@@ -127,7 +127,7 @@ The Gradle IDE project uses [Maven](http://maven.apache.org/) [Tycho](http://ecl
 This will use maven to compile all Gradle-IDE plugins, excluding test bundles and package them up to produce an update site for a snapshot build.  The update site will be located in `gradle-ide/org.springsource.ide.eclipse.gradle.site/target`.
 
 If you want to run tests during your build, then remove `-Dmaven.test.skip=true`.
-If you want to also build test bundles but not run tests then replace `-Dmaven.test.skip=true` with '-DskipTests'.
+If you want to also build test bundles but not run tests then replace `-Dmaven.test.skip=true` with `-DskipTests`.
 If you want to build against Eclipse 3.7 instead of Eclipse 4.2 than use `-Pe37` instead of `-Pe42`.
 
 ## Contributing
