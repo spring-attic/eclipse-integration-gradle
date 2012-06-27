@@ -1,0 +1,206 @@
+import java.text.Normalizer.Form;
+
+import groovy.json.JsonSlurper;
+
+/**
+ * This project is *not* actually a Gradle project. However this gradle build file is used to
+ * automate certain tasks.
+ * 
+ * Tasks:
+ *   - updateLibs: this will resolve and fetch the gradle tooling api jars and their transitive dependencies,
+ *     copying them into the libs folder of this project. It will also update the plugin manifest to add those
+ *     files to runtime classpath of this plugin.
+ *     
+ *  Procedure for updating: (when working in STS)
+ *    1) run the updateLibs task.
+ *    2) in STS/Eclipse select PDE Tools >> Update Classpath to update org.springsource.ide.eclipse.gradle.core plugin's classpath.
+ *        this step is hard to automate, is only required for building in the IDE, tycho build doesn't require this.
+ *    3) (optional) manually fetch source jars and attach in 'Referenced Libararies'.
+ *    
+ *  Procedure for updating: (when running maven tycho build on the build server):
+ *     ensure that the following command is executed before running the actual maven tycho build:
+ *     (cd org.springsource.ide.eclipse.gradle.core; ./gradlew)
+ *     See integration-build.sh for an example.
+ */
+apply plugin: 'java'
+
+task wrapper(type: Wrapper) {
+//	gradleVersion = '1.0-milestone-7'
+	gradleVersion = '1.0'
+}
+
+configurations.add("compileSource")
+
+def fetchVersion(URL url) {
+	def jsonData = new JsonSlurper().parseText(url.text)
+	println jsonData
+	return jsonData.version
+}
+
+def getApiVersion() {
+	//The apiVersion is chosen differently depending on the 'buildType'.
+	def buildType = System.getProperty("sts.gradle.build.type")
+	println "sts.gradle.build.type=${buildType}"
+	if (!buildType) {
+		//If build type is not set. Use a specific version defined below
+		println "normal build"
+		//return '1.0-rc-1'
+		//return "1.0-rc-2"
+		return '1.0'
+	} else if (buildType=='integration') {
+		//Integration builds use the current 'release-candidate'.
+		println "integration build"
+		def url = "http://services.gradle.org/versions/release-candidate".toURL()
+		def version = fetchVersion(url)
+		if (version) {
+			println "testing a release candidate"
+			return version
+		} else {
+			println "testing a current release"
+			//There is no release candidate at the moment. Maybe it was actaully released:
+			return fetchVersion("http://services.gradle.org/versions/current".toURL())
+		}
+	} else {
+		throw new Error("Unsupported value for system property 'sts.gradle.build.type': ${buildType}")
+	}
+}
+
+task printVersion << {
+	println gradle.gradleVersion
+}
+
+//What version of the gradle api jars is this build based on.
+//apiVersion = '1.0-milestone-7'
+apiVersion = getApiVersion()
+println "apiVersion = ${apiVersion}"
+
+//apiVersion = '1.0-milestone-+'
+//apiVersion = "1.0-rc-1"
+
+repositories {
+	mavenRepo name: 'libs-repo-snap', urls: "http://repo.gradle.org/gradle/libs-snapshots"
+	mavenRepo name: 'libs-repo', urls: "http://repo.gradle.org/gradle/libs-releases"
+}
+
+dependencies {
+	//compile group:'org.gradle', name:'gradle-core'//, version:'1.0-milestone-3-20110414154452+1000'
+	compile "org.gradle:gradle-core:$apiVersion",
+			"org.gradle:gradle-tooling-api:$apiVersion",
+			"org.gradle:gradle-wrapper:$apiVersion",
+			'org.slf4j:slf4j-simple:1.6.4',
+			'org.slf4j:slf4j-api:1.6.4',
+			'commons-collections:commons-collections:3.2.1'
+}
+
+configurations.compile.dependencies.each { dep ->
+	dependencies {
+		compileSource group: dep.group, name: dep.name, version: dep.version, classifier: 'sources', type: 'source'
+	}
+}
+
+//List getResolvableDependenciesForAllResolvedDependencies(Set allResolvedDependencies, Closure configureClosure) {
+//	return allResolvedDependencies.collect { ResolvedDependency resolvedDependency ->
+//		def dependency = new DefaultExternalModuleDependency(resolvedDependency.moduleGroup, resolvedDependency.moduleName, resolvedDependency.moduleVersion,
+//				resolvedDependency.configuration)
+//		dependency.transitive = false
+//		configureClosure.call(dependency)
+//		dependency
+//	}
+//}
+
+//void addSourceArtifact(DefaultExternalModuleDependency dependency) {
+//	dependency.artifact { artifact ->
+//		artifact.name = dependency.name
+//		artifact.type = 'source'
+//		artifact.extension = 'jar'
+//		artifact.classifier = 'sources'
+//	}
+//}
+
+defaultTasks 'updateLibs'
+
+task updateLibs(dependsOn: ['copyLibs', 'updateProperties', 'updateManfifest'])
+
+task updateProperties(dependsOn: configurations.compile) << {
+	def gradleCoreVersion = null
+	configurations.compile.getResolvedConfiguration().getFirstLevelModuleDependencies().each {
+		//		println "kris> class= ${it.getClass()}"
+		//		println "kris> name = ${it.name}"
+		//		println "kris> moduleName = ${it.moduleName}"
+		//		println "kris> moduleVersion = ${it.moduleVersion}"
+		if (it.moduleName=='gradle-core') {
+			gradleCoreVersion = it.getModuleVersion()
+		}
+	}
+	File propFile = new File("$projectDir/src/gradle-api.properties")
+	Properties props = new Properties();
+	props['gradle.api.version'] = gradleCoreVersion
+	props['gradle.distribution.uri'] = "http://services.gradle.org/distributions/gradle-1.0-rc-1-bin.zip".toString()
+	propFile.withOutputStream { def out ->
+		props.store(out, 'Gradle Tooling API Properties')
+	}
+}
+
+task debug(dependsOn: configurations.compileSource) << {
+	configurations.compileSource.each {
+		println "compileSource: ${it}"
+	}
+}
+
+task copyLibs(dependsOn: [configurations.compile, configurations.compileSource], type: Copy) {
+	def libDir = new File("$projectDir/lib")
+	doFirst {
+		println "Clearing $libDir"
+		libDir.listFiles().each { File f ->
+			if (f.toString().endsWith(".jar")) {
+				println "Deleting "+f
+				f.delete()
+			}
+		}
+	}
+
+	into libDir
+	from configurations.compile
+	from configurations.compileSource
+}
+
+task updateManfifest(dependsOn: configurations.compile) << {
+	File manifest = new File("$projectDir/META-INF/MANIFEST.MF")
+	List<String> lines = manifest.readLines()
+	int i = 0;
+
+	manifest.withPrintWriter { out ->
+		//Copy file upto line with 'Bundle-ClassPath: .'
+		while (i<lines.size() && !lines[i].startsWith("Bundle-ClassPath: .,")) {
+			out.println(lines[i])
+			i++
+		}
+
+		out.print 'Bundle-ClassPath: .,'
+		boolean comma = false
+		configurations.compile.each { File jarFile ->
+			if (jarFile.toString().endsWith(".jar")) {
+				if (comma) {
+					out.println(',')
+				} else {
+					out.println()
+				}
+				String name = jarFile.getName()
+				out.print(" lib/$name")
+				comma = true
+			}
+		}
+		out.println()
+
+		//Skip lines upto 'Export-Package: '
+		while (i<lines.size() && !lines[i].startsWith("Export-Package: ")) {
+			i++
+		}
+
+		//Copy the remaining lines
+		while (i<lines.size()) {
+			out.println lines[i]
+			i++
+		}
+	}
+}

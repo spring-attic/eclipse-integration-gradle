@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+<extension
+      point="org.eclipse.ui.popupMenus">
+      
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IResource"
+             adaptable="true"
+             id="org.springsource.ide.eclipse.gradle.ui.convertToGradle">
+		<enablement>
+   					<not>
+	       				<test forcePluginActivation="true"
+   		   					property="org.eclipse.core.resources.projectNature" 
+   		   					value="org.springsource.ide.eclipse.gradle.core.nature" />
+		   			</not>
+         </enablement>
+         <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.ConvertToGradleProjectActionDelegate"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.ui.actions.ConvertToGradleProject"
+               label="Convert to Gradle Project"
+               menubarPath="org.eclipse.ui.projectConfigure/additions">
+         </action>
+      </objectContribution>
+      
+	  <objectContribution
+            objectClass="org.eclipse.core.resources.IResource"
+             adaptable="true"
+             id="org.springsource.ide.eclipse.gradle.menu">
+<!--   		<filter
+           name="projectNature"
+           value="org.springsource.ide.eclipse.gradle.core.nature">
+        </filter> -->
+        <menu
+             label="Gradle"
+             id="org.springsource.ide.eclipse.gradle.menu">
+            <separator
+               	name="group1">
+            </separator>
+        </menu> 
+      </objectContribution>
+      
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IResource"
+             adaptable="true"
+             id="org.springsource.ide.eclipse.gradle.actions">
+        <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshAllAction"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.actions.refresh.all"
+               label="Refresh All"
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+         </action>
+        <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshSourceFoldersAction"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.actions.refresh.sourcefolders"
+               label="Refresh Source Folders"
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+         </action>
+        <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshDependenciesAction"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.actions.refresh.dependencies"
+               label="Refresh Dependencies"
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+         </action>
+        <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDependencyManagementActionDelegate"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.ui.EnableDisableDependencyManagementActionDelegate"
+               label="Enable Dependency Management"
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+         </action>
+        <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
+               label="Toggle DSL Support"
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+         </action>
+      </objectContribution>
+</extension>
+<extension
+      point = "org.eclipse.ui.preferencePages">
+       <page id="org.springsource.ide.eclipse.gradle.PreferencesPage"
+	    class="org.springsource.ide.eclipse.gradle.ui.GradlePreferencesPage"
+            name="Gradle">
+       </page>
+       <page
+             category="org.springsource.ide.eclipse.gradle.PreferencesPage"
+             class="org.springsource.ide.eclipse.gradle.ui.WTPPreferencesPage"
+             id="org.springsource.ide.eclipse.gradle.WTPPreferencesPage"
+             name="WTP">
+       </page>
+       <page
+             category="org.springsource.ide.eclipse.gradle.PreferencesPage"
+             class="org.springsource.ide.eclipse.gradle.ui.GradleArgumentsPreferencesPage"
+             id="org.springsource.ide.eclipse.gradle.JVMPreferencesPage"
+             name="Arguments">
+       </page>
+</extension>
+
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="org.springsource.ide.eclipse.gradle.ui.GradleProjectPropertyPage"
+            id="org.springsource.ide.eclipse.gradle.ui.projectPropertyPage"
+            name="Gradle">
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+			  <test property="org.eclipse.core.resources.projectNature"
+                         value="org.springsource.ide.eclipse.gradle.core.nature"/>
+            </adapt>
+         </enabledWhen>
+      </page>
+   </extension>
+
+<extension 
+     point="org.eclipse.ui.importWizards"> 
+      <wizard
+            category="org.springsource.ide.eclipse.gradle.wizards.import.category"
+            class="org.springsource.ide.eclipse.gradle.ui.wizards.GradleImportWizard"
+            icon="icons/gradle-import.png"
+            id="org.springsource.ide.eclipse.gradle.wizards.import"
+            name="Gradle Project"> 
+         <description> 
+            An import wizards that imports existing Gradle projects into Eclipse.
+         </description> 
+         <selection class="org.eclipse.core.resources.IResource"/> 
+      </wizard>
+      <category
+            id="org.springsource.ide.eclipse.gradle.wizards.import.category"
+            name="Gradle">
+      </category> 
+</extension>
+ <extension point="org.eclipse.ui.ide.projectNatureImages">
+  <image 
+    id="org.springsource.ide.eclipse.gradle.core.nature.img"
+    natureId="org.springsource.ide.eclipse.gradle.core.nature"
+    icon="icons/gradle-nature.png">
+  </image>
+ </extension>
+
+<extension
+      point = "org.eclipse.ui.newWizards">
+	<category
+	   id = "org.springsource.ide.eclipse.gradle.wizards.new.category"
+	   name="Gradle">
+	</category>
+ 	<wizard
+        category="org.springsource.ide.eclipse.gradle.wizards.new.category"
+        class="org.springsource.ide.eclipse.gradle.ui.wizards.NewGradleProjectWizard"
+        icon="icons/gradle-multiproj-folder.png"
+        id="org.springsource.ide.eclipse.gradle.wizards.new"
+        name="Gradle Project"
+        project="true">
+    	   <description>Create a New Gradle Project</description>
+	   <selection class="org.eclipse.core.resources.IResource"/>
+	</wizard>
+</extension>
+
+<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+     <launchConfigurationTypeImage
+        icon="icons/gradle-launch.png"
+        configTypeID="org.springsource.ide.eclipse.gradle.launch"
+        id="org.springsource.ide.eclipse.gradle.launch.image">
+    </launchConfigurationTypeImage>
+</extension>
+
+<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+    <launchConfigurationTabGroup
+        type="org.springsource.ide.eclipse.gradle.launch"
+        class="org.springsource.ide.eclipse.gradle.ui.launch.GradleLaunchTabGroup"
+        id="org.springsource.ide.eclipse.gradle.launch.tabgroup">
+    </launchConfigurationTabGroup>
+</extension>
+
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            category="org.eclipse.ui.externaltools"
+            class="org.springsource.ide.eclipse.gradle.ui.launch.GradleLaunchShortcut:showDialog"
+            description="Selected and execute a set of Gradle tasks"
+            icon="icons/gradle-launch.png"
+            id="org.springsource.ide.eclipse.gradle.launch.shortcut.showDialog"
+            label="Gradle Build..."
+            modes="run">
+        <contextualLaunch>
+           <enablement>
+             <with variable="selection">
+              <instanceof
+                    value="java.lang.Object">
+              </instanceof>
+               <count value="1"/>
+               <iterate>
+               	   <adapt type="org.eclipse.core.resources.IResource">
+                   	  <test property="org.eclipse.core.resources.projectNature" value="org.springsource.ide.eclipse.gradle.core.nature"/>
+               	   </adapt>
+               </iterate> -->
+             </with> 
+           </enablement>
+           <contextLabel
+         	  mode="run"
+         	  label="Gradle Build..."/>
+          <contextLabel
+         	  mode="debug"
+         	  label="Gradle Build..."/>
+  		 </contextualLaunch>
+        <configurationType
+              id="org.springsource.ide.eclipse.gradle.launch">
+        </configurationType>
+      </shortcut>
+      <shortcut
+            category="org.eclipse.ui.externaltools"
+            class="org.springsource.ide.eclipse.gradle.ui.launch.GradleLaunchShortcut:skipDialog"
+            description="Selected and execute a set of Gradle tasks"
+            icon="icons/gradle-launch.png"
+            id="org.springsource.ide.eclipse.gradle.launch.shortcut.skipDialog"
+            label="Gradle Build"
+            modes="run">
+        <contextualLaunch>
+           <enablement>
+             <with variable="selection">
+              <instanceof
+                    value="java.lang.Object">
+              </instanceof>
+               <count value="1"/>
+               <iterate>
+               	   <adapt type="org.eclipse.core.resources.IResource">
+                   	  <test property="org.eclipse.core.resources.projectNature" value="org.springsource.ide.eclipse.gradle.core.nature"/>
+               	   </adapt>
+               </iterate> -->
+             </with> 
+           </enablement>
+           <contextLabel
+         	  mode="run"
+         	  label="Gradle Build"/>
+          <contextLabel
+         	  mode="debug"
+         	  label="Gradle Build"/>
+  		 </contextualLaunch>
+        <configurationType
+              id="org.springsource.ide.eclipse.gradle.launch">
+        </configurationType>
+      </shortcut>
+   </extension>
+
+</plugin>

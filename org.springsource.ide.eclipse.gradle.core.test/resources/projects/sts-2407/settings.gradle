@@ -1,0 +1,9 @@
+def path = [] as LinkedList
+
+rootDir.traverse(
+	type: groovy.io.FileType.FILES,
+	nameFilter: ~/build\.gradle/,
+	maxDepth: 3,
+	preDir: { path << it.name },
+	postDir: { path.removeLast() }) { if (path) include path.join(":") }
+

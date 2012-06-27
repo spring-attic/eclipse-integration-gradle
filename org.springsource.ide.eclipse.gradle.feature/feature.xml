@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.springsource.ide.eclipse.gradle.feature"
+      label="%featureName"
+      version="3.0.0.qualifier"
+      provider-name="%providerName">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseUrl">
+      %license
+   </license>
+
+   <includes
+         id="org.gradle.toolingapi.feature"
+         version="0.0.0"/>
+
+   <requires>
+      <import plugin="org.springsource.ide.eclipse.dashboard.ui"/>
+   </requires>
+
+   <plugin
+         id="org.springsource.ide.eclipse.gradle.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.springsource.ide.eclipse.gradle.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springsource.ide.eclipse.gradle.ui.taskview"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

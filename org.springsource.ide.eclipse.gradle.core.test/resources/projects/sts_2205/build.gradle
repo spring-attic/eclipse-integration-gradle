@@ -1,0 +1,10 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceSets {
+    main {
+        java {
+            exclude 'testb2/**/*'
+        }
+    }
+}

@@ -1,0 +1,9 @@
+allprojects {	
+	repositories {
+                mavenCentral()
+	}
+}
+
+task createGradleWrapper(type: Wrapper) {
+	jarFile = 'buildutilities/gradle/wrapper/wrapper.jar'
+}

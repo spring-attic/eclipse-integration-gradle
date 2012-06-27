@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+  <link rel="stylesheet" href="css/stylesheet.css" type="text/css">
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Gradle STS Support -- Index</title></head>
+  <body><a href="http://springsource.com/developer/sts"><img style="border: 0px solid ; height: 60px; width: 60px;" alt="logo" src="img/sts60x60.png" align="left" hspace="0" vspace="0"></a>
+<a href="http://www.springsource.com/"><img style="border: 0px solid ; width: 240px; height: 50px;" alt="logo" src="img/spring09_logo.png" align="right" hspace="0" vspace="0"></a><br><br><br>
+
+<h1>Gradle STS Support -- 2.9.0 -- Index</h1>
+<p class="note">Note: The latest version of this file can always be
+found <a href="http://static.springsource.org/sts/docs/latest/reference/html/gradle/">here</a>.</p>
+
+<p>Since 2.7.M1 STS includes a, basic set of features to support
+working with Gradle projects inside of STS. Presently we provide three main chunks of functionality:</p>
+
+<ol>
+   <li>An <a href="gradle-sts-tutorial.html#import">import wizard</a>
+to help you import Gradle projects / subprojects into STS.</li>
+  <li>(Semi-)automated <a href="gradle-sts-tutorial.html#dependencies">dependency
+management</a><br></li>
+  <li>An extension to the standard Eclipse launch framework to <a href="gradle-sts-tutorial.html#launch">execute Gradle tasks</a>.<br></li>
+</ol>
+
+A more detailed list of features is shown below. Also see the <a href="gradle-sts-tutorial.html">tutorial</a> which walks you through
+an example using most of these features, including the <a href="gradle-sts-tutorial.html#import">import wizard </a>and the <a href="gradle-sts-tutorial.html#launch">task execution UI</a>.<br>
+
+<h2>List of Features</h2>
+
+<ul>
+   <li>Supports working with nested Gradle "multi projects":</li>
+     <ul>
+        <li>mapping hierarchical structure onto a flat set of "linked"
+            Eclipse projects with appropriate automatically configured resource
+            filters.</li>
+        <li>flexible name mapping, allows user to adopt two different
+            default name mapping schemes. Users can also rename individual projects in the
+            workspace without breaking the tools. </li>
+     </ul>
+   <li>Gradle Import Wizard:</li>
+      <ul>
+        <li>ease importing existing Gradle (Multi) Projects with a number
+            of subprojects.</li>
+        <li>ease the importing of a subset of "interesting projects",
+            without breaking project dependencies.</li>
+        <li>allow incrementally importing additional projects after
+            initially importing only a subset.</li>
+      </ul>
+   <li>Configure project dependencies: (so projects can "build/compile"
+              using the Eclipse JDT tools)</li>
+       <ul>
+          <li>Classpath container that manages Gradle Jar dependencies on
+              the Eclipse classpath</li>
+          <li>configure source folders automatically</li>
+          <li>configure project dependencies automatically</li>
+       </ul>
+   <li>Task Execution UI allows users to...</li>
+        <ul>
+            <li>create, store, edit, manage and execute lists of Gradle tasks
+              as Eclipse launch configurations from within STS.</li>
+            <li>quickly launch individual tasks with the <a href="gradle-sts-tutorial.html#tasks-view">Gradle Tasks View</a></li>  
+            <li>we use the standard Eclipse launching framework, so you can also</li>
+              <ul>
+                <li>relaunch from a list of favorites</li>
+                <li>relaunch from a "recent history" list</li>
+                <li>store launch configurations in files that can be shared via
+                    a code repository like SVN, CVS or git</li>
+              </ul>
+        </ul>
+   <li>Gradle DSL editing support: If Greclipse is installed you can enable DSLD Support to receive some 
+      content assist and JavaDoc hovers when editing Gradle files</li>
+</ul>
+
+<h2>Further reading</h2>
+<ul>
+   <li><a href="installation.html">Installation instructions</a></li>
+   <li><a href="faq.html">FAQ</a></li>
+   <li><a href="gradle-sts-tutorial.html">Tutorial: Using STS Gradle Tooling</a>
+</li>
+</body></html>

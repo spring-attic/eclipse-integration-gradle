@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Gradle"
+            id="org.springsource.ide.eclipse.gradle.ui.taskview">
+      </category>
+      <view
+            name="Gradle Tasks"
+            icon="icons/gradle-icon-16.png"
+            category="org.springsource.ide.eclipse.gradle.ui.taskview"
+            class="org.springsource.ide.eclipse.gradle.ui.taskview.GradleTasksView"
+            id="org.springsource.ide.eclipse.gradle.ui.views.GradleTasksView">
+      </view>
+   </extension>
+<!--   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>-->
+
+</plugin>

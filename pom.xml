@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   STS PARENT POM
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springsource.ide.eclipse</groupId>
+    <artifactId>org.springsource.ide.eclipse.root</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
+	<relativePath>common/pom-parent.xml</relativePath>
+  </parent>
+
+  <groupId>org.springsource.ide.eclipse.gradle</groupId>
+  <artifactId>org.springsource.ide.eclipse.gradle.parent</artifactId>
+  <version>3.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <scm>
+	<connection>scm:git:ssh://git.springsource.com:sts/gradle-plugins.git</connection>
+	<developerConnection>scm:git:ssh://git.springsource.com:sts/gradle-plugins.git</developerConnection>
+	<tag>HEAD</tag>
+	<url>http://git.springsource.com/sts/sts</url>
+  </scm>
+
+  <properties>
+<!-- <p2.qualifier>M1</p2.qualifier>
+	<p2.replaceQualifier>true</p2.replaceQualifier> -->
+	<p2.qualifier>SNAPSHOT</p2.qualifier>
+	<p2.sign>false</p2.sign>
+	<p2.repository.name>Gradle Integration for SpringSource Tool Suite</p2.repository.name>
+
+	<dist.name>SpringSource Tool Suite</dist.name>
+	<dist.project>gradle</dist.project>
+	<dist.type>snapshot</dist.type>
+	<dist.key>TOOLS</dist.key>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>e36</id> 
+      <properties>
+         <groovy.compiler.feature>org.codehaus.groovy17.feature.feature.group</groovy.compiler.feature>
+      </properties>
+    </profile>
+    <profile>
+      <id>e37</id>
+      <repositories>
+ 	   <repository>
+	    <id>linked-resources-bug-patch</id>
+	    <layout>p2</layout>
+	    <url>http://dist.springsource.com/release/TOOLS/patches/bug367669</url>
+	   </repository>
+	  </repositories>
+      <properties>
+         <groovy.compiler.feature>org.codehaus.groovy17.feature.feature.group</groovy.compiler.feature>
+     <!--    <groovy.compiler.feature>org.codehaus.groovy18.feature.feature.group</groovy.compiler.feature> -->
+      </properties>
+    </profile>
+    <profile>
+       <id>e42</id>
+       <properties>
+         <groovy.compiler.feature>org.codehaus.groovy17.feature.feature.group</groovy.compiler.feature>
+       </properties>
+	  <repositories>
+		<repository>
+		  <id>platform</id>
+		  <layout>p2</layout>
+		  <url>http://download.eclipse.org/eclipse/updates/4.2milestones/</url>
+		</repository>
+		<repository>
+		  <id>juno</id>
+		  <layout>p2</layout>
+		  <url>http://download.eclipse.org/releases/juno/</url>
+		</repository>
+		<repository>
+		  <id>swtbot</id>
+		  <layout>p2</layout>
+		  <url>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/</url>
+		</repository>
+		<repository>
+		  <id>sts-nightly</id>
+		  <layout>p2</layout>
+		  <url>http://dist.springsource.com/snapshot/STS/nightly/e4.2/</url>
+		</repository>
+		<repository>
+		  <id>greclipse42</id>
+		  <layout>p2</layout>
+		  <url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.2/</url>
+		</repository>
+	  </repositories>
+    </profile>
+  </profiles>
+
+  <repositories>
+    <repository>
+      <id>orbit</id>
+      <layout>p2</layout>
+      <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository/</url>
+    </repository>
+    <repository>
+       <id>ide.commons</id>
+       <layout>p2</layout>
+       <url>http://dist.springsource.com/snapshot/TOOLS/eclipse-integration-commons/nightly/</url>
+    </repository>
+	<repository>
+	  <id>mylyn</id>
+	  <layout>p2</layout>
+	  <url>http://download.eclipse.org/mylyn/releases/3.7</url>
+	</repository>
+<!--    <repository>
+      <id>springide</id>
+      <layout>p2</layout>
+      <url>http://dist.springframework.org/snapshot/IDE/nightly/</url>
+    </repository> -->
+<!-- 	<repository>
+	  <id>sts</id>
+	  <layout>p2</layout>
+	  <url>http://dist.springsource.com/release/TOOLS/update/e${dist.platform.version}/</url>
+	</repository>
+	<repository>
+	  <id>sts-dependencies</id>
+	  <layout>p2</layout>
+	  <url>http://dist.springsource.com/release/TOOLS/composite/e${dist.platform.version}/</url>
+	</repository> -->
+	<repository>
+	  <id>platform</id>
+	  <layout>p2</layout>
+	  <url>http://download.eclipse.org/releases/${dist.platform.id}/</url>
+	</repository>
+<!-- 	<repository> 
+	  <id>swtbot</id>
+	  <layout>p2</layout>
+	  <url>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site</url>
+	</repository> -->
+<!-- 	<repository>
+	  <id>swtbot</id>
+	  <layout>p2</layout>
+	  <url>http://download.eclipse.org/technology/swtbot/${dist.platform.id}/dev-build/update-site/</url>
+	</repository> -->
+    <repository>
+	  <id>greclipse-dev-builds</id>
+	  <layout>p2</layout>
+	  <url>http://dist.codehaus.org/groovy/distributions/greclipse/snapshot/e${dist.platform.version}/</url>
+	</repository>
+  </repositories>
+  
+  <modules>
+    <module>org.springsource.ide.eclipse.gradle.core</module>
+    <module>org.springsource.ide.eclipse.gradle.ui</module>
+    <module>org.springsource.ide.eclipse.gradle.ui.taskview</module>
+    <module>org.springsource.ide.eclipse.gradle.feature</module> 
+    <module>org.gradle.toolingapi.feature</module>
+	<module>org.springsource.ide.eclipse.gradle.site</module>
+	<module>org.springsource.ide.eclipse.gradle.core.test</module>
+  </modules>
+
+</project>

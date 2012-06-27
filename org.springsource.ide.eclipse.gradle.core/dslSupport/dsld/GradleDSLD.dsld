@@ -1,0 +1,31 @@
+package dsld;
+
+def buildScript = fileExtension("gradle") & ~fileName("settings.gradle")
+def settingsScript = fileName("settings.gradle")
+def project = buildScript & currentType('org.gradle.api.Project')
+
+(buildScript & isThisType()).accept { 
+	setDelegateType('org.gradle.api.Project')
+	//delegatesTo type: 'org.gradle.api.Project'
+}
+
+(project & enclosingCallName('repositories')).accept {
+	setDelegateType('org.gradle.api.artifacts.dsl.RepositoryHandler')
+	//delegatesTo type: 'org.gradle.api.artifacts.dsl.RepositoryHandler'
+} 
+
+(project & enclosingCallName('dependencies')).accept {
+	setDelegateType('org.gradle.api.artifacts.dsl.DependencyHandler')
+}
+
+//(buildScript & project & currentIdentifier("version")).accept {
+//	delegatesTo(String)	
+//}
+
+//(buildScript & isThisType() & inClosure() & enclosingCallName('repositories')).accept {
+//	delegatesTo('org.gradle.api.artifacts.dsl.RepositoryHandler')
+//}
+
+//blockDelegatesTo('repositories', 'org.gradle.api.artifacts.dsl.RepositoryHandler')
+//blockDelegatesTo('configurations', 'org.gradle.api.artifacts.ConfigurationContainer')
+

@@ -1,0 +1,724 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+
+
+
+  
+  <link rel="stylesheet" href="css/stylesheet.css" type="text/css">
+
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Gradle STS Support -- Tutorial</title></head><body>
+<a href="http://springsource.com/developer/sts"><img style="border: 0px solid ; height: 60px; width: 60px;" alt="logo" src="img/sts60x60.png" align="left"></a><a href="http://www.springsource.com/"><img style="border: 0px solid ; width: 240px; height: 50px;" alt="logo" src="img/spring09_logo.png" align="right"></a><br>
+
+<br>
+
+<br>
+
+
+<h1>Gradle STS Support -- 2.9.0 -- Tutorial</h1>
+
+<p class="note">Note: The latest version of this file can always be
+found <a href="http://static.springsource.org/sts/docs/latest/reference/html/gradle/">here</a></p>
+
+<p>This tutorial will take you through the process of using the STS-Gradle
+tooling to import a Gradle multi-project into STS and execute some
+Gradle tasks on the imported project(s). This tutorial does not cover
+how to install the Gradle tooling into STS.</p>
+
+<p>We will use <a href="http://static.springsource.org/spring-security/site/">spring-security
+project</a> as a running example throughout this tutorial.</p>
+
+<p class="note">Note: There is also an <a href="http://static.springsource.org/sts/docs/2.7.0.M1/reference/html/gradle/gradle-sts-tutorial.html">older
+version of this tutorial</a> based on the spring-integration project.</p>
+
+<p>If you want to follow along, the first step is to checkout the <a href="http://static.springsource.org/spring-security/site/source.html">source
+code</a> from git:</p>
+
+<pre style="margin-left: 40px;">git clone git://git.springsource.org/spring-security/spring-security.git</pre>
+
+<p>This will create the "spring-security" folder directly below
+whatever directory you typed the command in.</p>
+
+<h2><a name="import"></a>Importing Existing Gradle Project(s)</h2>
+
+<p>Now that we have the source code checked out we can use the <b>Gradle Import Wizard</b> to import a
+subset of the spring-security projects into an Eclipse workspace.</p>
+
+<p>This wizard is accessible via the <b>"File
+&gt;&gt; Import ..." menu</b>.</p>
+
+<div style="margin-left: 40px;"><img style="width: 525px; height: 550px;" alt="Choose Gradle import wizard" src="img/choose-gradle-wizard.png"></div>
+
+<p>The first thing you have to do in the wizard is point it to the root
+folder of your Gradle project. Click the <b>"Browse" button </b>and find the
+folder, or simply enter the path to your project folder if you remember
+it. </p>
+
+<div style="margin-left: 40px;"><img alt="" src="img/import-wizard-1.png"></div>
+
+<p>A typical Gradle project may consist of a hierarchy of (sub)projects.
+Before you can select which (sub)projects you are interested in you
+must request the Gradle API to construct a Gradle project/sub-project
+structure model. Click the <b>"Build
+Model" button</b> to do this.</p>
+
+<div style="margin-left: 40px;"><img style="width: 596px; height: 723px;" alt="" src="img/import-wizard-building-model.png"></div>
+
+<p><b>Warning:</b> This may take some time, so be patient!</p>
+  <ul>
+    <li>Building the model may take some time. How much time depends on
+the complexity of your project and how many of the build script's
+dependencies can already be found in the cache.</li>
+    <li>For spring-security, an initial "Build Model" with a
+completely cleared .gradle cache may take a few minutes to complete.</li>
+   </ul>
+
+<p>After some time, once the model has been constructed, you will be able
+to select which projects you wish to import into the workspace. You
+could elect to import everything by clicking the <b>"Select All" Button</b>. 
+However, let's assume we are only interested in the "spring-security-samples-jaas"
+project.</p>
+
+<div style="margin-left: 40px;"><img alt="" src="img/import-jaas-sample.png"></div>
+
+<p>If a project is selected and that project has an inter-project
+dependency on another project, then this other project must also be
+imported. Otherwise, the imported project would have problems with its
+classpath (missing dependencies). The import wizard uses the project
+dependency information provided by the Gradle tooling API to check
+whether you have properly selected all required projects. In the
+screenshot above, a missing dependency on "spring-security-web" is
+detected and reported.</p>
+<p>To fix it, select the missing project (but another missing dependency
+will be reported) or use the quick and easy <b>"Select required" button</b>
+which will automatically select required projects based on your current selection.</p>
+
+
+<p>You may or may not want to import the root project (usually
+it contains the main build script). If you
+click the root project, you will notice that it automatically
+selects/deselects all the subprojects below it. If you just want to select the root project alone, you can uncheck the <b>"Auto-select subprojects"</b> option.<br>
+</p>
+Allthough it is possible to do so, <span style="font-weight: bold;">we will not select the root project</span>
+to import. We can always come back later and import additional
+projects, including the root project. So it is beneficial to only import the projects you require
+(fewer imported projects means speedier workspace builds and less clutter).<br>
+<h2>Import options:&nbsp;</h2>
+<p>Besides selecting which projects to import, 
+the wizard also provides
+some additional options.<b><br>
+</b></p>
+
+<h3>Run before / after</h3>
+
+<p>These options allow the execution of specific gradle tasks to aid in
+the initialization of imported projects. When enabled, the wizard will
+execute the given tasks on each imported project that defines the task(s).</p>
+
+<p>Some default values are provided to support two common use cases. </p>
+
+<span style="font-weight: bold;">Use case 1: execute cleanEclipse eclipse before importing<br>
+<br>
+</span>
+<div style="margin-left: 40px;"><img style="width: 297px; height: 63px;" alt="" src="img/run-before.png"></div>
+
+<br>
+The reason why you may want to do this is because at present the Gradle
+Tooling API only directly supports
+basic Java projects. If we were to rely only on the information
+provided by the Tooling API in importing this project, then none of the WTP/Web related STS functionality will be turned on.<br>
+<br>
+To remedy this, simply enable the "Run Before" option to run "cleanEclipse"
+and "eclipse" tasks as shown above. The tasks will generate the necessary
+configuration files for WTP, and the import wizard is smart enough to leave the
+WTP related information untouched when adding its own customizations.<br>
+<br>
+<span style="font-weight: bold;">Note 1:</span> In Gradle M3, a Tooling
+API bug prevents STS from determining whether the tasks are defined on
+any given project. This may lead to an error trying to execute the
+tasks when they are not defined. To avoid this bug you have a few
+options:<br>
+<ul>
+  <li>Do not enable running the before tasks (but you will only get a 'pure Java' project).<br>
+</li>
+  <li>Ensure the tasks are defined on all the projects you want to import.</li>
+  <li>Switch your gradle wrapper to a more recect version of Gradle (The bug is fixed in M4).<br>
+</li>
+  <li>Run cleanEclipse and eclipse tasks on the commandline before importing.<br>
+  </li>
+
+</ul>
+<span style="font-weight: bold;">Note 2:</span> If the imported project
+uses Gradle M4 or above, the 'run before' option will be turned on by
+default. There should be no harm from having it enabled (except, that
+it will take slightly longer to peform the import operation)<br>
+<br>
+<span style="font-weight: bold;">Use case 2: execute afterEclipseImport task<br>
+</span><br>
+This task is intended as an open-ended hook. It is up to you to define
+this task in your build-script to make any kind of customization you
+might want. This option is enabled by default, however, unless some
+imported project actually define the task it won't do anything. (Note
+that 'afterEclipseImport' is not a built-in eclipse-plugin task, so it
+is not affected by the aforementioned bug).<br>
+<br>
+It is recommended to leave this option on by default. If the task is
+indeed defined, it is probably the project developer's intention that
+it be executed on import. Conversely, if it is not defined the Wizard
+will be able to detect this and simply will not do anything.<br>
+
+<h3>Enable Dependency Management</h3>
+
+<p>Enabling this option means that STS will configure your project's dependencies
+based on information it obtains from calling the Gradle Tooling API.
+The center piece of this mechanism is a special 'Gradle Dependencies' classpath entry.
+The contents of this entry will be computed dynamically by calling on the
+Gradle Tooling API. This option is recommended for projects that are
+fully supported by the tooling API. At present this means 'pure' Java 
+projects, or in Eclipse terms: projects that only require the Java nature.</p>
+
+<p>The advantage of using this option is that your project's .classpath 
+file will be free of user-specific references to files in the user's
+Gralde cache. Thus, it is viable to consider checking in files like
+.classpath into source control.</p>
+
+<p>Thus also, enabling dependency management should be the default. Unfortunately,
+due to the limited nature of the current Gradle Tooling API, this option may not
+work well for many projects. If so, you may consider disabling the
+option and relying directly on your build script and the Gradle eclipse
+plugin's 'cleanEclipse' and 'eclipse' tasks to configure your projects on
+import instead.</p>
+
+<p>Since 2.9.0, STS explicitly attempts to provide good support for this scenario.
+If dependency management is disabled then STS will not add the 'Gradle Dependencies' 
+entry, nor will it configure source folders or dependencies between projects.
+Instead, you should select some tasks (typically 'cleanEclipse eclipse' to
+execute before import instead.</p>
+
+<p>When dependency management is disabled, of course most of the menu
+commands related to dependency management will then be
+disabled. However since 2.9.0, the <b>Refresh All</b> command now provides 
+an alternate implementation for just this case. The alternate implementation 
+uses information captured and stored in <tt>.settings/gradle</tt> during import.
+This allows <b>Refresh All</b> to essentially re-import your project inplace. 
+That is, the same before/after tasks will be re-executed, and the same set 
+of selected customizations are re-applied to your project. Assuming that 
+'cleanEclipse eclipse' is amongst the selected before tasks, the effect 
+of this is that all of your project's Eclipse configuration data
+is refreshed.</p>
+
+<p>Note that if dependency managment is disabled, your generated <tt>.classpath</tt> 
+file will not be suitable to share with other users via a source code repository.
+This is because it will typically contain references to files in the your local 
+Gradle cache. Therefore, you should devise a process where each user generates their own
+<tt>.classpath</tt> (and other Eclipse/STS config files) locally.</p>
+
+<p>A file which you may still want to consider committing to source control in 
+these scenarios is<br>
+<tt>${rootproject}/.settings/gradle/org.springsource.ide.eclipse.gradle.core.import.prefs"</tt></p>
+
+<p>This file contains the most important configuration options for the import
+Wizard. If the file is present the import wizard will use it to set the
+defaults accordingly. So if your project 
+requires a set of very specific options to correctly import into STS, then
+sharing this file can help taking the the guess work out of the import 
+process. The contents of this file has been purposefully 
+designed to be used in this fashion. It should only contain information that 
+is safe to share amongst users (e.g. it does not contain absolute paths 
+specific to one user's local file system).</p>
+
+<h3>Enable DSL Support</h3>
+
+<p>Enabling this option will enable DSL support in the Groovy Editor.
+What this means is that, if  you have Groovy Eclipse installed, 
+you will get a modicum of Gradle awareness while editing <tt>.gradle</tt>
+files. I.e. simple code assist and JavaDoc style hover's for
+some elements in your build script will be provided.</p>
+
+<p>Selecting this option will enable DSL support for all the imported
+projects at once. If you only want to enable it for selected 
+projects. Then you should disable the option in the wizard and enable 
+it for individual projects afterwards via "Gradle >> Enable DSL" menu. </p>
+
+<h3>Create resource filters</h3>
+
+<p>Enabling this option will add resource filters to the
+imported projects to "hide" nested projects from the parent project.</p>
+
+<p>This deserves some further explanation. Eclipse (and
+therefore STS) essentially does not support project hierarchies. Only a
+"flat" project structure is supported in Eclipse and projects can not
+contain other projects.</p>
+
+<p>To overcome this limitation, a Gradle project hierarchy is flattened
+into a list of Eclipse projects. The projects will be imported as
+"linked projects" so that nesting structure is still maintained in the
+file system structure of the imported projects. However, if you import
+both a parent and (some of) its children in this way, it will appear as
+if the resources (files and folders) in the children are present
+multiple times in the workspace: once in the child itself and also once
+inside a nested folder of the parent project that contains the child.
+Although Eclipse supports this kind of setup, and it is possible to
+work with workspaces that show the same underlying file aliassed in
+multiple locations in the Eclipse workspace, it can be confusing.<br>
+</p>
+<p>For example if you pressed "CTRL-SHIFT-R" to "open resource" and
+searched for one of these aliassed resources, you would see that
+resource appear multiple times. To avoid this, keep the "create
+resource filters" enabled. This will configure the parent project in
+such a way that the children's project's resources are treated as
+"invisible/non-existent" in the parent. <b><br>
+</b></p>
+<h3><b>Use hierarchical project names</b><br>
+</h3>
+<p>This option selects between two different project naming schemes.<br>
+</p>
+<p>Names of the imported Eclipse projects can be chosen
+freely by the user. Since the projects are represented as links to the
+actual file system location, the names of the projects don't affect the
+underlying project structure. Of course, choosing sensible names will
+help in remembering what each Eclipse project represents in terms of
+the Gradle project hierarchy!<br>
+</p>
+<p>The wizard will give an initial name to each imported project based on
+one of two naming schemes. This choice <b>only affects the initial names</b> assigned by
+the wizard, you can still rename the projects after importing them.<span style="font-weight: bold;"><br>
+</span></p>
+<p><span style="font-weight: bold;">hierarchical</span><span style="font-weight: bold;">: </span>the name of each project consists
+of the name of each ancestor in the path leading to the project and the
+project itself, separated by dots. For example the
+"spring-integration-test" project would get Eclipse name
+"spring-integration.spring-integration-test" in the hierarchical naming
+scheme.<span style="font-weight: bold;"><br>
+</span></p>
+<p><span style="font-weight: bold;">non-hierarchical: </span>only
+the name of the project itself (not its parents) is used. For example
+"spring-integration-test" will be imported as a project called
+"spring-integration-test".<br>
+</p>
+It is possible that the non-hierarchical naming scheme leads to name
+conflicts (if more than one project in the hierarchy has the same
+name). The wizard will detect this situation and signal it as an error.
+If you see this error you will can use the hierarchical scheme
+instead, or you can deselect some of the projects that cause the naming conflict.<br>
+
+<p><b>WARNING:</b> It is recommended you do not use this option if you are relying on you are 
+using the 'eclipse' gradle task to help configure the project. The reason for this is that Gradle won't know
+about the fact that STS is renaming the project's. Thus any gradle generated configuration that contains 
+references to project names may not work well together with the hierarchical naming scheme.</p>
+
+<h3>Create working set 'spring-security'<br></h3>
+
+<p>This creates a working set based on the root
+project's name and adds all imported projects to this workingset. If the working set already exists this option will say
+"add" instead of "create". It will still add the projects to this
+workingset, but, since it already exists, won't try to create it again.<span style="font-weight: bold;"><br>
+</span></p>
+<h3>Additional working sets<br>
+</h3>
+<p>This provides a similar UI to the standard Eclipse
+import wizard for adding projects to working sets. It allows you to add
+the imported projects to an arbitrary number of working sets. You can
+use this instead of (or in conjunction with) the previous option. The
+previous option is more convenient and quick (in terms of numbers of
+clicks and keystrokes required) but if you need more control over the
+working sets and/or their names, this UI is provided as a more general
+fall-back option.<br>
+</p>
+<h2>Performing the Import<br>
+</h2>
+<p>For this tutorial we leave everything at the default settings,
+except for the 'run before' option which we explicitly enable since we
+want to have correct configuration for the WTP aspects of the sample
+web project.</p>
+<blockquote>
+    <br>
+    <img alt="" src="img/import-finish.png"><br>
+  </blockquote>
+Once you click finish, the selected projects will be imported into the
+Eclipse workspace.<br>
+
+<h2><a name="dependencies"></a>Imported Project Auto-configuration</h2>
+
+<p>Depending on selected opton. The import wizard will automatically configured
+projects as follows.</p>
+
+<p>In all cases:</p>
+<ul>
+    <li>A <b>Gradle Nature</b> is added to each project (shown in the UI
+as a bold, green "G" overlayed in the bottom right corner of the
+project icon).</li>
+</ul>
+
+<p>If dependency management is <b>enabled</b></p>
+<ul>
+  <li>A Gradle <b>class path container</b> is added to dynamically compute
+         the project's binary "jar" dependencies.</li>
+  <li>The project's <b>source folders</b> are configured</li>
+  <li>dependencies between projects are configured as Eclipse <b>project dependencies</b></li>
+</ul>
+
+<p>If dependency management is <b>disabled</b> then these configurations will not
+be automatically applied. Instead, it is assumed that you have defined and 
+selected appropriate <b>run before/after</b> gradle tasks to 
+achieve a similar effect.</p>
+
+<p>If DSL support is enabled, the following additions will be made to your project's configuration:</p>
+<ul>
+   <li>Groovy Nature</li>
+   <li>Gradle DSLD classpath entry added</li>
+   <li>Groovy Libraries</li>
+</ul>
+
+<p>Note that this turns your project into a Groovy project. Because of
+limitations in both AJDT and Greclipse, DSLD support can not be enabled
+for AspectJ projects. If you attempt to do so, an error will be reported
+during import and the DSL support will not be added to any affected projects. 
+However,  the import should still proceed and no other ill effects should result 
+from this error.</p>
+ 
+<p>The sceenshot below shows the workspace right after the import finished: </p>
+ /ul>
+  <div style="margin-left: 40px;"><img style="width: 855px; height: 598px;" alt="" src="img/ws-right-after-import.png"></div>
+  <ul style="margin: 0px; padding: 0px;">
+    <br>
+A few things are worth noting:<br>
+    <ul>
+      <li>You will probably notice a background job (bottom right of
+the workspace window) called "Update Gradle Classpath Container". The
+Gradle classpath container is an Eclipse class path entry representing
+all the binary project dependencies (typically these are jar files
+downloaded to your Gradle cache folder). This job may take a long time
+to complete, especially right after the first import, because it is
+downloading all the dependencies into the Gradle cache folder. This
+initial update may take several minutes.</li>
+      <li>The current implementation of the Gradle tooling API does not
+provide good progress information (yet), so if you examine the Job
+queue more
+closely, you may notice that sometimes it appears as if the job's
+progress bar is
+stuck. Be patient, it may take several minutes but the Job should
+eventually complete. Subsequent updates should be much faster since the
+dependencies are already downloaded.</li>
+      <li>Eclipse, by default, does not show working sets in the
+package explorer. If you want to use workingsets to organize projects
+in your workspace, you can enable this from the package explorer's
+configuration menu (under the little triangle in the top-left corner of
+the package explorer view, change "toplevel elements" from "projects"
+into "workingsets").</li>
+    <li>The ...-samples-jaas project has retained its WTP-related
+configuration infos, as can be seen from its icon. You can also test
+this out by deploying it to the server. (Menu: Run As &gt;&gt; Run On
+Server).<br>
+    </li>
+
+    </ul>
+    <br>
+The screenshot below shows the package explorer view, with "workingsets
+as toplevel elements" enabled, after the classpath container update has
+completed. The "missing project" errors are now gone. The
+screenshot also shows the downloaded <tt>.jar</tt> entries in the classpath
+container (under "Gradle Dependencies").<br>
+    <br>
+  </ul>
+  <div style="margin-left: 40px;"><img style="width: 252px; height: 389px;" alt="" src="img/expanded-classpath-container.png"><br>
+  </div>
+<h2>Refreshing Project Configuration Data</h2>
+
+<p>Presently, the Gradle tooling API which we built upon does not tell us
+when a Gradle project model needs to be updated. As a result, the
+configuration
+will become outdated. To force various aspects of the project
+configuration to be recomputed you can invoke the commands in the <span style="font-weight: bold;">Gradle context menu </span>accessed by <span style="font-weight: bold;">right clicking </span><span style="font-weight: bold;">on the Gradle project</span>.</p>
+
+<div style="margin-left: 40px;"><img style="width: 744px; height: 788px;" alt="" src="img/gradle-context-menu.png"></div>
+  <ul style="margin: 0px; padding: 0px;">
+    <br>
+The <b>Gradle context menu</b> provides the following commands:<br>
+    <blockquote><span style="font-weight: bold;">Disable(or enable)
+dependency management: </span>Remove/add the Gradle class path
+container from/to the project.<br>
+      <blockquote>Removing the container means that you intend to take
+personal responsibility for managing the project's dependencies and do
+not want to have the Gradle tooling do it for you at all.<br>
+      </blockquote>
+      <span style="font-weight: bold;">Refresh Dependencies: </span>for
+each of the selected projects (one or more Gradle projects can be
+selected. All selected projects must have dependency management enabled)<br>
+      <ol>
+        <ol>
+          <li>Invalidate and request a new Gradle model from the
+tooling
+API</li>
+          <li>Recompute the contents of the class path container</li>
+          <li>Recompute and reconfigure project dependencies</li>
+        </ol>
+      </ol>
+      <br>
+      <span style="font-weight: bold;">Refresh Source Folders: </span>Like
+Refresh Dependencies, but recomputes and reconfigures the project's
+source folders.<br>
+      <br>
+      <b>Refresh All:</b>combination of Refresh Dependencies and Refresh Source Folders.<br>
+    </blockquote>
+    <blockquote> </blockquote>
+    <p>Note that dependencies between projects and source folder
+configuration are
+stored in your project's metadata (the .classpath file). This means
+they
+will persist across Eclipse sessions. </p>
+    <p>Since 2.7.M2 the contents of the classpath container is also
+persisted in your workspace metadata. This reduces the time it takes
+for the IDE to become responsive when it starts up. However, it means
+you may need to manually trigger a refresh once in a while. You can
+tell whether a container
+was initialized from persisted state because it will be labeled as
+"Gradle Dependencies (persisted)".<br>
+    </p>
+    <ul>
+      <p><img style="width: 274px; height: 54px;" alt="" src="img/persisted-container.png"><br>
+      </p>
+    </ul></ul>
+<h2>Importing Additional Projects</h2>
+<p>The import wizard is designed to support importing a subset of
+subprojects first and, later on, import additional projects as needed.</p>
+
+
+<p>For example, earlier on we decided not to import the root project.
+Let's say we want to import it now, so we can easily examine and edit
+the main build script. <br>
+</p>
+<p>
+To import additional projects, simply reopen the import wizard as before 
+and point it again to the root of the project hierarchy. The project should already
+be available from the project combo's pull-down history.<br>
+</p>
+<p>To import the root project in isolation, we deselect '"Auto-select
+subprojects" and then select the root project, as shown below.<br>
+</p>
+<p style="margin-left: 40px;"><img alt="" src="img/import-root.png"><br>
+</p>
+Note that sub-projects that have previously been imported will not be
+shown anymore (e.g. spring-security-core is no longer shown), since they can't be imported again. An exception to this
+rule is made for projects that have subprojects themselves. Such
+projects must
+be shown because filtering them from the view would also implicitly
+remove all their children (making it impossible to import their
+children).<br>
+<p>
+    For example, if we would re-open the import wizard again after importing the root project, we would see this:<br>
+  </p>
+<div style="margin-left: 40px;"><img style="width: 183px; height: 108px;" alt="" src="img/import-again.png"></div>
+
+<p>Note the root project's transparant look, indicating that it was already imported before.</p>
+<h2><a name="launch"></a>The Task UI: "Launching" Gradle Tasks</h2>
+
+
+
+<p>In the next section of this tutorial we'll walk through the UI for
+creating and launching Gradle launch configurations. Gradle launch
+configurations are provided as extensions to the standard Eclipse
+launching framework. This means that if you are already familiar with
+the Eclipse launch UI, most of this will be familiar to you.</p>
+    <span style="font-weight: bold;">Creating and Executing a Launch
+Configuration</span><br>
+
+<p>Before we can "launch" a list of Gradle tasks, we must create a launch
+configuration. The easiest way to do that is by using the <span style="font-weight: bold;">"Run As" context menu. </span>This menu is
+accessed by right clicking on a Gradle project or one of its nested
+resources in the Package Explorer.</p>
+
+<div style="margin-left: 40px;"><img style="width: 733px; height: 590px;" alt="" src="img/run-as-menu.png"><br>
+  </div>
+  <ul style="margin: 0px; padding: 0px;">
+    <br>
+The following menu items will be shown (others may also be shown
+depending on what exactly you right-clicked on).<br>
+    <blockquote><span style="font-weight: bold;">Run As &gt;&gt; </span><span style="font-weight: bold;">Gradle</span><span style="font-weight: bold;"> Build ...</span> (dots at the end)<br>
+      <blockquote>This opens a Gradle launch configuration associated
+with the
+current project in the Tabbed launch configuration editor. This allows
+you to examine and edit the configuration before launching it.<br>
+If no launch configuration exists yet (for the selected project) an
+empty one will be created automatically. If more than one configuration
+is found, you will be asked to choose one.<br>
+      </blockquote>
+      <span style="font-weight: bold;">Run As &gt;&gt; </span><span style="font-weight: bold;">Gradle</span><span style="font-weight: bold;"> Build</span> (no dots at the end)<br>
+      <blockquote>This attempts to directly launch a Gradle launch
+configuration associated with your project. Typically you would use
+this if you already have a launch configuration defined and want to
+just launch it without examining or editing it. If a launch
+configuration doesn't exist yet, however, one will be created and
+opened
+in the editor. If more than one
+configuration already exists for the selected project, then a dialog
+will popup to ask you to choose one.<br>
+      </blockquote>
+      <span style="font-weight: bold;">External Tools Configurations</span><br>
+      <blockquote>This opens the generic Eclipse "External Tools
+Configurations"
+editor, allowing you to create / edit / save etc.
+launch configurations of different types, including Gradle launch
+configurations.<br>
+      </blockquote>
+    </blockquote>
+Since this is our first time launching anything for the <span style="font-weight: bold;">spring-integration</span> project, no
+launch configuration exists yet. We right click on the root project's
+build file (or any other resource in the project) and select "Run As
+&gt;&gt; Gradle
+Build...". An editor as shown in the screenshot below opens up. <br>
+    <br>
+  </ul>
+  <div style="margin-left: 40px;"><img style="width: 642px; height: 785px;" alt="" src="img/edit-configuration.png"></div>
+  <ul style="margin: 0px; padding: 0px;">
+    <br>
+If you have ever used ant launch configurations in Eclipse, the UI
+should look familiar since we followed its design. The main difference
+is that for Gradle the "list" of available tasks is a tree
+rather than just a list. Leaf nodes in the tree are tasks that can be
+executed. Internal tree nodes represent sub-projects.<br>
+    <br>
+The task tree can be quite large, especially for a project that has
+many subprojects. To help in finding a task in a large tree you
+can use the "<span style="font-weight: bold;">filter text" Box </span>above
+the tree. Type in any text, and only the tasks with a name starting
+with
+this text will be shown. You can add a "*" to the front of your search
+pattern to search for substrings instead of prefixes instead. The
+screenshot below shows how we filtered the tree to only show "build"
+related tasks. We then selected the "build" task in the root project.<br>
+    <br>
+  </ul>
+  <div style="margin-left: 40px;"><img style="width: 642px; height: 785px;" alt="" src="img/task-filter-text.png"><br>
+  </div>
+  <ul style="margin: 0px; padding: 0px;">
+    <br>
+    <span style="font-weight: bold;">Task execution order</span><br>
+    <br>
+If
+multiple tasks are selected, the ordering of the tasks is often
+important. For example, if we selected both ":clean" and ":build" in the jaas sample project, we
+probably want to
+make sure that the ":clean" task gets executed before the ":build" task.<br>
+    <br>
+The<span style="font-weight: bold;"> bottom portion of the "</span><span style="font-weight: bold;">Gradle</span><span style="font-weight: bold;"> Tasks" Tab </span>shows and controls task
+execution order. To change the execution order click the <span style="font-weight: bold;">"Order..." Button</span>.<br>
+    <br>
+  </ul>
+  <div style="margin-left: 40px;"><img style="width: 642px; height: 785px;" alt="" src="img/order-tasks.png"><br>
+  </div>
+  <ul style="margin: 0px; padding: 0px;">
+    <br>
+Finally, after reordering the tasks as desired, click on the<span style="font-weight: bold;"> "Run" Button</span> to save any changes
+you have made and launch the configuration.<br>
+Alternatively you can use the <span style="font-weight: bold;">"Apply"
+Button</span> to save the configuration without launching; or the <span style="font-weight: bold;">"Close" Button </span>to close it without
+launching or saving.<br>
+    <br>
+After clicking "Run" the selected tasks will be executed and the
+resulting output is displayed in the <span style="font-weight: bold;">Eclipse
+console view</span>.<br>
+    <br>
+  </ul>
+  
+<div style="margin-left: 40px;"><img style="width: 567px; height: 330px;" alt="" src="img/console-view.png"><br>
+</div>
+
+  <ul style="margin: 0px; padding: 0px;">
+    <h3><span style="font-weight: bold;">Automatically Refreshing the
+Workspace after Task Execution</span></h3>
+Typically, executing a set of Gradle tasks will cause changes to the
+resources in your workspace. Eclipse, by default, will not become aware
+of these changes. To make Eclipse aware that underlying resources in
+the file system have changed you need to "refresh" the workspace, or at
+least the portion of the workspace that you think may have changed. You
+can do this manually by using the context menu of any resource in the
+workspace. However, it is probably more convenient to automate this.<br>
+    <br>
+In the future the Gradle Task API aims to provide explicit information
+to the IDE about potential workspace changes. Presently, however, this
+is not the case and it is your
+responsibility to either manually refresh the resources or
+specify which resources should be
+refreshed automatically. The Gradle launch configuration editor
+provides a standard Eclipse "Refresh" tab to specify an automatic
+refresh strategy.<br>
+    <br>
+  </ul>
+  <div style="margin-left: 40px;"><img style="width: 730px; height: 494px;" alt="" src="img/refresh-tab.png"></div>
+  <ul style="margin: 0px; padding: 0px;">
+    <br>
+To enable automatic refresh, check the<span style="font-weight: bold;">
+"Refresh resources upon completion" Checkbox</span> and pick one of the
+provided strategies.<br>
+    <h3><span style="font-weight: bold;">Relaunching an Existing
+(Gradle)
+Launch Configuration</span></h3>
+After having created a launch configuration, you may want to launch
+that same configuration again, either with or without changes.<br>
+There are a number of different ways that you can do this. Besides
+using the already discussed context menus, you can also use the <span style="font-weight: bold;">External Tools Toolbar button</span><br>
+    <blockquote><img style="width: 227px; height: 134px;" alt="" src="img/toolbar.png"><br>
+      <br>
+    </blockquote>
+You can either click on the toolbar button itself or use its pull-down
+menu. <br>
+The pull down menu gives you access to a<span style="font-weight: bold;">
+list of recent launches</span> (automatically maintained) and a<span style="font-weight: bold;"> list of favorites</span> (explicitly
+managed by you).<br>
+    <br>
+Clicking the button (instead of the pulldown) is a shortcut to<span style="font-weight: bold;"> relaunch the most recent entry in the
+history</span>. <br>
+
+<h2><a name="tasks-view">Gradle Tasks View</a></h2>
+
+<p>The "Gradle Tasks" view added in STS 2.9.0.M1 provides an alternative mechanism that allows you to quickly launch a specific individual task without the hassle of using the standard Eclipse launch configuration editor.</p>
+
+<p>To open the view, use the <b>Windows &gt;&gt; Show View</b> menu.</p>
+
+<div style="margin-left: 40px;"><img alt="" src="img/show-view-other.png"></div>
+
+<p>You will find the tasks view in the "Gradle" category.</p>
+
+<div style="margin-left: 40px;"><img alt="" src="img/open-gradle-tasks-view.png"></div>
+
+<p>The view allows you to select a Gradle project and shows the tasks available for that project. Double-clicking a task
+in the view will launch that task.</p>
+
+<div style="margin-left: 40px;"><img alt="" src="img/gradle-tasks-view.png"></div>
+
+<p>The task view provides two buttons in its toolbar, from left to right:</p>
+<ul>
+  <li>Link with Selection Button: when selected, this makes the tasks view automatically select the corresponding project whenever you select something in another view.</li>
+  <li>Refresh button: click this to request the list of tasks to be refreshed (for example after you added new task definitions to your .gradle file).</li>
+</ul>
+
+<p>The tasks view provides a search box. Enter a string in this box to see only those tasks starting with that string. You can also add a "*" in front to search for substrings instead.
+
+<div style="margin-left: 40px;"><img alt="" src="img/tasks-view-with-filter.png"></div>
+
+Behind the scenes the tasks view uses the same launching mechanism as described earlier. A launch configuration 
+to launch your selected task will be created automatically if one does not already exist.
+If it exists, the existing configuration will be reused. That means you will be able to use the tools described
+earlier (launch configuration editor, launch history and shortcuts to edit and re-launch these configurations as well). 
+
+<h2>Bugs and Feature Requests:</h2>
+  </ul>
+  <ul style="margin: 0px; padding: 0px;">
+This release should still be considered
+experimental. It has been tested with a few
+real projects (spock, spring-integration, spring-security, spring-data-redis), but we are sure problems and
+issues remain. We welcome feedback and bug
+repors at <br>
+    <br>
+    <ul>
+      <li>The <a href="https://issuetracker.springsource.com/browse/STS">STS
+issue
+tracker</a><br>
+      </li>
+      <li>The <a href="http://forum.springsource.org/forumdisplay.php?f=32">STS forum</a>
+        <br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"></span><br>
+</ul></body></html>

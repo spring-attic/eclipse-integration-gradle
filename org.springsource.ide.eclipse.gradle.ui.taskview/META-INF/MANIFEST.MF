@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Taskview
+Bundle-SymbolicName: org.springsource.ide.eclipse.gradle.ui.taskview;singleton:=true
+Bundle-Version: 3.0.0.qualifier
+Bundle-Activator: org.springsource.ide.eclipse.gradle.ui.taskview.GradleTasksViewPlugin
+Bundle-Vendor: SpringSource
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.springsource.ide.eclipse.gradle.core,
+ org.springsource.ide.eclipse.gradle.ui,
+ org.eclipse.core.resources,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui,
+ org.eclipse.debug.core
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy

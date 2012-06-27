@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*******************************************************************************
+ * Copyright (c) 2012 VMware, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     VMware, Inc. - initial API and implementation
+ *******************************************************************************/
+-->
+<site>
+   <!-- UAA -->
+   <feature
+      url="org.springframework.ide.eclipse.uaa.feature_3.0.0.qualifier.jar"
+      id="org.springframework.ide.eclipse.uaa.feature" version="3.0.0.qualifier">
+      <category name="Extensions / Gradle Integration" />
+   </feature>
+   
+   <!-- gradle -->
+   <feature url="features/org.springsource.ide.eclipse.gradle.feature_0.0.0.jar" id="org.springsource.ide.eclipse.gradle.feature" version="0.0.0">
+      <category name="Extensions / Gradle Integration"/>
+   </feature>
+   <feature url="features/org.gradle.toolingapi.feature_0.0.0.jar" id="org.gradle.toolingapi.feature" version="0.0.0">
+      <category name="Extensions / Gradle Integration"/>
+   </feature>
+   <category-def name="Extensions / Gradle Integration" label="Extensions / Gradle Integration"/>
+</site>

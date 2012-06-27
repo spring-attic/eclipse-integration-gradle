@@ -1,0 +1,13 @@
+apply plugin: 'java'
+
+dependencies{
+	compile (project(':B')) {
+		transitive = false
+	}
+		
+	compile ':commons-logging:1.1.1@jar'
+}
+
+repositories {
+	flatDir dirs: "${rootProject.projectDir}/repo"
+}

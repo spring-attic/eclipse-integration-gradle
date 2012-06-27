@@ -1,0 +1,10 @@
+apply plugin: 'war'
+apply plugin: 'eclipse-wtp'
+
+repositories {
+    mavenCentral ()
+}
+
+dependencies {
+	compile project(':B')
+}

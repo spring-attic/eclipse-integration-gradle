@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   width="16"
+   height="16"
+   sodipodi:docname="gradle-import.svg"
+   inkscape:export-filename="/home/kdvolder/workspaces/classpathcontainer/org.springsource.ide.eclipse.gradle.ui/icons/gradle-import.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <metadata
+     id="metadata8">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs6">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3592">
+      <stop
+         style="stop-color:#000065;stop-opacity:1;"
+         offset="0"
+         id="stop3594" />
+      <stop
+         style="stop-color:#000065;stop-opacity:0;"
+         offset="1"
+         id="stop3596" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient2822">
+      <stop
+         style="stop-color:#004b00;stop-opacity:1"
+         offset="0"
+         id="stop2824" />
+      <stop
+         style="stop-color:#008000;stop-opacity:0;"
+         offset="1"
+         id="stop2826" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       id="perspective10" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2822"
+       id="linearGradient2828"
+       x1="10.761728"
+       y1="1.8627133"
+       x2="6.3155456"
+       y2="-2.8697701"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.2691106,0,0,1.2691107,-3.9465803,-0.86323163)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3592"
+       id="linearGradient3598"
+       x1="15.457627"
+       y1="15.593221"
+       x2="11.79661"
+       y2="11.79661"
+       gradientUnits="userSpaceOnUse" />
+    <inkscape:perspective
+       id="perspective2828"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="930"
+     inkscape:window-height="760"
+     id="namedview4"
+     showgrid="false"
+     inkscape:zoom="14.75"
+     inkscape:cx="-0.26730197"
+     inkscape:cy="8"
+     inkscape:window-x="279"
+     inkscape:window-y="185"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <image
+     xlink:href="file:///home/kdvolder/workspaces/classpathcontainer/org.springsource.ide.eclipse.gradle.ui/icons-sources/fldr_obj.png"
+     width="16"
+     height="16"
+     id="image12"
+     x="1.5027442e-08"
+     y="0.033898428" />
+  <text
+     xml:space="preserve"
+     style="font-size:10.15288544000000037px;font-style:normal;font-weight:normal;fill:url(#linearGradient2828);fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+     x="7.6690087"
+     y="7.912991"
+     id="text2818"
+     transform="scale(1.0273732,0.97335614)"><tspan
+       sodipodi:role="line"
+       id="tspan2820"
+       x="7.6690087"
+       y="7.912991"
+       style="font-weight:bold;fill:url(#linearGradient2828);fill-opacity:1">G</tspan></text>
+  <path
+     style="fill:url(#linearGradient3598);stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+     d="m 10.372881,15.728814 5.288136,0 -0.135593,-4.61017 -5.152543,4.61017 z"
+     id="path2818" />
+</svg>

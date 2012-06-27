@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<link rel="stylesheet" href="css/stylesheet.css" type="text/css">
+<title>Gradle STS Tooling Docs</title>
+</head><body>
+<h1>Gradle STS Support -- 3.0.0 (M2) -- Installation</h1>
+
+<p><small>Note: The latest version of this file can always be found <a href="http://static.springsource.org/sts/docs/latest/reference/html/gradle/" title="Latest Gradle Docs">here</a>.</small></p>
+
+<p>You can install the Gradle STS support in one of two ways. The easiest
+way to install is from the STS Dashboard extensions page. Simply search
+for "Gradle" to find the extension, select it and install.</p>
+
+<p>Optionally (if you want editor support) you should also install the "Groovy Eclipse" extension in the same way.</p>
+
+<h2>Requirements:</h2>
+
+<p>Either one of the following:</p>
+
+<ul>
+<li>An instance of STS 3.0.0.M2 or later based on Eclipse 3.7 or 4.2.</li>
+<li>An instance of Eclipse 3.7.2 or later. (Earlier versions of Eclipse such as Eclipse 3.6 probably also work but have not been <br />
+tested).</li>
+</ul>
+
+<p>Optionally (if you want support for editing .gradle files) a compatible Groovy Eclipse installation is 
+required (STS 3.0.0.M2) requires Groovy Eclipse 2.7.0. The Gradle tooling should be usable without Groovy Eclipse, but some functionality (related to editing gradle files) will not work.</p>
+
+<h2>Installation instructions:</h2>
+
+<h3>Installing from the STS dashboard:</h3>
+
+<p>The easiest way to install is from the STS Dashboard "Extensions" page.</p>
+
+<ol>
+<li>First download and install a recent release of STS (3.0.0.M2 or later).</li>
+<li>Open STS and in the dashboard click on the "Extensions" tab.</li>
+<li>Search for "Gradle" or "Groovy" depending on what you are installing, select it and click "Install".</li>
+<li>Review the list of software that will be installed and click "Next".</li>
+<li>Review and accept licence agreements and click "Finish".</li>
+</ol>
+
+<h3>Installing Gradle Tooling from update site:</h3>
+
+<p>Alternatively you can install from update sites. The following update
+sites are available:</p>
+
+<ul>
+<li>http://dist.springsource.com/snapshot/TOOLS/nightly/gradle (latest development snapshot)</li>
+<li>http://dist.springsource.com/milestone/TOOLS/gradle (latest milestone build.)</li>
+<li>http://dist.springsource.com/release/TOOLS/gradle (latest release)</li>
+</ul>
+
+<p><strong>Note:</strong> pasting the above URLs into a web browser will not work. You need
+to follow the instructions given below to use an Eclipse update site.</p>
+
+<p><strong>Note:</strong> presently (while STS 3.0.0 is still under development), only snapshot and milestone update sites contain versions 
+that are compatible with STS 3.0.0.M2 or later. Once 3.0.0 is released, the release site will also contain a 3.0.0 compatible 
+release.</p>
+
+<p><strong>If you are installing into STS</strong> one of these update sites will be
+sufficient.</p>
+
+<p><strong>If you are installing in a plain Eclipse</strong>, you will also need to add an STS update site to satisfy some dependencies.</p>
+
+<ul>
+<li>For eclipse 3.7:
+<ul>
+<li>STS Release: http://dist.springsource.com/release/TOOLS/update/e3.7/ (this site will only contain a compatible version after 3.0.0 release!)</li>
+<li>Milestone: http://dist.springsource.com/milestone/TOOLS/update/e3.7/</li>
+<li>Nightly: http://dist.springsource.com/snapshot/TOOLS/nightly/e3.7/</li>
+</ul></li>
+<li>For eclipse 4.2:
+<ul>
+<li>STS Release: http://dist.springsource.com/release/TOOLS/update/e4.2/ (this site will only contain a compatible version after 3.0.0 release!)</li>
+<li>Milestone: http://dist.springsource.com/milestone/TOOLS/update/e4.2/</li>
+<li>Nightly: http://dist.springsource.com/snapshot/TOOLS/nightly/e4.1/</li>
+</ul></li>
+</ul>
+
+<h4>Detailed instructions:</h4>
+
+<p>Steps 2..4 can be skipped if you are installing into STS.</p>
+
+<ol>
+<li>Open <strong>Help >> Install New Software</strong></li>
+<li>Click "Available Software sites".</li>
+<li>Click the "Add" button.</li>
+<li>Add an STS update site according to your Eclipse version.</li>
+<li>Paste a Gradle update site link into the "Work with" text box.</li>
+<li>Select everything on the site.</li>
+<li>Click "Next".</li>
+<li>Review the list of software that will be installed. Click "Next" again.</li>
+<li>Review and accept licence agreement and Click "Finish".</li>
+</ol>
+
+<h3>Installing Groovy Eclipse from Update Site</h3>
+
+<p>To install Groovy Eclipse from update site see <a href="http://groovy.codehaus.org/Eclipse+Plugin" title="Groovy Eclipse">here</a>.</p>
+</body></html>

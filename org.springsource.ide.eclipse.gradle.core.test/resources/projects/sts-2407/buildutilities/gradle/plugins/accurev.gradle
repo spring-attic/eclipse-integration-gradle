@@ -1,0 +1,20 @@
+//def accurev = new File("C:/Program Files/Accurev/bin/accurev")
+
+if (['accurev1', '-version'].execute().err.text) {
+	logger.warn "Cannot find Accurev binaries.  Accurev tasks will not be loaded"
+} else {
+	task includeModule << {
+		System.in.withReader {console->
+			println "What module do you want to include?  Please use a slash format (e.g. cswrapper/cssearch)"
+			def module = console.readLine()
+			println "What Accurev stream do you want to add this to?"
+			def stream = console.readLine()
+			def out = new StringBuilder()
+			def err = new StringBuilder()
+			def proc = ['accurev', 'incl', '-s', stream, module].execute()
+			proc.waitForProcessOutput(out, err)
+			if (out) println out
+			if (err) println err
+		}
+	}
+}

@@ -1,0 +1,11 @@
+apply plugin: 'java'
+
+repositories {
+	flatDir dirs: "${rootProject.projectDir}/repo"
+}
+
+dependencies {
+	compile project(':C') 
+	compile ':glazedlists:1.8.0:java15@jar'
+	testCompile ':junit:4.4@jar'
+}

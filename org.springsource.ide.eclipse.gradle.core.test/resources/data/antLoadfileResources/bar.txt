@@ -1,0 +1,4 @@
+This is my bar!
+which is not quite foo!
+instead it is bar...
+but it also has text.

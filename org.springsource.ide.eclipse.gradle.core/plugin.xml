@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClasspathContainerInitializer"
+            id="org.springsource.ide.eclipse.gradle.classpathcontainer">
+      </classpathContainerInitializer>
+      <classpathContainerInitializer
+            class="org.springsource.ide.eclipse.gradle.core.dsld.GradleDSLDClasspathContainerInitializer"
+            id="org.springsource.ide.eclipse.gradle.dsld.classpathcontainer">
+      </classpathContainerInitializer>
+   </extension>
+   
+   <extension
+         id="org.springsource.ide.eclipse.gradle.core.nature"
+         name="Gradle Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run class="org.springsource.ide.eclipse.gradle.core.GradleNature">
+         </run>
+      </runtime>
+      <requires-nature
+            id="org.eclipse.jdt.core.javanature">
+      </requires-nature>
+   </extension>
+
+  <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+    <launchConfigurationType
+        name="Gradle Build"
+        delegate="org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate"
+        category="org.eclipse.ui.externaltools"
+        modes="run"               
+        id="org.springsource.ide.eclipse.gradle.launch">
+    </launchConfigurationType>
+  </extension>
+  <extension
+        point="org.eclipse.jdt.groovy.core.typeLookup">
+     <lookup lookup="org.springsource.ide.eclipse.gradle.core.dsld.SuppressUnderliningTypeLookup">
+        <appliesTo
+              projectNature="org.springsource.ide.eclipse.gradle.core.nature">
+        </appliesTo>
+     </lookup>
+  </extension>
+  
+  <extension id="classpathcontainer" point="org.eclipse.core.resources.markers">
+     <super type="org.eclipse.core.resources.problemmarker"/>
+     <persistent value="true"/>
+  </extension>
+
+  
+
+</plugin>

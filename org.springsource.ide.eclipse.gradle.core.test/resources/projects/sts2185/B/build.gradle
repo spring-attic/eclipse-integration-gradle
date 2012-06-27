@@ -1,0 +1,10 @@
+apply plugin: 'java'
+apply plugin: 'eclipse-wtp'
+
+repositories {
+    mavenCentral ()
+}
+
+dependencies {
+    compile 'postgresql:postgresql:9.0-801.jdbc4'
+}

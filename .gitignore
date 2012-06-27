@@ -1,0 +1,14 @@
+bin/
+.gradle
+*.class
+*.zip
+/org.springsource.ide.eclipse.gradle.updatesite/*.jar
+/org.springsource.ide.eclipse.gradle.updatesite/features/*.jar
+/org.springsource.ide.eclipse.gradle.updatesite/plugins/*.jar
+/*/target
+/target
+/org.springsource.ide.eclipse.gradle.core.test/resources/gitprojects
+**/hs_err_pid*.log
+
+/org.springsource.ide.eclipse.gradle.core/src/gradle-api.properties
+/org.springsource.ide.eclipse.gradle.core/gradle.out

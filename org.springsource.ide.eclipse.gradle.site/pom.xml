@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springsource.ide.eclipse.gradle</groupId>
+		<artifactId>org.springsource.ide.eclipse.gradle.parent</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>org.springsource.ide.eclipse.gradle.site</artifactId>
+	<packaging>eclipse-update-site</packaging>
+	<properties>
+		<dist.accessKey>${accessKey}</dist.accessKey>
+		<dist.secretKey>${secretKey}</dist.secretKey>
+	</properties>
+	<profiles>
+	    <profile>
+	        <id>just-zip</id>
+	        <activation>
+	           <property>
+	               <name>!publish</name>
+	           </property>
+	        </activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<quiet>true</quiet>
+									<files>
+										<file>${dist.properties}</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>process-update-site</id>
+								<phase>install</phase>
+								<configuration>
+									<target>
+										<ant antfile="../common/build.xml" target="process-update-site">
+											<property name="p2.sign" value="${p2.sign}" />
+											<property name="p2.repository.name" value="${p2.repository.name}" />
+										</ant>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>create-zip</id>
+								<phase>install</phase>
+								<configuration>
+									<target>
+										<property name="dist.full.version"
+											value="${unqualifiedVersion}.${buildQualifier}" />
+										<ant antfile="../common/build.xml" target="zipsite">
+											<property name="dist.project" value="${dist.project}" />
+											<property name="dist.file.name"
+												value="${dist.project}-${dist.full.version}-updatesite.zip" />
+											<property name="dist.path"
+												value="${dist.type}/${dist.key}/nightly/${dist.project}" />
+											<property name="dist.platform.version" value="${dist.platform.version}" />
+											<property name="dist.type" value="${dist.type}" />
+											<property name="dist.key" value="${dist.key}" />
+											<property name="dist.project" value="${dist.project}" />
+											<property name="dist.target" value="${dist.target}" />
+										</ant>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+	    </profile>
+		<profile>
+			<id>publish</id>
+	        <activation>
+	           <property>
+	               <name>publish</name>
+	           </property>
+	        </activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<quiet>true</quiet>
+									<files>
+										<file>${dist.properties}</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>upload-dist</id>
+								<phase>deploy</phase>
+								<configuration>
+									<target>
+										<property name="dist.full.version"
+											value="${unqualifiedVersion}.${buildQualifier}" />
+										<ant antfile="../common/build.xml" target="deploy">
+											<property name="dist.project" value="${dist.project}" />
+											<property name="dist.file.name"
+												value="${dist.project}-${dist.full.version}-updatesite.zip" />
+											<property name="dist.path"
+												value="${dist.type}/${dist.key}/nightly/${dist.project}" />
+											<property name="dist.platform.version" value="${dist.platform.version}" />
+											<property name="dist.type" value="${dist.type}" />
+											<property name="dist.key" value="${dist.key}" />
+											<property name="dist.project" value="${dist.project}" />
+											<property name="dist.target" value="${dist.target}" />
+										</ant>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

@@ -1,0 +1,42 @@
+apply plugin: 'java'
+apply plugin: "jetty"
+
+httpPort = 9105
+
+jodaVersions = [time: "1.6", jsptags: "1.0.2"]
+versions += [jstl: '1.2', wurfl: '1.2', hibernate: "4.1.0.Beta1", drools: "5.3.0.Final", 
+		tiles: "2.1.3", joda: jodaVersions]
+
+dependsOn(':projectA:projectB:projectC')
+
+dependencies {
+	versions.with {
+		compile project(':projectA:projectB:projectC')
+
+		compile group: "javax.servlet", name: "jstl", version: jstl
+		compile group: "org.springframework", name: "spring-webmvc", version: spring.framework
+		compile group: "org.hibernate", name: "hibernate-validator", version: hibernate
+		compile group: "org.drools", name: "drools-core", version: drools
+		
+//		runtime group: "org.springframework.mobile", name: "spring-mobile-device", version: spring.frameworkMoble
+		runtime group: "org.springframework", name: "spring-jdbc", version: spring.framework
+		runtime group: "org.springframework", name: "spring-orm", version: spring.framework
+		runtime group: "org.springframework.webflow", name: "spring-webflow", version: spring.webflow
+		runtime group: "org.springframework.webflow", name: "spring-js", version: spring.webflow
+		runtime group: "org.springframework.security", name: "spring-security-config", version: spring.security
+		runtime group: "org.springframework.security", name: "spring-security-taglibs", version: spring.security
+		runtime group: "org.springframework.security", name: "spring-security-web", version: spring.security
+		runtime group: "net.sourceforge.wurfl", name: "wurfl", version: wurfl
+
+		runtime group: "org.apache.tiles", name: "tiles-jsp", version: tiles
+		runtime group: "joda-time", name: "joda-time", version: joda.time
+		runtime group: "joda-time", name: "joda-time-jsptags", version: joda.jsptags
+		runtime group: "org.drools", name: "drools-core", version: drools
+					
+		testCompile group: "org.jmock", name:"jmock-junit4", version: jmock
+		testCompile group: "org.eclipse.jetty", name:"jetty-server", version: jetty
+		testCompile project(':projectA:projectB:projectC').sourceSets.test.output
+
+	        testCompile group: "org.springframework.integration", name: "spring-integration-ws",  version: spring.integration
+	}		
+}

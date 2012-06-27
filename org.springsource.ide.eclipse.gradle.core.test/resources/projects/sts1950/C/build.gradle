@@ -1,0 +1,9 @@
+apply plugin: 'java'
+
+repositories {
+	flatDir dirs: "${rootProject.projectDir}/repo"
+}
+
+dependencies {
+	compile ':glazedlists:1.8.0:java15@jar' 
+}

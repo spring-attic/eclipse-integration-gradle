@@ -1,0 +1,76 @@
+apply plugin: 'java'
+
+versions = [axis2: '1.6.1']
+
+configurations {
+	wsdl2java
+}
+
+dependencies {
+	wsdl2java group: 'org.apache.axis2', name: 'axis2', version: versions.axis2
+	wsdl2java group: 'org.apache.axis2', name: 'axis2-ant-plugin', version: versions.axis2
+	wsdl2java group: 'org.apache.axis2', name: 'axis2-xmlbeans', version: versions.axis2
+	compile group: 'org.apache.axis2', name: 'axis2-xmlbeans', version: versions.axis2
+}
+
+
+outputDir = file("$buildDirName/wsdl2java")
+
+task wsdl2java() {
+
+	outputs.dir outputDir
+	delete outputDir
+	outputDir.mkdirs()
+
+	doLast {
+		assert wsdlurl: "wsdlurl must be defined"
+		ant.taskdef name: 'codegen',  classpath: configurations.wsdl2java.asPath,
+				classname: 'org.apache.axis2.tool.ant.AntCodegenTask'
+		logger.warn "Retrieving WSDL from $wsdlurl"
+		ant.codegen(output: outputDir, testcase: false, syncOnly: true,
+				databindingName: 'xmlbeans', generateservicexml: true, 
+				wsdlfilename: wsdlurl)
+	}
+}
+
+compileJava.source wsdl2java.outputs.files
+compileJava.options.compilerArgs << '-Xlint:none'
+
+
+jar {
+	from(sourceSets.main.output) {
+	    exclude "**/META-INF/*.*"
+	    exclude "**/lib/*.*"
+	    exclude "**/*MessageReceiver.class"
+	    exclude "**/*Skeleton.class"
+	}
+	
+	from(sourceSets.main.resources) {
+		exclude "**/*.wsdl"
+		exclude "**/*.xsd"
+		exclude "**/*.xml"
+	}
+}
+
+
+//task jar(overwrite: true , dependsOn: wsdl2java) << {
+//	def userDir = System.getProperty("user.dir")
+//	System.setProperty("user.dir", outputDir.absolutePath)
+//	def stubsAnt = new groovy.util.AntBuilder()
+//	System.setProperty("user.dir", userDir)
+//	
+//	stubsAnt.project.properties.each{println it}
+//	stubsAnt.ant(antfile: new File(outputDir, "build.xml"))
+//}
+
+
+/*
+  AACom AAthena uses this:
+    <codegen wsdlfilename="${wsdl}"
+            output="${output.dir}"
+            testcase="false"
+            syncOnly="true"
+            databindingName="xmlbeans"
+            generateservicexml="true" />
+
+*/

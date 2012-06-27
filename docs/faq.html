@@ -1,0 +1,509 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+
+
+
+
+
+
+
+
+  
+  <link rel="stylesheet" href="css/stylesheet.css" type="text/css">
+
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>STS Gradle Support -- FAQ</title></head><body><a href="http://springsource.com/developer/sts"><img style="border: 0px solid ; height: 60px; width: 60px;" alt="logo" src="img/sts60x60.png" align="left"></a>
+<a href="http://www.springsource.com/"><img style="border: 0px solid ; width: 240px; height: 50px;" alt="logo" src="img/spring09_logo.png" align="right"></a><br>
+
+
+<br>
+
+
+<br>
+
+
+<h1>STS Gradle Support -- 2.9.0 -- FAQ</h1>
+<p class="note">Note: The latest version of this file can always be
+found <a href="http://static.springsource.org/sts/docs/latest/reference/html/gradle/">here</a></p>
+
+
+
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#a1">What functionality is provided?</a> </li><li><a href="#a2">What types of projects are supported?</a> </li><li><a href="#a4">My Java level (1.6 | 1.5) and libraries are not
+setup right. Why not?</a> </li><li><a href="#a5">Is there support for editing ".gradle" files?</a> </li><li><a href="#a6">Why does importing a Gradle project take so long?</a>
+  </li><li><a href="#a7">Why does the progress bar behave funny?</a> </li><li><a href="#a8">Why can't I cancel any of the Gradle related
+operations in STS?</a> </li><li><a href="#a9">What versions of Gradle are supported?</a> </li><li><a href="#a10">How do I import an existing Gradle project into
+STS?</a> </li><li><a href="#a11">How do I make STS update dependencies after I
+edited my .gradle file?</a> </li><li><a href="#a12">How do I run a task?</a> </li><li><a href="#a13">How do I debug a task?</a> </li><li><a href="#a14">How do I create a new Gradle project in STS?</a> </li><li><a href="#why_flat">Why is my project/sub-project hierachy
+"flattened" by the import wizard?</a> </li><li><a href="#a15">I imported some Gradle projects but can't find
+them in my workspace folder on disk, where are they?</a> </li><li><a href="#a16">Why doesn't the Gradle import wizard have a "copy
+resources into workspace" option?</a></li><li><a href="#a17">Where can I ask more questions?</a></li><li><a href="#a18">Where can I report a bug?</a></li><li><a href="#a19">What is UAA?</a></li><li><a href="#a20">Why do I get error "Only exactly one embedded
+distribution should be found"?</a></li><li><a href="#a21">Why do I get error "No value with key 'distributionUrl' specified
+in
+wrapper properties file"</a></li><li><a href="#a22">How can I disable the STS Dashboard?</a></li><li><a href="#a23">Why do I get a warning "Method not found. Please verify that the version of Gradle you
+connect to contains method:
+HierarchicalEclipseProject.getLinkedResources()"</a></li><li><a href="a24">Should I run ".\gradlew eclipse" before importing my projects into STS?</a><br>
+
+  </li>
+</ol>
+
+
+
+<h2>FAQ</h2>
+
+
+<h3><a name="a1"></a>What functionality is provided?</h3>
+
+
+In a nutshell, we provide three main chunks of functionality <br>
+
+
+
+<ol>
+<li>An <a href="gradle-sts-tutorial.html#import">import wizard</a>
+to help you import Gradle projects / sub-projects into STS.</li><li>(Semi-)automated <a href="gradle-sts-tutorial.html#dependencies">dependency
+management</a><br>
+  </li><li>An extension to the standard Eclipse launch framework to <a href="gradle-sts-tutorial.html#launch">execute Gradle tasks</a>.<br>
+
+  </li>
+</ol>
+
+
+For more details see the <a href="gradle-sts-tutorial.html">tutorial</a>.
+It walks you through an example using the <a href="gradle-sts-tutorial.html#import">import wizard </a>and the <a href="gradle-sts-tutorial.html#launch">task execution UI</a>.<br>
+
+
+<br>
+
+
+The Gradle STS support is built upon a new tooling API that is being
+developed as part of Gradle itself.&nbsp; As this brand new API is
+fleshed out, the set of features in STS will expand.<br>
+
+
+
+<h3><a name="a2"></a>What types of projects are supported?</h3>
+
+
+The current version of the Gradle Tooling API only provides information
+about the "Java" aspects of a project. That is, things such as the
+classpath, project dependencies and source folders. The current version
+of Gradle STS support therefore only explicitly provides support for
+"plain Java" projects.&nbsp; In Eclipse terms, if your Eclipse project
+only requires the Java project nature then it
+is supported, otherwise it is not supported yet.<br>
+
+
+<br>
+
+
+You may still be able to use the tooling with other types of projects
+(WTP, AspectJ, Groovy etc.) but this depends in large part on you
+managing the non-Java related configuration of the project in some
+other way yourself.<br>
+<br>
+A (somewhat experimental) method which is supported since 2.8.0.M2 to
+get&nbsp; support for additional project types (WTP,&nbsp;
+AspectJ,&nbsp; ...)&nbsp; is to execute the Gradle eclipse tasks before
+importing.&nbsp; The import wizard provides this as an explicit option
+and will do its best to preserve any additional information it finds
+already existing in the project before making its own customizations.<br>
+<h3><a name="a4"></a>My Java level (1.6 | 1.5) and libraries are not
+setup right. Why
+not?<br>
+</h3>
+
+
+The Gradle Tooling API does not (yet) tell us this information so we
+cannot set it up automatically.<br>
+
+
+<h3><a name="a5"></a>Is there support for editing ".gradle" files?</h3>
+
+As of STS 2.9.0.M2 there is somewhat better support for editing .gradle files. 
+This requires that you install a recent version of Groovy Eclipse (2.6.1 development
+snapshot is required for STS 2.9.0.M2 gradle editor support). 
+<p>
+If a compatible version of Groovy Eclipse is installed, STS-Gradle will provide 
+an option in its Gradle menu to 'Enable DSLD Support'. This will
+add some customizations to your project to enable Groovy Eclipse on your project
+and contribute a <a href="http://docs.codehaus.org/display/GROOVY/DSL+Descriptors+for+Groovy-Eclipse">DSL Descriptor</a>. 
+This DSL Descriptor is currently quite limited and a work in progress. However you will already 
+get some useful code-assist and JavaDoc hovers if it is turned on.
+<p>
+We know there is much work to be done here, and many clever things
+are possible (e.g. content assisting for dependencies/version numbers
+by using knowledge available from the selected dependency repository).<br>
+<p>
+Make sure to install a recent
+version of Groovy Eclipse. Groovy-Eclipse can easily be installed from
+the STS dashboard, or the most recent dev build via this update site
+(Eclipse
+3.7):<span style="font-family: monospace;"><br>
+</span><tt><span class="external-link"> </span><br>
+</tt>
+<div style="margin-left: 40px;"><tt><span class="external-link">http://dist.codehaus.org/groovy/distributions/greclipse/snapshot/e3.7/</span></tt></div>
+
+
+<p>The <a href="http://groovy.codehaus.org/Eclipse+Plugin">Groovy-Eclipse
+project homepage</a> provides the comprehensive list of available
+update sites.
+</p>
+
+<h3><a name="a6"></a>Why does importing a Gradle project take so long?</h3>
+
+
+Longer version of this question: When I open the import wizard and
+click the "Build Model" button, this seems to take a long time. Also,
+it seems to download a lot of stuff. Why does it do that?<br>
+
+
+<br>
+
+
+Answer: Gradle needs to understand your project's structure to be able
+to build the project/sub-project structure model. This means it needs
+to
+understand (at least to some degree) your gradle script. However, a
+Gradle script is essentially a program. To understand this program
+Gradle needs to download at least some of the dependencies that the
+program itself relies upon. Unfortunately this takes time and can not
+be avoided. If you have already been running gradle builds of your
+project
+outside of STS before importing the project, you will find it is pretty
+quick
+because the dependencies have all already been downloaded.
+<h3><a name="a7"></a>Why does the progress bar behave funny?</h3>
+
+
+The Gradle Tooling API upon which we built does not provide real
+progress information (yet). The progress bar that you see is currently
+just a guesstimate at progress information, almost more of a 'Yes, I am
+still alive' monitor right now.
+<h3><a name="a8"></a>Why can't I cancel any of the Gradle related
+operations in STS?</h3>
+
+
+The Gradle Tooling API upon which we built does not provide a way to
+cancel long running operations (yet). <br>
+
+
+<h3><a name="a9"></a>What versions of Gradle are supported?</h3>
+
+
+
+Your build script will need to work with Gradle-1.0-M3 (or a more
+recent version) to be able to use the Gradle STS tool support. This is
+because we ship an embedded tooling API jar from 1.0-M4 and that is
+what
+it requires.<br>
+
+
+<h3><a name="a10"></a>How do I import an existing Gradle project into
+STS?</h3>
+
+
+Probably the easiest way is to use the import wizard. It can be found
+under "File &gt;&gt; Import" See the <a href="gradle-sts-tutorial.html#import">tutorial for more details on
+how to use it</a>.<br>
+
+
+<h3><a name="a11"></a>How do I make STS update dependencies after I
+edited my .gradle
+file?</h3>
+
+
+In the future, this will probably be automatic, however presently you
+have to force a refresh manually by using one of the context menu items
+in the "Gradle" menu, accessible by right clicking on your project. See
+the <a href="gradle-sts-tutorial.html">tutorial for more info</a>.<br>
+
+
+<h3><a name="a12"></a>How do I run a task?</h3>
+
+
+Short answer: You can run a single task, or a list of tasks by using
+the
+"Run As &gt;&gt; Gradle Build..." menu, accessed by right clicking on
+any resource in your gradle project.<br>
+
+
+<br>
+
+
+Long answer: There is a <a href="gradle-sts-tutorial.html#launch">detailed
+explanation of the task UI</a> in the tutorial.<br>
+
+
+
+<h3><a name="a13"></a>How do I debug a task?</h3>
+
+
+The STS tools don't currently provide debugging support for launched
+Gradle tasks.<br>
+
+
+<h3><a name="a14"></a>How do I create a new Gradle project in STS? </h3>
+
+
+The current version does not yet provide an explicit command or menu to
+create a new Gradle project. However there are two ways to work around
+this:<br>
+
+
+<ol>
+<li>create your project outside of STS and then import it using the
+import wizard.</li><li>use the "new Java project wizard" to create a Java project.
+Then use the "Configure &gt;&gt; Convert to Gradle Project" menu to
+convert your project into a Gradle project (this adds the Gradle nature
+and classpath container).<br>
+  </li>
+</ol>
+
+
+If the project you are creating is a multi-project it is best to use
+the
+import wizard because the "Convert to Gradle project" will not import
+the sub-projects into your workspace.<br>
+
+
+<br>
+
+
+Note that you can also use the import wizard to import a new
+sub-project you just created inside an existing multi-project that is
+already in your workspace.<br>
+
+
+<h3><a name="why_flat"></a>Why is my project/sub-project hierachy
+"flattened" by the import
+wizard?</h3>
+
+
+This is because Eclipse (and therefore STS) doesn't have the concept of
+nested projects. We therefore translate the Gradle project hierarchy
+into an equivalent flat list of projects that Eclipse can work with.<br>
+
+
+<h3><a name="a15"></a>I imported some Gradle projects but can't find
+them in my workspace
+folder on disk, where are they?</h3>
+
+
+They are still in the same place they were before you imported them.
+The import wizard does not actually copy any files into the STS/Eclipse
+workspace folder. Instead it creates a linked representation. Each
+project in your workspace (as shown inside STS) actually points to
+the original project location on disk where you imported it from. The
+reason why we do this is because we want to maintain the underlying
+file system structure (which determines the Gradle
+project/sub-project) hierarchy. At the same time, to satisfy Eclipse,
+we
+need to map these nested projects onto a flat list of Eclipse projects.
+Using a linked representation it is possible to have both a nested
+structure on disk and a flattened representation inside the Eclipse
+workspace at the same time. See also the question above "<a href="#why_flat">Why is my project hierarchy flattened</a>?"<br>
+
+
+<h3><a name="a16"></a>Why doesn't the Gradle import wizard have a "copy
+resources into
+workspace" option?</h3>
+
+
+That is because to maintain the project/sub-project relationship we
+always use
+a linked project representation. Read the answer to the previous two
+questions also for more of an explanation why we do this.<br>
+
+
+<h3><a name="a17"></a>Where can I ask more questions?</h3>
+
+
+If you have questions about the STS Gradle tooling, the <a href="http://forum.springsource.org/forumdisplay.php?f=32">STS Forum</a>
+is a good place
+to ask.
+<br>
+
+If you have questions about Gradle, please consult the <a href="http://gradle.org/help-and-support">Gradle Help & Support
+page</a>.
+
+<h3><a name="a18"></a>Where can I report a bug?</h3>
+
+
+If your bug is related to the STS Gradle tooling use the <a href="https://issuetracker.springsource.com/browse/STS">STS issue
+tracker</a>.<br>
+
+If your bug is related to Gradle itself, please consult the <a
+href="http://gradle.org/help-and-support">Gradle Help & Support
+page</a>.<br>
+
+If you don't know for sure which one it is, make your best guess.<br>
+
+
+<br>
+
+
+
+When filing a bug report, please try to be as precise as possible about
+how the bug can be reproduced. Good bug reports have a much better
+chance of getting fixed. Problems that can't be reproduced by us
+will probably not get fixed.<br>
+
+
+<h3><a name="a19"></a>What is UAA?</h3>
+
+
+If you haven't installed any STS components before, after you installed
+the Gradle tooling and restart Eclipse you will be prompted by Spring
+UAA, so naturally you might wonder what it is, why you are being
+prompted, and what it means to accept or reject the UAA agreement.<br>
+
+
+<br>
+
+
+For details please see the <a href="http://www.springsource.org/uaa/faq">Spring User Agent Analysis
+FAQ</a> and the <a href="http://www.springsource.org/uaa/terms_of_use">UAA
+Terms of Use</a>.<br>
+
+
+
+<br>
+
+
+From the <a href="http://www.springsource.org/uaa/faq">Spring User
+Agent Analysis FAQ</a>: "<span style="font-style: italic;">Spring UAA
+helps us gain a better understanding of how people are using Spring
+technologies. Of course your privacy is of paramount importance. For
+this reason Spring UAA does not operate unless you explicitly authorize
+it to, and any data it sends is completely anonymous.</span>". <br>
+
+
+<br>
+
+
+One good reason to allow the UAA to collect your data is that if you
+are using the STS Gradle tooling, your usage data is an implicit vote
+for us to continue developing it.<br>
+
+
+<h3><a name="a20"></a>Why do I get error "Only exactly one embedded distribution should
+be found"</h3>
+
+
+
+The cryptic error in 2.7.M1 is masking an earlier error. It is most likely
+caused by the fact that you have STS set to use the "Gradle Wrapper's
+Default" Gradle distribution, but the wrapper's default is not
+compatible with the tooling API. See also <a href="#a9">What versions
+of Gradle are supported?</a>.<br>
+
+
+<br>
+
+
+To address it, try explicitly specifying a gradle distribution in the
+Gradle Preferences page (this will overrride your Gradle wrapper's
+default. You can paste in the following URL:<br>
+
+
+<br>
+
+
+<div style="margin-left: 40px;"><a href="http://repo.gradle.org/gradle/distributions/gradle-1.0-milestone-3-bin.zip">http://repo.gradle.org/gradle/distributions/gradle-1.0-milestone-3-bin.zip</a>
+<br>
+</div>
+
+
+<br>
+
+Alternatively, you can regenerate your Gradle wrapper to use a more recent
+version of Gradle.<br>
+
+
+<br>
+
+
+Updating to 2.7.M2 build or the nightly build (see <a href="installation.html">installation
+instructions</a>) will slightly improve the error message (returning
+the original error from the Gradle API). (See question below :-)<br>
+
+
+<h3><a name="a21"></a>Why do I get error "No value with key 'distributionUrl' specified
+in
+wrapper properties file"</h3>
+
+
+The Gradle tooling API 1.0-milestone-3 raises this error when you are using a Gradle
+Wrapper generated with an older version of Gradle. For a workaround see the question above. Also see issue <a href="http://issues.gradle.org/browse/GRADLE-1527">GRADLE-1527</a>.<br>
+
+
+<h3><a name="a22"></a>How can I disable the STS Dashboard?</h3>
+an (Open the preferences with menu "Window &gt;&gt; Preferences" then under
+"Spring &gt;&gt; Dashboard" find the checkbox option "Show Dashboard on
+startup" and disable it.<br>
+
+<h3><span style="font-weight: bold;"><a name="a23"></a>Why do I get a warning "Method not found. Please verify that the version of Gradle you
+connect to contains method:
+HierarchicalEclipseProject.getLinkedResources()"?</span></h3>
+
+This method was added in Gradle-1.0.M4. The error happens when a M4 tooling API is being used with a pre-M4 gradle distribution.<br>
+
+<br>
+
+From STS 2.8.0.M1 onward we are using the Gradle-1.0.M4 tooling API.
+However the Gradle distribution the tooling API connects to is determined by your Gradle wrapper or the
+Gradle preferences page in STS.<br>
+
+To get rid of the error ensure that you are using a distribution of
+Gradle-1.0.M4 or later. (Either change your gradlewrapper.properties,
+or set it in the Gradle preferences page).<br>
+
+
+<br>
+
+Note that for most projects, you can use a M3 distribution without
+trouble. STS will catch this error and proceed under the assumption
+that there are no linked resources. <br>
+
+This assumption is correct in most cases so the warning can be ignored in most cases.<br>
+
+<br>
+
+A typical case where linked resources <span style="font-weight: bold;">are</span> used (and so you <span style="font-weight: bold;">should </span>switch
+to M4) is if your project has a source folder that is located outside
+of the project itself (for example a subproject having a source folder
+pointing to a location in the parrent project with a relative path such as
+"../shared-code".<br>
+
+<h3><a name="a24"></a>Should I run ".\gradlew eclipse" before importing my project(s) into STS?</h3>
+
+Ideally you should not have to. Ideally the import wizard would
+configure every aspect of your project correctly by querying the Gradle
+Tooling API for the required information. However, in reality, the
+Tooling API at this time only provides very limited information (see
+above <a href="#a2">What types of projects are supported?</a>). If any
+of your projects/subprojects requires natures not in the supported
+list, you can try to "fill the gap" by leveraging the generated eclipse
+configuration files. This works relatively well because the import
+wizard attempts as much as possible not to touch configuration
+information that cannot be requested from the Tooling API.<br>
+
+
+<br>
+
+In versions of the Gradle Tooling distributed with STS 2.8.M1 or prior,
+you will likely get duplicated information in "Referenced Libraries"
+and "Gradle Dependencies". You can fix this by opening the project's
+Build Path Properties page and removing the referenced library entries.<br>
+
+<br>
+
+In version 2.8.M2 this step is no longer required because the raw
+library class path entries will be automatically removed when the
+Gradle Nature is installed onto your project(s).<br>
+
+
+<br>
+</body></html>

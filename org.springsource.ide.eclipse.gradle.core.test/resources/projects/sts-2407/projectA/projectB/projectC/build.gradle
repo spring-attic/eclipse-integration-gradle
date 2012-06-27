@@ -1,0 +1,10 @@
+dependencies {
+	versions.with {
+		compile group: "org.aspectj", name: "aspectjrt", version: aspectj
+		compile group: "org.springframework.integration", name: "spring-integration-ws",  version: spring.integration
+		
+		
+		testCompile group: "org.eclipse.jetty", name:"jetty-server", version: jetty
+	}
+}
+

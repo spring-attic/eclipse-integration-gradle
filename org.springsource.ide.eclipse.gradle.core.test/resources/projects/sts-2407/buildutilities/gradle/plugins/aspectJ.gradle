@@ -1,0 +1,84 @@
+apply plugin:'java'
+apply plugin:'eclipse'
+
+
+
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
+
+configurations {
+	ajc
+	aspects
+	ajInpath
+}
+
+dependencies {
+	testCompile files(sourceSets.main.output.classesDir)	
+}
+
+task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true)  {
+	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
+	
+	doLast{
+		ant.taskdef(resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath:configurations.ajc.asPath)
+		ant.iajc(source:sourceCompatibility, target:targetCompatibility, destDir:sourceSets.main.output.classesDir.absolutePath,
+			maxmem:"512m", fork:"true", aspectPath:configurations.aspects.asPath, inpath:configurations.ajInpath.asPath, 
+			sourceRootCopyFilter:"**/.svn/*,**/*.java", classpath:configurations.compile.asPath){
+
+			sourceroots{
+				sourceSets.main.java.srcDirs.each{
+					pathelement(location:it.absolutePath)
+				}
+                pathelement(location:new File(projectDir, "src/main/aspect").absolutePath)
+			}
+		}
+	}
+}
+
+task compileTestJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true)  {
+    dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileTestJava")
+    
+    doLast{
+        ant.taskdef(resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath:configurations.ajc.asPath)
+        ant.iajc(source:sourceCompatibility, target:targetCompatibility, destDir:sourceSets.test.output.classesDir.absolutePath,
+            maxmem:"512m", fork:"true", aspectPath:configurations.aspects.asPath, inpath:configurations.ajInpath.asPath,
+            sourceRootCopyFilter:"**/.svn/*,**/*.java", classpath:configurations.testCompile.asPath){
+
+            sourceroots{
+                sourceSets.test.java.srcDirs.each{
+                    pathelement(location:it.absolutePath)
+                }
+                pathelement(location:new File(projectDir, "src/main/aspect").absolutePath)
+                pathelement(location:new File(projectDir, "src/test/aspect").absolutePath)
+            }
+        }
+    }
+}
+
+//add aspectj support for eclipse plugin
+eclipse.classpath.file.withXml { xmlProvider ->
+	def classpath = xmlProvider.asNode()
+	def xmlparser = new XmlParser()
+
+	configurations.aspects.files.each{ aspectsLib ->
+		classpath.children().findAll{ it['@path'] == aspectsLib.absolutePath }.each {
+			def attrs = xmlparser.createNode(it, 'attributes', [:])
+			xmlparser.createNode(attrs, 'attribute', [name: 'org.eclipse.ajdt.aspectpath', value: 'true']);
+		}
+	}
+}
+
+eclipse.project.file.withXml { xmlProvider->
+	def projectDescription = xmlProvider.asNode()
+	def xmlparser = new XmlParser()
+
+	def builders = projectDescription.buildSpec[0]
+	def ajbuilder = xmlparser.createNode(builders, 'buildCommand', [:])
+	xmlparser.createNode(ajbuilder, 'name', [:]).setValue('org.eclipse.ajdt.core.ajbuilder')
+	xmlparser.createNode(ajbuilder, 'arguments', [:]);
+
+	def natures = projectDescription.natures[0]
+	def ajnature = xmlparser.createNode(null, 'nature', [:])
+	ajnature.setValue('org.eclipse.ajdt.ui.ajnature');
+	natures.children().add(0, ajnature)
+}

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   width="16"
+   height="16"
+   sodipodi:docname="gradle-multiproj-folder-disabled.svg"
+   inkscape:export-filename="/home/kdvolder/commandline-dev/sts-gradle/org.springsource.ide.eclipse.gradle.ui/icons/gradle-multiproj-folder-disabled.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <metadata
+     id="metadata8">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs6">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3642">
+      <stop
+         style="stop-color:#005d00;stop-opacity:1;"
+         offset="0"
+         id="stop3644" />
+      <stop
+         style="stop-color:#005d00;stop-opacity:0;"
+         offset="1"
+         id="stop3646" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3634">
+      <stop
+         style="stop-color:#008000;stop-opacity:1;"
+         offset="0"
+         id="stop3636" />
+      <stop
+         style="stop-color:#005d00;stop-opacity:1"
+         offset="1"
+         id="stop3638" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3626">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3628" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3630" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       id="perspective10" />
+    <inkscape:perspective
+       id="perspective2829"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       gradientTransform="translate(-4.3400421,3.9968553)"
+       y2="-10.302938"
+       x2="1.0447534"
+       y1="2.6967092"
+       x1="12.340042"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient3659"
+       xlink:href="#linearGradient2822"
+       inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient2822">
+      <stop
+         style="stop-color:#909190;stop-opacity:1;"
+         offset="0"
+         id="stop2824" />
+      <stop
+         style="stop-color:#008000;stop-opacity:0;"
+         offset="1"
+         id="stop2826" />
+    </linearGradient>
+    <linearGradient
+       gradientTransform="translate(-4.3400421,3.9968553)"
+       y2="-10.302938"
+       x2="1.0447534"
+       y1="2.6967092"
+       x1="12.340042"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient2837"
+       xlink:href="#linearGradient2822"
+       inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3634"
+       id="linearGradient3640"
+       x1="9.0016394"
+       y1="0.55036688"
+       x2="19.073872"
+       y2="12.858577"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3642"
+       id="linearGradient3648"
+       x1="9.0016392"
+       y1="3.9134799"
+       x2="15.202447"
+       y2="3.9134799"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="892"
+     inkscape:window-height="861"
+     id="namedview4"
+     showgrid="false"
+     inkscape:zoom="14.75"
+     inkscape:cx="10.329298"
+     inkscape:cy="16.135593"
+     inkscape:window-x="269"
+     inkscape:window-y="194"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <path
+     style="fill:#ffffff;stroke:#989898;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:0.60000002;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;fill-opacity:1"
+     d="M 1.4915254,5.3559322 C 1.4237288,12.474576 1.3559322,12.542373 1.3559322,12.542373 l 1.220339,1.084746 8.7457628,0 1.220339,-0.949153 L 12.40678,5.3559322 8.4067797,5.4237288 6.440678,3.4576271 l -2.9830509,0 -1.9661017,1.8983051 z"
+     id="path2842" />
+  <text
+     xml:space="preserve"
+     style="font-size:8.89303493000000067px;font-style:normal;font-weight:normal;fill:#8c8c8c;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;stroke-opacity:0.60000001999999997"
+     x="8.5587244"
+     y="7.1506662"
+     id="text2818"
+     inkscape:export-filename="/home/kdvolder/Desktop/gradle-nature.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90"
+     transform="scale(1.0307827,0.97013659)"><tspan
+       sodipodi:role="line"
+       id="tspan2820"
+       x="8.5587244"
+       y="7.1506662"
+       style="font-weight:bold;fill:#8c8c8c;fill-opacity:1;stroke:none;stroke-opacity:0.60000001999999997">G</tspan></text>
+  <path
+     style="fill:#ffffff;stroke:#959595;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0.90000000000000002;fill-opacity:1"
+     d="m 1.9661017,13.084746 4.5423729,-4.5423731 8.9491524,-0.1355932 -0.0678,1.0169491 -4,4.2711862 -8.6779666,-0.0678 -0.7457627,-0.542373 z"
+     id="path2844" />
+</svg>
