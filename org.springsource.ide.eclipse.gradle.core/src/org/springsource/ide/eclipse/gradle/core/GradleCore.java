@@ -24,10 +24,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleAPIProperties;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -39,6 +42,7 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 public class GradleCore extends Plugin {
 
 	public static final String PLUGIN_ID = "org.springsource.ide.eclipse.gradle.core";
+	public static final String OLD_PLUGIN_ID = "com.springsource.sts.gradle.core";
 
 	private static BundleContext context;
 
@@ -91,6 +95,12 @@ public class GradleCore extends Plugin {
 		log(ExceptionUtil.coreException(msg));
 	}
 	
+	private static void logInfo(String msg) {
+		log(new Status(IStatus.INFO, GradleCore.PLUGIN_ID, msg));
+	}
+
+	
+	
 	public static GradleCore getInstance() {
 		return instance;
 	}
@@ -112,9 +122,29 @@ public class GradleCore extends Plugin {
 	
 	public GradlePreferences getPreferences() {
 		if (gradlePreferences==null) {
-			gradlePreferences = new GradlePreferences(new InstanceScope().getNode(PLUGIN_ID));
+			migrateLegacyPreferences(OLD_PLUGIN_ID, PLUGIN_ID);
+			gradlePreferences = new GradlePreferences(InstanceScope.INSTANCE.getNode(PLUGIN_ID));
 		}
 		return gradlePreferences;
+	}
+
+	private void migrateLegacyPreferences(String oldPluginId, String pluginId) {
+		IEclipsePreferences oldPrefs = InstanceScope.INSTANCE.getNode(OLD_PLUGIN_ID);
+		IEclipsePreferences newPrefs = InstanceScope.INSTANCE.getNode(PLUGIN_ID);
+		boolean needsMigration = newPrefs.getBoolean("needsMigration", true);
+		if (needsMigration) {
+			try {
+				for (String oldKey : oldPrefs.keys()) {
+					String newKey = oldKey.replace(OLD_PLUGIN_ID, PLUGIN_ID);
+					newPrefs.put(newKey, oldPrefs.get(oldKey, null));
+				}
+				newPrefs.putBoolean("needsMigration", false); //We done the migration.
+				newPrefs.flush(); //Make sure all the new copied prefs are stored.
+				GradleCore.logInfo("Gradle workspace preferences migrated to 3.0.0 format");
+			} catch (BackingStoreException e) {
+				GradleCore.log(e);
+			}
+		}
 	}
 
 	public static GradleProject create(IProject project) {
