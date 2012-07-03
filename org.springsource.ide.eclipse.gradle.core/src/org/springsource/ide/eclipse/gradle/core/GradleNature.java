@@ -13,19 +13,21 @@ package org.springsource.ide.eclipse.gradle.core;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
+import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
 
+import org.springsource.ide.eclipse.commons.frameworks.core.legacyconversion.IConversionConstants;
 
 /**
  * @author Kris De Volder
  */
 public class GradleNature implements IProjectNature {
 	
-	public static final boolean DEBUG = GlobalSettings.DEBUG && true;
+	public static final boolean DEBUG = false;
 	static {
 		if (DEBUG) {
 			System.out.println("Class is initialized: "+GradleNature.class.getName());
@@ -33,6 +35,7 @@ public class GradleNature implements IProjectNature {
 	}
 	
 	public static final String NATURE_ID = "org.springsource.ide.eclipse.gradle.core.nature";
+	public static final String OLD_NATURE_ID = IConversionConstants.GRADLE_OLD_NATURE;
 	
 	private IJavaProject project;
 	

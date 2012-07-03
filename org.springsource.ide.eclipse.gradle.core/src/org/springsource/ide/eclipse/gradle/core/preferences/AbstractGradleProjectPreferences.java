@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -43,48 +44,45 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperation
  */
 public abstract class AbstractGradleProjectPreferences extends AbstractGradlePreferences {
 
+	private static final String OLD_PREFIX = "com.springsource.sts.gradle"; //all names used before 3.0.0 containing this
+	private static final String NEW_PREFIX = "org.springsource.ide.eclipse.gradle"; //have been replaced by this.
+	
 	private GradleProject project;
+	private File legacyPropertiesFile; //points to file where it would be in pre 3.0.0 style package and bundle names.
 	private File propertiesFile;
 	private Properties properties;
 
 	protected AbstractGradleProjectPreferences(GradleProject project, String nodeId) {
-		moveLegacyPrefs(project, nodeId);
 		this.project = project;
 		this.propertiesFile = computePropertyFile(project, nodeId);
+		this.legacyPropertiesFile = computePropertyFile(project, nodeId.replace(NEW_PREFIX, OLD_PREFIX));
 	}
 
-	private static void moveLegacyPrefs(GradleProject project, String nodeId) {
-		try {
-			File legacyFile = computeLegacyPropertyFile(project, nodeId);
-			if (legacyFile.exists()) {
-				File newFile = computePropertyFile(project, nodeId);
-				if (newFile.exists()) {
-					legacyFile.delete();
-				} else {
-					File parent = newFile.getParentFile();
-					if (!parent.exists()) {
-						parent.mkdirs();
-					}
-					legacyFile.renameTo(newFile);
-				}
-			}
-		} catch (Exception e) {
-			GradleCore.log(e);
-		}
-	}
+//	private static void moveLegacyPrefs(GradleProject project, String nodeId) {
+//		try {
+//			File legacyFile = computeLegacyPropertyFile(project, nodeId);
+//			if (legacyFile.exists()) {
+//				File newFile = computePropertyFile(project, nodeId);
+//				if (newFile.exists()) {
+//					legacyFile.delete();
+//				} else {
+//					File parent = newFile.getParentFile();
+//					if (!parent.exists()) {
+//						parent.mkdirs();
+//					}
+//					legacyFile.renameTo(newFile);
+//				}
+//			}
+//		} catch (Exception e) {
+//			GradleCore.log(e);
+//		}
+//	}
 	
 	/**
 	 * Computes the location of the properties file where preferences are stored
 	 */
 	private static File computePropertyFile(GradleProject project, String nodeId) {
 		return new File(project.getLocation(), ".settings/gradle/"+nodeId+".prefs");
-	}
-	
-	/**
-	 * Computes the location of the properties file where preferences *used* to be stored
-	 */
-	private static File computeLegacyPropertyFile(GradleProject project, String nodeId) {
-		return new File(project.getLocation(), ".settings/"+nodeId+".prefs");
 	}
 	
 	public GradleProject getGradleProject() {
@@ -104,21 +102,34 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 		if (properties==null) {
 			properties = new Properties();
 			if (propertiesFile.exists()) {
-				FileInputStream in = null;
-				try {
-					in = new FileInputStream(propertiesFile);
-					properties.load(in);
-				} catch (IOException e) {
-					GradleCore.log(e);
-				} finally {
-					try {
-						if (in!=null) { in.close(); }
-					} catch (IOException e) {
-					}
+				loadProps(properties, propertiesFile);
+			} else if (legacyPropertiesFile.exists()) {
+				//Note: though we read the properties in the old location... we don't write them out into the new location
+				//until there's a change.
+				Properties legacyProps = new Properties();
+				loadProps(legacyProps, legacyPropertiesFile);
+				for (Object keyObj : legacyProps.keySet()) {
+					String key = (String)keyObj;
+					properties.put(key.replace(OLD_PREFIX, NEW_PREFIX), legacyProps.get(key));
 				}
 			}
 		}
 		return properties;
+	}
+
+	private static void loadProps(Properties properties, File propertiesFile) {
+		FileInputStream in = null;
+		try {
+			in = new FileInputStream(propertiesFile);
+			properties.load(in);
+		} catch (IOException e) {
+			GradleCore.log(e);
+		} finally {
+			try {
+				if (in!=null) { in.close(); }
+			} catch (IOException e) {
+			}
+		}
 	}
 
 	@Override

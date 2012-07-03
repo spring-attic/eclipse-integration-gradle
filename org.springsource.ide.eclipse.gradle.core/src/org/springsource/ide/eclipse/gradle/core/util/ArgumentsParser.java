@@ -19,9 +19,6 @@ import java.util.List;
  * be an idiosynchracy of Eclipse's JAva runtime implementation on Windows. The Gradle API doesn't require this kind
  * of special treatment based on platform. (or does it?)
  * 
- * TODO: once we have good test coverage for this class (100% would be nice), replace it with our own implementation
- * so that we can avoid IP issues on open sourcing this code.
- * 
  * @author Kris De Volder
  */
 public class ArgumentsParser {

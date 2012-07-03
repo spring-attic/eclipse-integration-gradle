@@ -22,7 +22,7 @@
          version="0.0.0"/>
 
    <requires>
-      <import plugin="org.springsource.ide.eclipse.dashboard.ui"/>
+      <import feature="org.springsource.ide.eclipse.commons" version="3.0.0.201207032116-CI-B108" match="greaterOrEqual"/>
    </requires>
 
    <plugin

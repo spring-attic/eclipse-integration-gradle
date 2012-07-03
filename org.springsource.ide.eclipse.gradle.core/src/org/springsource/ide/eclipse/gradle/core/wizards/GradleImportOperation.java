@@ -38,6 +38,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.ui.IWorkingSet;
@@ -213,12 +215,12 @@ public class GradleImportOperation {
 		final boolean haveWorkingSets = workingSets.length>0 || quickWorkingSetName!=null;
 		//This provisional implementation just creates a linked project pointing to wherever the root folder
 		// is pointing to.
-		int totalWork = 6;
+		int totalWork = 8;
 		if (addResourceFilters) { 
-			totalWork++; //7
+			totalWork++; //9
 		}
 		if (haveWorkingSets) {
-			totalWork++; //8
+			totalWork++; //10
 		}
 		monitor.beginTask("Import "+projectModel.getName(), totalWork);
 		try {
@@ -255,15 +257,35 @@ public class GradleImportOperation {
 				project.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
 			} else {
 				project.open(new SubProgressMonitor(monitor, 1));
-			} 
+			}
 			
 			//6..7
+			if (project.hasNature(GradleNature.OLD_NATURE_ID)) {
+				// project needs migration (i.e. remove old nature and classpath container entries)
+				NatureUtils.remove(project, GradleNature.OLD_NATURE_ID,  new SubProgressMonitor(monitor, 1));
+				IJavaProject javaproject = gProj.getJavaProject();
+				IClasspathEntry[] oldEntries = javaproject.getRawClasspath();
+				List<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>(oldEntries.length);
+				for (IClasspathEntry e : oldEntries) {
+					boolean remove = e.getEntryKind()==IClasspathEntry.CPE_CONTAINER &&
+							e.getPath().toString().startsWith("com.springsource.sts.gradle");
+					if (!remove) {
+						newEntries.add(e);
+					}
+				}
+				javaproject.setRawClasspath(newEntries.toArray(new IClasspathEntry[newEntries.size()]), true, new SubProgressMonitor(monitor, 1));
+			} else {
+				monitor.worked(2);
+			}	
+			
+			//8..9
 			boolean generateOnly = !getEnableDependencyManagement();
 			if (generateOnly) {
 				try {
-					NatureUtils.ensure(gProj.getProject(), new SubProgressMonitor(monitor, 1), 
-							GradleNature.NATURE_ID,
-							JavaCore.NATURE_ID);
+					NatureUtils.ensure(project, new SubProgressMonitor(monitor, 1), 
+								GradleNature.NATURE_ID, //Must be first to make gradle project icon have gradle nature showing 
+								JavaCore.NATURE_ID
+					);
 					DSLDSupport.maybeAdd(gProj, eh, new SubProgressMonitor(monitor, 1));
 				} catch (CoreException e) {
 					eh.handleError(e);
@@ -272,7 +294,7 @@ public class GradleImportOperation {
 				gProj.convertToGradleProject(projectMapper, eh, new SubProgressMonitor(monitor, 2));
 			}
 			
-			//8
+			//10
 			if (haveWorkingSets) {
 				addToWorkingSets(project, new SubProgressMonitor(monitor, 1));
 			}
