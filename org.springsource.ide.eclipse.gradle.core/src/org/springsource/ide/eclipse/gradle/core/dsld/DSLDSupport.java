@@ -63,7 +63,7 @@ public class DSLDSupport {
 				} catch (CoreException e) {
 					//Treat as 'less' severe error
 					//DSLD support is not crucial for correct operation, so handle error and continue
-					eh.handleError(e);
+					eh.handle(e.getStatus().getSeverity(), e);
 				}
 			}
 		} finally {
@@ -150,7 +150,7 @@ public class DSLDSupport {
 	private IStatus verifyPrereqsForEnablement(IProject project) throws CoreException {
 		boolean isAspectJ = project.hasNature(ASPECTJ_NATURE);
 		if (isAspectJ) {
-			return ExceptionUtil.status(
+			return ExceptionUtil.status(IStatus.WARNING,
 					"DSLD support can't be enabled.\n" +
 					"Reason: Project '"+project.getName()+"' is an AspectJ project.\n" +
 					"Greclipse does not support adding Groovy natures/builders to AspectJ projects.\n");

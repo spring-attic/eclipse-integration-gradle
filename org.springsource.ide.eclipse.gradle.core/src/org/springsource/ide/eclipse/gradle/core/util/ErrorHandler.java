@@ -122,6 +122,11 @@ public abstract class ErrorHandler {
 					IStatus status = new MultiStatus(GradleCore.PLUGIN_ID, 666, children, msg.toString(), null);
 					throw new CoreException(status);
 				}
+			} else if (recorded.size()>0) {
+				//no errors but has some recorded stuff. Log this stuff to the error log rather than simply discarding it.
+				for (IStatus e : recorded) {
+					GradleCore.log(e);
+				}
 			}
 		}
 		
@@ -221,5 +226,5 @@ public abstract class ErrorHandler {
 	public static ErrorHandler forEnableDisableDSLD() {
 		return new LogToEclipseErrorLog();
 	}
-	
+
 }
