@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 
 /**
  * This save participant maintains a per-project key value store. The keys are Strings and the
@@ -49,7 +50,7 @@ public class GradleSaveParticipant implements ISaveParticipant {
 		private static final long serialVersionUID = 1L;
 	}
 
-	private static final boolean DEBUG = true;//(""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; // (""+Platform.getLocation()).contains("kdvolder");
 
 	private static GradleSaveParticipant instance;
 	
