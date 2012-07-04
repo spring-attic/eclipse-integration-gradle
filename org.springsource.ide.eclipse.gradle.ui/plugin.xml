@@ -10,9 +10,14 @@
              id="org.springsource.ide.eclipse.gradle.ui.convertToGradle">
 		<enablement>
    					<not>
-	       				<test forcePluginActivation="true"
-   		   					property="org.eclipse.core.resources.projectNature" 
-   		   					value="org.springsource.ide.eclipse.gradle.core.nature" />
+	       				<or>
+	       					<test forcePluginActivation="true"
+   		   					   property="org.eclipse.core.resources.projectNature" 
+   		   					   value="org.springsource.ide.eclipse.gradle.core.nature" />
+	       					<test forcePluginActivation="true"
+   		   					   property="org.eclipse.core.resources.projectNature" 
+   		   					   value="com.springsource.sts.gradle.core.nature" />
+   		   				</or>
 		   			</not>
          </enablement>
          <action
