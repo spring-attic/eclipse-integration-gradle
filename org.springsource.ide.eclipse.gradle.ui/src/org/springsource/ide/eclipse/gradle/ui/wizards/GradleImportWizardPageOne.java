@@ -350,10 +350,8 @@ public class GradleImportWizardPageOne extends WizardPage {
 		setMessage(null, IStatus.WARNING);
 		if (!isTreePopulated) {
 			setErrorMessage("You must click 'Build Model' before you can select projects to import");
-			setPageComplete(false);
 		} else if (!hasSelectedProjects()) {
 			setErrorMessage("At least one project must be selected to import");
-			setPageComplete(false);
 		} else {
 			try {
 				updateProjectMapping();
@@ -379,7 +377,7 @@ public class GradleImportWizardPageOne extends WizardPage {
 				setMessage("Dependency management is disabled so you probably want to enable running the 'eclipse' task before import to configure the classpath.", IStatus.WARNING);
 			}
 		}
-		setPageComplete(operation!=null);
+		setPageComplete(getErrorMessage()==null);
 	}
 
 	private String getRootProjectName() {
