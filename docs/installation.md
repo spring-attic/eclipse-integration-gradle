@@ -28,8 +28,7 @@ Installation instructions:
 
 The easiest way to install is from the STS Dashboard "Extensions" page.
 
-  1. First download and install a recent release of STS (3.0.0.M2 or later).
-  2. Open STS and in the dashboard click on the "Extensions" tab.
+  1. First download and install a recent release of STS or Groovy and Grails Toolsuite (GGTS) version 3.0.0.M3 or later.
   3. Search for "Gradle" or "Groovy" depending on what you are installing, select it and click "Install".
   4. Review the list of software that will be installed and click "Next".
   5. Review and accept licence agreements and click "Finish".
@@ -47,7 +46,7 @@ sites are available:
 to follow the instructions given below to use an Eclipse update site.
 
 **Note:** presently (while STS 3.0.0 is still under development), only snapshot and milestone update sites contain versions 
-that are compatible with STS 3.0.0.M2 or later. Once 3.0.0 is released, the release site will also contain a 3.0.0 compatible 
+that are compatible with STS 3.0.0.M3 or later. Once 3.0.0 is released, the release site will also contain a 3.0.0 compatible 
 release.
 
 **If you are installing into STS** one of these update sites will be
@@ -62,7 +61,7 @@ sufficient.
   * For eclipse 4.2:
      * STS Release: http://dist.springsource.com/release/TOOLS/update/e4.2/ (this site will only contain a compatible version after 3.0.0 release!)
      * Milestone: http://dist.springsource.com/milestone/TOOLS/update/e4.2/
-     * Nightly: http://dist.springsource.com/snapshot/TOOLS/nightly/e4.1/
+     * Nightly: http://dist.springsource.com/snapshot/TOOLS/nightly/e4.2/
      
 ####Detailed instructions: 
 
