@@ -10,5 +10,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.6.4.jar" sourcepath="lib/slf4j-api-1.6.4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar" sourcepath="lib/commons-collections-3.2.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gradle-base-services-1.0.jar"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -9,53 +9,37 @@
     <version>3.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>org.springsource.ide.eclipse.gradle.core.test</artifactId>
+  
   <packaging>eclipse-test-plugin</packaging>
   <properties>
-	<test.class>org.springsource.ide.eclipse.gradle.core.test.AllGradleCoreTests</test.class>
+    <test.class>org.springsource.ide.eclipse.gradle.core.test.AllGradleCoreTests</test.class>
+    <test.useUIThread>true</test.useUIThread>
   </properties>
-  <build>
-	<plugins>
-<!-- 	  <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-antrun-plugin</artifactId>
-		<version>1.6</version>
-		<executions>
-		  <execution>
-			<id>prepare-tests</id>
-			<phase>pre-integration-test</phase>
-			<configuration>
-			  <target>
-				<ant antfile="../common/build.xml" target="prepare-tests">
-				</ant>
-			  </target>
-			</configuration>
-			<goals>
-			  <goal>run</goal>
-			</goals>
-		  </execution>
-		</executions>
-	  </plugin> -->
-	  <plugin>
-		<groupId>org.eclipse.tycho</groupId>
-		<artifactId>tycho-surefire-plugin</artifactId>
-		<version>${tycho-version}</version>
-		<configuration>
-		  <optionalDependencies>require</optionalDependencies>
-		  <dependencies>
- 			<dependency>
-			  <type>p2-installable-unit</type>
-			  <artifactId>${groovy.compiler.feature}</artifactId>
-			  <version>0.0.0</version>
-			</dependency>
-<!--  			<dependency>
-			  <type>p2-installable-unit</type>
-			  <artifactId>org.eclipse.jst.web_core.feature.feature.group</artifactId>
-			  <version>0.0.0</version>
-			</dependency> 
- -->
-		  </dependencies> 
-		</configuration>
-	  </plugin>
-	</plugins>
-  </build>
+  <profiles>
+    <profile>
+      <id>heartbeat</id>
+      <properties>
+        <test.skip>true</test.skip>
+      </properties>
+    </profile>
+  </profiles>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+						<id>second-generate-p2-metadata</id>
+						<goals>
+							<goal>p2-metadata</goal>
+						</goals>
+						<phase>verify</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
