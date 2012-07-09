@@ -11,7 +11,10 @@
  *     VMware, Inc. - initial API and implementation
  *******************************************************************************/
 -->
-<site>
+<site pack200="true">
+	
+   <category-def name="Extensions / Gradle Integration" label="Extensions / Gradle Integration"/>
+   
    <!-- Optional add ons for the Gradle tooling -->
    <feature
       url="org.springframework.ide.eclipse.uaa.feature_3.0.0.qualifier.jar"
@@ -25,11 +28,13 @@
    </feature>
    
    <!-- gradle -->
-   <feature url="features/org.springsource.ide.eclipse.gradle.feature_0.0.0.jar" id="org.springsource.ide.eclipse.gradle.feature" version="0.0.0">
+   <feature url="features/org.springsource.ide.eclipse.gradle.feature_0.0.0.jar" 
+   	  id="org.springsource.ide.eclipse.gradle.feature" version="0.0.0">
       <category name="Extensions / Gradle Integration"/>
    </feature>
-   <feature url="features/org.gradle.toolingapi.feature_0.0.0.jar" id="org.gradle.toolingapi.feature" version="0.0.0">
+   <feature url="features/org.gradle.toolingapi.feature_0.0.0.jar" 
+      id="org.gradle.toolingapi.feature" version="0.0.0">
       <category name="Extensions / Gradle Integration"/>
    </feature>
-   <category-def name="Extensions / Gradle Integration" label="Extensions / Gradle Integration"/>
+
 </site>
