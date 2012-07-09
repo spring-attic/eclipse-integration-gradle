@@ -538,7 +538,7 @@
 						<testSuite>${project.artifactId}</testSuite>
 						<testClass>${test.class}</testClass>
 						<argLine>
-							-Xmx1024m -XX:MaxPermSize=256m -Djava.io.tmpdir=${project.build.directory} -Duser.home=${project.build.directory} ${test.vmargs}
+							-Xmx1024m -XX:MaxPermSize=256m -Djava.io.tmpdir=${project.build.directory} -Dcom.springsource.sts.tests.cache=/opt/bamboo-home/.sts-tests -Duser.home=${project.build.directory} ${test.vmargs}
 						</argLine>
 						<appArgLine>
 							-eclipse.keyring ${project.build.directory}/keystore -eclipse.password ${project.build.directory}/keystore.password
