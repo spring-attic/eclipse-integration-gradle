@@ -56,7 +56,14 @@
 
 								<property name="dist.file.name" value="${dist.project}-${dist.full.version}-updatesite.zip" />
 								<property name="dist.full.path" value="${site.target.dir}/site/${dist.file.name}" />
-
+								
+								<!-- BEG debug code -->
+								<tstamp>
+    								<format property="TIMEOFDAY" pattern="kk:mm:ss"/>
+  								</tstamp>
+								<echo message="Time = ${TIMEOFDAY}"/>
+								<!-- END debug code -->
+								
 								<delete file="${dist.full.path}" />
 								<zip zipfile="${dist.full.path}" filesonly="true">
 									<zipfileset dir="${site.target.dir}/site">
