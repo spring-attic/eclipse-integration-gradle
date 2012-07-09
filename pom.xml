@@ -17,12 +17,13 @@
 	</scm>
 
 	<modules>
-		<module>org.springsource.ide.eclipse.gradle.core</module>
-		<module>org.springsource.ide.eclipse.gradle.ui</module>
-		<module>org.springsource.ide.eclipse.gradle.ui.taskview</module>
 		<module>org.springsource.ide.eclipse.gradle.feature</module>
 		<module>org.gradle.toolingapi.feature</module>
 		<module>org.springsource.ide.eclipse.gradle.site</module>
+		
+		<module>org.springsource.ide.eclipse.gradle.core</module>
+		<module>org.springsource.ide.eclipse.gradle.ui</module>
+		<module>org.springsource.ide.eclipse.gradle.ui.taskview</module>
 		<module>org.springsource.ide.eclipse.gradle.core.test</module>
 	</modules>
 
