@@ -96,7 +96,7 @@ Open the 'Gradle Tasks' View (via Window >> Show View menu).
 
 You can also do this on the commandline:
     
-    cd org.springsource.ide.eclipse.gradle.core/lib
+    cd org.springsource.ide.eclipse.gradle.core/
     ./gradlew updateLibs
 
 If you do this on the commandline you will need to manually refresh the `org.springsource.ide.eclipse.gradle.core` project in the Eclipse workspace afterwards. If you use the 'Gradle Tasks View' then the refresh is automatic.
