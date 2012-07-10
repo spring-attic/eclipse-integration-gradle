@@ -55,6 +55,7 @@
 		<p2.qualifier>SNAPSHOT</p2.qualifier>
 		<p2.sign>false</p2.sign>
 		<p2.repository.name>Gradle Integration for Eclipse</p2.repository.name>
+		<groovy.compiler.feature>org.codehaus.groovy17.feature.feature.group</groovy.compiler.feature>
 
 		<!-- Signing -->
 		<signing.skip>true</signing.skip>
@@ -549,13 +550,18 @@
 						</environmentVariables>
 <!--  						<product>org.springsource.ide.eclipse</product>
 						<application>org.eclipse.ui.ide.workbench</application> -->
-<!-- 						<dependencies>
-							<dependency>
+						<dependencies>
+				 			<dependency>
+							  <type>p2-installable-unit</type>
+							  <artifactId>${groovy.compiler.feature}</artifactId>
+							  <version>0.0.0</version>
+							</dependency>
+<!-- 							<dependency>
 								<type>p2-installable-unit</type>
 								<artifactId>org.eclipse.equinox.weaving.sdk.feature.group</artifactId>
 								<version>0.0.0</version>
-							</dependency>
-						</dependencies> -->
+							</dependency> -->
+						</dependencies>
 						<explodedBundles>
 							<explodedBundle>org.codehaus.groovy</explodedBundle>
 							<explodedBundle>org.codehaus.groovy.eclipse.tests</explodedBundle>
