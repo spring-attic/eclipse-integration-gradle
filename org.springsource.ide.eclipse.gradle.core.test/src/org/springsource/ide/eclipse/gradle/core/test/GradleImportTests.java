@@ -257,22 +257,11 @@ public class GradleImportTests extends GradleTest {
 	public void testImportSpringSecurity() throws Exception {
 		setSnapshotDistro();
 		GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-security", 
-				new URI("git://git.springsource.org/spring-security/spring-security.git"),
-				"359bd7c46")
+				new URI("git://github.com/SpringSource/spring-security.git"),
+				"f46a5bab40ad565c30b632608a69060dcee15522")
 		);
 		
 		importOp.setDoBeforeTasks(true);
-		importOp.excludeProjects(
-				//Don't have eclipse tasks... if imported, we will hit
-				//hit http://issues.gradle.org/browse/GRADLE-1792
-				//and the test will fail.
-				"itest-context", 
-				"itest-web", 
-				"manual", 
-				"docs", 
-				"faq", 
-				"spring-security"
-		);
 		
 		performImport(importOp,
 				//Ignore errors: (expected!)
@@ -280,35 +269,40 @@ public class GradleImportTests extends GradleTest {
 				"Project 'spring-security-samples-aspectj' is an AspectJ project"
 		);
 		
-//		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-//		for (IProject proj : projects) {
-//			System.out.println(proj);
-//		}
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		for (IProject proj : projects) {
+			System.out.println("\""+proj+"\","); //print out in a format convenient to copy paste below
+		}
 		
 		assertProjects(
-				//All have eclipse tasks
-				"spring-security-acl", 
-				"spring-security-aspects", 
-				"spring-security-cas", 
-				"spring-security-config", 
-				"spring-security-core", 
-				"spring-security-crypto", 
-				"spring-security-ldap", 
-				"spring-security-openid", 
-				"spring-security-remoting", 
-				"spring-security-samples-aspectj", 
-				"spring-security-samples-cassample", 
-				"spring-security-samples-casserver", 
-				"spring-security-samples-contacts", 
-				"spring-security-samples-dms", 
-				"spring-security-samples-gae", 
-				"spring-security-samples-jaas", 
-				"spring-security-samples-ldap", 
-				"spring-security-samples-openid", 
-				"spring-security-samples-preauth", 
-				"spring-security-samples-tutorial", 
-				"spring-security-taglibs", 
-				"spring-security-web"
+				"P/docs",
+				"P/faq",
+				"P/itest-context",
+				"P/itest-web",
+				"P/manual",
+				"P/spring-security",
+				"P/spring-security-acl",
+				"P/spring-security-aspects",
+				"P/spring-security-cas",
+				"P/spring-security-config",
+				"P/spring-security-core",
+				"P/spring-security-crypto",
+				"P/spring-security-ldap",
+				"P/spring-security-openid",
+				"P/spring-security-remoting",
+				"P/spring-security-samples-aspectj",
+				"P/spring-security-samples-cassample",
+				"P/spring-security-samples-casserver",
+				"P/spring-security-samples-contacts",
+				"P/spring-security-samples-dms",
+				"P/spring-security-samples-gae",
+				"P/spring-security-samples-jaas",
+				"P/spring-security-samples-ldap",
+				"P/spring-security-samples-openid",
+				"P/spring-security-samples-preauth",
+				"P/spring-security-samples-tutorial",
+				"P/spring-security-taglibs",
+				"P/spring-security-web"
 		);
 		
 		assertTrue(WTPUtil.isWTPProject(getProject("spring-security-samples-jaas")));
