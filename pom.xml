@@ -94,7 +94,7 @@
 		<test.useUIThread>true</test.useUIThread>
 		<test.skip>${maven.test.skip}</test.skip>
 
-		<tycho-version>0.14.1</tycho-version>
+		<tycho-version>0.15.0</tycho-version>
 
 <!-- 		<maven.test.error.ignore>true</maven.test.error.ignore>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore> -->
@@ -159,10 +159,16 @@
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/eclipse/updates/4.2/</url>
 				</repository>
-				<repository>
+				<!-- this makes not much sense, but without the 'indigo' site  tycho can't find the 'SWT fragment bundles' -->
+				<!--  <repository> 
 					<id>indigo</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/releases/indigo/</url>
+				</repository> -->
+				<repository>
+					<id>juno</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/juno/</url>
 				</repository>
 				<repository>
 					<id>swtbot</id>
