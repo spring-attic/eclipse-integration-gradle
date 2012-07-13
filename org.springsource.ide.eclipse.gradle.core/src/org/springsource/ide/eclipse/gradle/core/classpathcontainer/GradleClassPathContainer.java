@@ -221,10 +221,16 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		List<IClasspathAttribute> extraAttributes = new ArrayList<IClasspathAttribute>();
 		File javaDoc = gEntry.getJavadoc();
 		if (javaDoc!=null) {
-			IClasspathAttribute javaDocAttribute = new ClasspathAttribute(
-					IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, 
-					javaDoc.toURI().toString()
-					);
+			//Example of what it looks like in the eclipse .classpath file:
+			//<attributes>
+			//  <attribute name="javadoc_location" value="jar:file:/tmp/workspace/repos/test-with-jdoc-1.0-javadoc.jar!/"/>
+			//</attributes>
+			String jdoc = javaDoc.toURI().toString();
+			if (!javaDoc.isDirectory()) {
+				//Assume its a jar or zip containing the docs
+				jdoc = "jar:"+jdoc+"!/";
+			}
+			IClasspathAttribute javaDocAttribute = new ClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, jdoc);
 			extraAttributes.add(javaDocAttribute);
 		}
 		
