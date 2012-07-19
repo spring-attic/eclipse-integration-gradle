@@ -20,8 +20,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
 import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
 
-import org.springsource.ide.eclipse.commons.frameworks.core.legacyconversion.IConversionConstants;
-
 /**
  * @author Kris De Volder
  */
@@ -35,7 +33,7 @@ public class GradleNature implements IProjectNature {
 	}
 	
 	public static final String NATURE_ID = "org.springsource.ide.eclipse.gradle.core.nature";
-	public static final String OLD_NATURE_ID = IConversionConstants.GRADLE_OLD_NATURE;
+	public static final String OLD_NATURE_ID = "com.springsource.sts.gradle.core.nature";
 	
 	private IJavaProject project;
 	

@@ -20,8 +20,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jem.util;resolution:=optional,
  org.eclipse.jdt.groovy.core;bundle-version="2.6.1";resolution:=optional,
  org.codehaus.groovy;resolution:=optional,
- org.apache.commons.io,
- org.springsource.ide.eclipse.commons.frameworks.core;bundle-version="3.0.0.201207032116-CI-B108"
+ org.apache.commons.io
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
