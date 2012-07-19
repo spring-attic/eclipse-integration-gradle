@@ -13,12 +13,8 @@ package org.springsource.ide.eclipse.gradle.core;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
-import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
 
 /**
  * @author Kris De Volder
