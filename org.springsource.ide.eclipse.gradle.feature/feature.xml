@@ -21,10 +21,6 @@
          id="org.gradle.toolingapi.feature"
          version="0.0.0"/>
 
-   <requires>
-      <import feature="org.springsource.ide.eclipse.commons" version="3.0.0.201207032116-CI-B108" match="greaterOrEqual"/>
-   </requires>
-
    <plugin
          id="org.springsource.ide.eclipse.gradle.core"
          download-size="0"
