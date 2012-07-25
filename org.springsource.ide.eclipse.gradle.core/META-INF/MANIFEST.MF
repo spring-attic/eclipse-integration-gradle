@@ -46,3 +46,4 @@ Export-Package: org.gradle.tooling.model,
  org.springsource.ide.eclipse.gradle.core.wizards,
  org.springsource.ide.eclipse.gradle.core.wtp
 Bundle-Vendor: SpringSource
+Eclipse-BundleShape: dir
