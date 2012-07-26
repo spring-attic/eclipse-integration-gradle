@@ -122,6 +122,15 @@ public class GradleDSLDTests extends GradleTest {
 				"        /*!MAR:RH!*/mavenLocal/*!*/()\n" + 
 				"        /*!MAR:RH!*/mavenCentral/*!*/()\n" + 
 				"    }\n" + 
+				"}\n" +
+				"\n" +
+				"task goodbye {\n" +
+				"	/*!T:T!*/doLast/*!*/ {\n" +
+				"		println 'Bye'\n"+
+				"	}\n" +
+				"}\n" +
+				"/*!T:P!*/task/*!*/ hello {\n" +
+				"   /*!T:T!*/dependsOn(goodbye)/*!*/\n"+
 				"}\n");
 
 		IJavaProject javaProject = simpleProject("scaffold", workload.getContents());

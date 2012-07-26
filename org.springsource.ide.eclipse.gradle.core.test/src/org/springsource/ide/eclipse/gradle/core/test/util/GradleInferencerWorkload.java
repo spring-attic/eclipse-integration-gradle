@@ -24,6 +24,7 @@ public class GradleInferencerWorkload extends InferencerWorkload {
 	public GradleInferencerWorkload(String workloadDefinition) throws Exception {
 		super(workloadDefinition, 
 				"P",						"org.gradle.api.Project",
+				"T",						"org.gradle.api.Task",
 				"MAR", 						"org.gradle.api.artifacts.repositories.MavenArtifactRepository",
 				"RH",						"org.gradle.api.artifacts.dsl.RepositoryHandler");
 	}
