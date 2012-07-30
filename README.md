@@ -7,26 +7,53 @@ It comes with Spring UAA (User Agent Analysis), an optional component that help 
 
 It also comes with the SpringSource Dashboard as an optional component, which brings you up-to-date information about SpringSource-related projects as well as an easy-to-use extension install to get additional tooling add-ons, like the tc Server Integration for Eclipse, the Cloud Foundry Integration for Eclipse, Grails IDE and Groovy Eclipse.
 
-Installation (Release)
-----------------------
+Requirements (for version 3.0.0 of the Gradle tooling)
+------------------------------------------------------
 
-There is no release published yet. Once we have a release out, you will be able to install it from a release update site or from the SpringSource 
-Dashboard.
+Either one of the following:
 
-## Installation (Milestone)
+ * An instance of STS 3.0.0 or later based on Eclipse 3.7 or 4.2.
+ * An instance of Eclipse 3.7.2 or later. (Earlier versions of Eclipse such as Eclipse 3.6 probably also work but have not been   
+   tested).
 
-There is no milestone of available yet. Once a milestone is available it will be published on a milestone update site.
+If you want support for editing .gradle files a compatible Groovy Eclipse installation is 
+required. STS 3.0.0 requires Groovy Eclipse 2.7.0. The Gradle tooling should be usable without Groovy Eclipse, 
+but some functionality (related to editing gradle files) will not work.
 
-## Installation (CI builds)
+Installation instructions:
+--------------------------
 
-If you want to live on the leading egde, you can already install up-to-date continuous integration buids from this update site:
+### Installing from the STS dashboard:
 
-    http://dist.springsource.com/snapshot/TOOLS/gradle/nightly
-    
-But take care, those builds could be broken from time to time and might contain non-ship-ready
-features that might never appear in the milestone or release builds.
+The easiest way to install is from the STS Dashboard "Extensions" page.
+
+  1. First download and install a recent release of STS or Groovy and Grails Toolsuite (GGTS) version 3.0.0 or later.
+  3. Search for "Gradle" or "Groovy" depending on what you are installing, select it and click "Install".
+  4. Review the list of software that will be installed and click "Next".
+  5. Review and accept licence agreements and click "Finish".
+
+###Installing Gradle Tooling from update site
+
+Alternatively you can install from update sites. The following update
+sites are available:
+
+  * http://dist.springsource.com/snapshot/TOOLS/gradle/nightly (latest development snapshot)
+  * http://dist.springsource.com/milestone/TOOLS/gradle (latest milestone build)
+  * http://dist.springsource.com/release/TOOLS/gradle (latest release)
   
-The contents of the update site is tested to be compatible with both Eclipse 3.7 and Eclipse 4.2 and requires a Java 6 JDK.
+Pasting the above URLs into a web browser will not work. You need
+to follow the instructions given below to use an Eclipse update site.
+
+ 1. Open **Help >> Install New Software**
+ 2. Paste a Gradle update site link into the "Work with" text box.
+ 3. Ensure that the option "Group Items by Category" is enabled.
+ 4. Select the top-level node 'Extensions / Gradle Integration'. 
+ 5. Click "Next".
+ 6. Review the list of software that will be installed. Click "Next" again.
+ 7. Review and accept licence agreements and Click "Finish".
+
+Note that if you follow this installation procedure in a plain Eclipse, this will install the STS Dashboard.
+This gives you an easy way to subsequently install Groovy Eclipse as well. See instructions on 'Installing from the STS Dashboard' above. 
 
 ## Questions and bug reports:
 
