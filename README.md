@@ -23,7 +23,7 @@ but some functionality (related to editing gradle files) will not work.
 Installation instructions:
 --------------------------
 
-### <a id=#install-from-dash></a>Installing from the STS dashboard:
+### Installing from the STS dashboard:
 
 The easiest way to install is from the STS Dashboard "Extensions" page.
 
@@ -56,7 +56,7 @@ to follow the instructions given below to use an Eclipse update site.
 
 If you follow this installation procedure in a plain Eclipse, this will install the STS Dashboard.
 This gives you an easy way to subsequently install Groovy Eclipse as well. See instructions on 
-[Installing from the STS Dashboard](#install-from-dash) above. 
+[Installing from the STS Dashboard](#installing-from-the-sts-dashboard) above. 
 
 ## Questions and bug reports:
 
