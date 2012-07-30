@@ -23,11 +23,13 @@ but some functionality (related to editing gradle files) will not work.
 Installation instructions:
 --------------------------
 
-### Installing from the STS dashboard:
+### Installing from the STS dashboard: {#install-from-dash}
 
 The easiest way to install is from the STS Dashboard "Extensions" page.
 
-  1. First download and install a recent release of STS or Groovy and Grails Toolsuite (GGTS) version 3.0.0 or later.
+  1. First download and install a [recent release of STS](http://www.springsource.org/springsource-tool-suite-download) 
+     or Groovy and Grails Toolsuite (GGTS) version 3.0.0 or later.
+  2. Open the Dashboard and select the 'Extensions' Tab.
   3. Search for "Gradle" or "Groovy" depending on what you are installing, select it and click "Install".
   4. Review the list of software that will be installed and click "Next".
   5. Review and accept licence agreements and click "Finish".
@@ -52,8 +54,9 @@ to follow the instructions given below to use an Eclipse update site.
  6. Review the list of software that will be installed. Click "Next" again.
  7. Review and accept licence agreements and Click "Finish".
 
-Note that if you follow this installation procedure in a plain Eclipse, this will install the STS Dashboard.
-This gives you an easy way to subsequently install Groovy Eclipse as well. See instructions on 'Installing from the STS Dashboard' above. 
+If you follow this installation procedure in a plain Eclipse, this will install the STS Dashboard.
+This gives you an easy way to subsequently install Groovy Eclipse as well. See instructions on 
+[Installing from the STS Dashboard](#install-from-dash) above. 
 
 ## Questions and bug reports:
 
