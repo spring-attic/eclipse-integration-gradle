@@ -21,10 +21,16 @@
       id="org.springframework.ide.eclipse.uaa.feature" version="3.0.0.qualifier">
       <category name="Extensions / Gradle Integration" />
    </feature>
+
    <feature 
        url="features/org.springsource.ide.eclipse.dashboard_3.0.0.qualifier.jar" 
    	   id="org.springsource.ide.eclipse.dashboard" version="3.0.0.qualifier">
        <category name="Extensions / Gradle Integration"/>
+   </feature>
+   
+   <feature 
+       url="features/org.springsource.ide.eclipse.commons_3.0.0.qualifier.jar" 
+   	   id="org.springsource.ide.eclipse.commons" version="3.0.0.qualifier">
    </feature>
    
    <!-- gradle -->
@@ -32,6 +38,7 @@
    	  id="org.springsource.ide.eclipse.gradle.feature" version="0.0.0">
       <category name="Extensions / Gradle Integration"/>
    </feature>
+
    <feature url="features/org.gradle.toolingapi.feature_0.0.0.jar" 
       id="org.gradle.toolingapi.feature" version="0.0.0">
       <category name="Extensions / Gradle Integration"/>
