@@ -23,7 +23,7 @@ but some functionality (related to editing gradle files) will not work.
 Installation instructions:
 --------------------------
 
-### Installing from the STS dashboard: {#install-from-dash}
+### Installing from the STS dashboard: ### {#install-from-dash}
 
 The easiest way to install is from the STS Dashboard "Extensions" page.
 
