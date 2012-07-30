@@ -21,12 +21,12 @@ There is no milestone of available yet. Once a milestone is available it will be
 
 If you want to live on the leading egde, you can already install up-to-date continuous integration buids from this update site:
 
-    <http://dist.springsource.com/snapshot/TOOLS/nightly/gradle>
+    http://dist.springsource.com/snapshot/TOOLS/gradle/nightly
     
-  But take care, those builds could be broken from time to time and might contain non-ship-ready
-  features that might never appear in the milestone or release builds.
+But take care, those builds could be broken from time to time and might contain non-ship-ready
+features that might never appear in the milestone or release builds.
   
-  The contents of the update site is tested to be compatible with both Eclipse 3.7 and Eclipse 4.2 and requires a Java 6 JDK.
+The contents of the update site is tested to be compatible with both Eclipse 3.7 and Eclipse 4.2 and requires a Java 6 JDK.
 
 ## Questions and bug reports:
 
