@@ -1,7 +1,7 @@
-Gradle IDE
-==========
+Eclipse Integration Gradle
+==========================
 
-The Gradle IDE brings you developer tooling for Gradle into Eclipse.
+The Eclipse-Integration-Gradle project brings you developer tooling for Gradle into Eclipse.
 
 It comes with Spring UAA (User Agent Analysis), an optional component that help us to collect some usage data. This is completely anonymous and helps us to understand better how the tooling is used and how to improve it in the future.
 
