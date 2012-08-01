@@ -20,6 +20,12 @@ If you want support for editing .gradle files a compatible Groovy Eclipse instal
 required. STS 3.0.0 requires Groovy Eclipse 2.7.0. The Gradle tooling should be usable without Groovy Eclipse, 
 but some functionality (related to editing gradle files) will not work.
 
+Documentation 
+-------------
+
+Documentation for the functionality offered by Eclipse-Integration-Gradle tooling is available from [our
+project's GutHub Wiki](https://github.com/SpringSource/eclipse-integration-gradle/wiki).
+
 Installation instructions:
 --------------------------
 
