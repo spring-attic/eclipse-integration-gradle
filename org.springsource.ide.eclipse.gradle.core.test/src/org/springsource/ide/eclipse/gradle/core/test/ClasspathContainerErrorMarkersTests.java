@@ -40,8 +40,9 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 				importOp.verify();
 				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 				assertErrors(getProject(projectName), true,
-						"unresolved dependency - foo#bar;1.2.3",
-						"unresolved dependency - peyo#smurf;1.0.0");
+						"unresolved dependency - foo bar 1.2.3",
+						"unresolved dependency - peyo smurf 1.0.0"
+				);
 //			}
 //		};
 	}
@@ -66,8 +67,8 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 				GradleProject gp = getGradleProject(projectName);
 				
 				assertErrors(p, true,
-						"unresolved dependency - foo#bar;1.2.3",
-						"unresolved dependency - peyo#smurf;1.0.0"
+						"unresolved dependency - foo bar 1.2.3",
+						"unresolved dependency - peyo smurf 1.0.0"
 				);
 				
 				//If container is removed... error markers should go away!
@@ -78,8 +79,8 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 				//If container is added again... error markers should return.
 				GradleClassPathContainer.addTo(jp, new NullProgressMonitor());
 				assertErrors(p, true,
-						"unresolved dependency - foo#bar;1.2.3",
-						"unresolved dependency - peyo#smurf;1.0.0"
+						"unresolved dependency - foo bar 1.2.3",
+						"unresolved dependency - peyo smurf 1.0.0"
 				);
 				
 //			}
@@ -116,7 +117,7 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 				
 				assertErrors(p, true,
 //						"unresolved dependency - foo#bar;1.2.3",
-						"unresolved dependency - peyo#smurf;1.0.0"
+						"unresolved dependency - peyo smurf 1.0.0"
 				);
 				
 				//Put a new bad entry. It should appear as error marker after refresh.
@@ -128,8 +129,8 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"}");
 				RefreshDependenciesActionCore.synchCallOn(p);
 				assertErrors(p, true,
-						"unresolved dependency - new#one;1.2.3",
-						"unresolved dependency - peyo#smurf;1.0.0"
+						"unresolved dependency - new one 1.2.3",
+						"unresolved dependency - peyo smurf 1.0.0"
 				);
 				
 //			}
