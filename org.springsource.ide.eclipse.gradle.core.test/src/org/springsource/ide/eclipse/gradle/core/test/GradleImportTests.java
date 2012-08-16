@@ -26,6 +26,7 @@ import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -33,6 +34,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -59,6 +61,8 @@ import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleAPIProperties;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
+import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
+import org.springsource.ide.eclipse.gradle.core.test.util.ExternalProcess;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JUnitLaunchConfigUtil;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
@@ -258,8 +262,8 @@ public class GradleImportTests extends GradleTest {
 		setSnapshotDistro();
 		GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-security", 
 				new URI("git://github.com/SpringSource/spring-security.git"),
-				"f46a5bab40ad565c30b632608a69060dcee15522")
-		);
+				"734188206d26e7af09a238b4d34eaa01f2e937c0"
+		));
 		
 		importOp.setDoBeforeTasks(true);
 		
@@ -1116,6 +1120,29 @@ public class GradleImportTests extends GradleTest {
 				jp.getRawClasspath());
 	}
 
+	public void testSTS2405RemapJarToMavenProject() throws Exception {
+		IProject mvnProject = importEclipseProject("sts2405/myLib");
+		assertNoErrors(mvnProject, true);
+		ExternalProcess.exec(mvnProject.getLocation().toFile(), new ExternalCommand(
+				"mvn", "install"
+		));
+				
+		importTestProject("sts2405/main");
+		IProject gradleProject = getProject("main");
+		assertNoErrors(gradleProject, true);
+		
+		IJavaProject jp = JavaCore.create(gradleProject);
+		assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", jp);
+		assertClasspathProjectEntry(mvnProject, jp);
+		
+		GradleCore.create(gradleProject).getProjectPreferences().setRemapJarsToMavenProjects(false);
+		RefreshDependenciesActionCore.synchCallOn(gradleProject);
+		assertNoClasspathProjectEntry(mvnProject, jp);
+		assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
+		
+	}
+
+	
 	private void dumpRawClasspath(IJavaProject jp) throws JavaModelException {
 		System.out.println(">>> raw classpath for "+jp.getElementName());
 		for (IClasspathEntry e : jp.getRawClasspath()) {

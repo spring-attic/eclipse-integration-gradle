@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import org.junit.Assert;
+
 
 /**
  * Convenient wrapper around a {@link Process}. Simplifies the synchronous execution of external
@@ -175,5 +177,11 @@ public class ExternalProcess {
 
 	public int getExitValue() {
 		return exitValue;
+	}
+
+	public static void exec(File workdir, ExternalCommand cmd) throws IOException, InterruptedException {
+		ExternalProcess process = new ExternalProcess(workdir , cmd);
+		System.out.println(process);
+		org.junit.Assert.assertEquals(0, process.getExitValue());
 	}
 }

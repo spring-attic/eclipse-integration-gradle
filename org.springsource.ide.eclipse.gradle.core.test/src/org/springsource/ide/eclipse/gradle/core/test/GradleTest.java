@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -43,6 +44,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -602,12 +604,59 @@ public abstract class GradleTest extends TestCase {
 		}
 		fail("Not found '"+jarFile+"':\n"+msg.toString());
 	}
+	
+	public static void assertNoClasspathJarEntry(String jarFile, IClasspathEntry[] resolvedClasspath) {
+		for (IClasspathEntry e : resolvedClasspath) {
+			if (e.getEntryKind()==IClasspathEntry.CPE_LIBRARY) {
+				IPath path = e.getPath();
+				if (jarFile.equals(path.lastSegment())) {
+					fail("Found '"+jarFile+"':\n");
+				}
+			}
+		}
+		//ok!
+	}
 
+
+
+	public static void assertClasspathProjectEntry(IProject expectProject, IJavaProject project) throws JavaModelException {
+		IClasspathEntry[] classpath = project.getRawClasspath();
+		StringBuilder msg = new StringBuilder();
+		for (IClasspathEntry e : classpath) {
+			if (e.getEntryKind()==IClasspathEntry.CPE_PROJECT) {
+				IPath path = e.getPath();
+				if (expectProject.getFullPath().equals(path)) {
+					return; //OK
+				}
+				msg.append(e+"\n");
+			}
+		}
+		fail("Not found '"+expectProject+"':\n"+msg.toString());
+	}
+
+	public static void assertNoClasspathProjectEntry(IProject expectProject, IJavaProject project) throws JavaModelException {
+		IClasspathEntry[] classpath = project.getRawClasspath();
+		for (IClasspathEntry e : classpath) {
+			if (e.getEntryKind()==IClasspathEntry.CPE_PROJECT) {
+				IPath path = e.getPath();
+				if (expectProject.getFullPath().equals(path)) {
+					fail("Found '"+expectProject+"'");
+				}
+			}
+		}
+	}
+
+
+	
 	public static void assertClasspathJarEntry(String jarFile, GradleProject project)
 			throws JavaModelException {
 				assertClasspathJarEntry(jarFile, project.getJavaProject().getResolvedClasspath(true));
 			}
 
+	public static void assertNoClasspathJarEntry(String string, IJavaProject jp) throws JavaModelException {
+		assertNoClasspathJarEntry(string, jp.getResolvedClasspath(true));
+	}
+	
 	public static void assertSameElements(String[] _expecteds, String[] actuals) {
 		StringBuilder msg = new StringBuilder();
 		Set<String> expecteds = new HashSet<String>(Arrays.asList(_expecteds));
@@ -625,6 +674,20 @@ public abstract class GradleTest extends TestCase {
 		if (!"".equals(m)) {
 			fail(m);
 		}
+	}
+
+	public static IProject importEclipseProject(String path) throws Exception {
+		File projectDir = getTestProjectCopy(path);
+		IPath segments = new Path(path);
+		IWorkspace ws = ResourcesPlugin.getWorkspace();
+		String projectName = segments.lastSegment();
+		IProjectDescription projectDescription = ws.newProjectDescription(projectName);
+		projectDescription.setLocation(new Path(projectDir.getAbsolutePath()));
+
+		IProject project = ws.getRoot().getProject(projectName);
+		project.create(projectDescription, new NullProgressMonitor());
+		project.open(new NullProgressMonitor());
+		return project;
 	}
 	
 }

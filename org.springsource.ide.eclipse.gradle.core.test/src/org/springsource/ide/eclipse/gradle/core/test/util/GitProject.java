@@ -113,9 +113,9 @@ public class GitProject {
 			try {
 				System.out.println("Reusing cached test project: '"+projectName+"'");
 				System.out.println("     ..............location: "+projectDir);
-				exec(projectDir, getCheckoutCommand());
-				exec(projectDir, getResetCommand());
-				exec(projectDir, getCleanCommand());
+				ExternalProcess.exec(projectDir, getCheckoutCommand());
+				ExternalProcess.exec(projectDir, getResetCommand());
+				ExternalProcess.exec(projectDir, getCleanCommand());
 				return projectDir;
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -129,8 +129,8 @@ public class GitProject {
 		System.out.println("     Target location: "+projectDir);
 		
 		FileUtils.forceMkdir(gitDir);
-		exec(gitDir, getCloneCommand());
-		exec(projectDir, getCheckoutCommand());
+		ExternalProcess.exec(gitDir, getCloneCommand());
+		ExternalProcess.exec(projectDir, getCheckoutCommand());
 		return projectDir;
 	}
 
@@ -139,12 +139,6 @@ public class GitProject {
 			cleanCommand = new ExternalCommand("git", "clean", "-f", "-x", "-d");
 		}
 		return cleanCommand;
-	}
-
-	private void exec(File workdir, ExternalCommand cmd) throws IOException, InterruptedException {
-		ExternalProcess process = new ExternalProcess(workdir , cmd);
-		System.out.println(process);
-		org.junit.Assert.assertEquals(0, process.getExitValue());
 	}
 
 }
