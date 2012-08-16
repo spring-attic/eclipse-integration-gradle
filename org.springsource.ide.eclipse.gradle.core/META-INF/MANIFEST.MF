@@ -20,7 +20,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jem.util;resolution:=optional,
  org.eclipse.jdt.groovy.core;bundle-version="2.6.1";resolution:=optional,
  org.codehaus.groovy;resolution:=optional,
- org.apache.commons.io
+ org.apache.commons.io,
+ org.eclipse.m2e.core;resolution:=optional,
+ org.eclipse.m2e.maven.runtime;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
@@ -41,6 +43,7 @@ Export-Package: org.gradle.tooling.model,
  org.springsource.ide.eclipse.gradle.core.classpathcontainer,
  org.springsource.ide.eclipse.gradle.core.dsld,
  org.springsource.ide.eclipse.gradle.core.launch,
+ org.springsource.ide.eclipse.gradle.core.m2e,
  org.springsource.ide.eclipse.gradle.core.preferences,
  org.springsource.ide.eclipse.gradle.core.samples,
  org.springsource.ide.eclipse.gradle.core.util,

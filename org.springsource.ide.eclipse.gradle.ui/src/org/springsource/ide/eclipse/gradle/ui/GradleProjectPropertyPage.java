@@ -25,7 +25,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
-
+import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 
 /**
  * For setting preferences that are associated with a Gradle 'build'. These preferences/properties
@@ -41,6 +41,7 @@ import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPrefere
 public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
 	
 	private Button enableSortingButton;
+	private Button enableJarToProjectMappingButton;
 
 	public GradleProjectPropertyPage() {
 		super();
@@ -76,6 +77,18 @@ public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenc
             } else {
             	disableSortingButton.setSelection(true);
             }
+
+            group1 = new Group(page, SWT.BORDER);
+            grabHorizontal.applyTo(group1);
+            group1.setText("Dependency Management");
+            group1.setLayout(new GridLayout(1, true));
+            enableJarToProjectMappingButton = new Button(group1, SWT.CHECK);
+            enableJarToProjectMappingButton.setText("Remap Jars to maven projects (requires Gradle 1.1 and m2e)");
+            enableJarToProjectMappingButton.setToolTipText("Try to replace jars in Gradle Dependencies by dependencies to maven projects in the workspace.");
+            enableJarToProjectMappingButton.setSelection(project.getProjectPreferences().getRemapJarsToMavenProjects());
+            if (!M2EUtils.isInstalled()) {
+            	enableJarToProjectMappingButton.setEnabled(false);
+            }
         }
         return page;
 	}
@@ -85,6 +98,10 @@ public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenc
 		GradleProject gradleProject = getGradleProject();
 		GradleProjectPreferences prefs = gradleProject.getProjectPreferences();
 		prefs.setEnableClasspatEntrySorting(enableSortingButton.getSelection());
+		if (enableJarToProjectMappingButton!=null) {
+			//This can be null if M2E is not installed. In that case the option is not supported and the UI widgetry for it is not created.
+			prefs.setRemapJarsToMavenProjects(enableJarToProjectMappingButton.getSelection());
+		}
 		return true;
 	}
 
@@ -96,6 +113,4 @@ public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenc
 		}
 		return null;
 	}
-	
-	
 }

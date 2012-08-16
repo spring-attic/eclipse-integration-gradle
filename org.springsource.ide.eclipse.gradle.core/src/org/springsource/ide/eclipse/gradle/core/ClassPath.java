@@ -267,4 +267,14 @@ public class ClassPath {
 		return entries.toArray(new IClasspathEntry[entries.size()]);
 	}
 
+	public IClasspathEntry[] getLibraryEntries() {
+		Collection<IClasspathEntry> entries = getEntries(IClasspathEntry.CPE_LIBRARY);
+		return entries.toArray(new IClasspathEntry[entries.size()]);
+	}
+
+	public IClasspathEntry[] getProjectEntries() {
+		Collection<IClasspathEntry> entries = getEntries(IClasspathEntry.CPE_PROJECT);
+		return entries.toArray(new IClasspathEntry[entries.size()]);
+	}
+
 }

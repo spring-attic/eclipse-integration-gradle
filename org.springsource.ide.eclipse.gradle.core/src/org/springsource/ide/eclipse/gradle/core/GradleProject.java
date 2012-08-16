@@ -94,11 +94,7 @@ public class GradleProject {
 	private File location;
 	
 	/**
-	 * Gradle model associated with this project. May be null if the model isn't computed yet, or if the
-	 * previously computed model was invalidated for some reason.
-	 * <p>
-	 * This field may actually contain a fully fleshed out instance of the project model 
-	 * (i.e. {@link EclipseProject}) or just a skeletal model i.e {@link HierarchicalEclipseProject})
+	 * The model provider is reponsible for obtaining and cahching models from the tooling API.
 	 */
 	private GroupedModelProvider modelProvider = null;
 	
@@ -118,6 +114,8 @@ public class GradleProject {
 
 	private GradleRefreshPreferences refreshPrefs;
 
+	private GradleDependencyComputer dependencyComputer = new GradleDependencyComputer(this);
+
 	public GradleProject(File canonicalFile) {
 		Assert.isLegal(canonicalFile!=null, "Project location must not be null");
 		Assert.isLegal(canonicalFile.exists(), "Project location doesn't exist");
@@ -131,10 +129,9 @@ public class GradleProject {
 	 * (Note that this doesn't force the gradleModel itself to be updated!)
 	 */
 	public void refreshDependencies(IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask("Refresh dependencies "+getName(), 2);
+		monitor.beginTask("Refresh dependencies "+getName(), 3);
 		try {
-			refreshProjectDependencies(ProjectMapperFactory.workspaceMapper(),
-					new SubProgressMonitor(monitor, 1));
+			refreshProjectDependencies(ProjectMapperFactory.workspaceMapper(), new SubProgressMonitor(monitor, 1));
 			refreshClasspathContainer(new SubProgressMonitor(monitor, 1));
 //			WTPUtil.addWebLibraries(this); only doing this on project import for now.
 		} finally {
@@ -146,12 +143,11 @@ public class GradleProject {
 	 * Refreshes the project dependencies, bringing then in synch with the gradleModel.
 	 * (Note that this doesn't force the gradleModel itself to be updated!)
 	 */
-	public void refreshProjectDependencies(IProjectMapper projectMapper, SubProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	private void refreshProjectDependencies(IProjectMapper projectMapper, SubProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Refresh project dependencies "+getName(), 2);
 		try {
-			HierarchicalEclipseProject projectModel = getSkeletalGradleModel(new SubProgressMonitor(monitor, 1));
-			DomainObjectSet<? extends EclipseProjectDependency> projectDeps = projectModel.getProjectDependencies();
-			setProjectDependencies(projectDeps.getAll(), projectMapper, new SubProgressMonitor(monitor, 1));
+			EclipseProject projectModel = getGradleModel(new SubProgressMonitor(monitor, 1));
+			setProjectDependencies(projectModel, projectMapper, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
@@ -164,7 +160,7 @@ public class GradleProject {
 	 * Refreshes the contents of the classpath container to bring it in synch with the gradleModel.
 	 * (Note that this doesn't force the gradleModel itself to be updated!)
 	 */
-	public void refreshClasspathContainer(IProgressMonitor monitor) throws CoreException {
+	private void refreshClasspathContainer(IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask("Refresh Classpath Container", 1);
 		try {
 			IProject project = getProject();
@@ -400,7 +396,8 @@ public class GradleProject {
 	 * @param all
 	 * @param subProgressMonitor
 	 */
-	private void setProjectDependencies(List<? extends EclipseProjectDependency> projectDeps, IProjectMapper projectMapper, IProgressMonitor monitor) throws JavaModelException {
+	private void setProjectDependencies(EclipseProject projectModel, IProjectMapper projectMapper, IProgressMonitor monitor) throws JavaModelException {
+		DomainObjectSet<? extends EclipseProjectDependency> projectDeps = projectModel.getProjectDependencies();
 		//TODO: we remove and re-add all project dep entries, even if they didn't change. Should we optimize this to
 		// only add/remove when entries have changed?
 		
@@ -422,6 +419,9 @@ public class GradleProject {
 					entries.add(newEntry);
 				}
 				monitor.worked(1);
+			}
+			for (IClasspathEntry newEntry : this.getDependencyComputer().getProjectEntries(projectModel)) {
+				entries.add(newEntry);
 			}
 
 			//Remove old project entries and replace with new ones.
@@ -611,7 +611,7 @@ public class GradleProject {
 		} finally {
 			monitor.done();
 		}
-	}	
+	}
 		
 	public EclipseProject getGradleModel(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		return getGradleModel(EclipseProject.class, monitor);
@@ -1008,6 +1008,10 @@ public class GradleProject {
 		} catch (FastOperationFailedException e) {
 			//Expected... swallow
 		}
+	}
+
+	public GradleDependencyComputer getDependencyComputer() {
+		return dependencyComputer;
 	}
 
 }

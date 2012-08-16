@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.classpathcontainer;
 
-import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -27,24 +24,19 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.ClasspathAttribute;
-import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.core.JavaProject;
-import org.gradle.tooling.model.DomainObjectSet;
-import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.ClassPath;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.GradleDependencyComputer;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.GradleSaveParticipant;
 import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
-import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 
 
@@ -53,9 +45,8 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
  */
 @SuppressWarnings("restriction")
 public class GradleClassPathContainer implements IClasspathContainer /*, Cloneable*/ {
-
-	private static final String ERROR_MARKER_ID = "org.springsource.ide.eclipse.gradle.core.classpathcontainer";
 	
+	public static final String ERROR_MARKER_ID = "org.springsource.ide.eclipse.gradle.core.classpathcontainer";
 	private static final String GRADLE_CLASSPATHCONTAINER_KEY = "gradle.classpathcontainer";
 
 	public static boolean DEBUG = (""+Platform.getLocation()).equals("/tmp/testws");
@@ -130,18 +121,18 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	}
 
 	public synchronized IClasspathEntry[] getClasspathEntries() {
+		GradleDependencyComputer dependencyComputer = project.getDependencyComputer();
 		debug("getClassPathEntries called");
 		try {
-			EclipseProject gradleModel = project.getGradleModel(EclipseProject.class);
+			EclipseProject gradleModel = project.getGradleModel();
 			if (gradleModel!=null) {
 				if (oldModel==gradleModel) {
 					return getPersistedEntries();
 				} else {
-					ClassPath classpath = computeEntries(gradleModel);
-					IClasspathEntry[] entries = classpath.toArray();
+					IClasspathEntry[] entries = dependencyComputer.getLibraryEntries(gradleModel);
 					setPersistedEntries(entries);
 					oldModel = gradleModel;
-					return classpath.toArray();
+					return entries;
 				}
 			}
 		} catch (CoreException e) {
@@ -161,95 +152,6 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		};
 	}
 	
-	private ClassPath computeEntries(EclipseProject gradleModel) {
-		MarkerMaker markers = new MarkerMaker(project, ERROR_MARKER_ID);
-		try {
-			debug("gradleModel ready: "+Integer.toHexString(System.identityHashCode(gradleModel))+" "+gradleModel);
-			DomainObjectSet<? extends ExternalDependency> gClasspath = gradleModel.getClasspath();
-			ClassPath classpath = new ClassPath(project, gClasspath.size());
-			for (ExternalDependency gEntry : gClasspath) {
-				// Get the location of the jar itself
-				File file = gEntry.getFile();
-				IPath jarPath = new Path(file.getAbsolutePath()); 
-				if (jarPath.lastSegment()!=null && jarPath.lastSegment().endsWith(".jar")) {
-					addJarEntry(classpath, jarPath, gEntry);
-				} else {
-					//'non jar' entries may happen when project has a dependency on a sourceSet's output folder.
-					//See http://issues.gradle.org/browse/GRADLE-1766
-					boolean isCovered = false;
-					IProject containingProject = WorkspaceUtil.getContainingProject(file);
-					if (containingProject!=null) {
-						GradleProject referredProject = GradleCore.create(containingProject);
-						if (referredProject!=null) {
-							if (project.conservativeDependsOn(referredProject, false)) {
-								//We assume that a project dependeny is adequate representation for the dependency on 
-								//an output folder in the project.
-								isCovered = true;
-							}
-						}
-					}
-					if (!isCovered) {
-						if (file.exists()) {
-							//We don't know what this is, but it exists. Give it the benefit of the doubt and try to treat it 
-							//the same as a 'jar'... pray... and hope for the best. 
-							//Note: one possible thing this could be is an output folder containing .class files.
-							addJarEntry(classpath, jarPath, gEntry);
-							markers.reportWarning("Unknown type of Gradle Dependency was treated as 'jar' entry: "+jarPath);
-						} else {
-							//Adding this will cause very wonky behavior see: https://issuetracker.springsource.com/browse/STS-2531
-							//So do not add it. Only report it as an error marker on the project.
-							markers.reportError("Illegal entry in Gradle Dependencies: "+jarPath);
-						}
-					}
-				}
-			}
-			return classpath;
-		} finally {
-			markers.schedule();
-		}
-	}
-
-	private void addJarEntry(ClassPath classpath, IPath jarPath, ExternalDependency gEntry) {
-		// Get the location of a source jar, if any.
-		IPath sourceJarPath = null;
-		File sourceJarFile = gEntry.getSource();
-		if (sourceJarFile!=null) {
-			sourceJarPath = new Path(sourceJarFile.getAbsolutePath());
-		}
-
-		//Get the location of Java doc attachement, if any
-		List<IClasspathAttribute> extraAttributes = new ArrayList<IClasspathAttribute>();
-		File javaDoc = gEntry.getJavadoc();
-		if (javaDoc!=null) {
-			//Example of what it looks like in the eclipse .classpath file:
-			//<attributes>
-			//  <attribute name="javadoc_location" value="jar:file:/tmp/workspace/repos/test-with-jdoc-1.0-javadoc.jar!/"/>
-			//</attributes>
-			String jdoc = javaDoc.toURI().toString();
-			if (!javaDoc.isDirectory()) {
-				//Assume its a jar or zip containing the docs
-				jdoc = "jar:"+jdoc+"!/";
-			}
-			IClasspathAttribute javaDocAttribute = new ClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, jdoc);
-			extraAttributes.add(javaDocAttribute);
-		}
-		
-		WTPUtil.excludeFromDeployment(project.getJavaProject(), jarPath, extraAttributes);
-
-
-		//Create classpath entry with all this info
-		IClasspathEntry newLibraryEntry = JavaCore.newLibraryEntry(
-				jarPath, 
-				sourceJarPath, 
-				null, 
-				ClasspathEntry.NO_ACCESS_RULES, 
-				extraAttributes.toArray(new IClasspathAttribute[extraAttributes.size()]), 
-				GlobalSettings.exportClasspathContainerEntries);
-		classpath.add(newLibraryEntry);
-		if (newLibraryEntry.toString().contains("unresolved dependency")) {
-			debug("entry: "+newLibraryEntry);
-		}
-	}
 
 	public String getDescription() {
 		String desc = "Gradle Dependencies";

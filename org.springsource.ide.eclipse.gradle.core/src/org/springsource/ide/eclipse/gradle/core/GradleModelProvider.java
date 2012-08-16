@@ -239,7 +239,7 @@ public abstract class GradleModelProvider {
 		private GradleProject rootProject;
 		private Map<GradleProject, HierarchicalEclipseProject> models = null;
 		
-		/**' If a model build fails, we store the error as an explanation. */
+		/** If a model build fails, we store the error as an explanation. */
 		private CoreException error;
 		
 		/** To remember that we already failed to build a model of some specific type and shouldn't try again */
