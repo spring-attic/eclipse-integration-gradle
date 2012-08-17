@@ -1121,6 +1121,7 @@ public class GradleImportTests extends GradleTest {
 	}
 
 	public void testSTS2405RemapJarToMavenProject() throws Exception {
+		System.out.println("user.home = "+System.getProperty("user.home"));
 		IProject mvnProject = importEclipseProject("sts2405/myLib");
 		assertNoErrors(mvnProject, true);
 		new ExternalCommand(

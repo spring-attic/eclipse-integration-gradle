@@ -47,6 +47,7 @@ public class MavenCommand extends ExternalCommand {
 		super.configure(processBuilder);
 		Map<String, String> env = processBuilder.environment();
 		if (mavenHome!=null) {
+			env.put("HOME", System.getProperty("user.home"));
 			env.put("M2_HOME", mavenHome.toString());
 			env.put("MAVEN_HOME", mavenHome.toString());
 			env.put("MAVEN2_HOME", mavenHome.toString());
