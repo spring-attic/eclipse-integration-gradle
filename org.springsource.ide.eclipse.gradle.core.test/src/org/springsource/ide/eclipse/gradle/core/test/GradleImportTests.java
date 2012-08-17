@@ -1124,6 +1124,12 @@ public class GradleImportTests extends GradleTest {
 		IProject mvnProject = importEclipseProject("sts2405/myLib");
 		assertNoErrors(mvnProject, true);
 		ExternalProcess.exec(mvnProject.getLocation().toFile(), new ExternalCommand(
+			"which", "mvn"	
+		));
+		ExternalProcess.exec(mvnProject.getLocation().toFile(), new ExternalCommand(
+			"env"	
+		));
+		ExternalProcess.exec(mvnProject.getLocation().toFile(), new ExternalCommand(
 				"mvn", "install"
 		));
 				
