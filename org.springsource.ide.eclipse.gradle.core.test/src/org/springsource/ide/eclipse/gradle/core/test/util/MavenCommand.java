@@ -15,14 +15,19 @@ import java.util.Map;
 
 public class MavenCommand extends ExternalCommand {
 
-	public static File mvnHome = null;
+	public static String mavenHome = null;
+	static final String[] mavenHomes = {
+		//A list of places to check for a suitable maven installation
+		"/opt/java/tools/maven/apache-maven-3.0.3",
+		"/home/kdvolder/Applications/apache-maven-3.0.3"
+	};
+	
 	static {	
-		//This code is specific to our build server but without,
-		//it seems like we cannot correctly execute mvn commands
-		//on the build server which has multiple versions of maven installed.
-		File f = new File("/opt/java/tools/maven/apache-maven-3.0.3");
-		if (f.exists()) {
-			mvnHome = f;
+		for (String path : mavenHomes) {
+			if (new File(path).isDirectory()) {
+				mavenHome = path;
+				break;
+			}
 		}
 	}
 
@@ -31,8 +36,8 @@ public class MavenCommand extends ExternalCommand {
 	}
 
 	private static String[] customize(String[] pieces) {
-		if (mvnHome!=null) {
-			pieces[0] = mvnHome+"/bin/mvn";
+		if (mavenHome!=null) {
+			pieces[0] = mavenHome+"/bin/mvn";
 		}
 		return pieces;
 	}
@@ -41,10 +46,10 @@ public class MavenCommand extends ExternalCommand {
 	public void configure(ProcessBuilder processBuilder) {
 		super.configure(processBuilder);
 		Map<String, String> env = processBuilder.environment();
-		if (mvnHome!=null) {
-			env.put("M2_HOME", mvnHome.toString());
-			env.put("MAVEN_HOME", mvnHome.toString());
-			env.put("MAVEN2_HOME", mvnHome.toString());
+		if (mavenHome!=null) {
+			env.put("M2_HOME", mavenHome.toString());
+			env.put("MAVEN_HOME", mavenHome.toString());
+			env.put("MAVEN2_HOME", mavenHome.toString());
 		} else {
 			System.out.println("Warning: couldn't find a maven 3.0.3");
 		}
