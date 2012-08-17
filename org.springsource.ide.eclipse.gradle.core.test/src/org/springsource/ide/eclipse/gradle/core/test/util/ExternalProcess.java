@@ -125,6 +125,7 @@ public class ExternalProcess {
 		this.cmd = cmd; 
 		ProcessBuilder processBuilder = new ProcessBuilder(cmd.getProgramAndArgs());
 		processBuilder.directory(workingDir);
+		cmd.configure(processBuilder);
 		process = processBuilder.start();
 		err = new StreamGobler(process.getErrorStream(), errStream);
 		out = new StreamGobler(process.getInputStream(), outStream);
@@ -177,11 +178,5 @@ public class ExternalProcess {
 
 	public int getExitValue() {
 		return exitValue;
-	}
-
-	public static void exec(File workdir, ExternalCommand cmd) throws IOException, InterruptedException {
-		ExternalProcess process = new ExternalProcess(workdir , cmd);
-		System.out.println(process);
-		org.junit.Assert.assertEquals(0, process.getExitValue());
 	}
 }

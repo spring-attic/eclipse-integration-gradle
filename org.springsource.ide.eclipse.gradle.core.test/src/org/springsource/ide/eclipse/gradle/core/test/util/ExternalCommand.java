@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.test.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.junit.Assert;
 
 /**
  * Encapsulates information about an 'external' command that can be run through the OS. 
@@ -50,6 +54,26 @@ public class ExternalCommand {
 			first = false;
 		}
 		return buf.toString();
+	}
+
+	/**
+	 * Just before executing the command with a ProcessBuilder instance, this method is called,
+	 * giving the command a chance to apply some extra configuration (e.g. set some environment
+	 * parameters). 
+	 */
+	public void configure(ProcessBuilder processBuilder) {
+		//Default implementation does nothing. Subclasses may override.
+	}
+
+	/**
+	 * A convenient way to execute commands suitable for use in tests. The output and
+	 * result of commands are logged to the console and if the command returns non
+	 * 0 exit value an exception is thrown.
+	 */
+	public void exec(File workdir) throws IOException, InterruptedException {
+		ExternalProcess process = new ExternalProcess(workdir , this);
+		System.out.println(process);
+		org.junit.Assert.assertEquals(0, process.getExitValue());
 	}
 
 }

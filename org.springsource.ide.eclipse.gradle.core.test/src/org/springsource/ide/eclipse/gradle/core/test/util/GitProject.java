@@ -113,9 +113,9 @@ public class GitProject {
 			try {
 				System.out.println("Reusing cached test project: '"+projectName+"'");
 				System.out.println("     ..............location: "+projectDir);
-				ExternalProcess.exec(projectDir, getCheckoutCommand());
-				ExternalProcess.exec(projectDir, getResetCommand());
-				ExternalProcess.exec(projectDir, getCleanCommand());
+				getCheckoutCommand().exec(projectDir);
+				getResetCommand().exec(projectDir);
+				getCleanCommand().exec(projectDir);
 				return projectDir;
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -129,8 +129,8 @@ public class GitProject {
 		System.out.println("     Target location: "+projectDir);
 		
 		FileUtils.forceMkdir(gitDir);
-		ExternalProcess.exec(gitDir, getCloneCommand());
-		ExternalProcess.exec(projectDir, getCheckoutCommand());
+		getCloneCommand().exec(gitDir);
+		getCheckoutCommand().exec(projectDir);
 		return projectDir;
 	}
 

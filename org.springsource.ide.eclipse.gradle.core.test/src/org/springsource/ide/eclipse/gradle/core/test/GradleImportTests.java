@@ -62,9 +62,9 @@ import org.springsource.ide.eclipse.gradle.core.preferences.GradleAPIProperties;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
-import org.springsource.ide.eclipse.gradle.core.test.util.ExternalProcess;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JUnitLaunchConfigUtil;
+import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
@@ -1123,15 +1123,15 @@ public class GradleImportTests extends GradleTest {
 	public void testSTS2405RemapJarToMavenProject() throws Exception {
 		IProject mvnProject = importEclipseProject("sts2405/myLib");
 		assertNoErrors(mvnProject, true);
-		ExternalProcess.exec(mvnProject.getLocation().toFile(), new ExternalCommand(
+		new ExternalCommand(
 			"which", "mvn"	
-		));
-		ExternalProcess.exec(mvnProject.getLocation().toFile(), new ExternalCommand(
+		).exec(mvnProject.getLocation().toFile());
+		new ExternalCommand(
 			"env"	
-		));
-		ExternalProcess.exec(mvnProject.getLocation().toFile(), new ExternalCommand(
+		).exec(mvnProject.getLocation().toFile());
+		new MavenCommand(
 				"mvn", "install"
-		));
+		).exec(mvnProject.getLocation().toFile());
 				
 		importTestProject("sts2405/main");
 		IProject gradleProject = getProject("main");
