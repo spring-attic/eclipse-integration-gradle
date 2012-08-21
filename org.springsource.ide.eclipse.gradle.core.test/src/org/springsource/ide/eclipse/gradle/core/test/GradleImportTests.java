@@ -1121,9 +1121,12 @@ public class GradleImportTests extends GradleTest {
 	}
 
 	public void testSTS2405RemapJarToMavenProject() throws Exception {
+		String home = System.getenv("HOME");
+		System.out.println("HOME = "+System.getProperty("user.home"));
 		System.out.println("user.home = "+System.getProperty("user.home"));
 		System.out.println("maven.repo.local = "+System.getProperty("maven.repo.local"));
 		IProject mvnProject = importEclipseProject("sts2405/myLib");
+		String mvnLocalRepo = home +"/.m2/repository";
 		assertNoErrors(mvnProject, true);
 		new ExternalCommand(
 			"which", "mvn"	
@@ -1131,23 +1134,23 @@ public class GradleImportTests extends GradleTest {
 		new ExternalCommand(
 			"env"	
 		).exec(mvnProject.getLocation().toFile());
+		String mavenLocalProp = "-Dmaven.repo.local="+mvnLocalRepo;
 		new MavenCommand(
-				"mvn", "install"
+				"mvn", mavenLocalProp, "install"
 		).exec(mvnProject.getLocation().toFile());
-				
+
 		importTestProject("sts2405/main");
 		IProject gradleProject = getProject("main");
 		assertNoErrors(gradleProject, true);
-		
+
 		IJavaProject jp = JavaCore.create(gradleProject);
 		assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", jp);
 		assertClasspathProjectEntry(mvnProject, jp);
-		
+
 		GradleCore.create(gradleProject).getProjectPreferences().setRemapJarsToMavenProjects(false);
 		RefreshDependenciesActionCore.synchCallOn(gradleProject);
 		assertNoClasspathProjectEntry(mvnProject, jp);
 		assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
-		
 	}
 
 	
