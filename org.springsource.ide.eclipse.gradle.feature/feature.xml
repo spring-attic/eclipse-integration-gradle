@@ -2,7 +2,7 @@
 <feature
       id="org.springsource.ide.eclipse.gradle.feature"
       label="%featureName"
-      version="3.0.0.qualifier"
+      version="3.1.0.qualifier"
       provider-name="%providerName">
 
    <description>

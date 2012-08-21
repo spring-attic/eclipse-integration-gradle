@@ -2,7 +2,7 @@
 <feature
       id="org.gradle.toolingapi.feature"
       label="Gradle Tooling Api"
-      version="3.0.0.qualifier">
+      version="3.1.0.qualifier">
 
    <description url="http://www.gradle.org/">
       Gradle tooling API jars, are bundled with STS Gradle plugins. 
