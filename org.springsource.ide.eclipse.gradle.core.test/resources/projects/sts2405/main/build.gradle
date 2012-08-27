@@ -10,7 +10,9 @@ jar {
 }
 
 repositories {
-	mavenLocal()
+	//def repo = mavenRepo urls: "file:${maven.repo.local}"
+	def repo = mavenLocal()
+	println "Gradle is using mavenlocal.url = "+(repo.url)
     mavenCentral()
 }
 
