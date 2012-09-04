@@ -58,6 +58,7 @@ import org.springsource.ide.eclipse.gradle.core.dsld.GradleDSLDClasspathContaine
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
+import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleAPIProperties;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
@@ -1121,6 +1122,7 @@ public class GradleImportTests extends GradleTest {
 	}
 
 	public void testSTS2405RemapJarToMavenProject() throws Exception {
+		assertTrue("This test requires m2e", M2EUtils.isInstalled());
 		String userHome = System.getProperty("user.home");
 		String home = System.getenv("HOME");
 		System.out.println("HOME = "+home);

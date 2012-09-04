@@ -610,7 +610,7 @@ public abstract class GradleTest extends TestCase {
 			if (e.getEntryKind()==IClasspathEntry.CPE_LIBRARY) {
 				IPath path = e.getPath();
 				if (jarFile.equals(path.lastSegment())) {
-					fail("Found '"+jarFile+"':\n");
+					fail("Found '"+jarFile+"'\n");
 				}
 			}
 		}
