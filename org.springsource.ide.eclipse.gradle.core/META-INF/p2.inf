@@ -8,3 +8,14 @@ requires.1.namespace=osgi.bundle
 requires.1.name=org.codehaus.groovy
 requires.1.greedy=false
 requires.1.optional=true
+
+# same for m2e dependencies
+requires.2.namespace=osgi.bundle
+requires.2.name=org.eclipse.m2e.core
+requires.2.greedy=false
+requires.2.optional=true
+
+requires.3.namespace=osgi.bundle
+requires.3.name=org.eclipse.m2e.maven.runtime
+requires.3.greedy=false
+requires.3.optional=true
