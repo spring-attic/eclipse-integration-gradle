@@ -237,6 +237,12 @@
 			<url>http://download.eclipse.org/mylyn/releases/3.7</url>
 		</repository>
 
+		<repository>
+			<id>m2e-releases</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/technology/m2e/releases/</url>
+		</repository>
+
 		<!-- required for Maven and Ant AWS dependency -->
 		<repository>
 			<id>springsource-maven-release</id>
