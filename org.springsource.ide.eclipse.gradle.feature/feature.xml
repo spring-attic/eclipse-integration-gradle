@@ -25,8 +25,7 @@
          id="org.springsource.ide.eclipse.gradle.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="true"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.springsource.ide.eclipse.gradle.ui"
@@ -37,6 +36,13 @@
 
    <plugin
          id="org.springsource.ide.eclipse.gradle.ui.taskview"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.io"
          download-size="0"
          install-size="0"
          version="0.0.0"
