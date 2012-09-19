@@ -46,7 +46,7 @@ def getApiVersion() {
 		println "normal build"
 		//return '1.0-rc-1'
 		//return "1.0-rc-2"
-		return '1.1'
+		return '1.2'
 	} else if (buildType=='integration') {
 		//Integration builds use the current 'release-candidate'.
 		println "integration build"
@@ -87,8 +87,7 @@ dependencies {
 	compile "org.gradle:gradle-core:$apiVersion",
 			"org.gradle:gradle-tooling-api:$apiVersion",
 			"org.gradle:gradle-wrapper:$apiVersion",
-			'org.slf4j:slf4j-simple:1.6.4',
-			'org.slf4j:slf4j-api:1.6.4',
+			'org.slf4j:slf4j-simple:1.6.6',
 			'commons-collections:commons-collections:3.2.1'
 }
 

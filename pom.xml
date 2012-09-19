@@ -358,6 +358,9 @@
 				<version>${tycho-version}</version>
 				<configuration>
 					<resolver>p2</resolver>
+			        <dependency-resolution>
+        				<optionalDependencies>require</optionalDependencies>
+      				</dependency-resolution>
 				</configuration>
 			</plugin>
 
