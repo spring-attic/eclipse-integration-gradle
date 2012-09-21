@@ -266,7 +266,8 @@ public class GradleImportTests extends GradleTest {
 		setSnapshotDistro();
 		GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-security", 
 				new URI("git://github.com/SpringSource/spring-security.git"),
-				"734188206d26e7af09a238b4d34eaa01f2e937c0"
+				"191fc9c8be80c7338ab8e183014de48f78fcffd1"
+//				"734188206d26e7af09a238b4d34eaa01f2e937c0"
 		));
 		
 		importOp.setDoBeforeTasks(true);
