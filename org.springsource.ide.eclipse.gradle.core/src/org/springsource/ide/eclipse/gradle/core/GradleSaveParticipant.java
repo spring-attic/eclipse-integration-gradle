@@ -91,35 +91,39 @@ public class GradleSaveParticipant implements ISaveParticipant {
 	private void save() {
 		debug("Saving gradle workspace state...");
 		File file = getSaveFile();
-		debug("file = "+file);
-		if (file.exists()) {
-			debug(file + " exists. Deleting it");
-			file.delete();
-		}
-		ObjectOutputStream out = null;
-		try {
-			out = new ObjectOutputStream(new FileOutputStream(file));
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			for (Iterator<Entry<String, ProjectStore>> iterator = store.entrySet().iterator(); iterator.hasNext();) {
-				Entry<String, ProjectStore> entry = (Entry<String, ProjectStore>) iterator.next();
-				IProject project = root.getProject(entry.getKey());
-				if (!project.exists()) {
-					iterator.remove();
+		if (file!=null) {
+			debug("file = "+file);
+			if (file.exists()) {
+				debug(file + " exists. Deleting it");
+				file.delete();
+			}
+			ObjectOutputStream out = null;
+			try {
+				out = new ObjectOutputStream(new FileOutputStream(file));
+				IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+				for (Iterator<Entry<String, ProjectStore>> iterator = store.entrySet().iterator(); iterator.hasNext();) {
+					Entry<String, ProjectStore> entry = (Entry<String, ProjectStore>) iterator.next();
+					IProject project = root.getProject(entry.getKey());
+					if (!project.exists()) {
+						iterator.remove();
+					}
+				}
+				out.writeObject(store);
+				debug("Saving gradle workspace state DONE");
+			} catch (FileNotFoundException e) {
+				GradleCore.log(e);
+			} catch (IOException e) {
+				GradleCore.log(e);
+			} finally {
+				if (out!=null) {
+					try {
+						out.close();
+					} catch (IOException e) {
+					}
 				}
 			}
-			out.writeObject(store);
-			debug("Saving gradle workspace state DONE");
-		} catch (FileNotFoundException e) {
-			GradleCore.log(e);
-		} catch (IOException e) {
-			GradleCore.log(e);
-		} finally {
-			if (out!=null) {
-				try {
-					out.close();
-				} catch (IOException e) {
-				}
-			}
+		} else {
+			GradleCore.warn("Gradle workspace state couldn't be saved. No state location.");
 		}
 	}
 
@@ -154,44 +158,54 @@ public class GradleSaveParticipant implements ISaveParticipant {
 	private synchronized void restore() {
 		debug("Restoring gradle workspace state...");
 		File file = getSaveFile();
-		debug("file = "+file);
-		Exception e = null;
-		ObjectInputStream in = null;
-		try {
-			if (file!=null && file.exists()) {
-				 in = new ObjectInputStream(new FileInputStream(file));
-				store = (Map<String, ProjectStore>) in.readObject();
-				debug("Restoring gradle workspace state...OK");
-			} else {
-				debug("Not restroring state... save file not found: "+file);
-			}
-		} catch (IOException _e) {
-			e = _e;
-		} catch (ClassNotFoundException _e) {
-			e = _e;
-		} finally {
-			if (in!=null) {
-				try {
-					in.close();
-				} catch (IOException e1) {
+		if (file!=null) {
+			//Should really never be null, but aparantly it does happen after a workspace crash.
+			//It should be ok to skip restoring the state, there's nothing essential in this state just some cached.
+			debug("file = "+file);
+			Exception e = null;
+			ObjectInputStream in = null;
+			try {
+				if (file!=null && file.exists()) {
+					in = new ObjectInputStream(new FileInputStream(file));
+					store = (Map<String, ProjectStore>) in.readObject();
+					debug("Restoring gradle workspace state...OK");
+				} else {
+					debug("Not restroring state... save file not found: "+file);
+				}
+			} catch (IOException _e) {
+				e = _e;
+			} catch (ClassNotFoundException _e) {
+				e = _e;
+			} finally {
+				if (in!=null) {
+					try {
+						in.close();
+					} catch (IOException e1) {
+					}
 				}
 			}
-		}
-		if (e!=null) {
-			debug("Restoring gradle workspace state...FAILED: "+e.getMessage());
-			//File corrupt?
-			GradleCore.log(e);
-			if (file!=null && file.exists()) {
-				file.delete();
-				debug("Deleting save file: "+file);
+			if (e!=null) {
+				debug("Restoring gradle workspace state...FAILED: "+e.getMessage());
+				//File corrupt?
+				GradleCore.log(e);
+				if (file!=null && file.exists()) {
+					file.delete();
+					debug("Deleting save file: "+file);
+				}
 			}
 		}
 	}
 	
 	private File getSaveFile() {
-		IPath stateLoc = GradleCore.getInstance().getStateLocation();
-		IPath saveLoc = stateLoc.append("gradleWSState");
-		return saveLoc.toFile();
+		GradleCore instance = GradleCore.getInstance();
+		if (instance!=null) {
+			IPath stateLoc = instance.getStateLocation();
+			if (stateLoc!=null) {
+				IPath saveLoc = stateLoc.append("gradleWSState");
+				return saveLoc.toFile();
+			}
+		}
+		return null;
 	}
 
 	/**

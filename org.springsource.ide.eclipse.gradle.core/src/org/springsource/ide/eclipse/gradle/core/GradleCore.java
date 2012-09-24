@@ -197,5 +197,9 @@ public class GradleCore extends Plugin {
 		}
 		return list;
 	}
+
+	public static void warn(String message) {
+		log(new Status(IStatus.WARNING, GradleCore.PLUGIN_ID, message));
+	}
 	
 }
