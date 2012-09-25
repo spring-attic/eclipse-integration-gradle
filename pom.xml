@@ -18,7 +18,6 @@
 
 	<modules>
 		<module>org.springsource.ide.eclipse.gradle.feature</module>
-		<module>org.gradle.toolingapi.feature</module>
 		<module>org.springsource.ide.eclipse.gradle.site</module>
 		
 		<module>org.springsource.ide.eclipse.gradle.core</module>
