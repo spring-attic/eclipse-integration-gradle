@@ -714,7 +714,8 @@ public class GradleProject {
 			return cachedProject;
 		}
 		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if (project.getLocation().toFile().equals(location)) {
+			IPath loc = project.getLocation();
+			if (loc!=null && loc.toFile().equals(location)) {
 				this.cachedProject = project;
 				return project;
 			}
