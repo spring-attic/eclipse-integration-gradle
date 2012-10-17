@@ -60,6 +60,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.ProjectMapperFactory;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
+import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.KillGradleDaemons;
 import org.springsource.ide.eclipse.gradle.core.test.util.LoggingProgressMonitor;
@@ -124,6 +125,13 @@ public abstract class GradleTest extends TestCase {
 		prefs.setJVMArguments(null); //Reset to default.
 		prefs.setProgramArguments(null); //Reset to default.
 		KillGradleDaemons.killem(); //Keep the number of daemons under control.
+		new ACondition() {
+			@Override
+			public boolean test() throws Exception {
+				ACondition.assertJobManagerIdle();
+				return true;
+			}
+		}.waitFor(20000);
 	}
 	
 
