@@ -6,6 +6,7 @@ Bundle-Version: 3.1.0.qualifier
 Bundle-Vendor: SpringSource
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit,
+ org.eclipse.ui,
  org.eclipse.core.runtime,
  org.apache.commons.io,
  org.eclipse.core.resources,
@@ -39,5 +40,7 @@ Require-Bundle: org.junit,
  org.eclipse.equinox.event,
  org.eclipse.ui.ide.application,
  org.eclipse.m2e.core,
- org.eclipse.m2e.maven.runtime
+ org.eclipse.m2e.maven.runtime,
+ org.eclipse.m2e.lifecyclemapping.defaults
+ 
  
