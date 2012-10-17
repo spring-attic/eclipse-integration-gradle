@@ -37,4 +37,7 @@ Require-Bundle: org.junit,
  org.eclipse.jst.j2ee.web,
  org.eclipse.equinox.ds,
  org.eclipse.equinox.event,
- org.eclipse.ui.ide.application
+ org.eclipse.ui.ide.application,
+ org.eclipse.m2e.core,
+ org.eclipse.m2e.maven.runtime
+ 
