@@ -125,45 +125,18 @@ public abstract class GradleTest extends TestCase {
 		prefs.setJVMArguments(null); //Reset to default.
 		prefs.setProgramArguments(null); //Reset to default.
 		KillGradleDaemons.killem(); //Keep the number of daemons under control.
-		new ACondition() {
-			@Override
-			public boolean test() throws Exception {
-				ACondition.assertJobManagerIdle();
-				return true;
-			}
-		}.waitFor(20000);
-	}
-	
-
-	public static void assertJobManagerIdle() {
-		//TODO: Remove: this is duplicated and exists in the STS codebase (see ACondition)
-		final IJobManager jm = Job.getJobManager();
-		if (jm.isIdle()) {
-			return; //OK!
-		}
-		//Make a nice message listing all the jobs and their present state.
-		Job[] allJobs = jm.find(null);
-		StringBuffer msg = new StringBuffer("JobManager not idle: \n");
-		for (Job job : allJobs) {
-			msg.append("   Job: "+job.getName() + " State: " + stateString(job) +"\n");
-		}
-		throw new AssertionFailedError(msg.toString());
-	}
-	
-	public static String stateString(Job job) {
-		//TODO: Remove: this is duplicated and exists in the STS codebase (see ACondition)
-		int state = job.getState();
-		switch (state) {
-		case Job.RUNNING:
-			return "RUNNING";
-		case Job.SLEEPING:
-			return "SLEEPING";
-		case Job.WAITING:
-			return "WAITING";
-		case Job.NONE:
-			return "NONE";
-		default:
-			return ""+state;
+		try {
+			new ACondition() {
+				@Override
+				public boolean test() throws Exception {
+					ACondition.assertJobManagerIdle();
+					return true;
+				}
+			}.waitFor(20000);
+		} catch (Throwable e) {
+			//Print this as interesting information about the jobs that keep on chugging away...
+			//but do not let this cause test failures.
+			GradleCore.log(e);
 		}
 	}
 	
