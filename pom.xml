@@ -100,10 +100,23 @@
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 		<encoding>UTF-8</encoding>
+		
+		<sts.test.cache>${user.home}/.sts-test-cache</sts.test.cache>
 
 	</properties>
 
 	<profiles>
+
+		<profile>
+			<id>bamboo</id>
+			<activation>
+			  <file><exists>/opt/bamboo-home</exists></file>
+			</activation>
+			
+			<properties>
+				<sts.test.cache>/opt/bamboo-home/.sts-test-cache</sts.test.cache>
+			</properties>
+		</profile>
 
 		<profile>
 			<id>e37</id>
@@ -554,7 +567,7 @@
 						<testSuite>${project.artifactId}</testSuite>
 						<testClass>${test.class}</testClass>
 						<argLine>
-							-Xmx1024m -XX:MaxPermSize=256m -Djava.io.tmpdir=${project.build.directory} -Dcom.springsource.sts.tests.cache=/opt/bamboo-home/.sts-tests -Duser.home=${project.build.directory} ${test.vmargs}
+							-Xmx1024m -XX:MaxPermSize=256m -Djava.io.tmpdir=${project.build.directory} -Dcom.springsource.sts.tests.cache=${sts.test.cache} -Duser.home=${project.build.directory} ${test.vmargs}
 						</argLine>
 						<appArgLine>
 							-eclipse.keyring ${project.build.directory}/keystore -eclipse.password ${project.build.directory}/keystore.password
@@ -571,6 +584,13 @@
 							  <artifactId>${groovy.compiler.feature}</artifactId>
 							  <version>0.0.0</version>
 							</dependency>
+<!-- Ugh! I'd like to add this ensure m2e is installed when we run the tests... but it seems adding
+     this makes JDT patch go AWOL 					
+                            <dependency>
+							  <type>p2-installable-unit</type>
+							  <artifactId>org.eclipse.m2e.feature.feature.group</artifactId>
+							  <version>0.0.0</version>
+							</dependency> -->
 <!-- 							<dependency>
 								<type>p2-installable-unit</type>
 								<artifactId>org.eclipse.equinox.weaving.sdk.feature.group</artifactId>
