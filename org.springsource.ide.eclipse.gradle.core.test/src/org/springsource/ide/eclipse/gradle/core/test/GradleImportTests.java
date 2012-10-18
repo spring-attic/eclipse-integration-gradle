@@ -26,7 +26,6 @@ import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -34,7 +33,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -591,7 +589,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(name);
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.10.jar", true);
+		assertJarEntry(project, "junit-4.11-beta-1.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 	
@@ -644,7 +642,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects("quickstart");
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.10.jar", true);
+		assertJarEntry(project, "junit-4.11-beta-1.jar", true);
 		
 		assertNoRawLibraryEntries(project);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
@@ -691,7 +689,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(name);
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.10.jar", true);
+		assertJarEntry(project, "junit-4.11-beta-1.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 	
