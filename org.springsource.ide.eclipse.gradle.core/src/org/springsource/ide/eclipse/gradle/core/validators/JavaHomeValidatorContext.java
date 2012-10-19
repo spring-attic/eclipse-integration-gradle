@@ -22,10 +22,19 @@ public interface JavaHomeValidatorContext {
 
 	/**
 	 * Should return the name of the JRE install selected by the user, or null if the
-	 * user has selected the Gradle wrapper's default instead of a specific JRE.
+	 * user has not selected a JRE. (Note: if a execution environment is selected, this
+	 * returns null, it only returns a non-null value if a JRE is selected directly.
 	 */
 	String getJavaHomeJRENameInPage();
 
+	/**
+	 * Should return the name of the Execution environment selected by the suer of null if
+	 * has not selected a EE.
+	 */
+	String getExecutionEnvNameInPage();
+	
+	
 	JavaRuntimeUtils getJREUtils();
+
 
 }

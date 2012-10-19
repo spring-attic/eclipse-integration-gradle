@@ -13,13 +13,17 @@ package org.springsource.ide.eclipse.gradle.core.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.springsource.ide.eclipse.gradle.core.GradleCore;
-
+import org.eclipse.jdt.launching.LibraryLocation;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
 /**
  * Utilities to retrieve info about JVMs configured in the workspace.
@@ -29,6 +33,30 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 public class JavaRuntimeUtils {
 	
 	private List<IVMInstall> allInstalls = null; //Lazy initialised
+	private IExecutionEnvironment[] allExecEnvs = null;
+	
+	public IExecutionEnvironment[] getExecutionEnvs() {
+		if (allExecEnvs==null) {
+			IExecutionEnvironmentsManager mgr = JavaRuntime.getExecutionEnvironmentsManager();
+			allExecEnvs = mgr.getExecutionEnvironments();
+			if (allExecEnvs==null) {
+				allExecEnvs = new IExecutionEnvironment[0];
+			}
+		}
+		return allExecEnvs;
+	}
+	
+	public String[] getExecutionEnvNames() {
+		IExecutionEnvironment[] envs = getExecutionEnvs();
+		if (envs!=null) {
+			String[] names = new String[envs.length];
+			for (int i = 0; i < names.length; i++) {
+				names[i] = envs[i].getId();
+			}
+			return names;
+		}
+		return new String[0];
+	}
 
 	public List<IVMInstall> getWorkspaceJVMs() {
 		if (allInstalls==null) {
@@ -67,7 +95,7 @@ public class JavaRuntimeUtils {
 	
 	/**
 	 * This method returns true if we are fairly certain that the given JVM is a JRE and not a proper
-	 * JDK. If we can't determine whether it is a JDK then we conservatibley return false.
+	 * JDK. If we can't determine whether it is a JDK then we conservatively return false.
 	 */
 	public static boolean hasTheJREProblem(IVMInstall jvm) {
 		String os = System.getProperty("os.name");
@@ -86,6 +114,20 @@ public class JavaRuntimeUtils {
 		}
 		return false; // Conservatively assume check for 'not a JRE' is passing if unknown OS, or Mac OS, or something went wrong,
 		// or Java home doesn't exist  etc.
+	}
+
+	public IVMInstall getInstallForEE(String execEnvName) {
+		IExecutionEnvironment[] ees = getExecutionEnvs();
+		IExecutionEnvironment found = null;
+		for (IExecutionEnvironment ee : ees) {
+			if (ee.getId().equals(execEnvName)) {
+				found = ee;
+			}
+		}
+		if (found!=null) {
+			return found.getDefaultVM();
+		}
+		return null;
 	}
 
 	

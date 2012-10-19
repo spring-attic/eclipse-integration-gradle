@@ -224,7 +224,7 @@ public class GradleImportTests extends GradleTest {
 		//It doesn't actually test whether this setting actually makes Gradle use that JVM (how could we test that???)
 		IVMInstall defaultVM = JavaRuntime.getDefaultVMInstall();
 		try {
-			GradleCore.getInstance().getPreferences().setJavaHomeJRE(defaultVM);
+			GradleCore.getInstance().getPreferences().setJavaHomeJREName(defaultVM.getName());
 			String projectName = "multiproject";
 			String subprojectName = "subproject";
 			importTestProject(projectName);
@@ -233,7 +233,7 @@ public class GradleImportTests extends GradleTest {
 					subprojectName);
 			
 		} finally {
-			GradleCore.getInstance().getPreferences().setJavaHomeJRE(null); //Rest to default
+			GradleCore.getInstance().getPreferences().unsetJavaHome(); //Reset to default
 		}
 	}
 

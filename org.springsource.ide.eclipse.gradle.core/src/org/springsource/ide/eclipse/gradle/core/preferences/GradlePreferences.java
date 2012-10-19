@@ -40,12 +40,14 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
  */
 public class GradlePreferences extends AbstractGradlePreferences implements IPreferenceChangeListener {
 
-	private static final String JAVA_HOME_JRE_NAME = GradlePreferences.class.getName()+".JAVA_HOME_MODE";
+	private static final String JAVA_HOME_JRE_NAME = GradlePreferences.class.getName()+".JAVA_HOME_JRE";
+	private static final String JAVA_HOME_EE_NAME = GradlePreferences.class.getName()+".JAVA_HOME_EE";
+	
 	private static final String DISTRIBUTION = GradlePreferences.class.getName()+".DISTRIBUTION";
 	
 	private static final String DEPLOYMENT_EXCLUSIONS = GradlePreferences.class.getName()+".WTP_EXCLUDE";
 	
-	private static final String DISABLE_UNDERLINING = GradlePreferences.class.getName()+".DISABL_UNDERLINING";
+	private static final String DISABLE_UNDERLINING = GradlePreferences.class.getName()+".DISABLE_UNDERLINING";
 	public static final boolean DEFAULT_DISABLE_UNDERLINING = true;
 	
 	private static final String JVM_ARGS = GradlePreferences.class.getName()+".JVM_ARGS";
@@ -89,28 +91,52 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	
 
 	/**
-	 * @return a workspace configured JVM to use for Gradle's JAVA_HOME. May be null in which case
+	 * Return a workspace configured JVM to use for Gradle's JAVA_HOME. May be null in which case
 	 * Gradle should use its own default.
+	 * <p>
+	 * A custom Java home can be defined in one of two ways, either via selecting a specific JRE,
+	 * or by selecting an Execution environment that has a default JRE associated with it. 
 	 */
 	public IVMInstall getJavaHomeJRE() {
+		JavaRuntimeUtils jres = new JavaRuntimeUtils();
 		String jreName = get(JAVA_HOME_JRE_NAME, null);
 		if (jreName!=null) {
-			JavaRuntimeUtils jres = new JavaRuntimeUtils();
 			return jres.getInstall(jreName);
+		}
+		String eeName = get(JAVA_HOME_EE_NAME, null);
+		if (eeName!=null) {
+			return jres.getInstallForEE(eeName);
 		}
 		return null;
 	}
 	
 	/**
-	 * Sets the JavaHome to a specific JVM installation chosen by the user, or null if no Java home was specified
-	 * by the user (in this case, Gradle will be left to figure out by itself what it should be using.
+	 * Sets the JavaHome by selecting a JRE name chosen by the user or null, if the JRE was chosen.
 	 */
-	public void setJavaHomeJRE(IVMInstall install) {
-		if (install==null) {
-			put(JAVA_HOME_JRE_NAME, null);
-		} else {
-			put(JAVA_HOME_JRE_NAME, install.getName());
+	public void setJavaHomeJREName(String jreName) {
+		put(JAVA_HOME_JRE_NAME, jreName);
+		if (jreName!=null) {
+			//When a JRE name is used to specify the Java home, make sure the EE_NAME is
+			//not active anymore.
+			put(JAVA_HOME_EE_NAME, null);
 		}
+	}
+	
+	public void setJavaHomeEEName(String eeName) {
+		put(JAVA_HOME_EE_NAME, eeName);
+		if (eeName!=null) {
+			//When a EE name is used to specify the Java home, make sure the JRE_NAME selection is
+			//not active anymore.
+			put(JAVA_HOME_JRE_NAME, null);
+		}
+	}
+	
+	/**
+	 * Ensures that no custom Java home is selected anymore.
+	 */
+	public void unsetJavaHome() {
+		setJavaHomeEEName(null);
+		setJavaHomeJREName(null);
 	}
 
 	/**
@@ -234,6 +260,14 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 
 	public void setProgramArguments(String args) {
 		put(PROGRAM_ARGUMENTS, args);
+	}
+
+	public String getJavaHomeJREName() {
+		return get(JAVA_HOME_JRE_NAME, null);
+	}
+
+	public String getJavaHomeEEName() {
+		return get(JAVA_HOME_EE_NAME, null);
 	}
 	
 }

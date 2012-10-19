@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.JavaRuntimeUtils;
 import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 import org.springsource.ide.eclipse.gradle.core.validators.JavaHomeValidator;
@@ -56,9 +57,17 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
 	//////// alternative 2: Local JVM install folder ///////////////////////
 	private Button customHomeButton;
 	private Combo customJRECombo;
-	private Button browseHomeButton;
+	private Button configureJREsButton;
+	
+	/////// alternative 3: Execution environment ///////////////////////////
+	private Button customExecutionEnvButton;
+	private Combo customExecutionEnvCombo;
+	private Button configureExecEnvsButton;
+	
+	////////////
 	
 	private JavaRuntimeUtils jres = new JavaRuntimeUtils();
+
 	
 	public JavaHomeSection(PreferencePageWithSections owner) {
 		super(owner);
@@ -66,7 +75,7 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
 	}
 	
 	public void createContents(Composite page) {
-        GridDataFactory grabHorizontal = GridDataFactory.fillDefaults().grab(true, false);
+        GridDataFactory grabHor = GridDataFactory.fillDefaults().grab(true, false);
 		Label label = new Label(page, SWT.NONE);
 		label.setText("Java Home (requires Gradle 1.0.RC1 or later)");
 
@@ -75,7 +84,7 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
         Composite composite = new Composite(page, SWT.NONE);
         GridLayout layout = new GridLayout(3, false);
         composite.setLayout(layout);
-        grabHorizontal.applyTo(composite);
+        grabHor.applyTo(composite);
         
 		defaultButton = new Button(composite, SWT.RADIO); 
 		defaultButton.setText("Use Gradle wrapper's default");
@@ -87,23 +96,41 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
 		customHomeButton = new Button(composite, SWT.RADIO);
 		customHomeButton.setText("Workspace JRE: ");
 		customHomeButton.setToolTipText("Use a specific Java installation configured in this workspace");
-        
         customJRECombo = new Combo(composite, SWT.DROP_DOWN+SWT.READ_ONLY);
-        refreshJREs();
-        
-		browseHomeButton = new Button(composite, SWT.PUSH);
-		browseHomeButton.setText("Configure JREs");
+		configureJREsButton = new Button(composite, SWT.PUSH);
+		configureJREsButton.setText("Configure JREs");
 		
-        customHomeButton.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {
-				enableDisableWidgets();
-			}
+		grabHor.applyTo(configureJREsButton);
+		grabHor.applyTo(customJRECombo);
+		
+		//Alternative 3: choose an execution environment
+		customExecutionEnvButton = new Button(composite, SWT.RADIO);
+		customExecutionEnvButton.setText("Execution Environment");
+		customExecutionEnvButton.setToolTipText("Specify a JRE indirectly via an execution environment");
+		customExecutionEnvCombo = new Combo(composite, SWT.DROP_DOWN+SWT.READ_ONLY);
+		configureExecEnvsButton = new Button(composite, SWT.PUSH);
+		configureExecEnvsButton.setText("Configure EEs");
 
-			public void widgetDefaultSelected(SelectionEvent e) {
+		grabHor.applyTo(configureExecEnvsButton);
+		grabHor.applyTo(customExecutionEnvCombo);
+		
+        refreshJREs();
+
+        customHomeButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				enableDisableWidgets(customHomeButton, customJRECombo, configureJREsButton);
+				validator.refresh();
+			}
+		});
+        customExecutionEnvButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				enableDisableWidgets(customExecutionEnvButton, 
+						customExecutionEnvCombo, configureExecEnvsButton);
+				validator.refresh();
 			}
 		});
                 
-        browseHomeButton.addSelectionListener(new SelectionAdapter() {
+        configureJREsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				@SuppressWarnings("restriction")
 				IPreferencePage page = new org.eclipse.jdt.internal.debug.ui.jres.JREsPreferencePage();
@@ -116,15 +143,22 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
 				dialog.open();
 				
 				refreshJREs();
+			}
+		});
+        
+        configureExecEnvsButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				@SuppressWarnings("restriction")
+				IPreferencePage page = new org.eclipse.jdt.internal.debug.ui.jres.ExecutionEnvironmentsPreferencePage();
+				PreferenceManager mgr = new PreferenceManager();
+				IPreferenceNode node = new PreferenceNode("1", page);
+				mgr.addToRoot(node);
+				PreferenceDialog dialog = new PreferenceDialog(owner.getShell(), mgr);
+				dialog.create();
+				dialog.setMessage(page.getTitle());
+				dialog.open();
 				
-//				System.out.println("kdvolder");
-				
-//				PreferenceDialog w = PreferencesUtil.createPreferenceDialogOn(owner.getShell(), JRE_PREF_PAGE_ID, new String[] {JRE_PREF_PAGE_ID, GradlePreferencesPage.ID}, null);
-//				w.setBlockOnOpen(true);
-//				w.open();
-//				//Eclipse only allows one preferences dialog to be open at the same time
-//				//We only get here after user closed dialog, so we must reopen it on the Gradle preferences page.
-//				PreferencesUtil.createPreferenceDialogOn(null, GradlePreferencesPage.ID, new String[] {JRE_PREF_PAGE_ID, GradlePreferencesPage.ID}, null).open();
+				refreshJREs();
 			}
 
 		});
@@ -135,25 +169,61 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
 			}
 		});
         
-        grabHorizontal.applyTo(customJRECombo);
+        customExecutionEnvCombo.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				validator.refresh();
+			}
+		});
+        
+        grabHor.applyTo(customJRECombo);
 
-        setJavaHomeInPage(getJavaHome());
+        copyFrom(getPreferences());
+        
         enableDisableWidgets();
 	}
-	
-	private void setJavaHome(IVMInstall distro) {
-		GradleCore.getInstance().getPreferences().setJavaHomeJRE(distro);
+
+	/**
+	 * Fill the widget contents based on GradlePreferences
+	 */
+	private void copyFrom(GradlePreferences preferences) {
+		Button enable = defaultButton;
+		String jreName = preferences.getJavaHomeJREName();
+		if (jreName!=null) {
+			customJRECombo.setText(jreName);
+			if (customJRECombo.getText().equals(jreName)) {
+				enable = customHomeButton;
+			}
+		}
+		String eeName = preferences.getJavaHomeEEName();
+		if (eeName!=null) {
+			customExecutionEnvCombo.setText(eeName);
+			if (customExecutionEnvCombo.getText().equals(eeName)) {
+				enable = customExecutionEnvButton;
+			}
+		}
+		for (Button b : new Button[] {defaultButton, customHomeButton, customExecutionEnvButton}) {
+			b.setSelection(b==enable);
+		}
 	}
 
 	private void enableDisableWidgets() {
-		enableDisableWidgets(customHomeButton, customJRECombo, browseHomeButton);
+		enableDisableWidgets(customHomeButton, customJRECombo, configureJREsButton);
+		enableDisableWidgets(customExecutionEnvButton, customExecutionEnvCombo, configureExecEnvsButton);
 	}
 
 	private void refreshJREs() {
 		jres = new JavaRuntimeUtils();
-        customJRECombo.setItems(jres.getWorkspaceJVMNames());
+		setItems(customJRECombo, jres.getWorkspaceJVMNames());
+        setItems(customExecutionEnvCombo, jres.getExecutionEnvNames());
 	}
 	
+	
+	private static void setItems(Combo combo, String[] items) {
+		String oldSelection = combo.getText();
+		combo.setItems(items);
+		combo.setText(oldSelection); //Otherwise the selection gets cleared which is annoying.
+	}
+
 	/**
 	 * Enable/disable a number of controls depending on whether given radio button is enabled/disabled.
 	 */
@@ -164,29 +234,21 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
 		}
 	}
 	
-	private void setJavaHomeInPage(IVMInstall install) {
-		if (install==null) {
-			defaultButton.setSelection(true);
-			customHomeButton.setSelection(false);
-		} else {
-			String name = install.getName();
-			customHomeButton.setSelection(true);
-			defaultButton.setSelection(false);
-			customJRECombo.setText(name);
-		}
-	}
-
-	private IVMInstall getJavaHome() {
-		return GradleCore.getInstance().getPreferences().getJavaHomeJRE();
-	}
-
 	public boolean performOK() {
-		setJavaHome(getJavaHomeInPage());
+		GradlePreferences prefs = getPreferences();
+		prefs.setJavaHomeJREName(getJavaHomeJRENameInPage());
+		prefs.setJavaHomeEEName(getExecutionEnvNameInPage());
 		return true;
 	}
 
+	private GradlePreferences getPreferences() {
+		return GradleCore.getInstance().getPreferences();
+	}
+
 	public void performDefaults() {
-		setJavaHomeInPage(null);
+		defaultButton.setSelection(true);
+		customExecutionEnvButton.setSelection(false);
+		customHomeButton.setSelection(false);
 	}
 
 	public String getJavaHomeJRENameInPage() {
@@ -199,10 +261,12 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
 		return null;
 	}
 	
-	private IVMInstall getJavaHomeInPage() {
-		String name = getJavaHomeJRENameInPage();
-		if (name!=null) {
-			return jres.getInstall(name);
+	public String getExecutionEnvNameInPage() {
+		if (customExecutionEnvButton.getSelection()) {
+			String name = customExecutionEnvCombo.getText();
+			if (!"".equals(name)) {
+				return name;
+			}
 		}
 		return null;
 	}
@@ -215,4 +279,5 @@ public class JavaHomeSection extends PrefsPageSection implements JavaHomeValidat
 	public JavaRuntimeUtils getJREUtils() {
 		return jres;
 	}
+
 }
