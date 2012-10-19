@@ -139,12 +139,15 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 					return GradleCore.create(project);
 				}
 			} else {
-				String projectLoc = conf.getAttribute(PROJECT_LOCATION, (String)null);
-				if (projectLoc!=null) {
-					return GradleCore.create(new File(projectLoc));
+				String projectLocString = conf.getAttribute(PROJECT_LOCATION, (String)null);
+				if (projectLocString!=null) {
+					File projectLoc = new File(projectLocString);
+					if (projectLoc.isDirectory()) {
+						return GradleCore.create(projectLoc);
+					}
 				}
 			}
-		} catch (CoreException e) {
+		} catch (Exception e) {
 			GradleCore.log(e);
 		}
 		return null;
