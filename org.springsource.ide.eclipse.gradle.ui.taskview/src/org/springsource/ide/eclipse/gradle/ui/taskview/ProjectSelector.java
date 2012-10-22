@@ -117,6 +117,8 @@ public class ProjectSelector {
 		projectCombo.setItems(projectNames);
 		if (select>=0) {
 			projectCombo.setText(projectNames[select]);
+		} else {
+			setProject((GradleProject)null);
 		}
 	}
 
