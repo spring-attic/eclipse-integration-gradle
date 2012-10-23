@@ -32,13 +32,12 @@ import org.springsource.ide.eclipse.gradle.core.wtp.DeploymentExclusions;
 import org.springsource.ide.eclipse.gradle.core.wtp.RegexpListDeploymentExclusions;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 
-
 /**
  * Convenience wrapper class to access Gradle preferences, however they may be stored.
  * 
  * @author Kris De Volder
  */
-public class GradlePreferences extends AbstractGradlePreferences implements IPreferenceChangeListener {
+public class GradlePreferences extends AbstractGradlePreferences implements IPreferenceChangeListener, IJavaHomePreferences {
 
 	private static final String JAVA_HOME_JRE_NAME = GradlePreferences.class.getName()+".JAVA_HOME_JRE";
 	private static final String JAVA_HOME_EE_NAME = GradlePreferences.class.getName()+".JAVA_HOME_EE";
@@ -97,13 +96,13 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	 * A custom Java home can be defined in one of two ways, either via selecting a specific JRE,
 	 * or by selecting an Execution environment that has a default JRE associated with it. 
 	 */
-	public IVMInstall getJavaHomeJRE() {
+	public static IVMInstall getJavaHomeJRE(IJavaHomePreferences prefs) {
 		JavaRuntimeUtils jres = new JavaRuntimeUtils();
-		String jreName = get(JAVA_HOME_JRE_NAME, null);
+		String jreName = prefs.getJavaHomeJREName();
 		if (jreName!=null) {
 			return jres.getInstall(jreName);
 		}
-		String eeName = get(JAVA_HOME_EE_NAME, null);
+		String eeName = prefs.getJavaHomeEEName();
 		if (eeName!=null) {
 			return jres.getInstallForEE(eeName);
 		}
@@ -268,6 +267,14 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 
 	public String getJavaHomeEEName() {
 		return get(JAVA_HOME_EE_NAME, null);
+	}
+
+	public static File getJavaHome(IJavaHomePreferences prefs) {
+		IVMInstall install = getJavaHomeJRE(prefs);
+		if (install!=null) {
+			return install.getInstallLocation();
+		}
+		return null;
 	}
 	
 }

@@ -24,6 +24,7 @@ public class GradleLaunchArgumentsTab extends LaunchTabWithSections {
 	
 	protected List<LaunchTabSection> createSections() {
 		ArrayList<LaunchTabSection> sections = new ArrayList<LaunchTabSection>();
+		sections.add(new JavaHomeLaunchTabSection(this));
 		sections.add(new JVMArgumentsLaunchTabSection(this));
 		sections.add(new ProgramArgumentsLaunchTabSection(this));
 		return sections;

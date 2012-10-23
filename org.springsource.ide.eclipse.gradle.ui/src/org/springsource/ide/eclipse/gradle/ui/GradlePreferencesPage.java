@@ -14,6 +14,8 @@ package org.springsource.ide.eclipse.gradle.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
+
 /**
  * @author Kris De Volder
  */
@@ -28,7 +30,8 @@ public class GradlePreferencesPage extends PreferencePageWithSections {
 		List<PrefsPageSection> sections = new ArrayList<PrefsPageSection>();
 		sections.add(new EnableUnderliningSection(this));
 		sections.add(new DistributionSection(this));
-		sections.add(new JavaHomeSection(this));
+		//JavaHomeSection moved to arguments page.
+		//sections.add(new JavaHomeSection(this, GradleCore.getInstance().getPreferences()));
 		return sections;
 	}
 
