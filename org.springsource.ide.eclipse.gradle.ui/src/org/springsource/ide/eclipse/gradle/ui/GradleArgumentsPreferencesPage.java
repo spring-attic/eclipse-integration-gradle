@@ -13,6 +13,8 @@ package org.springsource.ide.eclipse.gradle.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
+
 public class GradleArgumentsPreferencesPage extends PreferencePageWithSections {
 
 	public GradleArgumentsPreferencesPage() {
@@ -21,6 +23,7 @@ public class GradleArgumentsPreferencesPage extends PreferencePageWithSections {
 	@Override
 	protected List<PrefsPageSection> createSections() {
 		List<PrefsPageSection> sections = new ArrayList<PrefsPageSection>();
+		sections.add(new JavaHomeSection(this));
 		sections.add(new JVMArgumentsSection(this));
 		sections.add(new ProgramArgumentsSection(this));
 		return sections;

@@ -56,6 +56,7 @@ import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfiguration
 import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
+import org.springsource.ide.eclipse.gradle.core.preferences.IJavaHomePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
@@ -299,16 +300,16 @@ public class GradleProject {
 	 */
 	public void configureOperation(LongRunningOperation gradleOp, ILaunchConfiguration conf) {
 		try {
-			GradleProjectPreferences prefs = getProjectPreferences();
-			File javaHome = prefs.getJavaHome();
+			GradleProjectPreferences projectPrefs = getProjectPreferences();
+			File javaHome = projectPrefs.getJavaHome();
 			if (javaHome!=null) {
 				gradleOp.setJavaHome(javaHome);
 			}
-			String[] jvmArgs = prefs.getJVMArgs();
+			String[] jvmArgs = projectPrefs.getJVMArgs();
 			if (jvmArgs!=null) {
 				gradleOp.setJvmArguments(jvmArgs);
 			}
-			String[] pgmArgs = prefs.getProgramArgs();
+			String[] pgmArgs = projectPrefs.getProgramArgs();
 			if (pgmArgs!=null) {
 				gradleOp.withArguments(pgmArgs);
 			}
@@ -714,7 +715,8 @@ public class GradleProject {
 			return cachedProject;
 		}
 		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if (project.getLocation().toFile().equals(location)) {
+			IPath loc = project.getLocation();
+			if (loc!=null && loc.toFile().equals(location)) {
 				this.cachedProject = project;
 				return project;
 			}

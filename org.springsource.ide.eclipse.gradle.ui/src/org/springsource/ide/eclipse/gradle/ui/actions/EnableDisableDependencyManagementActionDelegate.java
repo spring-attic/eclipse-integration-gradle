@@ -11,9 +11,11 @@
 package org.springsource.ide.eclipse.gradle.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -32,26 +34,37 @@ public class EnableDisableDependencyManagementActionDelegate extends GradleProje
 	}
 
 	public void run(IAction action) {
-		final IProject project = getProject();
-		runInUi(new GradleRunnable("Enable Dependency Management for "+project.getName()) {
-			@Override
-			public void doit(IProgressMonitor monitor) throws Exception {
-				monitor.beginTask(jobName, 10);
-				try {
-					final IJavaProject javaProject = JavaCore.create(project);
-					if (GradleClassPathContainer.isOnClassPath(javaProject)) {
-						GradleClassPathContainer.removeFrom(javaProject, monitor);
-					} else {
-						GradleClassPathContainer.addTo(javaProject, monitor);
+		final List<IProject> projects = getProjects();
+		if (projects.size()>0) {
+			runInUi(new GradleRunnable("Enable/Disable Gradle Dependency Management") {
+				@Override
+				public void doit(IProgressMonitor monitor) throws Exception {
+					boolean enable = !GradleClassPathContainer.isOnClassPath(JavaCore.create(projects.get(0)));
+					monitor.beginTask(jobName, projects.size());
+					try {
+						for (IProject project : projects) {
+							try {
+								final IJavaProject javaProject = JavaCore.create(project);
+								boolean isEnabled = GradleClassPathContainer.isOnClassPath(javaProject);
+								if (enable!=isEnabled) {
+									if (enable) {
+										GradleClassPathContainer.addTo(javaProject, new SubProgressMonitor(monitor, 1));
+									} else {
+										GradleClassPathContainer.removeFrom(javaProject, new SubProgressMonitor(monitor, 1));
+									}
+								} else {
+									monitor.worked(1);
+								}
+							} catch (JavaModelException e) {
+								throw new InvocationTargetException(e);
+							}
+						}
+					} finally {
+						monitor.done();
 					}
-				} catch (JavaModelException e) {
-					throw new InvocationTargetException(e);
 				}
-				finally {
-					monitor.done();
-				}
-			}
-		});
+			});
+		}
 	} 
 	
 	@Override

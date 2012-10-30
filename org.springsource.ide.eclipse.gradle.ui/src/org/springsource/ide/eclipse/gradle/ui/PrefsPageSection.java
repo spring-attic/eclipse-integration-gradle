@@ -25,7 +25,6 @@ public abstract class PrefsPageSection extends PageSection {
 		super(owner);
 	}
 
-	public abstract void createContents(Composite page);
 	public abstract boolean performOK();
 	public abstract void performDefaults();
 	

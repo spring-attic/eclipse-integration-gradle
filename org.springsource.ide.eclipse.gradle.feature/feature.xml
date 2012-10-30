@@ -17,10 +17,6 @@
       %license
    </license>
 
-   <includes
-         id="org.gradle.toolingapi.feature"
-         version="0.0.0"/>
-
    <plugin
          id="org.springsource.ide.eclipse.gradle.core"
          download-size="0"

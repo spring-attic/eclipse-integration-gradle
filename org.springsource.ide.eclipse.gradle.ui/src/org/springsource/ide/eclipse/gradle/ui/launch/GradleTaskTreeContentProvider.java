@@ -48,7 +48,9 @@ public class GradleTaskTreeContentProvider implements ITreeContentProvider {
 	
 	public void dispose() {
 		try {
-			projectProv.dispose();
+			if (projectProv!=null) {
+				projectProv.dispose();
+			}
 			if (currentProject!=null) {
 				if (modelListener!=null) {
 					currentProject.removeModelListener(modelListener);

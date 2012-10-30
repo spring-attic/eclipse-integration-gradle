@@ -119,13 +119,9 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	}
 
 	public File getJavaHome() {
-		//Presently this preference can only be specified Globally, but eventually, it might make sense to
-		//override the global setting by setting it on the root project of a hierarchy.
-		IVMInstall install = GradleCore.getInstance().getPreferences().getJavaHomeJRE();
-		if (install!=null) {
-			return install.getInstallLocation();
-		}
-		return null;
+		//Presently this preference can not be specified on projects so we just use the
+		//global preference to determine it.
+		return GradlePreferences.getJavaHome(GradleCore.getInstance().getPreferences());
 	}
 
 	public String[] getJVMArgs() {

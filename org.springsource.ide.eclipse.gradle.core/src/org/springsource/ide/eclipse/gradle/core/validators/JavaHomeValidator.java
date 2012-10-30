@@ -40,6 +40,17 @@ public class JavaHomeValidator extends LiveExpression<ValidationResult> {
 			}
 		}
 		
+		String execEnvName = context.getExecutionEnvNameInPage();
+		if (execEnvName!=null) {
+			JavaRuntimeUtils jres = context.getJREUtils();
+			IVMInstall install = jres.getInstallForEE(execEnvName);
+			if (install==null) {
+				return ValidationResult.error("No default JRE defined for "+execEnvName);
+			} else if (JavaRuntimeUtils.hasTheJREProblem(install)) {
+				return ValidationResult.error(install.getName()+" is not a JDK. Gradle requires a JDK.");
+			}
+		}
+		
 		return ValidationResult.OK;
 	}
 

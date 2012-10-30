@@ -302,6 +302,7 @@ public class GradleTasksView extends ViewPart {
 	}
 
 	public void requestRefreshTasks() throws CoreException {
+		projectSelector.updateProjects();
 		GradleProject project = projectSelector.getProject();
 		if (project!=null) {
 			project.requestGradleModelRefresh();

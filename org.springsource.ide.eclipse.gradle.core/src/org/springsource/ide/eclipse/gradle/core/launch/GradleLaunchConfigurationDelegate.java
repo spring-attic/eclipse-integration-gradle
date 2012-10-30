@@ -29,8 +29,9 @@ import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.gradle.tooling.LongRunningOperation;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
+import org.springsource.ide.eclipse.gradle.core.preferences.IJavaHomePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ArgumentsParser;
-
 
 /**
  * Launch configuration delegate to support the execution of Gradle tasks.
@@ -49,6 +50,8 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	
 	private static final String JVM_ARGS = ID+".JVM_ARGS";
 	private static final String PGM_ARGS = ID+".PGM_ARGS";
+	private static final String JRE_NAME = ID+".JRE_NAME";
+	private static final String EE_NAME = ID+".EE_NAME";
 
 	/*
 	 * Of the two properties PROJECT and PROJECT_LOCATION at least one of them must be set to
@@ -57,6 +60,7 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	 */
 	private static final String PROJECT = ID +".PROJECT";
 	public static final String PROJECT_LOCATION = ID+".LOCATION";
+
 
 	public void launch(ILaunchConfiguration configuration, String mode, final ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask("Launching Gradle Tasks", 1);
@@ -67,6 +71,34 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		}
 	}
 
+	/**
+	 * Allows using a Gradle launch configuration as a {@link IJavaHomePreferences} instance.
+	 */
+	public static IJavaHomePreferences asJavaHomePrefs(final ILaunchConfiguration conf) {
+		return new IJavaHomePreferences() {
+			public void unsetJavaHome() {
+				this.setJavaHomeEEName(null);
+				this.setJavaHomeJREName(null);
+			}
+			
+			public void setJavaHomeJREName(String name) {
+				GradleLaunchConfigurationDelegate.setJavaHomeJREName((ILaunchConfigurationWorkingCopy)conf, name);
+			}
+			
+			public void setJavaHomeEEName(String name) {
+				GradleLaunchConfigurationDelegate.setJavaHomeEEName((ILaunchConfigurationWorkingCopy)conf, name);
+			}
+			
+			public String getJavaHomeJREName() {
+				return GradleLaunchConfigurationDelegate.getJavaHomeJREName(conf);
+			}
+			
+			public String getJavaHomeEEName() {
+				return GradleLaunchConfigurationDelegate.getJavaHomeEEName(conf);
+			}
+		};
+	}
+
 	public static String getJVMArguments(ILaunchConfiguration conf) {
 		try {
 			return conf.getAttribute(JVM_ARGS, (String)null);
@@ -75,7 +107,44 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			return null;
 		}
 	}
+	
+	public static String getJavaHomeJREName(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(JRE_NAME, (String)null);
+		} catch (CoreException e) {
+			GradleCore.log(e);
+			return null;
+		}
+	}
+	
+	public static String getJavaHomeEEName(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(EE_NAME, (String)null);
+		} catch (CoreException e) {
+			GradleCore.log(e);
+			return null;
+		}
+	}
 
+	public static void setJavaHomeJREName(ILaunchConfigurationWorkingCopy conf, String name) {
+		if (name==null) {
+			conf.removeAttribute(JRE_NAME);
+		} else {
+			conf.setAttribute(JRE_NAME, name);
+			//only one of JRE / EE name should be set to non-null value enforce this:
+			conf.removeAttribute(EE_NAME);
+		}
+	}
+	public static void setJavaHomeEEName(ILaunchConfigurationWorkingCopy conf, String name) {
+		if (name==null) {
+			conf.removeAttribute(EE_NAME);
+		} else {
+			conf.setAttribute(EE_NAME, name);
+			//only one of JRE / EE name should be set to non-null value enforce this:
+			conf.removeAttribute(JRE_NAME);
+		}
+	}
+	
 	public static void setJVMArguments(ILaunchConfigurationWorkingCopy conf, String args) {
 		if (args==null) {
 			conf.removeAttribute(JVM_ARGS);
@@ -139,12 +208,15 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 					return GradleCore.create(project);
 				}
 			} else {
-				String projectLoc = conf.getAttribute(PROJECT_LOCATION, (String)null);
-				if (projectLoc!=null) {
-					return GradleCore.create(new File(projectLoc));
+				String projectLocString = conf.getAttribute(PROJECT_LOCATION, (String)null);
+				if (projectLocString!=null) {
+					File projectLoc = new File(projectLocString);
+					if (projectLoc.isDirectory()) {
+						return GradleCore.create(projectLoc);
+					}
 				}
 			}
-		} catch (CoreException e) {
+		} catch (Exception e) {
 			GradleCore.log(e);
 		}
 		return null;
@@ -293,6 +365,10 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 
 	public static void configureOperation(LongRunningOperation gradleOp, ILaunchConfiguration conf) {
 		if (conf!=null) {
+			File javaHome = GradlePreferences.getJavaHome(asJavaHomePrefs(conf));
+			if (javaHome!=null) {
+				gradleOp.setJavaHome(javaHome);
+			}
 			String[] jvmArgs = getJVMArgumentsArray(conf);
 			if (jvmArgs!=null) {
 				gradleOp.setJvmArguments(jvmArgs);
@@ -303,4 +379,5 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			}
 		}
 	}
+
 }
