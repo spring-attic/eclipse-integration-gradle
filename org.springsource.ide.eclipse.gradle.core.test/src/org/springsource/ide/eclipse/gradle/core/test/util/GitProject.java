@@ -36,6 +36,7 @@ public class GitProject {
 	private ExternalCommand checkoutCommand;
 	private ExternalCommand resetCommand;
 	private ExternalCommand cleanCommand;
+	private ExternalCommand pullCommand;
 
 	public GitProject(String projectName, URI repo, String checkout) {
 		Assert.isNotNull(projectName);
@@ -99,6 +100,13 @@ public class GitProject {
 		return checkoutCommand;
 	}
 
+	private ExternalCommand getPullCommand() {
+	    if (pullCommand==null) {
+	        pullCommand = new ExternalCommand("git", "pull", "-f", "origin", checkout);
+	    }
+	    return pullCommand;
+	}
+	
 	private ExternalCommand getCloneCommand() {
 		if (gitCommand==null) {
 			gitCommand = new ExternalCommand("git", "clone", recursive?"--recursive":null, repo.toString());
@@ -134,6 +142,12 @@ public class GitProject {
 		return projectDir;
 	}
 
+	public File forcePull() throws IOException, InterruptedException {
+	    File projectDir = checkout();
+	    getPullCommand().exec(projectDir);
+	    return projectDir;
+	}
+	
 	private ExternalCommand getCleanCommand() {
 		if (cleanCommand==null) {
 			cleanCommand = new ExternalCommand("git", "clean", "-f", "-x", "-d");

@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -34,6 +35,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -161,6 +163,14 @@ public abstract class GradleTest extends TestCase {
 		}
 	}
 
+	public static void assertNoErrors(boolean build) throws CoreException {
+	    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+	    IProject[] projects = root.getProjects();
+	    for (IProject project : projects) {
+            assertNoErrors(project, build);
+        }
+        
+	}
 	/**
 	 * Assert that a given set of projects exists in the workspace. Also forces a full build of
 	 * the projects and checks that the projects have no errors.
@@ -366,10 +376,23 @@ public abstract class GradleTest extends TestCase {
 	 * Checkouts the given git project and creates an import operation to import the project and all its subproject.
 	 */
 	public static GradleImportOperation importGitProjectOperation(GitProject project) throws IOException, InterruptedException, NameClashException, ExistingProjectException, MissingProjectDependencyException, CoreException {
-		File projectDir = project.checkout();
-		return importTestProjectOperation(projectDir);
+		return importGitProjectOperation(project, false);
 	}
 
+	/**
+	 * Checkouts the given git project and creates an import operation to import the project and all its subproject.
+	 * Set forcePull to be true if the project should be pulled to the specified ref
+	 */
+	public static GradleImportOperation importGitProjectOperation(GitProject project, boolean forcePull) throws IOException, InterruptedException, NameClashException, ExistingProjectException, MissingProjectDependencyException, CoreException {
+	    File projectDir;
+        if (forcePull) {
+            projectDir = project.forcePull();
+        } else {
+            projectDir = project.checkout();
+        }
+        return importTestProjectOperation(projectDir);
+	}
+	
 	
 	public static void importGitProject(GitProject project) throws IOException, InterruptedException, NameClashException, ExistingProjectException, MissingProjectDependencyException, CoreException {
 		GradleImportOperation op = importGitProjectOperation(project);
