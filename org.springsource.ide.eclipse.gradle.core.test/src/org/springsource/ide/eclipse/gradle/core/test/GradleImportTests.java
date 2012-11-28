@@ -648,7 +648,28 @@ public class GradleImportTests extends GradleTest {
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 
-	/**
+	// disable project for now since not passing
+	public void _testImportGrailsCore() throws Exception {
+    
+        final GradleImportOperation importOp = importGitProjectOperation(new GitProject("grails-core", 
+                new URI("git://github.com/grails/grails-core.git"), "master"), true);
+    
+        importOp.setEnableDSLD(false); // cause some compilation errors in this project so turn off
+        importOp.setEnableDependencyManagement(false);
+        importOp.setDoBeforeTasks(true);
+    
+        performImport(importOp,
+                //Ignore errors: (expected!)
+                "Project 'spring-aspects' is an AspectJ project"
+                );
+    
+        
+        //check that the refresh preferences got setup properly (only checking one property).
+        //the one that has a non-default value.
+        assertNoErrors(true);
+    }
+
+    /**
 	 * Verify that project classpath does not have plain jar entries on it (all jars are managed in classpath containers).
 	 * @throws JavaModelException 
 	 */
