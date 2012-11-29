@@ -648,8 +648,7 @@ public class GradleImportTests extends GradleTest {
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 
-	// disable project for now since not passing
-	public void _testImportGrailsCore() throws Exception {
+	public void testImportGrailsCore() throws Exception {
     
         final GradleImportOperation importOp = importGitProjectOperation(new GitProject("grails-core", 
                 new URI("git://github.com/grails/grails-core.git"), "master"), true);
