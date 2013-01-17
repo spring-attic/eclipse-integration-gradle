@@ -119,9 +119,9 @@ public class GradleProject {
 
 	public GradleProject(File canonicalFile) {
 		Assert.isLegal(canonicalFile!=null, "Project location must not be null");
-		Assert.isLegal(canonicalFile.exists(), "Project location doesn't exist");
-		Assert.isLegal(canonicalFile.isAbsolute(), "Project location must be absolute");
-		Assert.isLegal(canonicalFile.isDirectory(), "Project location must be a directory");
+		Assert.isLegal(canonicalFile.exists(), "Project location doesn't exist: "+canonicalFile);
+		Assert.isLegal(canonicalFile.isAbsolute(), "Project location must be absolute: "+canonicalFile);
+		Assert.isLegal(canonicalFile.isDirectory(), "Project location must be a directory: "+canonicalFile);
 		this.location = canonicalFile;
 	}
 	
