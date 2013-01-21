@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.gradle.tooling.GradleConnectionException;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ModelBuilder;
 import org.gradle.tooling.ProgressEvent;
@@ -30,8 +29,8 @@ import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil.Console;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 
 /**
@@ -85,10 +84,17 @@ public abstract class GradleModelProvider {
 		return GradleCore.getInstance().getPreferences().getDistribution();
 	}
 	
-	private static ProjectConnection getGradleConnector(File projectLoc, URI distributionPref, IProgressMonitor monitor) {
+	private static File getGradleUserHomePref() {
+		return GradleCore.getInstance().getPreferences().getGradleUserHome();
+	}
+	
+	private static ProjectConnection getGradleConnector(File projectLoc, URI distributionPref, File gradleUserHomePref, IProgressMonitor monitor) {
 		monitor.beginTask("Connection to Gradle", 1);
 		try {
 			GradleConnector connector = GradleConnector.newConnector();
+			if (gradleUserHomePref!=null) {
+				connector.useGradleUserHomeDir(gradleUserHomePref);
+			}
 			// Configure the connector and create the connection
 			if (distributionPref!=null) {
 				boolean distroSet = false;
@@ -121,8 +127,9 @@ public abstract class GradleModelProvider {
 		try {
 			ProjectConnection connection;
 			URI distribution = getDistributionPref();
+			File gradleUserHome = getGradleUserHomePref();
 			try {
-				connection = getGradleConnector(projectLoc, distribution, new SubProgressMonitor(monitor, 1));
+				connection = getGradleConnector(projectLoc, distribution, gradleUserHome, new SubProgressMonitor(monitor, 1));
 				return connection;
 			} catch (Exception e) {
 //				if (distribution==null) {

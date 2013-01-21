@@ -43,6 +43,7 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	private static final String JAVA_HOME_EE_NAME = GradlePreferences.class.getName()+".JAVA_HOME_EE";
 	
 	private static final String DISTRIBUTION = GradlePreferences.class.getName()+".DISTRIBUTION";
+	private static final String GRADLE_USER_HOME = GradlePreferences.class.getName()+".GRADLE_USER_HOME";
 	
 	private static final String DEPLOYMENT_EXCLUSIONS = GradlePreferences.class.getName()+".WTP_EXCLUDE";
 	
@@ -88,7 +89,22 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 		put(DISTRIBUTION, distro!=null?distro.toString():null);
 	}
 	
+	/**
+	 * Returns a java.io.File instance pointing to a gradle user home directory specified by the user
+	 * or null if none was specified. 
+	 */
+	public File getGradleUserHome() {
+		String gradleUserHomeString = get(GRADLE_USER_HOME, null);
+		if (gradleUserHomeString!=null) {
+			return new File(gradleUserHomeString);
+		}
+		return null;
+	}
 
+	public void setGradleUserHome(File loc) {
+		put(GRADLE_USER_HOME, loc!=null?loc.toString():null);
+	}
+	
 	/**
 	 * Return a workspace configured JVM to use for Gradle's JAVA_HOME. May be null in which case
 	 * Gradle should use its own default.
@@ -276,5 +292,4 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 		}
 		return null;
 	}
-	
 }
