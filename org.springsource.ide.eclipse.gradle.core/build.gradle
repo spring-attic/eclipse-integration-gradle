@@ -51,7 +51,7 @@ def getApiVersion() {
 		println "normal build"
 		//return '1.0-rc-1'
 		//return "1.0-rc-2"
-		return '1.2'
+		return '1.3'
 	//} else if (buildType=='integration') {
 		//Integration builds use the current 'release-candidate'.
 //		println "integration build"
