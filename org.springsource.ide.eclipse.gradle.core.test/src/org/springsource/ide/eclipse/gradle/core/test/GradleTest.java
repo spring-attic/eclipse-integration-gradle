@@ -231,7 +231,7 @@ public abstract class GradleTest extends TestCase {
 		}
 	}
 
-	private IProject[] buildProjects() throws CoreException {
+	protected IProject[] buildProjects() throws CoreException {
 		//Wait long enough for the gradle model to become available.
 		IProject[] projects = getProjects();
 		for (IProject p : projects) {

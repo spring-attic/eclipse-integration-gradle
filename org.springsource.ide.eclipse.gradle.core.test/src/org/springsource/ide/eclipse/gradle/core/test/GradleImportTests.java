@@ -662,6 +662,7 @@ public class GradleImportTests extends GradleTest {
                 "Project 'spring-aspects' is an AspectJ project"
                 );
     
+       buildProjects();
         
         //check that the refresh preferences got setup properly (only checking one property).
         //the one that has a non-default value.
