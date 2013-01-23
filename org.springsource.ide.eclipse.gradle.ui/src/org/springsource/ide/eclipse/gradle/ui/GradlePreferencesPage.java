@@ -31,6 +31,7 @@ public class GradlePreferencesPage extends PreferencePageWithSections {
 		sections.add(new EnableUnderliningSection(this));
 		sections.add(new DistributionSection(this));
 		sections.add(new GradleUserHomeSection(this));
+		sections.add(new DependencyManagementSection(this));
 		//JavaHomeSection moved to arguments page.
 		//sections.add(new JavaHomeSection(this, GradleCore.getInstance().getPreferences()));
 		return sections;

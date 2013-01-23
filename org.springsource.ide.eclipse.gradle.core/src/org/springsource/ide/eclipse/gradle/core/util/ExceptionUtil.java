@@ -121,4 +121,7 @@ public class ExceptionUtil {
 		return status(IStatus.ERROR, msg);
 	}
 
+	public static final IStatus OK_STATUS = status(IStatus.OK, "");
+
+	
 }

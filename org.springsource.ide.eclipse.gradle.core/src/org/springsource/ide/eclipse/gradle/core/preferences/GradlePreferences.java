@@ -27,6 +27,7 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.osgi.framework.Bundle;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
 import org.springsource.ide.eclipse.gradle.core.util.JavaRuntimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wtp.DeploymentExclusions;
 import org.springsource.ide.eclipse.gradle.core.wtp.RegexpListDeploymentExclusions;
@@ -54,7 +55,14 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	private static final String DEFAULT_JVM_ARGS = null;
 	
 	private static final String PROGRAM_ARGUMENTS = GradlePreferences.class.getName()+".PGM_ARGS";
+	
 	private static final String DEFAULT_PROGRAM_ARGUMENTS = null;
+	
+	private static final String AUTO_REFRESH_DEPENDENCIES = GradlePreferences.class.getName()+".AUTO_REFRESH_DEPENDENCIES";
+	public static final boolean DEFAULT_AUTO_REFRESH_DEPENDENCIES = false;
+	
+	private static final String AUTO_REFRESH_DELAY = GradlePreferences.class.getName()+".AUTO_REFRESH_DELAY";
+	public static final int DEFAULT_AUTO_REFRESH_DELAY = 5000;
 
 	private static URI builtInDistribution = null;
 
@@ -246,6 +254,9 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 		if (DEPLOYMENT_EXCLUSIONS.equals(event.getKey())) {
 			cachedExclusions = null;
 			WTPUtil.refreshAllDependencies();
+		} else if (AUTO_REFRESH_DELAY.equals(event.getKey()) 
+				|| AUTO_REFRESH_DEPENDENCIES.equals(event.getKey())) {
+			DependencyRefresher.refresh();
 		}
 	}
 
@@ -291,5 +302,19 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 			return install.getInstallLocation();
 		}
 		return null;
+	}
+
+	public boolean isAutoRefreshDependencies() {
+		return get(AUTO_REFRESH_DEPENDENCIES, DEFAULT_AUTO_REFRESH_DEPENDENCIES);
+	}
+	public void setAutoRefreshDependencies(boolean e) {
+		put(AUTO_REFRESH_DEPENDENCIES, e);
+	}
+	
+	public int getAutoRefreshDelay() {
+		return get(AUTO_REFRESH_DELAY, DEFAULT_AUTO_REFRESH_DELAY);
+	}
+	public void setAutoRefreshDelay(int v) {
+		put(AUTO_REFRESH_DELAY, v);
 	}
 }

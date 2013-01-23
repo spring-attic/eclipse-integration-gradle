@@ -32,6 +32,10 @@ public abstract class AbstractGradlePreferences {
 		String encoded = ""+enabled;
 		put(key, encoded);
 	}
+	public void put(String key, int deflt) {
+		String encoded = ""+deflt;
+		put(key, encoded);
+	}
 	
 	public boolean get(String key, boolean deflt) {
 		String encoded = get(key, null);
@@ -39,6 +43,13 @@ public abstract class AbstractGradlePreferences {
 			return deflt;
 		}
 		return Boolean.valueOf(encoded);
+	}
+	public int get(String key, int deflt) {
+		String encoded = get(key, null);
+		if (encoded==null) {
+			return deflt;
+		}
+		return Integer.valueOf(encoded);
 	}
 
 	public abstract String get(String name, String deflt);

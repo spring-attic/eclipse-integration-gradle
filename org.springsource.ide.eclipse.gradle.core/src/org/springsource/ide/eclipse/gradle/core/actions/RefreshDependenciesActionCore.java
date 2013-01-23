@@ -36,20 +36,23 @@ public class RefreshDependenciesActionCore {
 	/**
 	 * Exposes what this UI action does through an easy to call static method.
 	 */
-	private static void callOn(final List<IProject> projects, Continuation<Void> cont) {
-		if (!projects.isEmpty()) {
-			JobUtil.schedule(JobUtil.LIGHT_RULE, new Continuable("Refresh project models", projects.size()*2, cont) {
-				@Override
-				public void doit(Continuation<Void> cont, IProgressMonitor monitor) throws CoreException {
+	private static void callOn(final IProjectProvider _projects, Continuation<Void> cont) {
+		final int BIG_WORK = 10000;
+		JobUtil.schedule(JobUtil.LIGHT_RULE, new Continuable("Refresh project models", BIG_WORK, cont) {
+			@Override
+			public void doit(Continuation<Void> cont, IProgressMonitor monitor) throws CoreException {
+				List<IProject> projects = _projects.get();
+				if (!projects.isEmpty()) {
+					int workUnit = BIG_WORK / projects.size() / 2;
 					final List<GradleProject> gps = new ArrayList<GradleProject>(projects.size());
 					for (IProject p : projects) {
 						GradleProject gp = GradleCore.create(p);
 						gp.invalidateGradleModel();
 						gps.add(gp);
-						monitor.worked(1);
+						monitor.worked(workUnit);
 					}
 					for (GradleProject gp : gps) {
-						gp.getGradleModel(new SubProgressMonitor(monitor, 1));
+						gp.getGradleModel(new SubProgressMonitor(monitor, workUnit));
 					}
 					JobUtil.schedule(new Continuable("Refresh project dependencies", projects.size(), cont) {
 						@Override
@@ -61,10 +64,8 @@ public class RefreshDependenciesActionCore {
 						}
 					});
 				}
-			});
-		} else {
-			cont.apply(null);
-		}
+			}
+		});
 	}
 
 	/**
@@ -72,7 +73,7 @@ public class RefreshDependenciesActionCore {
 	 */
 	public static Joinable<Void> callOn(List<IProject> asList) {
 		JoinableContinuation<Void> k = new JoinableContinuation<Void>();
-		callOn(asList, k);
+		callOn(IProjectProvider.from(asList), k);
 		return k;
 	}
 
@@ -81,8 +82,14 @@ public class RefreshDependenciesActionCore {
 	 */
 	public static void synchCallOn(IProject p) throws Exception {
 		JoinableContinuation<Void> k = new JoinableContinuation<Void>();
-		callOn(Arrays.asList(p), k);
+		callOn(IProjectProvider.from(Arrays.asList(p)), k);
 		k.join();
+	}
+
+	public static Joinable<Void> callOn(IProjectProvider projects) {
+		JoinableContinuation<Void> k = new JoinableContinuation<Void>();
+		callOn(projects, k);
+		return k;
 	}
 
 }

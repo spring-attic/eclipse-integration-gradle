@@ -48,6 +48,8 @@ import org.gradle.tooling.model.eclipse.EclipseSourceDirectory;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleModelProvider.GroupedModelProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
+import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
+import org.springsource.ide.eclipse.gradle.core.autorefresh.IDirtyProjectListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClasspathContainerInitializer;
@@ -146,6 +148,10 @@ public class GradleProject {
 	 */
 	private void refreshProjectDependencies(IProjectMapper projectMapper, SubProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Refresh project dependencies "+getName(), 2);
+		IDirtyProjectListener dirtyProjects = DependencyRefresher.getInstanceGently();
+		if (dirtyProjects!=null) {
+			dirtyProjects.removeDirty(this);
+		}
 		try {
 			EclipseProject projectModel = getGradleModel(new SubProgressMonitor(monitor, 1));
 			setProjectDependencies(projectModel, projectMapper, new SubProgressMonitor(monitor, 1));

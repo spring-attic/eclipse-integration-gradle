@@ -22,6 +22,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
@@ -31,9 +32,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
+import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
+import org.springsource.ide.eclipse.gradle.core.autorefresh.GradleWorkspaceListener;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleAPIProperties;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
+import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 
 
 /**
@@ -67,6 +72,7 @@ public class GradleCore extends Plugin {
 		Assert.isTrue(instance==null);
 		GradleCore.context = bundleContext;
 		instance = this;
+		DependencyRefresher.init();
 	}
 
 	/*
