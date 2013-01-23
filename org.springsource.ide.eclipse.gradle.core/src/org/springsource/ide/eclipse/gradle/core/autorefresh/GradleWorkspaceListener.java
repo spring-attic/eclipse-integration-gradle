@@ -40,11 +40,6 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPa
  */
 public class GradleWorkspaceListener {
 	
-	//TODO: it should be user configurable whether this thing is enabled. If it turns out ot be annoying
-	// users should be able to either tweak it or disable it completely.
-	
-	private final IDirtyProjectListener dirtyProjectListener;
-	
 	/**
 	 * Get a set of root GradleProjects that are affected by changes to .gradle files. A root project is considered
 	 * affected if a .gradle file is changed in the project itself or any of its nested projects.
@@ -89,7 +84,6 @@ public class GradleWorkspaceListener {
 	}
 	
 	public GradleWorkspaceListener(final IDirtyProjectListener dirtyProjectListener) {
-		this.dirtyProjectListener = dirtyProjectListener;
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IResourceChangeListener listener = new IResourceChangeListener() {
 			public void resourceChanged(IResourceChangeEvent event) {
@@ -97,19 +91,20 @@ public class GradleWorkspaceListener {
 					return;
 				
 				final Set<GradleProject> affectedRootProjects = getAffectedRootProjects(event);
-				
-				for (IProject p : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-					if (GradleNature.hasNature(p)) {
-						GradleProject gp = GradleCore.create(p);
-						if (GradleClassPathContainer.isOnClassPath(gp.getJavaProject())) {
-							//Auto refresh is limited to projects that have dependency management
-							//enabled. It may be possible to broaden this.
-							try {
-								if (affectedRootProjects.contains(gp.getRootProject())) {
-									dirtyProjectListener.addDirty(gp);
+				if (!affectedRootProjects.isEmpty()) {
+					for (IProject p : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+						if (GradleNature.hasNature(p)) {
+							GradleProject gp = GradleCore.create(p);
+							if (GradleClassPathContainer.isOnClassPath(gp.getJavaProject())) {
+								//Auto refresh is limited to projects that have dependency management
+								//enabled. It may be possible to broaden this.
+								try {
+									if (affectedRootProjects.contains(gp.getRootProject())) {
+										dirtyProjectListener.addDirty(gp);
+									}
+								} catch (FastOperationFailedException e) {
+									//ignore
 								}
-							} catch (FastOperationFailedException e) {
-								//ignore
 							}
 						}
 					}
