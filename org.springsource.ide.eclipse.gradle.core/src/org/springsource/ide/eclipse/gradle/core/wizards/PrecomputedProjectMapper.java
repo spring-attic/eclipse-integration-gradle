@@ -116,10 +116,31 @@ public abstract class PrecomputedProjectMapper implements IProjectMapper {
 		inverseMap.put(to, from);
 	}
 
+	
+	
 	public final IProject get(HierarchicalEclipseProject target) {
-		IProject result = map.get(target.getProjectDirectory().getAbsolutePath());
-		Assert.isLegal(result!=null, "No project name mapping was defined for "+target);
+		String projectKey = target.getProjectDirectory().getAbsolutePath();
+		IProject result = map.get(projectKey);
+		if (result==null) {
+			Assert.isLegal(false, 
+					"No project name mapping was defined for "+target+"\n" +
+							"Project key is: '"+projectKey+"'\n"+
+							"The name map is: \n"+
+							dumpMap());
+		}
 		return result;
+	}
+
+	/**
+	 * Dump the contents of the name -> project map into a string for debugging 
+	 * purposes.
+	 */
+	private String dumpMap() {
+		StringBuilder dump = new StringBuilder();
+		for (String k : map.keySet()) {
+			dump.append("  '"+k+"' => "+map.get(k)+"\n");
+		}
+		return dump.toString();
 	}
 
 	public Collection<HierarchicalEclipseProject> getAllProjects() {
