@@ -139,7 +139,7 @@ public abstract class GradleTest extends TestCase {
 					ACondition.assertJobManagerIdle();
 					return true;
 				}
-			}.waitFor(20000);
+			}.waitFor(180000);
 		} catch (Throwable e) {
 			//Print this as interesting information about the jobs that keep on chugging away...
 			//but do not let this cause test failures.
@@ -187,6 +187,7 @@ public abstract class GradleTest extends TestCase {
 		Set<String> expected = new HashSet<String>(Arrays.asList(names));
 		System.out.println("CHECKING FOR ERRORS IN PROJECTS");
 
+// Prints out list of actual projects for easy manual verify and then copy pasting.
 		for (IProject p : projects) {
 			System.out.println("\""+p.getName()+"\",");
 		}

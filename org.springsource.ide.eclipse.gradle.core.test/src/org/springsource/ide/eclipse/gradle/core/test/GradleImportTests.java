@@ -243,26 +243,6 @@ public class GradleImportTests extends GradleTest {
 		}
 	}
 
-//	public void testSTS2276SetJavaHomeBis() throws Exception {
-//		//Variant of the previous test, but this one uses a test project that has a wrapper defining
-//		//a version of Gradle that doesn't support the API that sets JavaHome. Though setting Java home may not
-//		//work in this case, that shouldn't really break imports etc. 
-//		IVMInstall defaultVM = JavaRuntime.getDefaultVMInstall();
-//		try {
-//			//File javaHome = defaultVM.getInstallLocation();
-//			assertNotNull(defaultVM.getInstallLocation());
-//			GradleCore.getInstance().getPreferences().setJavaHomeJRE(defaultVM);
-//			String projectName = "multiproject-m6";
-//			String subprojectName = "subproject";
-//			importTestProject(projectName);
-//			assertProjects(
-//					projectName,
-//					subprojectName);
-//		} finally {
-//			GradleCore.getInstance().getPreferences().setJavaHomeJRE(null); //Rest to default
-//		}
-//	}
-	
 	public void testImportSpringSecurity() throws Exception {
 		//TODO: test currently failing.
 		/// See http://forums.gradle.org/gradle/topics/tooling_api_1_2_model_build_fails_when_there_are_unresolved_dependencies
@@ -270,8 +250,8 @@ public class GradleImportTests extends GradleTest {
 		setSnapshotDistro();
 		GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-security", 
 				new URI("git://github.com/SpringSource/spring-security.git"),
-				"191fc9c8be80c7338ab8e183014de48f78fcffd1"
-//				"734188206d26e7af09a238b4d34eaa01f2e937c0"
+				"66357a2077cb3d94657a5b759771572a341e55f4"
+				//"191fc9c8be80c7338ab8e183014de48f78fcffd1"
 		));
 		
 		importOp.setDoBeforeTasks(true);
@@ -288,37 +268,38 @@ public class GradleImportTests extends GradleTest {
 		}
 		
 		assertProjects(
-				"docs",
-				"faq",
-				"itest-context",
-				"itest-web",
-				"manual",
-				"spring-security",
-				"spring-security-acl",
-				"spring-security-aspects",
-				"spring-security-cas",
-				"spring-security-config",
-				"spring-security-core",
-				"spring-security-crypto",
-				"spring-security-ldap",
-				"spring-security-openid",
-				"spring-security-remoting",
-				"spring-security-samples-aspectj",
-				"spring-security-samples-cassample",
-				"spring-security-samples-casserver",
-				"spring-security-samples-contacts",
-				"spring-security-samples-dms",
-				"spring-security-samples-gae",
-				"spring-security-samples-jaas",
-				"spring-security-samples-ldap",
-				"spring-security-samples-openid",
-				"spring-security-samples-preauth",
-				"spring-security-samples-tutorial",
-				"spring-security-taglibs",
-				"spring-security-web"
+				"docs-3.2.x",
+				"faq-3.2.x",
+				"itest-context-3.2.x",
+				"itest-web-3.2.x",
+				"manual-3.2.x",
+				"spring-security-3.2.x",
+				"spring-security-acl-3.2.x",
+				"spring-security-aspects-3.2.x",
+				"spring-security-cas-3.2.x",
+				"spring-security-config-3.2.x",
+				"spring-security-core-3.2.x",
+				"spring-security-crypto-3.2.x",
+				"spring-security-ldap-3.2.x",
+				"spring-security-openid-3.2.x",
+				"spring-security-remoting-3.2.x",
+				"spring-security-samples-aspectj-3.2.x",
+				"spring-security-samples-cassample-3.2.x",
+				"spring-security-samples-casserver-3.2.x",
+				"spring-security-samples-contacts-3.2.x",
+				"spring-security-samples-dms-3.2.x",
+				"spring-security-samples-gae-3.2.x",
+				"spring-security-samples-jaas-3.2.x",
+				"spring-security-samples-ldap-3.2.x",
+				"spring-security-samples-openid-3.2.x",
+				"spring-security-samples-preauth-3.2.x",
+				"spring-security-samples-servletapi-3.2.x",
+				"spring-security-samples-tutorial-3.2.x",
+				"spring-security-taglibs-3.2.x",
+				"spring-security-web-3.2.x"
 		);
 		
-		assertTrue(WTPUtil.isWTPProject(getProject("spring-security-samples-jaas")));
+		assertTrue(WTPUtil.isWTPProject(getProject("spring-security-samples-jaas-3.2.x")));
 	}
 	
 	public void testSTS2185AddWebAppLibrariesContainerToWTPProjects() throws Exception {
@@ -534,6 +515,7 @@ public class GradleImportTests extends GradleTest {
 	}		
 	
 	public void testImportSpringDataRedis() throws Exception {
+		GradleCore.getInstance().getPreferences().unsetJavaHome();
 //		JavaUtils.setJava15Compliance();
 		setSnapshotDistro();
 		importGitProject(new GitProject("spring-data-redis", 
