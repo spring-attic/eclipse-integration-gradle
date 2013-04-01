@@ -63,6 +63,7 @@ import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JUnitLaunchConfigUtil;
+import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
@@ -132,12 +133,13 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testImportSpringFramework() throws Exception {
+		JavaXXRuntime.java7everyone();
 		String[] projectNames = {
 				"spring",
 				"spring-aop",
-				"spring-asm",
 				"spring-aspects",
 				"spring-beans",
+				"spring-build-src",
 				"spring-context",
 				"spring-context-support",
 				"spring-core",
@@ -147,33 +149,37 @@ public class GradleImportTests extends GradleTest {
 				"spring-jdbc",
 				"spring-jms",
 				"spring-orm",
+				"spring-orm-hibernate4",
 				"spring-oxm",
-				"spring-struts",
 				"spring-test",
+				"spring-test-mvc",
 				"spring-tx",
 				"spring-web",
 				"spring-webmvc",
-				"spring-webmvc-portlet"				
+				"spring-webmvc-portlet",
+				"spring-webmvc-tiles3"
 		};
 		
 		//			boolean good = false;
 		//			while(!good) {
 		//				try {
-		//					Thread.sleep(20000); //Wait out the fucking interrupted exception that eclipse is sending.
+		//					Thread.sleep(20000); //Wait out the !@#$ interrupted exception that eclipse is sending.
 		//					good = true;
 		//				} catch (InterruptedException e) {
 		//				}
 		//			}
 		//		
-		URI distro = new URI("http://repo.gradle.org/gradle/distributions-snapshots/gradle-1.0-milestone-8-20120112000036+0100-bin.zip");
-		//distro from: https://github.com/SpringSource/spring-framework/blob/9a1a00a651410390ec317ca3d301d5e9d109f395/.wrapper/gradle-wrapper.properties
-		//Note: tooling API doesn't pick up on this because the wrapper in this project is not in the standard location.
+		URI distro = new URI("http://services.gradle.org/distributions/gradle-1.3-bin.zip");
 		GradleCore.getInstance().getPreferences().setDistribution(distro);
 
 		final GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-framework", 
-				new URI("git://github.com/kdvolder/spring-framework.git"),
-				"1b255a18a0fb1")
-				);
+				new URI("git://github.com/SpringSource/spring-framework.git"),
+				"db3bbb5f8cb945b8f29fbd83aff9bbd2dbc70e1c"
+			)
+		);
+
+		
+		
 
 		String[] beforeTasks = {
 				//These tasks are set based on the shell script included with spring framework:
@@ -648,26 +654,21 @@ public class GradleImportTests extends GradleTest {
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 
-	public void testImportGrailsCore() throws Exception {
-    
-        final GradleImportOperation importOp = importGitProjectOperation(new GitProject("grails-core", 
-                new URI("git://github.com/grails/grails-core.git"), "master"), true);
-    
-        importOp.setEnableDSLD(false); // cause some compilation errors in this project so turn off
-        importOp.setEnableDependencyManagement(false);
-        importOp.setDoBeforeTasks(true);
-    
-        performImport(importOp,
-                //Ignore errors: (expected!)
-                "Project 'spring-aspects' is an AspectJ project"
-                );
-    
-       buildProjects();
-        
-        //check that the refresh preferences got setup properly (only checking one property).
-        //the one that has a non-default value.
-        assertNoErrors(true);
-    }
+	public void _DISABLED_testImportGrailsCore() throws Exception {
+
+		final GradleImportOperation importOp = importGitProjectOperation(new GitProject("grails-core", 
+				new URI("git://github.com/grails/grails-core.git"), "master"), true);
+
+		importOp.setEnableDSLD(false); // cause some compilation errors in this project so turn off
+		importOp.setEnableDependencyManagement(false);
+		importOp.setDoBeforeTasks(true);
+
+		performImport(importOp);
+
+		buildProjects();
+
+		assertNoErrors(true);
+	}
 
     /**
 	 * Verify that project classpath does not have plain jar entries on it (all jars are managed in classpath containers).

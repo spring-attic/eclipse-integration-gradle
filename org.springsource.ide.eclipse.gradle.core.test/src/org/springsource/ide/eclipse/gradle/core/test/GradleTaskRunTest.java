@@ -606,26 +606,26 @@ public class GradleTaskRunTest extends GradleTest {
 		assertContains("Looks like it worked", process.getStreamsProxy().getOutputStreamMonitor().getContents());
 	}
 	
-	public void testSimpleTaskWithDifferentMilestones() throws Exception {
+	public void testSimpleTaskWithDifferentReleases() throws Exception {
 		class Result {
-			int milestone;
+			int minorVersion;
 			Throwable error;
-			public Result(int ms) {
-				milestone = ms;
+			public Result(int mv) {
+				minorVersion = mv;
 			}
 			@Override
 			public String toString() {
-				return "Milestone "+milestone+" = "+ ((error==null) ? "OK" : ExceptionUtil.getMessage(error));
+				return "Release 1."+minorVersion+" = "+ ((error==null) ? "OK" : ExceptionUtil.getMessage(error));
 			}
 		}
-		int lo = 3; int hi = 9;
+		int lo = 0; int hi = 5;
 		Result[] results = new Result[hi-lo+1];
 		boolean failed = false;
 		for (int i = 0; i < results.length; i++) {
-			int milestone = lo+i;
-			results[i] = new Result(milestone);
+			int minorVersion = lo+i;
+			results[i] = new Result(minorVersion);
 			try {
-				doSimpleTaskWithMilestone(milestone);
+				doSimpleTaskWithRelease(minorVersion);
 			} catch (Throwable e) {
 				failed = true;
 				e.printStackTrace();
@@ -641,10 +641,11 @@ public class GradleTaskRunTest extends GradleTest {
 		}
 	}
 	
-	public void doSimpleTaskWithMilestone(int milestone) throws Exception {
-		GradleCore.getInstance().getPreferences().setDistribution(Distributions.milestoneURI(milestone));
+	public void doSimpleTaskWithRelease(int minorVersion) throws Exception {
+		int majorVersion = 1;
+		GradleCore.getInstance().getPreferences().setDistribution(Distributions.releaseURI(majorVersion, minorVersion));
 
-		String name = "milestoneTest"+milestone;
+		String name = "releaseTest"+majorVersion+"_"+minorVersion;
 		try {
 			IJavaProject jproject = simpleProject(name, 
 					"task hello << {\n" + 

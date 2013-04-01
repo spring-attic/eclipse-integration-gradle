@@ -67,5 +67,9 @@ public class Distributions {
 			return new URI("http://services.gradle.org/distributions/gradle-1.0-milestone-"+num+"-bin.zip");
 		}
 	}
+
+	public static URI releaseURI(int majorVersion, int minorVersion) throws URISyntaxException {
+		return new URI("http://services.gradle.org/distributions/gradle-"+majorVersion+"."+minorVersion+"-bin.zip");
+	}
 	
 }

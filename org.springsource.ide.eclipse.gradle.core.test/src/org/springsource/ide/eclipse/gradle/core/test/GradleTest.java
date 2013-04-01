@@ -64,6 +64,7 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPa
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
+import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.KillGradleDaemons;
 import org.springsource.ide.eclipse.gradle.core.test.util.LoggingProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
@@ -87,6 +88,10 @@ public abstract class GradleTest extends TestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
+		JavaXXRuntime.java6everyone(); //Swicht compiler VM install, Grade Java home all to JAva 6 by default.
+										// Individual tests may swich to another Java version if they like
+										// But ensure java 6 as stable baseline for tests that don't set it themselves.
+		
 		//Disable greclipse background DSL support adding. Hopefully will stop random test failures because of 'missing external folder links'.
 		IEclipsePreferences preferences = ConfigurationScope.INSTANCE.getNode("org.codehaus.groovy.eclipse.dsl");
 		preferences.putBoolean("org.codehaus.groovy.eclipse.dsl.auto.add.support", false);
@@ -181,6 +186,10 @@ public abstract class GradleTest extends TestCase {
 		IProject[] projects = buildProjects();
 		Set<String> expected = new HashSet<String>(Arrays.asList(names));
 		System.out.println("CHECKING FOR ERRORS IN PROJECTS");
+
+		for (IProject p : projects) {
+			System.out.println("\""+p.getName()+"\",");
+		}
 		
 		for (IProject p : projects) {
 			String nameSeen = p.getName();
