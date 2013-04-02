@@ -42,6 +42,8 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
 
+import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants;
+
 
 /** 
  * WTPUtilit methods, that have a 'dynamic' implementation. If WTP plugins are installed in
