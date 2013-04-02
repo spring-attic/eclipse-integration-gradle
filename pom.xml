@@ -189,9 +189,9 @@
 					<url>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/</url>
 				</repository>
 				<repository>
-					<id>greclipse37</id>
+					<id>greclipse42</id>
 					<layout>p2</layout>
-					<url>http://dist.springsource.org/release/GRECLIPSE/e4.2/</url>
+					<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.2/</url>
 				</repository>
 			</repositories>
 		</profile>
