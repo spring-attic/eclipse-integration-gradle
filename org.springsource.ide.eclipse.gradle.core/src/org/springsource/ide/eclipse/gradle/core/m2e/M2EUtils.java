@@ -8,6 +8,7 @@ import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.UnsupportedMethodException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.apache.maven.artifact.repository.MavenArtifactRepository;
 
 @SuppressWarnings("restriction")
 public class M2EUtils {
@@ -83,6 +84,8 @@ public class M2EUtils {
 	private static IM2EUtils createImplementation() {
 		try {
 			Class.forName("org.eclipse.m2e.core.internal.MavenPluginActivator");
+			Class.forName("org.eclipse.m2e.core.internal.project.registry.MavenProjectManager");
+			Class.forName("org.eclipse.m2e.core.project.IMavenProjectFacade");
 			Class.forName("org.apache.maven.artifact.repository.MavenArtifactRepository");
 			return new DefaultImplementation();
 		} catch (Throwable e) {
