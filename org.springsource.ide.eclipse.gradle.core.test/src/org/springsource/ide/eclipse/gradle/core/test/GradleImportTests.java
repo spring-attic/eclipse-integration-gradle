@@ -72,7 +72,6 @@ import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 
-
 /**
  * Basic tests for the GradleImport operation. Imports a project, all its subprojects using
  * default settings.
@@ -773,14 +772,14 @@ public class GradleImportTests extends GradleTest {
 			//We are running the 'regular' build!
 			//This test requires M8 (project's wrapper properties says so, but it is non-standar location so 
 			// tooling API doesn't know.
-			distro = new URI("http://repo.gradle.org/gradle/distributions/gradle-1.0-milestone-8-bin.zip");
+			// distro = new URI("http://repo.gradle.org/gradle/distributions/gradle-1.0-milestone-8-bin.zip");
 //		}
 		GradleCore.getInstance().getPreferences().setDistribution(distro);
 		importGitProject(
 				new GitProject(
 						"spring-integration", 
-						new URI("git://github.com/SpringSource/spring-integration.git"), 
-						"1ba24f7bb667e0f90"
+						new URI("git://github.com/kdvolder/spring-integration.git"),
+						"d4026bd63b43fdade2ed38a97bcdce89e6fab835"
 				).setRecursive(true)
 		);
 
@@ -804,6 +803,7 @@ public class GradleImportTests extends GradleTest {
 				"spring-integration-jdbc",
 				"spring-integration-jms",
 				"spring-integration-jmx",
+				"spring-integration-jpa",
 				"spring-integration-mail",
 				"spring-integration-mongodb",
 				"spring-integration-redis",
