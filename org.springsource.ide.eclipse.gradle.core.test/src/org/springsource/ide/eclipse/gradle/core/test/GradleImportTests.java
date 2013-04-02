@@ -303,6 +303,7 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testSTS2185AddWebAppLibrariesContainerToWTPProjects() throws Exception {
+		assertTrue("This test requires WTP functionality to be installed", WTPUtil.isInstalled());
 		String[] projectNames = {
 				"sts2185",
 				"A",
