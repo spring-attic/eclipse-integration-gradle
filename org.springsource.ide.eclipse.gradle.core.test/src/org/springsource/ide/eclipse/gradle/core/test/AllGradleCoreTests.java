@@ -16,8 +16,6 @@ import junit.framework.TestSuite;
 
 import org.apache.commons.io.FileUtils;
 import org.springsource.ide.eclipse.gradle.core.test.util.GroovySanityTest;
-import org.springsource.ide.eclipse.gradle.core.test.util.JavaUtils;
-import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.ManagedTestSuite;
 import org.springsource.ide.eclipse.gradle.core.test.util.RefreshAllActionCoreTests;
 
