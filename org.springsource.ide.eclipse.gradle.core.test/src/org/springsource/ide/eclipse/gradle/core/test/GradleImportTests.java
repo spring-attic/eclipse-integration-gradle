@@ -637,7 +637,8 @@ public class GradleImportTests extends GradleTest {
 	}
 
 	public void _DISABLED_testImportGrailsCore() throws Exception {
-
+		//This test disabled, needs Groovy 2.0 but other tests need Groovy 1.8. Cannot run both in the same
+		// test build / runtime workbench.
 		final GradleImportOperation importOp = importGitProjectOperation(new GitProject("grails-core", 
 				new URI("git://github.com/grails/grails-core.git"), "master"), true);
 
