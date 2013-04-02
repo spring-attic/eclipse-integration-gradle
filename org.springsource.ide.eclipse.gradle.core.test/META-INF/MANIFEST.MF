@@ -34,4 +34,6 @@ Require-Bundle: org.junit,
  org.eclipse.m2e.lifecyclemapping.defaults,
  org.eclipse.m2e.discovery,
  org.eclipse.m2e.core.ui,
- org.eclipse.m2e.scm
+ org.eclipse.m2e.scm,
+ org.eclipse.jst.j2ee,
+ org.eclipse.wst.common.project.facet.core
