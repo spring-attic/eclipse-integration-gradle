@@ -32,7 +32,7 @@ public class GroovySanityTest extends GradleTest {
 		checkSanity(8); //Currently some of the imported projects expecting Groovy 1.8 or they will fail.
 	}
 
-	private static void checkSanity(int expectMinor) throws BundleException {
+	public static void checkSanity(int expectMinor) throws BundleException {
 		Bundle bundle = CompilerUtils.getActiveGroovyBundle();
 		assertNotNull("No active Groovy bundle found", bundle);
 		assertEquals("Wrong version for groovy bundle: " + bundle.getVersion(), expectMinor, bundle.getVersion().getMinor());

@@ -171,8 +171,6 @@
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/eclipse/updates/4.2/</url>
 				</repository>
-				<!-- this makes not much sense, but without the 'indigo' site  tycho can't find the 'SWT fragment bundles'
-				     See https://bugs.eclipse.org/bugs/show_bug.cgi?id=385087 -->
 				<repository> 
 					<id>indigo</id>
 					<layout>p2</layout>
@@ -600,16 +598,12 @@
 							  <version>0.0.0</version>
 							</dependency>
 <!-- Ugh! I'd like to add this ensure m2e is installed when we run the tests... but it seems adding
-     this makes JDT patch go AWOL 
+     this makes JDT patch go AWOL. So instead I added all the plugins that are in this feature as
+     dependencies of the test plugin 
                             <dependency>
 							  <type>p2-installable-unit</type>
 							  <artifactId>org.eclipse.m2e.feature.feature.group</artifactId>
 							  <version>0.0.0</version>
-							</dependency> -->
-<!-- 							<dependency>
-								<type>p2-installable-unit</type>
-								<artifactId>org.eclipse.equinox.weaving.sdk.feature.group</artifactId>
-								<version>0.0.0</version>
 							</dependency> -->
 						</dependencies>
 						<explodedBundles>

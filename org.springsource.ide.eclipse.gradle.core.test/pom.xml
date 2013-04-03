@@ -17,13 +17,19 @@
   </properties>
   <profiles>
     <profile>
+      <id>GrailsCore</id>
+      <properties>
+          <test.class>org.springsource.ide.eclipse.gradle.core.test.GrailsCoreBuildTest</test.class>
+          <groovy.compiler.feature>org.codehaus.groovy20.feature.feature.group</groovy.compiler.feature>
+      </properties>
+    </profile>
+    <profile>
       <id>heartbeat</id>
       <properties>
         <test.skip>true</test.skip>
       </properties>
     </profile>
   </profiles>
-
 	<build>
 		<plugins>
 			<plugin>

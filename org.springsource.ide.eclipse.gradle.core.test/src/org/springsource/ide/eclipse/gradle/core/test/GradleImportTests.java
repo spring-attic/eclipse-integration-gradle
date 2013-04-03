@@ -636,23 +636,6 @@ public class GradleImportTests extends GradleTest {
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 
-	public void _DISABLED_testImportGrailsCore() throws Exception {
-		//This test disabled, needs Groovy 2.0 but other tests need Groovy 1.8. Cannot run both in the same
-		// test build / runtime workbench.
-		final GradleImportOperation importOp = importGitProjectOperation(new GitProject("grails-core", 
-				new URI("git://github.com/grails/grails-core.git"), "master"), true);
-
-		importOp.setEnableDSLD(false); // cause some compilation errors in this project so turn off
-		importOp.setEnableDependencyManagement(false);
-		importOp.setDoBeforeTasks(true);
-
-		performImport(importOp);
-
-		buildProjects();
-
-		assertNoErrors(true);
-	}
-
     /**
 	 * Verify that project classpath does not have plain jar entries on it (all jars are managed in classpath containers).
 	 * @throws JavaModelException 
