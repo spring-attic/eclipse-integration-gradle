@@ -42,9 +42,6 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
 
-import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants;
-
-
 /** 
  * WTPUtilit methods, that have a 'dynamic' implementation. If WTP plugins are installed in
  * Eclipse, then they provide a 'real' implementation calling on WTP methods and classes.
@@ -252,6 +249,7 @@ public class WTPUtil {
 	private static IWTPUtil createImplementation() {
 		try {
 			Class.forName("org.eclipse.wst.common.componentcore.ComponentCore");
+			Class.forName("org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants");
 			return new DefaultImplementation();
 		} catch (ClassNotFoundException e) {
 			//Most likely reason for the exception is that WTP is not installed (the WTP plugins are declared as
