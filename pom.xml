@@ -579,8 +579,28 @@
 							  <artifactId>${groovy.compiler.feature}</artifactId>
 							  <version>0.0.0</version>
 							</dependency>
+				 			<dependency>
+							  <type>p2-installable-unit</type>
+							  <artifactId>org.eclipse.jst.web_core.feature.feature.group</artifactId>
+							  <version>0.0.0</version>
+							</dependency>
+				 			<dependency>
+							  <type>p2-installable-unit</type>
+							  <artifactId>org.eclipse.jst.web_ui.feature.feature.group</artifactId>
+							  <version>0.0.0</version>
+							</dependency>
+				 			<dependency>
+							  <type>p2-installable-unit</type>
+							  <artifactId>org.eclipse.jst.enterprise_core.feature.feature.group</artifactId>
+							  <version>0.0.0</version>
+							</dependency>
+				 			<dependency>
+							  <type>p2-installable-unit</type>
+							  <artifactId>org.eclipse.jst.enterprise_ui.feature.feature.group</artifactId>
+							  <version>0.0.0</version>
+							</dependency>
 <!-- Ugh! I'd like to add this ensure m2e is installed when we run the tests... but it seems adding
-     this makes JDT patch go AWOL 					
+     this makes JDT patch go AWOL 
                             <dependency>
 							  <type>p2-installable-unit</type>
 							  <artifactId>org.eclipse.m2e.feature.feature.group</artifactId>
