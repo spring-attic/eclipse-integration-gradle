@@ -28,7 +28,7 @@ import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 public class GrailsCoreBuildTest extends GradleTest {
 	
 	public void testGroovySanity() throws Exception {
-		GroovySanityTest.checkSanity(0); // 0 means 2.0 (it is the 'minor' version number.
+		GroovySanityTest.checkSanity(1); // 1 means 2.1 (it is the 'minor' version number.
 	}
 	
 	public void testImportGrailsCore() throws Exception {
