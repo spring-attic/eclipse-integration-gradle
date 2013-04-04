@@ -53,6 +53,14 @@ public class ClassPath {
 		return false;
 	}
 	
+	public boolean DEBUG = false;
+	
+	private void debug(String msg) {
+		if (DEBUG) {
+			System.out.println("ClassPath: "+msg);
+		}
+	}
+	
 	/**
 	 * This array defines the ordering classpath entries based on their kinds.
 	 */
@@ -244,7 +252,11 @@ public class ClassPath {
 			mon.worked(1);
 			IClasspathEntry[] newClasspath = toArray();
 			if (isChanged(oldClasspath, newClasspath)) {
+				debug("setRawClasspath...");
 				javaProject.setRawClasspath(newClasspath, new SubProgressMonitor(mon, 1));
+				debug("setRawClasspath DONE");
+			} else {
+				debug("Skipping setRawClasspath because old == new");
 			}
 		} finally {
 			mon.done();

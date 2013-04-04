@@ -41,6 +41,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.core.JavaModelManager.PerProjectInfo;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
@@ -211,6 +213,23 @@ public class GradleImportOperation {
 		}
 	}
 
+	/**
+	 * Make sure that we get the real up-to-date raw classpath. If we don't call this function at certain
+	 * points then JDT may give us stale information after the .classpath file has been changed on
+	 * disk, for example by running a Gradle task.
+	 */
+	private static void forceClasspathUpToDate(IProject project) {
+		try {
+			JavaProject javaProject = (JavaProject)JavaCore.create(project);
+			PerProjectInfo info = javaProject.getPerProjectInfo();
+			if (info!=null) {
+				info.readAndCacheClasspath(javaProject);
+			}
+		} catch (Exception e) {
+			GradleCore.log(e);
+		}
+	}
+	
 	private void importProject(HierarchicalEclipseProject projectModel, ErrorHandler eh, IProgressMonitor monitor) {
 		final boolean haveWorkingSets = workingSets.length>0 || quickWorkingSetName!=null;
 		//This provisional implementation just creates a linked project pointing to wherever the root folder
@@ -255,6 +274,7 @@ public class GradleImportOperation {
 			//5
 			if (isReimport) {
 				project.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+				forceClasspathUpToDate(project);
 			} else {
 				project.open(new SubProgressMonitor(monitor, 1));
 			}

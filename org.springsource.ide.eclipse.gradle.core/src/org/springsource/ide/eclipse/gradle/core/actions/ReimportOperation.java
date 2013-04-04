@@ -60,16 +60,16 @@ public class ReimportOperation {
 	private GradleImportOperation createImportOperation(IProgressMonitor m) throws FastOperationFailedException, OperationCanceledException, CoreException {
 		m.beginTask("Create re-import operation", 1);
 		try {
-			GradleProject rootProject = p.getRootProject();
 			List<HierarchicalEclipseProject> projects = Arrays.asList((HierarchicalEclipseProject)p.getGradleModel(m));
+			List<HierarchicalEclipseProject> relatedProjects = p.getAllProjectsInBuild();
 			GradleImportOperation op = new GradleImportOperation(
-					projects,
-					prefs.getAddResourceFilters(),
-					GradleImportOperation.createProjectMapping(prefs.getUseHierarchicalNames(), projects)
-					);
+				projects,
+				prefs.getAddResourceFilters(),
+				GradleImportOperation.createProjectMapping(prefs.getUseHierarchicalNames(), relatedProjects)
+			);
 			//op.setWorkingSets(workingSets); // this option only meaningfull on initial import. 
 			op.setQuickWorkingSet(null); // this option only meaningfull on initial import. 
-			op.setEnableDependencyManagement(false); // this type of operation shouldn't be invoked unless this option was off.
+			op.setEnableDependencyManagement(p.isDependencyManaged());
 			op.setDoAfterTasks(prefs.getDoAfterTasks());	
 			op.setAfterTasks(prefs.getAfterTasks());
 			op.setDoBeforeTasks(prefs.getDoBeforeTasks());

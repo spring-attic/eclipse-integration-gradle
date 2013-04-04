@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -83,7 +84,7 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
  */
 public class GradleProject {
 	
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private void debug(String msg) {
 		if (DEBUG) {
 			System.out.println(this+": "+msg);
@@ -163,6 +164,14 @@ public class GradleProject {
 //		}
 	}
 
+	public boolean isDependencyManaged() {
+		IJavaProject jp = getJavaProject();
+		if (jp!=null) {
+			return GradleClassPathContainer.isOnClassPath(jp);
+		}
+		return false;
+	}
+	
 	/**
 	 * Refreshes the contents of the classpath container to bring it in synch with the gradleModel.
 	 * (Note that this doesn't force the gradleModel itself to be updated!)
@@ -681,22 +690,28 @@ public class GradleProject {
 			
 			//4: Refresh project deps
 			refreshProjectDependencies(projectMapping, new SubProgressMonitor(monitor, 1));
+			debug("refreshed project dependencies");
 			
 			//5: Force root project cache to be set
 			try {
 				getRootProject();
+				debug("root project cached");
 			} catch (FastOperationFailedException e) {
+				debug("FAILED to cache root project: " + e.getMessage());
+				
 				 //Shouldn't happen... because by now, there should already be gradle model available
-				ExceptionUtil.coreException(e);
+				throw ExceptionUtil.coreException(e);
 			} finally {
 				monitor.worked(1);
 			}
 			
 			//6: Enable DSL support
 			DSLDSupport.maybeAdd(this, eh, new SubProgressMonitor(monitor, 1));
+			debug("DSLDSupport maybe added");
 			
 			//7: Add classpath container
 			GradleClassPathContainer.addTo(getJavaProject(), new SubProgressMonitor(monitor, 1));
+			debug("Classpath container added");
 
 			
 			//8: Add WTP fixups
@@ -1020,6 +1035,22 @@ public class GradleProject {
 
 	public GradleDependencyComputer getDependencyComputer() {
 		return dependencyComputer;
+	}
+
+	public List<HierarchicalEclipseProject> getAllProjectsInBuild() throws FastOperationFailedException, CoreException {
+		//TODO: cache this and keep cache as long as model of root project is the same object.
+		final List<HierarchicalEclipseProject> projects = new ArrayList<HierarchicalEclipseProject>();
+		new ProjectHierarchyVisitor() {
+			public void visit(HierarchicalEclipseProject project) throws CoreException {
+				projects.add(project);
+			}
+		}.accept(getRootProject().getGradleModel(HierarchicalEclipseProject.class));
+		return projects;
+	}
+
+	public void walkHierachy(ProjectHierarchyVisitor projectHierarchyVisitor) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

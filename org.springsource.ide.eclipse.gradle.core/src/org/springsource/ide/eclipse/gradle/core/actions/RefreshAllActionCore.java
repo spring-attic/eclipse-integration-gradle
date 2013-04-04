@@ -128,9 +128,7 @@ public class RefreshAllActionCore {
 					@Override
 					public void doit(Continuation<Void> cont, IProgressMonitor monitor) throws Exception {
 						for (GradleProject p : managed) {
-							monitor.subTask("Refreshing '"+p.getName());
-							p.refreshSourceFolders(eh, new SubProgressMonitor(monitor, 1));
-							p.refreshDependencies(new SubProgressMonitor(monitor, 1));
+							new ReimportOperation(p).perform(eh, new SubProgressMonitor(monitor, 1));
 						}
 						eh.rethrowAsCore();
 						cont.apply(null);

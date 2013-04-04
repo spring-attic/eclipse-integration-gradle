@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaModelManager.PerProjectInfo;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.ClassPath;
@@ -49,11 +50,18 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	public static final String ERROR_MARKER_ID = "org.springsource.ide.eclipse.gradle.core.classpathcontainer";
 	private static final String GRADLE_CLASSPATHCONTAINER_KEY = "gradle.classpathcontainer";
 
-	public static boolean DEBUG = (""+Platform.getLocation()).equals("/tmp/testws");
+	public static boolean DEBUG = false;
+	public static boolean S_DEBUG = false;
 	
 	public void debug(String msg) {
 		if (DEBUG) {
-			System.out.println("GradleClassPathContainer "+project+" "+path+": "+msg);
+			System.out.println("GradleClassPathContainer: "+msg);
+		}
+	}
+
+	public static void sdebug(String msg) {
+		if (S_DEBUG) {
+			System.out.println("GradleClassPathContainer: "+msg);
 		}
 	}
 	
@@ -278,13 +286,18 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		try {
 			mon.worked(1);
 			if (!isOnClassPath(project)) {
+				sdebug("Adding... to "+project.getElementName());
 				//Only add it if itsn't there yet
 				ClassPath classpath = new ClassPath(GradleCore.create(project), project.getRawClasspath());
 				//			classpath.add(JavaCore.newContainerEntry(new Path(ID)));
+				classpath.DEBUG = S_DEBUG;
 				classpath.add(WTPUtil.addToDeploymentAssembly(project, JavaCore.newContainerEntry(new Path(ID), GlobalSettings.exportClasspathContainerEntries)));
 				classpath.removeLibraryEntries();
 				classpath.setOn(project, new SubProgressMonitor(mon, 9));
 				GradleCore.create(project).getClassPathcontainer().refreshMarkers();
+				sdebug("Done Adding to "+project.getElementName());
+			} else {
+				sdebug("NOT adding (already there) "+project.getElementName());
 			}
 		} finally {
 			mon.done();

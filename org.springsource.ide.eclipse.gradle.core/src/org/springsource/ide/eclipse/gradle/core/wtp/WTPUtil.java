@@ -251,7 +251,7 @@ public class WTPUtil {
 			Class.forName("org.eclipse.wst.common.componentcore.ComponentCore");
 			Class.forName("org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants");
 			return new DefaultImplementation();
-		} catch (ClassNotFoundException e) {
+		} catch (Throwable e) {
 			//Most likely reason for the exception is that WTP is not installed (the WTP plugins are declared as
 			//optional dependencies).
 			GradleCore.log(e);

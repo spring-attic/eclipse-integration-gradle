@@ -44,7 +44,7 @@ public class DSLDSupport {
 
 	public static final String GROOVY_LIBS_CONTAINER = "GROOVY_SUPPORT";
     public static final String GROOVY_DSL_CONTAINER = "GROOVY_DSL_SUPPORT";
-	static final String GROOVY_NATURE = "org.eclipse.jdt.groovy.core.groovyNature";
+	public static final String GROOVY_NATURE = "org.eclipse.jdt.groovy.core.groovyNature";
 	static final String ASPECTJ_NATURE = "org.eclipse.ajdt.ui.ajnature";
 
 	private Boolean haveGreclipse = null;

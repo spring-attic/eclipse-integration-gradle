@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -49,6 +50,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
+import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
@@ -68,9 +70,11 @@ import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
+import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
 import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
+import org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDependencyManagementActionDelegate;
 
 /**
  * Basic tests for the GradleImport operation. Imports a project, all its subprojects using
@@ -771,7 +775,7 @@ public class GradleImportTests extends GradleTest {
 			System.out.println("\""+proj.getName()+"\",");
 		}
 
-		assertProjects(
+		String[] projectNames = {
 				"spring-integration",
 				"spring-integration-amqp",
 				"spring-integration-core",
@@ -800,7 +804,42 @@ public class GradleImportTests extends GradleTest {
 				"spring-integration-ws",
 				"spring-integration-xml",
 				"spring-integration-xmpp"
+		};
+		
+		assertProjects(
+				projectNames
 		);
+		
+		DSLDSupport dslSupport = DSLDSupport.getInstance();
+		for (IProject p : projects) {
+			GradleProject gp = GradleCore.create(p);
+			//Iniatially dsl support is enabled.
+			assertTrue(dslSupport.isEnabled(gp));
+			assertTrue(p.hasNature(DSLDSupport.GROOVY_NATURE));
+			//Disable dependency management on all the projects.
+			dslSupport.enableFor(gp, false, new NullProgressMonitor());
+		}
+		
+		// Now do a basic refresh all test.
+		RefreshAllActionCore.callOn(Arrays.asList(projects)).join();
+		for (IProject p : projects) {
+			GradleProject gp = GradleCore.create(p);
+			assertFalse(dslSupport.isEnabled(gp));
+			if (p.getName().equals("spring-integration")) {
+				//The 'root' project keeps groovy nature because it doesn't apply the 'eclipse'
+				//  plugin. Therefore it has no 'cleanEclipse' task and so the nature isn't erased.
+				// This is the expected behavior. (Or should we ourselves attempt to 'cleanEclipse'?).
+				assertTrue(p.hasNature(DSLDSupport.GROOVY_NATURE));
+			} else {
+				assertFalse("Project "+p.getName()+" still has Groovy nature", 
+						p.hasNature(DSLDSupport.GROOVY_NATURE));
+			}
+		}
+		
+		assertProjects(
+				projectNames
+		);
+		
 	}
 	
 	public void testSTS2094() throws Exception {
