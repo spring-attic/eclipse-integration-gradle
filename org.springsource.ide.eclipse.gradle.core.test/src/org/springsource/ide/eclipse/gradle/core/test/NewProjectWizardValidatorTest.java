@@ -115,6 +115,17 @@ public class NewProjectWizardValidatorTest extends GradleTest {
 		assertError("Location: last segment of path should be 'bork'");
 		
 	}
+
+	public void testLocationsWithOnlyGitFolderCountsAsEmpty() throws Exception {
+		File dir = TestUtils.createTempDirectory();
+		dir = new File(dir, "bork");
+		File gitDir = new File(dir, ".git");
+		assertTrue(gitDir.mkdirs());
+		
+		wizard.name.setValue("bork");
+		wizard.location.setValue(dir.getAbsolutePath());
+		assertOk(wizard.newProjectOp.getLocationValidator().getValue());
+	}
 	
 	public void testLocationIsNotAnEmptyDir() throws Exception {
 		File dir = TestUtils.createTempDirectory();
