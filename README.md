@@ -24,7 +24,7 @@ Documentation
 -------------
 
 Documentation for the functionality offered by Eclipse-Integration-Gradle tooling is available from [our
-project's GutHub Wiki](https://github.com/SpringSource/eclipse-integration-gradle/wiki).
+project's GitHub Wiki](https://github.com/SpringSource/eclipse-integration-gradle/wiki).
 
 Installation instructions:
 --------------------------
