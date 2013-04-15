@@ -150,7 +150,7 @@
 				<repository>
 					<id>greclipse37</id>
 					<layout>p2</layout>
-					<url>http://dist.springsource.org/release/GRECLIPSE/e3.7/</url>
+					<url>http://dist.springsource.org/snapshot/GRECLIPSE/e3.7/</url>
 				</repository>
 			</repositories>
 		</profile>
