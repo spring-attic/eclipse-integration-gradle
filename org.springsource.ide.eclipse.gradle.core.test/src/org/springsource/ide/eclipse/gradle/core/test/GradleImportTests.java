@@ -762,13 +762,14 @@ public class GradleImportTests extends GradleTest {
 			// distro = new URI("http://repo.gradle.org/gradle/distributions/gradle-1.0-milestone-8-bin.zip");
 //		}
 		GradleCore.getInstance().getPreferences().setDistribution(distro);
-		importGitProject(
+		GradleImportOperation op = importGitProjectOperation(
 				new GitProject(
 						"spring-integration", 
 						new URI("git://github.com/kdvolder/spring-integration.git"),
 						"d4026bd63b43fdade2ed38a97bcdce89e6fab835"
 				).setRecursive(true)
 		);
+		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (IProject proj : projects) {
@@ -805,6 +806,9 @@ public class GradleImportTests extends GradleTest {
 				"spring-integration-xml",
 				"spring-integration-xmpp"
 		};
+		
+		TestUtils.disableCompilerLevelCheck(getProject("spring-integration-groovy"));
+		TestUtils.disableCompilerLevelCheck(getProject("spring-integration-scripting"));
 		
 		assertProjects(
 				projectNames

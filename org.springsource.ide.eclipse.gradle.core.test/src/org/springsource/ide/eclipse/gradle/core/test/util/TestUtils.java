@@ -31,6 +31,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 
+import org.codehaus.groovy.eclipse.core.compiler.CompilerUtils;
+import org.codehaus.groovy.frameworkadapter.util.SpecifiedVersion;
+
 /**
  * @author Kris De Volder
  */
@@ -70,6 +73,10 @@ public class TestUtils {
 				Assert.fail("Expecting no problems but found: " + markerMessage(problem));
 			}
 		}
+	}
+	
+	public static void disableCompilerLevelCheck(IProject p) {
+		CompilerUtils.setCompilerLevel(p, SpecifiedVersion.DONT_CARE);
 	}
 	
 	public static String markerMessage(IMarker m) throws CoreException {
