@@ -862,46 +862,6 @@ public class GradleImportTests extends GradleTest {
 		importOp.perform(new ErrorHandler.Test(IStatus.ERROR), new NullProgressMonitor());
 	}
 	
-//	public void testImportSpock() throws Exception {
-//		setSnapshotDistro();
-//		importGitProject(new GitProject("spock", 
-//				new URI("git://github.com/spockframework/spock.git"),
-//				"3f5723")
-//		);
-//		
-//		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-//		for (IProject proj : projects) {
-//			System.out.println(proj);
-//		}
-//		
-//		assertProjects(
-//				"spock", 
-//				"spock-core", 
-//				"spock-grails", 
-//				"spock-grails-support", 
-//				"spock-guice", 
-//				"spock-specs", 
-//				"spock-spring", 
-//				"spock-tapestry", 
-//				"spock-unitils"
-//		);
-//	}
-	
-
-//Timing results wiht a 'bulk' run of eclipse tasks
-//1 min, 15 sec
-//0 min, 44 sec
-//0 min, 40 sec
-//0 min, 42 sec
-//0 min, 38 sec
-//0 min, 40 sec
-//0 min, 36 sec
-//0 min, 38 sec
-//0 min, 38 sec
-//0 min, 41 sec
-//----------------------
-//Avg : 0 min, 43 sec
-//<<<< import times ====
 	public void disabledTestTimedImport() throws Exception {
 		setSnapshotDistro();
 		final GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-security", 
