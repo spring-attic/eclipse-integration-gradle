@@ -27,6 +27,8 @@ import org.springsource.ide.eclipse.gradle.core.validators.CompositeValidator;
 import org.springsource.ide.eclipse.gradle.core.validators.ValidationResult;
 
 
+//TODO: copied to commons livexp. Remove this from gradle bundles.
+
 /**
  * An abstract super class to more easily create preferences pages composed of modular sections.
  * Each section encapsulates its own widgetry and validation logic.
