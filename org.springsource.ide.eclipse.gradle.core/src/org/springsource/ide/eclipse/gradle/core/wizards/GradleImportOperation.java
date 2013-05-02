@@ -382,7 +382,7 @@ public class GradleImportOperation {
 				}
 			}
 			if (!childProjectFilters.isEmpty()) {
-				project.createFilter(IResourceFilterDescription.EXCLUDE_ALL|IResourceFilterDescription.FOLDERS, 
+				project.createFilter(IResourceFilterDescription.EXCLUDE_ALL|IResourceFilterDescription.FOLDERS|IResourceFilterDescription.INHERITABLE, 
 						ResourceFilterFactory.or(childProjectFilters), IResource.BACKGROUND_REFRESH, new SubProgressMonitor(monitor, existing.length));
 			}
 		} finally {
