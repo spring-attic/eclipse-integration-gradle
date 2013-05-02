@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.FileInfoMatcherDescription;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -64,7 +65,6 @@ import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ResourceFilterFactory;
 import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper.NameClashException;
-
 
 /**
  * This is the 'core' counter part of GradleImportWizard. An instance of this class specifies 
@@ -165,6 +165,8 @@ public class GradleImportOperation {
 		if (doAfterTasks) {
 			totalWork += tasksWork;
 		}
+		int derivedMarkingWork = tasksWork+1/2;
+		totalWork += derivedMarkingWork;
 		monitor.beginTask("Importing Gradle Projects", totalWork);
 		try {
 			if (!projectsToImport.isEmpty()) {
@@ -182,25 +184,64 @@ public class GradleImportOperation {
 						refreshProjects(sorted, new SubProgressMonitor(monitor, tasksWork/3));
 					}
 				}
+				markBuildFolderAsDerived(sorted, new SubProgressMonitor(monitor, derivedMarkingWork));
 			}
 		} finally {
 			monitor.done();
 		}
 	}
 
-	private void refreshProjects(List<HierarchicalEclipseProject> sorted, IProgressMonitor monitor) {
-		monitor.beginTask("Refreshing projects", sorted.size());
+	private void markBuildFolderAsDerived(List<HierarchicalEclipseProject> sorted, IProgressMonitor mon) {
+		mon.beginTask("Mark derived resources", sorted.size());
+		try {
+			for (HierarchicalEclipseProject hp : sorted) {
+				GradleProject gp = GradleCore.create(hp);
+				markBuildFolderAsDerived(gp, new SubProgressMonitor(mon, 1));
+			}
+		} finally {
+			mon.done();
+		}
+	}
+
+	/**
+	 * Marks folders like 'build' where gradle typically puts stuff created by the build
+	 * as 'derived'. This will stop these folders from being shared with CVS, git etc.
+	 * and also stop validation.
+	 */
+	private void markBuildFolderAsDerived(GradleProject gp, IProgressMonitor mon) {
+		mon.beginTask("Mark build folder derived", 1);
+		try {
+			IFolder buildFolder = gp.getBuildFolder();
+			if (buildFolder!=null) {
+				if (!buildFolder.exists()) {
+					//Can't mark it when it doesn't exist. This could be problematic if
+					//it is created later by running a task/build. So we pro-actively create it
+					//now so we can mark it!
+					buildFolder.create(true, true, new NullProgressMonitor());
+				}
+				buildFolder.setDerived(true, new SubProgressMonitor(mon, 1));
+			}
+		} catch (CoreException e) {
+			GradleCore.log(e);
+		}
+		finally {
+			mon.done();
+		}
+	}
+	
+	private void refreshProjects(List<HierarchicalEclipseProject> sorted, IProgressMonitor mon) {
+		mon.beginTask("Refreshing projects", sorted.size()*2);
 		try {
 			for (HierarchicalEclipseProject _p : sorted) {
 				IProject p = GradleCore.create(_p).getProject();
 				try {
-					p.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+					p.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(mon, 1));
 				} catch (CoreException e) {
 					GradleCore.log(e);
 				}
 			}
 		} finally {
-			monitor.done();
+			mon.done();
 		}
 	}
 

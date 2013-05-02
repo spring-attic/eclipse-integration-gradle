@@ -1053,4 +1053,25 @@ public class GradleProject {
 		
 	}
 
+	/**
+	 * This returns the folder where the Gradle build output for this project are
+	 * being stored.
+	 * 
+	 * This may return null if the GradleProject is not imported in the workspace.
+	 * 
+	 * This may return a IFolder instance (handle) that doesn't physically 
+	 * exist (yet). E.g. this may happen if a project is imported to the workspace 
+	 * but has not yet been built by gradle prior to importing it. In this case 
+	 * the build folder may not have been created yet.
+	 */
+	public IFolder getBuildFolder() {
+		IProject p = getProject();
+		if (p!=null) {
+			//TODO: presumably it is possible to change this from the default. So we need to able to
+			// configure this and/or ask Gradle via tooling API where it lives.
+			return p.getFolder("build");
+		}
+		return null;
+	}
+
 }
