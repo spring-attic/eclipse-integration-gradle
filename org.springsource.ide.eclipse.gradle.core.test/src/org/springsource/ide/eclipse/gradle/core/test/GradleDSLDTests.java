@@ -18,6 +18,7 @@ import java.io.InputStream;
 import junit.framework.AssertionFailedError;
 
 import org.codehaus.groovy.eclipse.GroovyLogManager;
+import org.codehaus.groovy.eclipse.core.compiler.CompilerUtils;
 import org.codehaus.groovy.eclipse.dsl.RefreshDSLDJob;
 import org.codehaus.groovy.eclipse.dsl.tests.AbstractDSLInferencingTest;
 import org.codehaus.groovy.eclipse.dsl.tests.InferencerWorkload;
@@ -50,6 +51,7 @@ public class GradleDSLDTests extends GradleTest {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		System.out.println("Active Groovy Version = "+CompilerUtils.getGroovyVersion());
 		GroovyLogManager.manager.addLogger(new AbstractDSLInferencingTest.TestLogger());
 	}
 	
