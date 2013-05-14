@@ -59,6 +59,7 @@ import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectSorter;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectUtil;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
@@ -284,6 +285,8 @@ public class GradleImportOperation {
 		}
 		monitor.beginTask("Import "+projectModel.getName(), totalWork);
 		try {
+			GradleProject gProj = GradleCore.create(projectModel);
+			
 			//1
 			IWorkspace ws = ResourcesPlugin.getWorkspace();
 			String projectName = getEclipseName(projectModel);
@@ -291,6 +294,12 @@ public class GradleImportOperation {
 			IProjectDescription projectDescription = ws.newProjectDescription(projectName);
 			if (!isDefaultProjectLocation(projectName, projectDir)) {
 				projectDescription.setLocation(new Path(projectDir.getAbsolutePath()));
+			}
+			//To improve error message... check validity of project location vs name
+			//note: in import wizard use, this error is impossible since wizard validates this constraint.
+			String expectedName = projectDir.getName();
+			if (!expectedName.equals(projectName)) {
+				eh.handleError(ExceptionUtil.coreException("Project-name ("+projectName+") should match last segment of location ("+projectDir+")"));
 			}
 			monitor.worked(1);
 			
@@ -303,7 +312,6 @@ public class GradleImportOperation {
 			}
 
 			//3
-			GradleProject gProj = GradleCore.create(projectModel);
 			GradleRefreshPreferences refreshPrefs = gProj.getRefreshPreferences();
 			refreshPrefs.copyFrom(this);
 			
