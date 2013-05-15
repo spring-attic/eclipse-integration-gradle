@@ -88,7 +88,7 @@ public class GradleImportOperation {
 	
 	public static final boolean DEFAULT_DO_AFTER_TASKS = true; //Is not affected by GRADLE-1792 so can be on by default
 	public static final boolean DEFAULT_ENABLE_DEPENDENCY_MANAGEMENT = true; //Default setting preserves 'old' behavior.
-	public static final boolean DEFAULT_ENABLE_DSLD = true;
+	public static final boolean DEFAULT_ENABLE_DSLD = false; //Less chance of classpath issues created by adding DSL stuff to classpath.
 	
 	/**
 	 * Tasks to run before doing actual import (if option is enabled)
@@ -292,14 +292,20 @@ public class GradleImportOperation {
 			String projectName = getEclipseName(projectModel);
 			File projectDir = projectModel.getProjectDirectory().getCanonicalFile(); //TODO: is this right for subfolders (locations maybe better relative to ws somehow)
 			IProjectDescription projectDescription = ws.newProjectDescription(projectName);
+			Path projectLocation = new Path(projectDir.getAbsolutePath());
 			if (!isDefaultProjectLocation(projectName, projectDir)) {
-				projectDescription.setLocation(new Path(projectDir.getAbsolutePath()));
+				projectDescription.setLocation(projectLocation);
 			}
 			//To improve error message... check validity of project location vs name
 			//note: in import wizard use, this error is impossible since wizard validates this constraint.
-			String expectedName = projectDir.getName();
-			if (!expectedName.equals(projectName)) {
-				eh.handleError(ExceptionUtil.coreException("Project-name ("+projectName+") should match last segment of location ("+projectDir+")"));
+			//Be careful that this constraint only needs to hold in a very specific case where the
+			//location is nested exactly one level below the workspace location on disk.
+			IPath wsLocation = ws.getRoot().getLocation();
+			if (wsLocation.isPrefixOf(projectLocation) && wsLocation.segmentCount()+1==projectLocation.segmentCount()) {
+				String expectedName = projectDir.getName();
+				if (!expectedName.equals(projectName)) {
+					eh.handleError(ExceptionUtil.coreException("Project-name ("+projectName+") should match last segment of location ("+projectDir+")"));
+				}
 			}
 			monitor.worked(1);
 			
