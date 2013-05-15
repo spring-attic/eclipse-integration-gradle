@@ -26,7 +26,9 @@ import org.codehaus.groovy.eclipse.dsl.tests.InferencerWorkload.InferencerTask;
 import org.codehaus.jdt.groovy.model.GroovyCompilationUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,10 +39,13 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
+import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.dsld.GradleDSLDClasspathContainer;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.GradleInferencerWorkload;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
+import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
+import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 
 
 /**
@@ -58,7 +63,7 @@ public class GradleDSLDTests extends GradleTest {
 	public void testScaffolding() throws Exception {
 		InferencerWorkload workload = new GradleInferencerWorkload( 
 				"/*!V:P!*/apply/*!*/ plugin: 'java'\n");
-		IJavaProject javaProject = simpleProject("scaffold", workload.getContents());
+		IJavaProject javaProject = simpleDSLDProject("scaffold", workload.getContents());
 		IProject project = javaProject.getProject();
 		TestUtils.assertNoErrors(project);
 		new RefreshDSLDJob(project).run(new NullProgressMonitor()); //Needed to make DSLD stuff work.
@@ -75,6 +80,13 @@ public class GradleDSLDTests extends GradleTest {
 
 	}
 	
+	private IJavaProject simpleDSLDProject(String projName, String buildFileContents) throws Exception {
+		GradleImportOperation importOp = simpleProjectImport(projName, buildFileContents);
+		importOp.setEnableDSLD(true);
+		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+		return getJavaProject(projName);
+	}
+
 	public void testSuppressUnderlining() throws Exception {
 		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
 		assertTrue(prefs.getGroovyEditorDisableUnderlining());
@@ -87,6 +99,7 @@ public class GradleDSLDTests extends GradleTest {
 				"}\n");
 		
 		GradleProject gp = emptyGradleJavaProject("scaffold");
+		DSLDSupport.getInstance().enableFor(gp, true, new NullProgressMonitor());
 		IProject project = gp.getProject();
 		TestUtils.assertNoErrors(project);
 		new RefreshDSLDJob(project).run(new NullProgressMonitor()); //Needed to make DSLD stuff work.
@@ -106,7 +119,7 @@ public class GradleDSLDTests extends GradleTest {
 			assertContains("Inferencing failure", e.getMessage());
 		}
 	}
-	
+
 	public void testASimpleBuildScript() throws Exception {
 		InferencerWorkload workload = new GradleInferencerWorkload(
 				"apply plugin: 'base'\n" + 
@@ -135,7 +148,7 @@ public class GradleDSLDTests extends GradleTest {
 				"   /*!T:T!*/dependsOn(goodbye)/*!*/\n"+
 				"}\n");
 
-		IJavaProject javaProject = simpleProject("scaffold", workload.getContents());
+		IJavaProject javaProject = simpleDSLDProject("scaffold", workload.getContents());
 		IProject project = javaProject.getProject();
 		TestUtils.assertNoErrors(project);
 		new RefreshDSLDJob(project).run(new NullProgressMonitor()); //Needed to make DSLD stuff work.
