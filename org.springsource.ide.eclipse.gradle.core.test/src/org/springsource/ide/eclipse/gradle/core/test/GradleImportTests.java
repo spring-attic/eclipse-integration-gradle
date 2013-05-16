@@ -1176,13 +1176,13 @@ public class GradleImportTests extends GradleTest {
 				JavaCore.newProjectEntry(new Path("/"+secondProj), true),
 				
 				//Order is alphapbetic:
-				JavaCore.newContainerEntry(GroovyDSLCoreActivator.CLASSPATH_CONTAINER_ID, false),
-				JavaCore.newContainerEntry(GroovyClasspathContainer.CONTAINER_ID, false),
+				//Only there if DSLD enabled: JavaCore.newContainerEntry(GroovyDSLCoreActivator.CLASSPATH_CONTAINER_ID, false),
+				//Only there if DSLD enabled: JavaCore.newContainerEntry(GroovyClasspathContainer.CONTAINER_ID, false),
 				//org.eclipse
 				JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER"), true),
 				//org.springsource
 				JavaCore.newContainerEntry(new Path(GradleClassPathContainer.ID), true),
-				JavaCore.newContainerEntry(new Path(GradleDSLDClasspathContainer.ID), false),
+				//Only there if DSLD enabled: JavaCore.newContainerEntry(new Path(GradleDSLDClasspathContainer.ID), false),
 		};
 		return expectedClasspath;
 	}
