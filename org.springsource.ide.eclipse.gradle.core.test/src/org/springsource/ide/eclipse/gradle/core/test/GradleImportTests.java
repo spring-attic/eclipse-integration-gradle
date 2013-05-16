@@ -770,6 +770,7 @@ public class GradleImportTests extends GradleTest {
 						"d4026bd63b43fdade2ed38a97bcdce89e6fab835"
 				).setRecursive(true)
 		);
+		op.setEnableDSLD(true);
 		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
@@ -818,10 +819,10 @@ public class GradleImportTests extends GradleTest {
 		DSLDSupport dslSupport = DSLDSupport.getInstance();
 		for (IProject p : projects) {
 			GradleProject gp = GradleCore.create(p);
-			//Iniatially dsl support is enabled.
-			assertTrue(dslSupport.isEnabled(gp));
-			assertTrue(p.hasNature(DSLDSupport.GROOVY_NATURE));
-			//Disable dependency management on all the projects.
+			//Iniatially dsl support is ...
+			assertTrue("dslSupport enabled?", dslSupport.isEnabled(gp));
+			assertTrue("Groovy Nature", p.hasNature(DSLDSupport.GROOVY_NATURE));
+			//Disable dsl support
 			dslSupport.enableFor(gp, false, new NullProgressMonitor());
 		}
 		
