@@ -146,7 +146,7 @@ public class GradleCore extends Plugin {
 				}
 				newPrefs.putBoolean("needsMigration", false); //We done the migration.
 				newPrefs.flush(); //Make sure all the new copied prefs are stored.
-				GradleCore.logInfo("Gradle workspace preferences migrated to 3.0.0 format");
+				//GradleCore.logInfo("Gradle workspace preferences migrated to 3.0.0 format");
 			} catch (BackingStoreException e) {
 				GradleCore.log(e);
 			}
