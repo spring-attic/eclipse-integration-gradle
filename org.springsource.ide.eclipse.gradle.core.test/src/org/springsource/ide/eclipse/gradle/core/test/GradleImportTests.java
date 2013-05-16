@@ -89,6 +89,7 @@ public class GradleImportTests extends GradleTest {
 		File projectLoc = extractJavaSample(projectName);
 		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
 		importOp.setEnableDependencyManagement(false); //use default values for everything else.
+		boolean expectDsld = importOp.getEnableDSLD();
 		
 		performImport(importOp);
 		GradleProject project = getGradleProject(projectName);
@@ -97,7 +98,7 @@ public class GradleImportTests extends GradleTest {
 		
 		assertFalse("Shouldn't have classpath container", 
 				GradleClassPathContainer.isOnClassPath(project.getJavaProject()));
-		assertTrue("DSLD support added?", DSLDSupport.getInstance().isEnabled(project));
+		assertEquals("DSLD support enablement state", expectDsld, DSLDSupport.getInstance().isEnabled(project));
 		assertTrue("Gradle nature added?", GradleNature.hasNature(getProject(projectName)));
 	}
 	
