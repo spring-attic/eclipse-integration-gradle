@@ -294,6 +294,10 @@ public abstract class GradleTest extends TestCase {
 			MissingProjectDependencyException {
 		importTestProject(extractJavaSample(projectName));
 	}
+	
+	public GradleImportOperation importSampleProjectOperation(String projectName) throws Exception {
+		return importTestProjectOperation(extractJavaSample(projectName));
+	}
 
 	/**
 	 * Extracts one of the java sample projects from the official Gradle distribution zip, placing it into a new folder

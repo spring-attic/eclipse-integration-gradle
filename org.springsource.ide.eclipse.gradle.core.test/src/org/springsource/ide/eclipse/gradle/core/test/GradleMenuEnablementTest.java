@@ -29,6 +29,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
+import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 import org.springsource.ide.eclipse.gradle.ui.actions.ConvertToGradleProjectActionDelegate;
 import org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate;
 import org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDependencyManagementActionDelegate;
@@ -137,7 +138,9 @@ public class GradleMenuEnablementTest extends GradleTest {
 	
 	public void test_STS2450_IgnoreGroovyLibrariesInDSLDSupportEnablementTest() throws Exception {
 		String projectName = "quickstart";
-		importSampleProject(projectName);
+		GradleImportOperation op = importSampleProjectOperation(projectName);
+		op.setEnableDSLD(true);
+		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 		IProject project = getProject(projectName);
 		IJavaProject jp = JavaCore.create(project);
 		
