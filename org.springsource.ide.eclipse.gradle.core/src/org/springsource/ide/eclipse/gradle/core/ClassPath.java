@@ -86,9 +86,20 @@ public class ClassPath {
 			int k1 = e1.getEntryKind();
 			int k2 = e2.getEntryKind();
 			Assert.isLegal(k1==k2, "Only entries with the same kind should be compared");
-			String p1 = e1.getPath().toString();
-			String p2 = e2.getPath().toString();
+			String p1 = getCompareString(e1);
+			String p2 = getCompareString(e2);
 			return p1.compareTo(p2);
+		}
+
+		private String getCompareString(IClasspathEntry e) {
+			String str = e.getPath().toString();
+			if (e.getEntryKind()==IClasspathEntry.CPE_CONTAINER) {
+				//STS-3382: DSL support Groovy container should be last entry on classpath
+				if (str.startsWith("GROOVY_")) {
+					str = "zzz"+str; 
+				}
+			}
+			return str;
 		}
 	}
 

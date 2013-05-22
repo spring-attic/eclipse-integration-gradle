@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -46,8 +45,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
@@ -69,6 +66,7 @@ import org.springsource.ide.eclipse.gradle.core.test.util.KillGradleDaemons;
 import org.springsource.ide.eclipse.gradle.core.test.util.LoggingProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.DownloadManager;
+import org.springsource.ide.eclipse.gradle.core.util.DownloadManager.DownloadRequestor;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler.Test;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
@@ -78,7 +76,6 @@ import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation.ExistingProjectException;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation.MissingProjectDependencyException;
 import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper.NameClashException;
-import org.springsource.ide.eclipse.gradle.core.util.DownloadManager.DownloadRequestor;
 
 
 /**
