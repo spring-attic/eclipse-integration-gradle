@@ -114,8 +114,9 @@ public class WTPPreferencesPage extends PreferencePage implements IWorkbenchPref
 				GradleCore.log(e);
 				return false;
 			}
+		} else {
+			return true;
 		}
-		return false;
 	}
 	
 	private void setDeploymentExclusions(RegexpListDeploymentExclusions exclusions) {
