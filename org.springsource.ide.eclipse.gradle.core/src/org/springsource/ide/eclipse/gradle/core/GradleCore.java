@@ -92,6 +92,11 @@ public class GradleCore extends Plugin {
 		IStatus s = ExceptionUtil.status(IStatus.ERROR, e);
 		log(s);
 	}
+	
+	public static void logInfo(Throwable e) {
+		IStatus s = ExceptionUtil.status(IStatus.INFO, e);
+		log(s);
+	}
 
 	public static void log(IStatus s) {
 		instance.getLog().log(s);
@@ -207,5 +212,5 @@ public class GradleCore extends Plugin {
 	public static void warn(String message) {
 		log(new Status(IStatus.WARNING, GradleCore.PLUGIN_ID, message));
 	}
-	
+
 }

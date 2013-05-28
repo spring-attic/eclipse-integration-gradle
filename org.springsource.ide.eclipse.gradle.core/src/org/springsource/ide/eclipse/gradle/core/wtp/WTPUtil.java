@@ -241,7 +241,6 @@ public class WTPUtil {
 			}
 			return false;
 		}
-
 	}
 
 	private static final IWTPUtil implementation = createImplementation();
@@ -254,7 +253,7 @@ public class WTPUtil {
 		} catch (Throwable e) {
 			//Most likely reason for the exception is that WTP is not installed (the WTP plugins are declared as
 			//optional dependencies).
-			GradleCore.log(e);
+			GradleCore.logInfo(e); //Don't log this as a real error: see https://issuetracker.springsource.com/browse/STS-3385
 			return new NullImplementation();
 		}
 	}
