@@ -49,7 +49,7 @@ public class GradleDependencyComputer {
 		this.model = null;
 	}
 	
-	private void addJarEntry(ClassPath classpath, IPath jarPath, ExternalDependency gEntry) {
+	private void addJarEntry(ClassPath classpath, IPath jarPath, ExternalDependency gEntry, boolean export) {
 		// Get the location of a source jar, if any.
 		IPath sourceJarPath = null;
 		File sourceJarFile = gEntry.getSource();
@@ -84,7 +84,7 @@ public class GradleDependencyComputer {
 				null, 
 				ClasspathEntry.NO_ACCESS_RULES, 
 				extraAttributes.toArray(new IClasspathAttribute[extraAttributes.size()]), 
-				GlobalSettings.exportClasspathContainerEntries);
+				export);
 		classpath.add(newLibraryEntry);
 		if (newLibraryEntry.toString().contains("unresolved dependency")) {
 			debug("entry: "+newLibraryEntry);
@@ -106,6 +106,7 @@ public class GradleDependencyComputer {
 			debug("gradleModel ready: "+Integer.toHexString(System.identityHashCode(gradleModel))+" "+gradleModel);
 			DomainObjectSet<? extends ExternalDependency> gClasspath = gradleModel.getClasspath();
 			ClassPath classpath = new ClassPath(project, gClasspath.size());
+			boolean export = GradleCore.getInstance().getPreferences().isExportDependencies(); //TODO: maybe should be project preference?
 			for (ExternalDependency gEntry : gClasspath) {
 				// Get the location of the jar itself
 				File file = gEntry.getFile();
@@ -120,7 +121,7 @@ public class GradleDependencyComputer {
 						}
 					}
 					if (!remapped) {
-						addJarEntry(classpath, jarPath, gEntry);
+						addJarEntry(classpath, jarPath, gEntry, export);
 					}
 				} else {
 					//'non jar' entries may happen when project has a dependency on a sourceSet's output folder.
@@ -142,7 +143,7 @@ public class GradleDependencyComputer {
 							//We don't know what this is, but it exists. Give it the benefit of the doubt and try to treat it 
 							//the same as a 'jar'... pray... and hope for the best. 
 							//Note: one possible thing this could be is an output folder containing .class files.
-							addJarEntry(classpath, jarPath, gEntry);
+							addJarEntry(classpath, jarPath, gEntry, export);
 							markers.reportWarning("Unknown type of Gradle Dependency was treated as 'jar' entry: "+jarPath);
 						} else {
 							//Adding this will cause very wonky behavior see: https://issuetracker.springsource.com/browse/STS-2531

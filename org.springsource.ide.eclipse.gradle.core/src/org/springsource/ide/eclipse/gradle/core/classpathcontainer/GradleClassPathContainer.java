@@ -286,12 +286,14 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		try {
 			mon.worked(1);
 			if (!isOnClassPath(project)) {
+				boolean export = GradleCore.getInstance().getPreferences().isExportDependencies();
 				sdebug("Adding... to "+project.getElementName());
 				//Only add it if itsn't there yet
 				ClassPath classpath = new ClassPath(GradleCore.create(project), project.getRawClasspath());
 				//			classpath.add(JavaCore.newContainerEntry(new Path(ID)));
 				classpath.DEBUG = S_DEBUG;
-				classpath.add(WTPUtil.addToDeploymentAssembly(project, JavaCore.newContainerEntry(new Path(ID), GlobalSettings.exportClasspathContainerEntries)));
+				classpath.add(WTPUtil.addToDeploymentAssembly(project, JavaCore.newContainerEntry(new Path(ID), export)));
+//						GlobalSettings.exportClasspathContainer)));
 				classpath.removeLibraryEntries();
 				classpath.setOn(project, new SubProgressMonitor(mon, 9));
 				GradleCore.create(project).getClassPathcontainer().refreshMarkers();

@@ -20,7 +20,11 @@ public class GlobalSettings {
 	 */
 	public static final boolean DEBUG = false;
 
-	public static final boolean exportClasspathContainerEntries = true;
+	//Removed: 
+	//public static final boolean exportClasspathContainer = true; 
+	//public static final boolean exportClasspathContainerEntries = true;  
+	//Now should follow the workspace preference.
+	
 	public static boolean exportProjectEntries = true;
 
 }

@@ -15,9 +15,14 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -27,6 +32,7 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.osgi.framework.Bundle;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
 import org.springsource.ide.eclipse.gradle.core.util.JavaRuntimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wtp.DeploymentExclusions;
@@ -61,8 +67,12 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	private static final String AUTO_REFRESH_DEPENDENCIES = GradlePreferences.class.getName()+".AUTO_REFRESH_DEPENDENCIES";
 	public static final boolean DEFAULT_AUTO_REFRESH_DEPENDENCIES = false;
 	
-	private static final String AUTO_REFRESH_DELAY = GradlePreferences.class.getName()+".AUTO_REFRESH_DELAY";
+	public static final String AUTO_REFRESH_DELAY = GradlePreferences.class.getName()+".AUTO_REFRESH_DELAY";
 	public static final int DEFAULT_AUTO_REFRESH_DELAY = 5000;
+	
+	private static final String EXPORT_DEPENDENCIES =  GradlePreferences.class.getName()+".EXPORT_DEPENDENCIES";
+	public static final boolean DEFAULT_EXPORT_DEPENDENCIES =  true; //This is probably the wrong behavior but preserves backwards compatibility
+			//See: https://issuetracker.springsource.com/browse/STS-3405
 
 	private static URI builtInDistribution = null;
 
@@ -257,6 +267,20 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 		} else if (AUTO_REFRESH_DELAY.equals(event.getKey()) 
 				|| AUTO_REFRESH_DEPENDENCIES.equals(event.getKey())) {
 			DependencyRefresher.refresh();
+		} else if (EXPORT_DEPENDENCIES.equals(event.getKey())) {
+			try {
+				//All projects that have dependency management enabled are affected.
+				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+				List<IProject> affected = new ArrayList<IProject>();
+				for (IProject p : projects) {
+					if (GradleCore.create(p).isDependencyManaged()) {
+						affected.add(p);
+					}
+				}
+				RefreshAllActionCore.callOn(affected);
+			} catch (CoreException e) {
+				GradleCore.log(e);
+			}
 		}
 	}
 
@@ -316,5 +340,13 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	}
 	public void setAutoRefreshDelay(int v) {
 		put(AUTO_REFRESH_DELAY, v);
+	}
+
+	public boolean isExportDependencies() {
+		return get(EXPORT_DEPENDENCIES, DEFAULT_EXPORT_DEPENDENCIES);
+	}
+
+	public void setExportDependencies(boolean e) {
+		put(EXPORT_DEPENDENCIES, e);
 	}
 }
