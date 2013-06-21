@@ -12,6 +12,7 @@ package org.springsource.ide.eclipse.gradle.core.test;
 
 import java.net.URI;
 
+import org.eclipse.core.resources.IProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.GroovySanityTest;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
@@ -51,7 +52,12 @@ public class GrailsCoreBuildTest extends GradleTest {
 		buildProjects();
 
 		boolean build = false; //No need to build again, already built all projects.
-		assertNoErrors(build); 
+		assertNoErrors(build, new Predicate<IProject>() {
+			@Override
+			public boolean apply(IProject project) {
+				return project.getName().endsWith(".ROOT");
+			}
+		}); 
 	}
 
 

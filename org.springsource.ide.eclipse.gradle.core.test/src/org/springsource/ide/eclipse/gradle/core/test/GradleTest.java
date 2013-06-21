@@ -165,14 +165,16 @@ public abstract class GradleTest extends TestCase {
 		}
 	}
 
-	public static void assertNoErrors(boolean build) throws CoreException {
+	public static void assertNoErrors(boolean build, Predicate<IProject> exclude) throws CoreException {
 	    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 	    IProject[] projects = root.getProjects();
 	    for (IProject project : projects) {
-            assertNoErrors(project, build);
+	    	if (!exclude.apply(project)) {
+	    		assertNoErrors(project, build);
+	    	}
         }
-        
 	}
+	
 	/**
 	 * Assert that a given set of projects exists in the workspace. Also forces a full build of
 	 * the projects and checks that the projects have no errors.
