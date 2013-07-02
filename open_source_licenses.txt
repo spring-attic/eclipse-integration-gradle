@@ -1,54 +1,39 @@
-Gradle Integration for Eclipse 3.2.0 GA
+open_source_license.txt
 
+Gradle Integration for Eclipse 3.3.0 GA
 
-===========================================================================
-
-VMware makes available all content in this download ("Content"). Unless otherwise indicated below, the Content is provided to you under the terms and conditions of the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
+=================================================================
+GoPivotal makes available all content in this download ("Content"). 
+Unless otherwise indicated below, the Content is provided to you under 
+the terms and conditions of the Eclipse Public License Version 1.0 ("EPL"). 
+A copy of the EPL is available in the file called license.txt. For 
+purposes of the EPL, "Program" will mean the Content.
 
 The following copyright statements and licenses apply to various open
 source software packages (or portions thereof) that are distributed with
 this Content.
 
-
-=============== TABLE OF CONTENTS =============================
-
-
-The following is a listing of the open source components detailed in this
-document.  This list is provided for your convenience; please read further if
-you wish to review the copyright notice(s) and the full text of the license
-associated with each component.
+=================================================================
+TABLE OF CONTENTS
+=================================================================
+The following is a listing of the open source components detailed in this document. 
+This list is provided for your convenience; please read further if you wish to review 
+the copyright notice(s) and the full text of the license associated with each component.
 
 
 
+SECTION 1: Eclipse Public License, V1.0
 
-SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
-
-   >>> springframework.roo.wrapping.bcpg-jdk15-1.45
-   >>> springframework.roo.wrapping.bcprov-jdk15_1.45-1.45
-
-
-
-SECTION 2: Apache License, V2.0
-
-   >>> org.springframework.roo.wrapping.json-simple-1.1.0
-   >>> org.springframework.uaa.client-1.0.3
-   >>> spring-core-3.1.1.release
-
-
-
-SECTION 3: Eclipse Public License, V1.0
-
-   >>> com.google.protobuf-2.4.0
    >>> org.apache.commons.io-2.0.1
-   >>> org.springframework.ide.eclipse.uaa-3.2.0
-   >>> org.springsource.ide.eclipse.commons.configurator-3.2.0
-   >>> org.springsource.ide.eclipse.commons.content.core-3.2.0
-   >>> org.springsource.ide.eclipse.commons.core-3.2.0
-   >>> org.springsource.ide.eclipse.commons.frameworks.core-3.2.0
-   >>> org.springsource.ide.eclipse.commons.frameworks.ui-3.2.0
-   >>> org.springsource.ide.eclipse.commons.livexp-3.2.0
-   >>> org.springsource.ide.eclipse.commons.ui-3.2.0
-   >>> org.springsource.ide.eclipse.dashboard.ui-3.2.0
+   >>> org.springframework.ide.eclipse.uaa-3.3.0
+   >>> org.springsource.ide.eclipse.commons.configurator-3.3.0
+   >>> org.springsource.ide.eclipse.commons.content.core-3.3.0
+   >>> org.springsource.ide.eclipse.commons.core-3.3.0
+   >>> org.springsource.ide.eclipse.commons.frameworks.core-3.3.0
+   >>> org.springsource.ide.eclipse.commons.frameworks.ui-3.3.0
+   >>> org.springsource.ide.eclipse.commons.livexp-3.3.0
+   >>> org.springsource.ide.eclipse.commons.ui-3.3.0
+   >>> org.springsource.ide.eclipse.dashboard.ui-3.3.0
 
 
 
@@ -56,124 +41,14 @@ APPENDIX. Standard License Files
 
    >>> Eclipse Public License, V1.0
 
-   >>> Apache License, V2.0
-   
+   >>> Apache 2.0
 
 
 
 
---------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES ----------
+--------------- SECTION 1: Eclipse Public License, V1.0 ----------
 
-BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
-
-
->>> springframework.roo.wrapping.bcpg-jdk15-1.45
-
-License:
-
-Bouncy Castle Licence http://www.bouncycastle.org/licence.html
-
-Apache Software License, Version 1.1 http://www.apache.org/licenses/LICENSE-1.1
-
-
->>> springframework.roo.wrapping.bcprov-jdk15_1.45-1.45
-
-Licenses:
-
-Bouncy Castle Licence 	http://www.bouncycastle.org/licence.html
-
-
-ADDITIONAL LICENSE INFORMATION:
-
-
-> Apache 1.1
-
-
-Apache Software License, Version 1.1 	http://www.apache.org/licenses/LICENSE-1.1
-Packages
-
-
---------------- SECTION 2: Apache License, V2.0 ----------
-
-Apache License, V2.0 are applicable to the following component(s).
-
-
->>> org.springframework.roo.wrapping.json-simple-1.1.0
-
-License: Apache 2.0
-
-
->>> org.springframework.uaa.client-1.0.3
-
-Spring User Agent Analysis (UAA) is copyright (C) 2010 SpringSource
-Inc. All Rights Reserved.
-
-
-All parts of UAA except the "server" module are licensed under the
-Apache Software License, version 2.0:
-
-     http://www.apache.org/licenses/LICENSE-2.0.html. 
-
-The "server" module is commercial/proprietary to VMware and all rights 
-are reserved. The "server" module consists of all files under the 
-"server" directory and its sub-directories. The "client" module does not require the "server" module and thus the "client" module can be freely redistributed under the aforementioned Apache Software License.
-
-Other software is used by Spring UAA as follows:
-
-* Google Protocol Buffers for Java (http://code.google.com/p/protobuf) is used for encoding and decoding objects into an optimised wire format. This library is licensed under the New BSD License.
-
-
-* Base64 (http://iharder.net/base64) is used for Base64 encoding and decoding. It has been formally granted to the public domain.
-
-
->>> spring-core-3.1.1.release
-
-Copyright 2002-2008 the original author or authors.
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
-
-You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-
-See the License for the specific language governing permissions and limitations under the License.
-
-
---------------- SECTION 3: Eclipse Public License, V1.0 ----------
-
-Eclipse Public License, V1.0 are applicable to the following component(s).
-
-
->>> com.google.protobuf-2.4.0
-
-About
-About This Content
-January 22, 2009
-License
-The Eclipse Foundation makes available all content in this plug-in ("Content"). Unless otherwise indicated below, the Content is provided to you under the terms and conditions of the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available at 
-http://www.eclipse.org/legal/epl-v10.html
-. For purposes of the EPL, "Program" will mean the Content.
-If you did not receive this Content directly from the Eclipse Foundation, the Content is being redistributed by another party ("Redistributor") and different terms and conditions may apply to your use of any object code in the Content. Check the Redistributor's license that was provided with the Content. If no such license exists, contact the Redistributor. Unless otherwise indicated below, the terms and conditions of the EPL still apply to any source code in the Content and such source code may be obtained at 
-http://www.eclipse.org
-.
-Third Party Content
-The Content includes items that have been sourced from third parties as set out below. If you did not receive this Content directly from the Eclipse Foundation, the following is provided for informational purposes only, and you should look to the Redistributors license for terms and conditions of use.
-Objenesis 1.0
-The plug-in includes Objenesis ("Objenesis") developed by http://objenesis.org/. Therefore:
-This product includes software developed by Objenesis (
-http://objenesis.org/
-).
-A subset of the Objenesis binary code is included with no modifications except postprocessing (pack200 conditioning and signing). The corresponding Objenesis source code is located in src.zip.
-Objenesis is:
-Copyright (c) 2003-2006, Objenesis Team and all contributors.
-Your use of the Objenesis code is subject to the terms and conditions of the MIT License. A copy of the license is contained in the file 
-LICENSE.txt
- and is also available at 
-http://www.opensource.org/licenses/mit-license.php
-.
-Examples and documentation as well as updated source code for Objenesis is available at 
-http://objenesis.org/
-.
+Eclipse Public License, V1.0 is applicable to the following component(s).
 
 
 >>> org.apache.commons.io-2.0.1
@@ -208,7 +83,7 @@ Commons IO is:
 Copyright (c) 1997-2005 The Apache Software Foundation. All rights reserved.
 Your use of the Commons IO code is subject to the terms and conditions of the Apache Software License 2.0. A copy of the license is contained in the file 
 LICENSE.txt
- and is also available at 
+and is also available at 
 http://www.apache.org/licenses/LICENSE-2.0.html
 .
 The Apache attribution 
@@ -219,168 +94,166 @@ http://commons.apache.org/io/
 .
 
 
->>> org.springframework.ide.eclipse.uaa-3.2.0
+>>> org.springframework.ide.eclipse.uaa-3.3.0
 
 About Eclipse Integration Commons
-March 11, 2013
+July 9, 2013
 Abstract
 
 The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
 
  License
-VMware makes available all content in this download ("Content"). Unless otherwise
+GoPivotal makes available all content in this download ("Content"). Unless otherwise
 indicated below, the Content is provided to you under the terms and conditions of 
 the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
 the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
  
 Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.configurator-3.2.0
-
-About Gradle Integration for Eclipse
-March 11, 2013
-Abstract
-
-The Gradle Integration for Eclipse E project provides Eclipse integration support for Gradle
-
-License
-VMware makes available all content in this download ("Content"). Unless otherwise
-indicated below, the Content is provided to you under the terms and conditions of 
-the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
-the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
- 
-Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
-
-
->>> org.springsource.ide.eclipse.commons.content.core-3.2.0
-
-About Gradle Integration for Eclipse
-March 11, 2013
-Abstract
-
-The Gradle Integration for Eclipse E project provides Eclipse integration support for Gradle
-
-License
-VMware makes available all content in this download ("Content"). Unless otherwise
-indicated below, the Content is provided to you under the terms and conditions of 
-the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
-the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
- 
-Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
-
-
->>> org.springsource.ide.eclipse.commons.core-3.2.0
-
-About Gradle Integration for Eclipse
-March 11, 2013
-Abstract
-
-The Gradle Integration for Eclipse E project provides Eclipse integration support for Gradle
-
-License
-VMware makes available all content in this download ("Content"). Unless otherwise
-indicated below, the Content is provided to you under the terms and conditions of 
-the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
-the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
- 
-Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
-
-
->>> org.springsource.ide.eclipse.commons.frameworks.core-3.2.0
+>>> org.springsource.ide.eclipse.commons.configurator-3.3.0
 
 About Eclipse Integration Commons
-March 11, 2013
+July 9, 2013
 Abstract
 
 The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
 
  License
-VMware makes available all content in this download ("Content"). Unless otherwise
+GoPivotal makes available all content in this download ("Content"). Unless otherwise
 indicated below, the Content is provided to you under the terms and conditions of 
 the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
 the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
  
 Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.frameworks.ui-3.2.0
+>>> org.springsource.ide.eclipse.commons.content.core-3.3.0
 
 About Eclipse Integration Commons
-March 11, 2013
+July 9, 2013
 Abstract
 
 The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
 
  License
-VMware makes available all content in this download ("Content"). Unless otherwise
+GoPivotal makes available all content in this download ("Content"). Unless otherwise
 indicated below, the Content is provided to you under the terms and conditions of 
 the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
 the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
  
 Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.livexp-3.2.0
-
-About Gradle Integration for Eclipse
-March 11, 2013
-Abstract
-
-The Gradle Integration for Eclipse E project provides Eclipse integration support for Gradle
-
-License
-VMware makes available all content in this download ("Content"). Unless otherwise
-indicated below, the Content is provided to you under the terms and conditions of 
-the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
-the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
- 
-Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
-
-
->>> org.springsource.ide.eclipse.commons.ui-3.2.0
+>>> org.springsource.ide.eclipse.commons.core-3.3.0
 
 About Eclipse Integration Commons
-March 11, 2013
+July 9, 2013
 Abstract
 
 The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
 
  License
-VMware makes available all content in this download ("Content"). Unless otherwise
+GoPivotal makes available all content in this download ("Content"). Unless otherwise
 indicated below, the Content is provided to you under the terms and conditions of 
 the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
 the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
  
 Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.dashboard.ui-3.2.0
+>>> org.springsource.ide.eclipse.commons.frameworks.core-3.3.0
 
-About Gradle Integration for Eclipse
-March 11, 2013
+About Eclipse Integration Commons
+July 9, 2013
 Abstract
 
-The Gradle Integration for Eclipse E project provides Eclipse integration support for Gradle
+The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
 
-License
-VMware makes available all content in this download ("Content"). Unless otherwise
+ License
+GoPivotal makes available all content in this download ("Content"). Unless otherwise
 indicated below, the Content is provided to you under the terms and conditions of 
 the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
 the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
  
 Third Party Content
-The Content includes items that have been sourced from third parties, as set out in the file called open_source_license.txt."
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
+>>> org.springsource.ide.eclipse.commons.frameworks.ui-3.3.0
+
+About Eclipse Integration Commons
+July 9, 2013
+Abstract
+
+The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
+
+ License
+GoPivotal makes available all content in this download ("Content"). Unless otherwise
+indicated below, the Content is provided to you under the terms and conditions of 
+the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
+the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
+ 
+Third Party Content
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
+
+
+>>> org.springsource.ide.eclipse.commons.livexp-3.3.0
+
+About Eclipse Integration Commons
+July 9, 2013
+Abstract
+
+The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
+
+ License
+GoPivotal makes available all content in this download ("Content"). Unless otherwise
+indicated below, the Content is provided to you under the terms and conditions of 
+the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
+the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
+ 
+Third Party Content
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
+
+
+>>> org.springsource.ide.eclipse.commons.ui-3.3.0
+
+About Eclipse Integration Commons
+July 9, 2013
+Abstract
+
+The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
+
+ License
+GoPivotal makes available all content in this download ("Content"). Unless otherwise
+indicated below, the Content is provided to you under the terms and conditions of 
+the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
+the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
+ 
+Third Party Content
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
+
+
+>>> org.springsource.ide.eclipse.dashboard.ui-3.3.0
+
+About Eclipse Integration Commons
+July 9, 2013
+Abstract
+
+The Eclipse Integration Commons project provides components that help other projects to implement Eclipse-based tooling.
+
+ License
+GoPivotal  makes available all content in this download ("Content"). Unless otherwise
+indicated below, the Content is provided to you under the terms and conditions of 
+the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available in 
+the file called license.txt. For purposes of the EPL, "Program" will mean the Content.
+ 
+Third Party Content
+The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
 =============== APPENDIX. Standard License Files ============== 
@@ -614,7 +487,9 @@ to a jury trial in any resulting litigation.
 
 
 
+
 --------------- SECTION 2: Apache License, V2.0 -----------
+
 
 Apache License 
 
@@ -792,7 +667,6 @@ warranty or additional liability.
 END OF TERMS AND CONDITIONS 
 
 
-
 ===========================================================================
 
 To the extent any open source components are licensed under the
@@ -802,15 +676,14 @@ available (as would be noted above), you may obtain a copy of
 the source code corresponding to the binaries for such open
 source components and modifications thereto, if any, (the
 "Source Files"), by downloading the Source Files from VMware's website at
-http://www.vmware.com/download/open_source.html, or by sending a request, with
-your name and address to: VMware, Inc., 3401 Hillview Avenue,
-Palo Alto, CA 94304,United States of America. All such
-requests should clearly specify: OPEN SOURCE FILES REQUEST,
-Attention General Counsel. VMware shall mail a copy of the
+http://www.vmware.com/download/open_source.html, or by sending a request, 
+with your name and address to: GoPivotal, Inc., 1900 S. Norfolk Street #125,
+ San Mateo, CA 94403, Attention: General Counsel. All such requests should 
+ clearly specify: OPEN SOURCE FILES REQUEST,
+Attention General Counsel. GoPivotal shall mail a copy of the
 Source Files to you on a CD or equivalent physical medium. This
 offer to obtain a copy of the Source Files is valid for three
-years from the date you acquired this Software product. Alternatively,
-the Source Files may accompany the VMware product.
+years from the date you acquired this Software product. Alternatively, 
+the Source Files may accompany the GoPivotal product.
 
-
-[GRADLEIDE320GAKR030113]
+[GRADLEIDE33GASS062713]
