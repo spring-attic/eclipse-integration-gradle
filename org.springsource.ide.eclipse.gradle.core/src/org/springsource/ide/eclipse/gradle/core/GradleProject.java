@@ -308,6 +308,19 @@ public class GradleProject {
 		}
 		return preferences;
 	}
+	
+	public synchronized void refreshProjectPreferences() {
+		GradleProject root = getRootProjectMaybe();
+		if (root!=null && root!=this) {
+			root.refreshProjectPreferences();
+		}
+		//Wait to set this to null until the very last. Otherwise getRootProjectMaybe
+		//call will end up reinitializing it right away (determining associated root
+		//project requires the project prefs store which contains a pointer to the
+		//root project!
+		preferences = null;
+	}
+
 
 	/**
 	 * @param conf May be null in contexts where there is no launch configuration (e.g. build model operations, or tasks executed for an import
@@ -1073,5 +1086,6 @@ public class GradleProject {
 		}
 		return null;
 	}
+
 
 }

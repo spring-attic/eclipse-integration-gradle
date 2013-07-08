@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,8 +43,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.JavaModelManager.PerProjectInfo;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
@@ -173,7 +174,10 @@ public class GradleImportOperation {
 			if (!projectsToImport.isEmpty()) {
 				List<HierarchicalEclipseProject> sorted = new GradleProjectSorter(projectsToImport).getSorted();
 				if (doBeforeTasks) {
-					doTasks(sorted, beforeTasks, eh, new SubProgressMonitor(monitor, tasksWork));
+					boolean doneSome = doTasks(sorted, beforeTasks, eh, new SubProgressMonitor(monitor, tasksWork));
+					if (doneSome) {
+						refreshProjectPreferences(sorted);
+					}
 				}
 				for (HierarchicalEclipseProject project : sorted) {
 					importProject(project, eh, new SubProgressMonitor(monitor, 1));
@@ -189,6 +193,13 @@ public class GradleImportOperation {
 			}
 		} finally {
 			monitor.done();
+		}
+	}
+
+	private void refreshProjectPreferences(List<HierarchicalEclipseProject> projects) {
+		for (HierarchicalEclipseProject p : projects) {
+			GradleProject gp = GradleCore.create(p); 
+			gp.refreshProjectPreferences();
 		}
 	}
 
