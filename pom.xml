@@ -93,7 +93,7 @@
 		<test.useUIThread>true</test.useUIThread>
 		<test.skip>${maven.test.skip}</test.skip>
 
-		<tycho-version>0.15.0</tycho-version>
+    	<tycho-version>0.17.0</tycho-version>
 
 <!-- 		<maven.test.error.ignore>true</maven.test.error.ignore>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore> -->
