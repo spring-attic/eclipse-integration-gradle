@@ -49,8 +49,10 @@ import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
@@ -509,26 +511,36 @@ public class GradleImportWizardPageOne extends WizardPage {
 				//TODO: This runnable isn't protected by a scheduling rule. That can be a problem!
 				@Override
 				public void doit(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-					GradleProject modelHolder = GradleCore.create(rf);
-					modelHolder.invalidateGradleModel(); // TODO: with better invalidation from Gradle, this may not be necessary
-					final HierarchicalEclipseProject rootModel = modelHolder.getSkeletalGradleModel(monitor);
-					rootFolderText.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							//This call must execute in the UI thread.
-							projectSelectionTree.setInput(Arrays.asList(rootModel));
-							isTreePopulated = true;
-//							if (!hasSelectedProjects()) {
-//								selectAllProjects(true);
-//							}
-							// Expand the root node, also helps for the "pack" calls below to have correct column size. 
-							projectSelectionTree.setExpandedElements(new Object[] { rootModel }); 
-							// Allocate column widths based on contents.
-							projectSelectionTree.getTree().getColumn(0).pack();
-							projectSelectionTree.getTree().getColumn(1).pack();
-							defaultsSetter.rootModelChanged(rootModel);
-							checkPageComplete();
-						}
-					});
+					GradleProject selectedProject = GradleCore.create(rf);
+					selectedProject.invalidateGradleModel(); // TODO: with better invalidation from Gradle, this may not be necessary
+					selectedProject.getSkeletalGradleModel(monitor); //forces model to be built
+
+					try {
+						
+						//Careful... make sure to get the model for the rootproject even if a subproject was selected!
+						//See https://issuetracker.springsource.com/browse/STS-3456
+						final HierarchicalEclipseProject rootModel = selectedProject.getRootProject().getSkeletalGradleModel();
+						rootFolderText.getDisplay().asyncExec(new Runnable() {
+							public void run() {
+								//This call must execute in the UI thread.
+								projectSelectionTree.setInput(Arrays.asList(rootModel));
+								isTreePopulated = true;
+	//							if (!hasSelectedProjects()) {
+	//								selectAllProjects(true);
+	//							}
+								// Expand the root node, also helps for the "pack" calls below to have correct column size. 
+								projectSelectionTree.setExpandedElements(new Object[] { rootModel }); 
+								// Allocate column widths based on contents.
+								projectSelectionTree.getTree().getColumn(0).pack();
+								projectSelectionTree.getTree().getColumn(1).pack();
+								defaultsSetter.rootModelChanged(rootModel);
+								checkPageComplete();
+							}
+						});
+					} catch (FastOperationFailedException e) {
+						//This shouldn't happen since model was already built beforehand
+						throw ExceptionUtil.coreException(e);
+					}
 				}
 			});
 		} catch (Exception e) {
