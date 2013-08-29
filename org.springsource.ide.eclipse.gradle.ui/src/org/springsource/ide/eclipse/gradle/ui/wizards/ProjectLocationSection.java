@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Text;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
 import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 import org.springsource.ide.eclipse.gradle.core.util.expression.ValueListener;
-import org.springsource.ide.eclipse.gradle.core.validators.NewProjectLocationValidator;
 import org.springsource.ide.eclipse.gradle.core.validators.ValidationResult;
 import org.springsource.ide.eclipse.gradle.core.validators.Validator;
 import org.springsource.ide.eclipse.gradle.ui.GradleUI;

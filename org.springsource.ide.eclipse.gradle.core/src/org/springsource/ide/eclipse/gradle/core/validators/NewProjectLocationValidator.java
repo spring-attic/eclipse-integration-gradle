@@ -27,6 +27,10 @@ import static org.springsource.ide.eclipse.gradle.core.validators.ValidationResu
  * The validator accepts paths that either do not exist or that point to an
  * empty directory.
  * 
+ * TODO: remove this class. There's now a reusable duplicate in commons.
+ * Use that instead:
+ * org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectLocationValidator
+ * 
  * @author Kris De Volder
  */
 public class NewProjectLocationValidator extends Validator implements ValueListener<String> {

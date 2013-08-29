@@ -21,6 +21,11 @@ import org.springsource.ide.eclipse.gradle.core.util.expression.ValueListener;
 
 /**
  * @author Kris De Volder
+ *
+ * TODO: remove: duplicated in eclipse-integration-commons (reusable component!).
+ * Don't forget to move testing code as well.
+ * 
+ * See org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectNameValidator
  */
 public class ProjectNameValidator extends Validator implements ValueListener<String> {
 	
