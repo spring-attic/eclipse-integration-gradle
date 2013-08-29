@@ -669,4 +669,13 @@ public class GradleImportOperation {
 		return new GradleImportOperation(projects, true, mapping);
 	}
 
+	public GradleProject[] getProjects() {
+		GradleProject[] projects = new GradleProject[projectsToImport.size()];
+		int i=0;
+		for (HierarchicalEclipseProject p : projectsToImport) {
+			projects[i++] = GradleCore.create(p);
+		}
+		return projects;
+	}
+
 }
