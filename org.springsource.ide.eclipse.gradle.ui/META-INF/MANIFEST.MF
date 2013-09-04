@@ -4,7 +4,7 @@ Bundle-Name: SpringSource Tool Suite Gradle Integration (UI)
 Bundle-SymbolicName: org.springsource.ide.eclipse.gradle.ui;singleton:=true
 Bundle-Version: 3.4.0.qualifier
 Bundle-Activator: org.springsource.ide.eclipse.gradle.ui.GradleUI
-Bundle-Vendor: SpringSource
+Bundle-Vendor: GoPivotal, Inc.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jdt.core,
