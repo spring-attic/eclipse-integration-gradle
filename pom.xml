@@ -29,10 +29,10 @@
 	<!-- Common Configuration -->
 
 	<organization>
-		<name>SpringSource, a division of VMware, Inc.</name>
-		<url>http://springsource.com</url>
+		<name>GoPivotal, Inc.</name>
+		<url>http://spring.io</url>
 	</organization>
-	<url>http://www.springsource.com/developer/sts</url>
+	<url>http://spring.io/tools</url>
 
 	<prerequisites>
 		<maven>3.0</maven>

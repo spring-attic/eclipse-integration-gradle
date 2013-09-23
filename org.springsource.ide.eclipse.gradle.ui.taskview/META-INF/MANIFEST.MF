@@ -4,7 +4,7 @@ Bundle-Name: Taskview
 Bundle-SymbolicName: org.springsource.ide.eclipse.gradle.ui.taskview;singleton:=true
 Bundle-Version: 3.4.0.qualifier
 Bundle-Activator: org.springsource.ide.eclipse.gradle.ui.taskview.GradleTasksViewPlugin
-Bundle-Vendor: SpringSource
+Bundle-Vendor: GoPivotal, Inc.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.springsource.ide.eclipse.gradle.core,
