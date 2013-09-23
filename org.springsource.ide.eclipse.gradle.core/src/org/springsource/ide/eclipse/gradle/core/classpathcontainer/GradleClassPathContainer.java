@@ -50,16 +50,16 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	public static final String ERROR_MARKER_ID = "org.springsource.ide.eclipse.gradle.core.classpathcontainer";
 	private static final String GRADLE_CLASSPATHCONTAINER_KEY = "gradle.classpathcontainer";
 
-	public static boolean DEBUG = false;
-	public static boolean S_DEBUG = false;
+	public static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
+	public static final boolean S_DEBUG = false;
 	
-	public void debug(String msg) {
+	private static final void debug(String msg) {
 		if (DEBUG) {
 			System.out.println("GradleClassPathContainer: "+msg);
 		}
 	}
 
-	public static void sdebug(String msg) {
+	private static final void sdebug(String msg) {
 		if (S_DEBUG) {
 			System.out.println("GradleClassPathContainer: "+msg);
 		}
@@ -78,6 +78,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 * themselves do not persist across sessions).
 	 */
 	private EclipseProject oldModel = null;
+	private IClasspathEntry[] persistedEntries;
 
 	/**
 	 * Creates an uninitialised {@link GradleClassPathContainer}. If displayed in the UI it
@@ -317,15 +318,22 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 * returned if there's no GradleModel to return a properly computed set of entries.
 	 */
 	public void setPersistedEntries(IClasspathEntry[] persistedEntries) {
+		this.persistedEntries = persistedEntries;
 		IProject eclipseProject = project.getProject();
 		GradleSaveParticipant store = GradleSaveParticipant.getInstance();
 		store.put(eclipseProject, GRADLE_CLASSPATHCONTAINER_KEY, encode(persistedEntries));
 	}
 
 	private IClasspathEntry[] getPersistedEntries() {
-		IProject eclipseProject = project.getProject();
-		GradleSaveParticipant store = GradleSaveParticipant.getInstance();
-		return decode(store.get(eclipseProject, GRADLE_CLASSPATHCONTAINER_KEY));
+		if (persistedEntries!=null) {
+			debug("In memory persisted");
+			return persistedEntries;
+		} else {
+			debug("Decoding persisted");
+			IProject eclipseProject = project.getProject();
+			GradleSaveParticipant store = GradleSaveParticipant.getInstance();
+			return persistedEntries = decode(store.get(eclipseProject, GRADLE_CLASSPATHCONTAINER_KEY));
+		}
 	}
 
 	private IClasspathEntry[] decode(Serializable serializable) {
