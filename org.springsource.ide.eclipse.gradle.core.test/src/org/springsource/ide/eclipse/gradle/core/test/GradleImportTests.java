@@ -572,7 +572,7 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testImportJavaQuickStart() throws Exception {
-		GradleClassPathContainer.DEBUG = true;
+//		GradleClassPathContainer.DEBUG = true;
 		String name = "quickstart";
 		importSampleProject(name);
 		
@@ -672,7 +672,7 @@ public class GradleImportTests extends GradleTest {
 	}
 
 	public void testSts1907RemoveReferencedLibraries() throws Exception {
-		GradleClassPathContainer.DEBUG = true;
+//		GradleClassPathContainer.DEBUG = true;
 		String name = "quickstart";
 		importSampleProject(name);
 		IJavaProject project = getJavaProject(name);

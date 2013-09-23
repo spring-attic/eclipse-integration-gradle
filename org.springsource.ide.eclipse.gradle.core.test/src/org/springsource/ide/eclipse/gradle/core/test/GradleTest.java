@@ -122,7 +122,7 @@ public abstract class GradleTest extends TestCase {
 	
 	@Override
 	protected void tearDown() throws Exception {
-		GradleClassPathContainer.DEBUG = false;
+//		GradleClassPathContainer.DEBUG = false;
 		super.tearDown();
 		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
 		prefs.setDistribution(null); //Reset to default.
