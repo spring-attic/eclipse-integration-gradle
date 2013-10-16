@@ -71,7 +71,8 @@ public class ExternalCommand {
 	 * 0 exit value an exception is thrown.
 	 */
 	public void exec(File workdir) throws IOException, InterruptedException {
-		ExternalProcess process = new ExternalProcess(workdir , this);
+		System.out.println(">>> exec: "+this);
+		ExternalProcess process = new ExternalProcess(workdir, this);
 		System.out.println(process);
 		org.junit.Assert.assertEquals(0, process.getExitValue());
 	}
