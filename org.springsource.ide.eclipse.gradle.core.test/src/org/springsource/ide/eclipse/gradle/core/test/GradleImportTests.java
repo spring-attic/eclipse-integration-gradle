@@ -1120,36 +1120,45 @@ public class GradleImportTests extends GradleTest {
 	public void testSTS2405RemapJarToMavenProject() throws Exception {
 		assertTrue("This test requires m2e", M2EUtils.isInstalled());
 		String userHome = System.getProperty("user.home");
-		String home = System.getenv("HOME");
-		System.out.println("HOME = "+home);
-		System.out.println("user.home = "+System.getProperty("user.home"));
-		System.out.println("maven.repo.local = "+System.getProperty("maven.repo.local"));
-		IProject mvnProject = importEclipseProject("sts2405/myLib");
-		String mvnLocalRepo = userHome +"/.m2/repository";
-		assertNoErrors(mvnProject, true);
-		new ExternalCommand(
-			"which", "mvn"	
-		).exec(mvnProject.getLocation().toFile());
-		new ExternalCommand(
-			"env"	
-		).exec(mvnProject.getLocation().toFile());
-		String mavenLocalProp = "-Dmaven.repo.local="+mvnLocalRepo;
-		new MavenCommand(
-				"mvn", mavenLocalProp, "install"
-		).exec(mvnProject.getLocation().toFile());
-
-		importTestProject("sts2405/main");
-		IProject gradleProject = getProject("main");
-		assertNoErrors(gradleProject, true);
-
-		IJavaProject jp = JavaCore.create(gradleProject);
-		assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", jp);
-		assertClasspathProjectEntry(mvnProject, jp);
-
-		GradleCore.create(gradleProject).getProjectPreferences().setRemapJarsToMavenProjects(false);
-		RefreshDependenciesActionCore.synchCallOn(gradleProject);
-		assertNoClasspathProjectEntry(mvnProject, jp);
-		assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
+		String restoreJvmArgs = GradleCore.getInstance().getPreferences().getJVMArguments();
+		try {
+			String home = System.getenv("HOME");
+			System.out.println("HOME = "+home);
+			System.out.println("user.home = "+System.getProperty("user.home"));
+			System.out.println("maven.repo.local = "+System.getProperty("maven.repo.local"));
+			IProject mvnProject = importEclipseProject("sts2405/myLib");
+			String mvnLocalRepo = userHome +"/.m2/repository";
+			assertNoErrors(mvnProject, true);
+			new ExternalCommand(
+				"which", "mvn"	
+			).exec(mvnProject.getLocation().toFile());
+//			new ExternalCommand(
+//				"env"	
+//			).exec(mvnProject.getLocation().toFile());
+			String mavenLocalProp = "-Dmaven.repo.local="+mvnLocalRepo;
+			new MavenCommand(
+					"mvn", mavenLocalProp, "install"
+			).exec(mvnProject.getLocation().toFile());
+	
+			//Note: Gradle does not obey system property 'maven.repo.local'. The build script must 
+			//read it and use it somehow for it to have an effect.
+			GradleCore.getInstance().getPreferences().setJVMArguments(mavenLocalProp);
+			
+			importTestProject("sts2405/main");
+			IProject gradleProject = getProject("main");
+			assertNoErrors(gradleProject, true);
+	
+			IJavaProject jp = JavaCore.create(gradleProject);
+			assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", jp);
+			assertClasspathProjectEntry(mvnProject, jp);
+	
+			GradleCore.create(gradleProject).getProjectPreferences().setRemapJarsToMavenProjects(false);
+			RefreshDependenciesActionCore.synchCallOn(gradleProject);
+			assertNoClasspathProjectEntry(mvnProject, jp);
+			assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
+		} finally{
+			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
+		}
 	}
 
 	

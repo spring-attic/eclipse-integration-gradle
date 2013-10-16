@@ -10,9 +10,14 @@ jar {
 }
 
 repositories {
+	maven {
+		url = new File(System.getProperty('maven.repo.local')).toURI()
+	}
+	
 	//def repo = mavenRepo urls: "file:${maven.repo.local}"
-	def repo = mavenLocal()
-	println "Gradle is using mavenlocal.url = "+(repo.url)
+//	println "maven.repo.local = ${System.getProperty('maven.repo.local')}"
+//	def repo = mavenLocal()
+//	println "Gradle is using mavenlocal.url = "+(repo.url)
     mavenCentral()
 }
 
