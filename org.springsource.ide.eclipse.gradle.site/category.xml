@@ -105,6 +105,6 @@
 	<bundle id="org.springframework.roo.wrapping.json-simple" version="0.0.0"/>
 	<bundle id="com.google.protobuf" version="0.0.0"/>
 	<bundle id="com.google.protobuf.source" version="0.0.0"/>
-   
+	<bundle id="org.codehaus.jackson.core" version="0.0.0"/>
 
 </site>
