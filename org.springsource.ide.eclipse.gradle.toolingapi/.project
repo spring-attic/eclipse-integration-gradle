@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.springsource.ide.eclipse.gradle.core</name>
+	<name>org.springsource.ide.eclipse.gradle.toolingapi</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -22,19 +22,8 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
+		<nature>org.springsource.ide.eclipse.gradle.core.nature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>org.eclipse.jdt.groovy.core.groovyNature</nature>
 		<nature>org.eclipse.pde.PluginNature</nature>
 	</natures>
-	<filteredResources>
-		<filter>
-			<id>1365114646088</id>
-			<name></name>
-			<type>10</type>
-			<matcher>
-				<id>org.eclipse.ui.ide.multiFilter</id>
-				<arguments>1.0-projectRelativePath-matches-false-false-target</arguments>
-			</matcher>
-		</filter>
-	</filteredResources>
 </projectDescription>

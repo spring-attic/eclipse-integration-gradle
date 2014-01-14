@@ -20,6 +20,7 @@
 		<module>org.springsource.ide.eclipse.gradle.feature</module>
 		<module>org.springsource.ide.eclipse.gradle.site</module>
 		
+		<module>org.springsource.ide.eclipse.gradle.toolingapi</module>
 		<module>org.springsource.ide.eclipse.gradle.core</module>
 		<module>org.springsource.ide.eclipse.gradle.ui</module>
 		<module>org.springsource.ide.eclipse.gradle.ui.taskview</module>
@@ -193,6 +194,41 @@
 				</repository>
 			</repositories>
 		</profile>
+		
+		<profile>
+			<id>e43</id>
+			<properties>
+				<dist.target>e4.3</dist.target>
+				<dist.platform.name>Kepler</dist.platform.name>
+				<dist.platform.id>kepler</dist.platform.id>
+				<dist.platform.version>4.3</dist.platform.version>
+				<package.qualifierPrefix>e43</package.qualifierPrefix>
+				<version.weaving>1.0.0.R3_6_2</version.weaving>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.3/</url>
+				</repository>
+				<repository> 
+					<id>kepler</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/kepler/</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/</url>
+				</repository>
+				<repository>
+					<id>greclipse43</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.3/</url>
+				</repository>
+			</repositories>
+		</profile>
+		
 
 		<profile>
 			<id>build.springsource.com</id>

@@ -12,15 +12,12 @@ package org.springsource.ide.eclipse.gradle.core.classpathcontainer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.slf4j.Marker;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.util.BusyStatus;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;

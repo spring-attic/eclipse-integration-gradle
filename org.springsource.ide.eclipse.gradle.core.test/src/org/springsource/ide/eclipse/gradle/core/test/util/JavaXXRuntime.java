@@ -38,6 +38,7 @@ public class JavaXXRuntime {
 	};
 	static String[] java6locations = {
 		"/usr/lib/jvm/java-6-sun", // On a ubuntu machine that has sun java 6 installed
+		"/usr/lib/jvm/java-6-oracle", // On a ubuntu machine that has oracle java 6 installed
 		"/opt/java/jdk/Sun/1.6"  // on springsource build server
 	};
 	

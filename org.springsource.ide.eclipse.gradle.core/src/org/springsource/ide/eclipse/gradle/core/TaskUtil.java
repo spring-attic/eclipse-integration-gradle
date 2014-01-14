@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -29,12 +28,11 @@ import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.model.Task;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
-import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
+import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil.Console;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
-import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil.Console;
 
 
 /**

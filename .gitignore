@@ -13,3 +13,4 @@ bin/
 /org.springsource.ide.eclipse.gradle.core/src/gradle-api.properties
 /org.springsource.ide.eclipse.gradle.core/gradle.out
 /README.html
+/org.springsource.ide.eclipse.gradle.toolingapi/gradle.out
