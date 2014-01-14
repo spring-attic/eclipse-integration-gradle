@@ -30,28 +30,9 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
  * 
  * @author Kris De Volder
  */
-public class GradleAPIProperties extends Properties {
+public class GradleAPIProperties {
 
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * @return The value of "gradle.distribution.uri" property as a URI. May return null if the property is not defined or the property file does not exist.
-	 */
-	public URI getDistribution() {
-		String uriString = getProperty("gradle.distribution.uri");
-		if (uriString!=null) {
-			try {
-				return new URI(uriString);
-			} catch (URISyntaxException e) {
-				GradleCore.log(e);
-			}
-		}
-		return null;
-	}
-
-	public String getApiVersion() {
-		return getProperty("gradle.api.version");
-	}
 
 	public List<File> getGradleAPIJars() {
 		ArrayList<File> result = new ArrayList<File>();

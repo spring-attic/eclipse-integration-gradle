@@ -119,14 +119,6 @@ public class GradleCore extends Plugin {
 	public synchronized GradleAPIProperties getAPIProperties() {
 		if (properties == null) {
 			properties = new GradleAPIProperties();
-			InputStream propFile = this.getClass().getClassLoader().getResourceAsStream("gradle-api.properties");
-			if (propFile!=null) {
-				try {
-					properties.load(propFile);
-				} catch (IOException e) {
-					GradleCore.log(e);
-				}
-			}
 		}
 		return properties;
 	}

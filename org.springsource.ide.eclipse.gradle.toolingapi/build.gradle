@@ -121,13 +121,6 @@ task updateProperties(dependsOn: configurations.compile) << {
 			gradleCoreVersion = it.getModuleVersion()
 		}
 	}
-	File propFile = new File("$projectDir/src/gradle-api.properties")
-	Properties props = new Properties();
-	props['gradle.api.version'] = gradleCoreVersion
-	props['gradle.distribution.uri'] = "http://services.gradle.org/distributions/gradle-1.0-rc-1-bin.zip".toString()
-	propFile.withOutputStream { def out ->
-		props.store(out, 'Gradle Tooling API Properties')
-	}
 }
 
 task updateEmbeddedLibsProperties(dependsOn: [configurations.compile]) << {
