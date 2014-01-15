@@ -7,7 +7,7 @@ Bundle-Activator: org.springsource.ide.eclipse.gradle.toolingapi.Activator
 Bundle-Vendor: GoPivotal
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/gradle-core-1.8.jar,
