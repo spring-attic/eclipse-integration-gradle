@@ -21,8 +21,9 @@ import java.util.Properties;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
+import org.gradle.tooling.model.GradleTask;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
-
+import org.springsource.ide.eclipse.gradle.toolingapi.GradleToolingApi;
 
 /**
  * An instance of this class represents the contents of the "gradle.properties" file
@@ -32,13 +33,18 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
  */
 public class GradleAPIProperties {
 
+	/**
+	 * ID of the plugin where all the tooling API jar files reside inside a 'lib' folder.
+	 */
+	private static final String LIB_PLUGIN_ID = GradleToolingApi.PLUGIN_ID;
+	
 	private static final long serialVersionUID = 1L;
 
 	public List<File> getGradleAPIJars() {
 		ArrayList<File> result = new ArrayList<File>();
 		try {
-			File bundle = FileLocator.getBundleFile(Platform.getBundle(GradleCore.PLUGIN_ID));
-			Assert.isTrue(bundle.exists() && bundle.isDirectory(), "Bundle '"+GradleCore.PLUGIN_ID+" must be exploded");
+			File bundle = FileLocator.getBundleFile(Platform.getBundle(LIB_PLUGIN_ID));
+			Assert.isTrue(bundle.exists() && bundle.isDirectory(), "Bundle '"+LIB_PLUGIN_ID+" must be exploded");
 			File libFolder = new File(bundle, "lib");
 			for (File file : libFolder.listFiles()) {
 				String name = file.getName();

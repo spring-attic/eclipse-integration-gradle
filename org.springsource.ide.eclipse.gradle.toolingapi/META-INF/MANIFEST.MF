@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Toolingapi
 Bundle-SymbolicName: org.springsource.ide.eclipse.gradle.toolingapi
 Bundle-Version: 3.5.0.qualifier
-Bundle-Activator: org.springsource.ide.eclipse.gradle.toolingapi.Activator
+Bundle-Activator: org.springsource.ide.eclipse.gradle.toolingapi.GradleToolingApi
 Bundle-Vendor: GoPivotal
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
@@ -178,4 +178,6 @@ Export-Package: org.gradle,
  org.gradle.util,
  org.gradle.util.hash,
  org.gradle.util.internal,
- org.gradle.wrapper
+ org.gradle.wrapper,
+ org.springsource.ide.eclipse.gradle.toolingapi
+Eclipse-BundleShape: dir
