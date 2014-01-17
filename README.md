@@ -127,12 +127,12 @@ Our tools are built on top of the Gradle Tooling API. However the Tooling API ja
 
 Open the 'Gradle Tasks' View (via Window >> Show View menu).
 
-  - select project `org.springsource.ide.eclipse.gradle.core`.
+  - select project `org.springsource.ide.eclipse.gradle.toolingapi`.
   - run the task called `updateLibs`.
 
 You can also do this on the commandline:
     
-    cd org.springsource.ide.eclipse.gradle.core/
+    cd org.springsource.ide.eclipse.gradle.toolingapi/
     ./gradlew updateLibs
 
 If you do this on the commandline you will need to manually refresh the `org.springsource.ide.eclipse.gradle.core` project in the Eclipse workspace afterwards. If you use the 'Gradle Tasks View' then the refresh is automatic.
