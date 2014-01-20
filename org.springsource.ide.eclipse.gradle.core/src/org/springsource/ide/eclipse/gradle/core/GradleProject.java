@@ -1061,11 +1061,6 @@ public class GradleProject {
 		return projects;
 	}
 
-	public void walkHierachy(ProjectHierarchyVisitor projectHierarchyVisitor) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	/**
 	 * This returns the folder where the Gradle build output for this project are
 	 * being stored.
