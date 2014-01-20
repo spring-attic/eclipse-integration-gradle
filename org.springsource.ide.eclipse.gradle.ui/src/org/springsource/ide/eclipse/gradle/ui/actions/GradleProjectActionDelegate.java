@@ -18,16 +18,17 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
@@ -64,6 +65,21 @@ public abstract class GradleProjectActionDelegate implements IObjectActionDelega
 						projects.add((IProject) element);
 					} else if (element instanceof IResource) {
 						projects.add(((IResource) element).getProject());
+					} else if (element instanceof IWorkingSet) {
+						IWorkingSet workingSet = (IWorkingSet) element;
+						for (IAdaptable adaptable : workingSet.getElements()) {
+							IProject project = (IProject) adaptable.getAdapter(IProject.class);
+							if (project != null) {
+								projects.add(project);
+								continue;
+							}
+							// In case a working set has something other than a project
+							IResource resource = (IResource) adaptable.getAdapter(IResource.class);
+							if (resource != null && resource.getProject() != null) {
+								projects.add(resource.getProject());
+								continue;
+							}
+						}
 					}
 				}
 			}

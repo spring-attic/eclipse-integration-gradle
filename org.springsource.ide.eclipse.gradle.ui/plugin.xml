@@ -86,6 +86,55 @@
                menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
          </action>
       </objectContribution>
+      <objectContribution
+            adaptable="true"
+            id="org.springsource.ide.eclipse.gradle.workingSetMenu"
+            objectClass="org.eclipse.ui.IWorkingSet">
+         <menu
+               id="org.springsource.ide.eclipse.gradle.workingSetMenu"
+               label="Gradle"
+               path="additions">
+            <groupMarker
+                  name="refresh">
+            </groupMarker>
+         </menu>
+         <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshAllAction"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.workingset.actions.refresh.all"
+               label="Refresh All"
+               menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh"
+               style="push">
+         </action>
+         <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshSourceFoldersAction"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.actions.refresh.sourcefolders"
+               label="Refresh Source Folders"
+               menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh">
+         </action>
+         <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshDependenciesAction"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.actions.refresh.dependencies"
+               label="Refresh Dependencies"
+               menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh">
+         </action>
+         <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDependencyManagementActionDelegate"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.ui.EnableDisableDependencyManagementActionDelegate"
+               label="Enable Dependency Management"
+               menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh">
+         </action>
+         <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
+               label="Toggle DSL Support"
+               menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh">
+         </action>
+      </objectContribution>
 </extension>
 <extension
       point = "org.eclipse.ui.preferencePages">
