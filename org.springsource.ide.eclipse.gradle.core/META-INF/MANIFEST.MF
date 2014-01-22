@@ -39,5 +39,5 @@ Export-Package: org.springsource.ide.eclipse.gradle.core,
  org.springsource.ide.eclipse.gradle.core.validators,
  org.springsource.ide.eclipse.gradle.core.wizards,
  org.springsource.ide.eclipse.gradle.core.wtp
-Bundle-Vendor: GoPivotal, Inc.
+Bundle-Vendor: Pivotal Software, Inc.
 Eclipse-BundleShape: dir
