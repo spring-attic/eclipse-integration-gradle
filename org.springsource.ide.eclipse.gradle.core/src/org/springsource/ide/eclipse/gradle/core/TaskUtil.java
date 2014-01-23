@@ -11,7 +11,6 @@
 package org.springsource.ide.eclipse.gradle.core;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -119,6 +118,17 @@ public class TaskUtil {
 		return System.getenv().get("JAVA_HOME");
 	}
 	
+	/**
+	 * Run a bunch of tasks 'in bulk'. It is possible that no tasks will be executed, if there are no
+	 * tasks matching the provided list of names in the specified project list.
+	 * 
+	 * @param sortedProjects a list of topologically sorted projects
+	 * @param taskNamesProvider provider of task names to run per project
+	 * @param monitor the progress monitor
+	 * @return <code>true</code> if any tasks have been executed
+	 * @throws OperationCanceledException
+	 * @throws CoreException
+	 */
 	public static boolean bulkRunTasks(List<HierarchicalEclipseProject> sortedProjects, ITaskProvider taskNamesProvider, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Run eclipse tasks", sortedProjects.size()*3);
 		try {
@@ -169,52 +179,13 @@ public class TaskUtil {
 	 * 
 	 * @return true if some tasks where actually found and executed.
 	 */
-	public static boolean bulkRunEclipseTasksOn(List<HierarchicalEclipseProject> sortedProjects, String[] taskNamesToRun, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-		monitor.beginTask("Run eclipse tasks", sortedProjects.size()*3);
-		try {
-			if (sortedProjects.size()>0) {
-				GradleProject rootProject = null; //Will be set on first occasion to determine
-				CompositeDomainObjectSet<String> tasksToRun = new CompositeDomainObjectSet<String>(String.class);
-				List<DefaultDomainObjectSet<String>> subCollections = new ArrayList<DefaultDomainObjectSet<String>>(sortedProjects.size());
-				for (String taskName : taskNamesToRun) {
-					DefaultDomainObjectSet<String> subCollection = new DefaultDomainObjectSet<String>(String.class);
-					subCollections.add(subCollection);
-					tasksToRun.addCollection(subCollection);
-				}
-	
-				//Collection the tasks to run: Ticks: 2*sorted.size
-				for (HierarchicalEclipseProject _project : sortedProjects) {
-					GradleProject project = GradleCore.create(_project);
-					if (rootProject==null) {
-						try {
-							rootProject = project.getRootProject();
-						} catch (FastOperationFailedException e) {
-							throw new IllegalStateException(e);
-						}
-					}
-					for (Task task : project.getTasks(new SubProgressMonitor(monitor, 2))) {
-						for (int i = 0; i < taskNamesToRun.length; i++) {
-							String path = task.getPath();
-							if (task.getName().equals(taskNamesToRun[i]) || path.equals(taskNamesToRun[i])) {
-								subCollections.get(i).add(path);
-							}
-						}
-					}
-				}
-				
-				//Running the tasks: ticks: sorted.size
-				if (!tasksToRun.isEmpty()) {
-					execute(rootProject, null, tasksToRun, new SubProgressMonitor(monitor, sortedProjects.size()) );
-					return true;
-				} else {
-					monitor.worked(sortedProjects.size());
-				}
+	public static boolean bulkRunEclipseTasksOn(List<HierarchicalEclipseProject> sortedProjects, final String[] taskNamesToRun, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+		return bulkRunTasks(sortedProjects, new ITaskProvider() {
+			@Override
+			public String[] getTaskNames(GradleProject project) {
+				return taskNamesToRun;
 			}
-		} finally {
-			monitor.done();
-		}
-		return false;
+		}, monitor);
 	}
-	
 	
 }

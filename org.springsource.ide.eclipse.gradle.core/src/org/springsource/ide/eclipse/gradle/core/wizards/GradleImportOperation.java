@@ -171,25 +171,28 @@ public class GradleImportOperation {
 		int derivedMarkingWork = tasksWork+1/2;
 		totalWork += derivedMarkingWork;
 		monitor.beginTask("Importing Gradle Projects", totalWork);
+		boolean tasksExecuted;
 		try {
 			if (!projectsToImport.isEmpty()) {
 				List<HierarchicalEclipseProject> sorted = new GradleProjectSorter(projectsToImport).getSorted();
-				if (doBeforeTasks) {
-					boolean doneSome = doBeforeTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork));
-					if (doneSome) {
-						refreshProjectPreferences(sorted);
-					}
+				
+				// Execute "before" tasks and only refresh preference if anything was executed 
+				tasksExecuted = doBeforeTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork));
+				if (tasksExecuted) {
+					refreshProjectPreferences(sorted);
 				}
+					
 				for (HierarchicalEclipseProject project : sorted) {
 					importProject(project, eh, new SubProgressMonitor(monitor, 1));
 					JobUtil.checkCanceled(monitor);
 				}
-				if (doAfterTasks) {
-					boolean doneSome = doAfterTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork-tasksWork/3));
-					if (doneSome) {
-						refreshProjects(sorted, new SubProgressMonitor(monitor, tasksWork/3));
-					}
+				
+				// Execute "after" tasks and refresh projects because they've been imported by now
+				tasksExecuted = doAfterTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork-tasksWork/3));
+				if (tasksExecuted) {
+					refreshProjects(sorted, new SubProgressMonitor(monitor, tasksWork/3));
 				}
+				
 				markBuildFolderAsDerived(sorted, new SubProgressMonitor(monitor, derivedMarkingWork));
 			}
 		} finally {
@@ -263,12 +266,13 @@ public class GradleImportOperation {
 			ITaskProvider taskProvider = isReimport ? new ITaskProvider() {
 				@Override
 				public String[] getTaskNames(GradleProject project) {
-					return project.getRefreshPreferences().getBeforeTasks();
+					GradleRefreshPreferences prefs = project.getRefreshPreferences();
+					return prefs.getDoBeforeTasks() ? prefs.getBeforeTasks() : new String[0]; 
 				}
 			} : new ITaskProvider() {
 				@Override
 				public String[] getTaskNames(GradleProject project) {
-					return getBeforeTasks();
+					return getDoBeforeTasks() ? getBeforeTasks() : new String[0];
 				}
 			};
 			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor);
@@ -283,12 +287,13 @@ public class GradleImportOperation {
 			ITaskProvider taskProvider = isReimport ? new ITaskProvider() {
 				@Override
 				public String[] getTaskNames(GradleProject project) {
-					return project.getRefreshPreferences().getAfterTasks();
+					GradleRefreshPreferences prefs = project.getRefreshPreferences();
+					return prefs.getDoAfterTasks() ? prefs.getAfterTasks() : new String[0]; 
 				}
 			} : new ITaskProvider() {
 				@Override
 				public String[] getTaskNames(GradleProject project) {
-					return getAfterTasks();
+					return getDoAfterTasks() ? getAfterTasks() : new String[0];
 				}
 			};
 			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor);
