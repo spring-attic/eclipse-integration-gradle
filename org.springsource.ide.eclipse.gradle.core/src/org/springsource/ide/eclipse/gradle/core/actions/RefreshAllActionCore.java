@@ -52,7 +52,7 @@ public class RefreshAllActionCore {
 	}
 
 	/**
-	 * Refresh a list of projects that do *not* have dependency management enabled.
+	 * Refresh a list of projects. Executes re-import operation for batches of interdependent projects.
 	 */
 	private static Joinable<Void> refreshProjects(final List<GradleProject> projects) throws CoreException {
 		final String jobName = getName(projects);
