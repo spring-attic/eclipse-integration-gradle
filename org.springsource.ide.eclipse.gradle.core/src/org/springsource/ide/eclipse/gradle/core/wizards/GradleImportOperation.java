@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -56,6 +55,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.TaskUtil;
+import org.springsource.ide.eclipse.gradle.core.TaskUtil.ITaskProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
@@ -76,6 +76,7 @@ import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper
  * the wizard UI when the user presses the finish button.
  * 
  * @author Kris De Volder
+ * @author Alex Boyko
  */
 @SuppressWarnings("restriction")
 public class GradleImportOperation {
@@ -170,32 +171,35 @@ public class GradleImportOperation {
 		int derivedMarkingWork = tasksWork+1/2;
 		totalWork += derivedMarkingWork;
 		monitor.beginTask("Importing Gradle Projects", totalWork);
+		boolean tasksExecuted;
 		try {
 			if (!projectsToImport.isEmpty()) {
 				List<HierarchicalEclipseProject> sorted = new GradleProjectSorter(projectsToImport).getSorted();
-				if (doBeforeTasks) {
-					boolean doneSome = doTasks(sorted, beforeTasks, eh, new SubProgressMonitor(monitor, tasksWork));
-					if (doneSome) {
-						refreshProjectPreferences(sorted);
-					}
+				
+				// Execute "before" tasks and only refresh preference if anything was executed 
+				tasksExecuted = doBeforeTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork));
+				if (tasksExecuted) {
+					refreshProjectPreferences(sorted);
 				}
+					
 				for (HierarchicalEclipseProject project : sorted) {
 					importProject(project, eh, new SubProgressMonitor(monitor, 1));
 					JobUtil.checkCanceled(monitor);
 				}
-				if (doAfterTasks) {
-					boolean doneSome = doTasks(sorted, afterTasks, eh, new SubProgressMonitor(monitor, tasksWork-tasksWork/3));
-					if (doneSome) {
-						refreshProjects(sorted, new SubProgressMonitor(monitor, tasksWork/3));
-					}
+				
+				// Execute "after" tasks and refresh projects because they've been imported by now
+				tasksExecuted = doAfterTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork-tasksWork/3));
+				if (tasksExecuted) {
+					refreshProjects(sorted, new SubProgressMonitor(monitor, tasksWork/3));
 				}
+				
 				markBuildFolderAsDerived(sorted, new SubProgressMonitor(monitor, derivedMarkingWork));
 			}
 		} finally {
 			monitor.done();
 		}
 	}
-
+	
 	private void refreshProjectPreferences(List<HierarchicalEclipseProject> projects) {
 		for (HierarchicalEclipseProject p : projects) {
 			GradleProject gp = GradleCore.create(p); 
@@ -257,9 +261,42 @@ public class GradleImportOperation {
 		}
 	}
 
-	private boolean doTasks(List<HierarchicalEclipseProject> sorted, String[] taskNames, ErrorHandler eh, IProgressMonitor monitor) {
+	private boolean doBeforeTasks(List<HierarchicalEclipseProject> sorted, ErrorHandler eh, IProgressMonitor monitor) {
 		try {
-			return TaskUtil.bulkRunEclipseTasksOn(sorted, taskNames, monitor);
+			ITaskProvider taskProvider = isReimport ? new ITaskProvider() {
+				@Override
+				public String[] getTaskNames(GradleProject project) {
+					GradleRefreshPreferences prefs = project.getRefreshPreferences();
+					return prefs.getDoBeforeTasks() ? prefs.getBeforeTasks() : new String[0]; 
+				}
+			} : new ITaskProvider() {
+				@Override
+				public String[] getTaskNames(GradleProject project) {
+					return getDoBeforeTasks() ? getBeforeTasks() : new String[0];
+				}
+			};
+			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor);
+		} catch (Exception e) {
+			eh.handleError(e);
+			return true; // conservatively assume that something was done before the error happened.
+		}
+	}
+
+	private boolean doAfterTasks(List<HierarchicalEclipseProject> sorted, ErrorHandler eh, IProgressMonitor monitor) {
+		try {
+			ITaskProvider taskProvider = isReimport ? new ITaskProvider() {
+				@Override
+				public String[] getTaskNames(GradleProject project) {
+					GradleRefreshPreferences prefs = project.getRefreshPreferences();
+					return prefs.getDoAfterTasks() ? prefs.getAfterTasks() : new String[0]; 
+				}
+			} : new ITaskProvider() {
+				@Override
+				public String[] getTaskNames(GradleProject project) {
+					return getDoAfterTasks() ? getAfterTasks() : new String[0];
+				}
+			};
+			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor);
 		} catch (Exception e) {
 			eh.handleError(e);
 			return true; // conservatively assume that something was done before the error happened.
@@ -330,10 +367,12 @@ public class GradleImportOperation {
 
 			//3
 			GradleRefreshPreferences refreshPrefs = gProj.getRefreshPreferences();
-			refreshPrefs.copyFrom(this);
+			if (!isReimport) {
+				refreshPrefs.copyFrom(this);
+			}
 			
 			//4
-			if (addResourceFilters) {
+			if ((!isReimport && addResourceFilters) || (isReimport && refreshPrefs.getAddResourceFilters())) {
 				createResourceFilters(project, projectModel, new SubProgressMonitor(monitor, 1));
 			}
 			
@@ -365,7 +404,7 @@ public class GradleImportOperation {
 			}	
 			
 			//8..9
-			boolean generateOnly = !getEnableDependencyManagement();
+			boolean generateOnly = isReimport ? !gProj.isDependencyManaged() : !getEnableDependencyManagement();
 			if (generateOnly) {
 				try {
 					NatureUtils.ensure(project, new SubProgressMonitor(monitor, 1), 

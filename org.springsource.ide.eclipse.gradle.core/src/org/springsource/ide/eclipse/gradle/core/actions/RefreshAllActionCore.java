@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,9 @@
 package org.springsource.ide.eclipse.gradle.core.actions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -19,10 +21,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.util.Continuation;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
 import org.springsource.ide.eclipse.gradle.core.util.JoinableContinuation;
@@ -33,6 +33,7 @@ import org.springsource.ide.eclipse.gradle.core.util.NullJoinable;
  * The 'core' counterpart for RefreshAllAction.
  * 
  * @author Kris De Volder
+ * @author Alex Boyko
  */
 public class RefreshAllActionCore {
 
@@ -42,33 +43,19 @@ public class RefreshAllActionCore {
 	 */
 	public static Joinable<Void> callOn(final List<IProject> projects) throws CoreException {
 		if (!projects.isEmpty()) {
-			List<GradleProject> managed = new ArrayList<GradleProject>();
-			List<GradleProject> unmanaged = new ArrayList<GradleProject>();
+			List<GradleProject> gradleProjects = new ArrayList<GradleProject>(projects.size());
 			for (IProject p : projects) {
-				GradleProject gp = GradleCore.create(p);
-				if (GradleClassPathContainer.isOnClassPath(gp.getJavaProject())) {
-					managed.add(gp);
-				} else {
-					unmanaged.add(gp);
-				}
+				gradleProjects.add(GradleCore.create(p));
 			}
-			
-			if (managed.isEmpty()) {
-				return refreshUnmanaged(unmanaged);
-			} else if (unmanaged.isEmpty()) {
-				return refreshManagedProjects(managed);
-			} else {
-				throw ExceptionUtil.coreException("The selection contains some projects with dependency management enabled and some with it disabled." +
-						"All selected projects should either be managed or unmanaged.");
-			}
+			return refreshProjects(gradleProjects);
 		}
 		return new NullJoinable<Void>();
 	}
 
 	/**
-	 * Refresh a list of projects that do *not* have dependency management enabled.
+	 * Refresh a list of projects. Executes re-import operation for batches of interdependent projects.
 	 */
-	private static Joinable<Void> refreshUnmanaged(final List<GradleProject> projects) throws CoreException {
+	private static Joinable<Void> refreshProjects(final List<GradleProject> projects) throws CoreException {
 		final String jobName = getName(projects);
 		final ErrorHandler eh = ErrorHandler.forRefreshAll();
 		if (!projects.isEmpty()) {
@@ -88,8 +75,18 @@ public class RefreshAllActionCore {
 						JobUtil.schedule(new Continuable("Reimporting "+jobName, projects.size(), cont) {
 							@Override
 							public void doit(Continuation<Void> cont, IProgressMonitor monitor) throws Exception {
-								for (GradleProject p : projects) {
-									new ReimportOperation(p).perform(eh, new SubProgressMonitor(monitor, 1));
+								Map<GradleProject, List<GradleProject>> batches = new HashMap<GradleProject, List<GradleProject>>();
+								for (GradleProject project : projects) {
+									GradleProject root = project.getRootProject();
+									List<GradleProject> batch = batches.get(root);
+									if (batch == null) {
+										batch = new ArrayList<GradleProject>();
+										batches.put(root, batch);
+									}
+									batch.add(project);
+								}
+								for (List<GradleProject> batch : batches.values()) {
+									new ReimportOperation(batch).perform(eh, new SubProgressMonitor(monitor, batch.size()));
 								}
 								eh.rethrowAsCore();
 								cont.apply(null);
@@ -106,39 +103,6 @@ public class RefreshAllActionCore {
 		return new NullJoinable<Void>();
 	}
 	
-	/**
-	 * Refresh a list of projects that *do* have dependency management enabled.
-	 */
-	private static Joinable<Void> refreshManagedProjects(final List<GradleProject> managed) {
-		JoinableContinuation<Void> cont = new JoinableContinuation<Void>();
-		final String jobName = "Refresh Gradle model for "+getName(managed);
-		final ErrorHandler eh = ErrorHandler.forRefreshAll();
-		JobUtil.schedule(JobUtil.LIGHT_RULE, new Continuable(jobName, managed.size()*2, cont) {
-			@Override
-			public void doit(Continuation<Void> cont, IProgressMonitor monitor) throws Exception {
-				monitor.subTask("Invalidating old gradle models");
-				for (GradleProject p : managed) {
-					p.invalidateGradleModel();
-				}
-				monitor.worked(1);
-				for (GradleProject p : managed) {
-					p.getGradleModel(new SubProgressMonitor(monitor, 1));
-				}
-				JobUtil.schedule(new Continuable("Refresh All for "+getName(managed), managed.size(), cont) {
-					@Override
-					public void doit(Continuation<Void> cont, IProgressMonitor monitor) throws Exception {
-						for (GradleProject p : managed) {
-							new ReimportOperation(p).perform(eh, new SubProgressMonitor(monitor, 1));
-						}
-						eh.rethrowAsCore();
-						cont.apply(null);
-					}
-				});
-			}
-		}); 
-		return cont;
-	}
-
 	private static String getName(List<GradleProject> projects) {
 		if (projects.size()>1) {
 			return "multiple projects";
