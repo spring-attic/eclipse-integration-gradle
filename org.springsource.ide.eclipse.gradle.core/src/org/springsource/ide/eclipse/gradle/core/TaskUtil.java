@@ -42,6 +42,10 @@ import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
  */
 public class TaskUtil {
 	
+	public static interface ITaskProvider {
+		String[] getTaskNames(GradleProject project);
+	}
+	
 	public static void execute(GradleProject project,  ILaunchConfiguration conf, Collection<String> taskList, IProgressMonitor mon) throws CoreException {
 		Console console = ConsoleUtil.getConsole("Executing tasks on "+project.getDisplayName());
 		execute(project, conf, taskList, mon, new PrintStream(console.out), new PrintStream(console.err));
@@ -112,6 +116,50 @@ public class TaskUtil {
 
 	private static String getJavaHome() {
 		return System.getenv().get("JAVA_HOME");
+	}
+	
+	public static boolean bulkRunTasks(List<HierarchicalEclipseProject> sortedProjects, ITaskProvider taskNamesProvider, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+		monitor.beginTask("Run eclipse tasks", sortedProjects.size()*3);
+		try {
+			if (sortedProjects.size()>0) {
+				GradleProject rootProject = null; //Will be set on first occasion to determine
+				CompositeDomainObjectSet<String> tasksToRun = new CompositeDomainObjectSet<String>(String.class);
+	
+				//Collection the tasks to run: Ticks: 2*sorted.size
+				for (HierarchicalEclipseProject _project : sortedProjects) {
+					GradleProject project = GradleCore.create(_project);
+					if (rootProject==null) {
+						try {
+							rootProject = project.getRootProject();
+						} catch (FastOperationFailedException e) {
+							throw new IllegalStateException(e);
+						}
+					}
+					String[] taskNamesToRun = taskNamesProvider.getTaskNames(project);
+					DefaultDomainObjectSet<String> subCollection = new DefaultDomainObjectSet<String>(String.class);
+					for (Task task : project.getTasks(new SubProgressMonitor(monitor, 2))) {
+						for (int i = 0; i < taskNamesToRun.length; i++) {
+							String path = task.getPath();
+							if (task.getName().equals(taskNamesToRun[i]) || path.equals(taskNamesToRun[i])) {
+								subCollection.add(path);
+							}
+						}
+					}
+					tasksToRun.addCollection(subCollection);
+				}
+				
+				//Running the tasks: ticks: sorted.size
+				if (!tasksToRun.isEmpty()) {
+					execute(rootProject, null, tasksToRun, new SubProgressMonitor(monitor, sortedProjects.size()) );
+					return true;
+				} else {
+					monitor.worked(sortedProjects.size());
+				}
+			}
+		} finally {
+			monitor.done();
+		}
+		return false;
 	}
 
 	/**

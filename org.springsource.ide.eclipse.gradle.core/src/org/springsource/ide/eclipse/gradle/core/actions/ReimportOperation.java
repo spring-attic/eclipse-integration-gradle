@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.actions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,19 +40,23 @@ import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
  */
 public class ReimportOperation {
 	
-	private GradleProject p;
-	private GradleRefreshPreferences prefs;
+	private Collection<GradleProject> gradleProjects;
 
 	public ReimportOperation(GradleProject p) throws FastOperationFailedException {
-		this.p = p;
-		this.prefs = p.getRefreshPreferences();
+		this.gradleProjects = Collections.singletonList(p);
 	}
 
+	public ReimportOperation(Collection<GradleProject> gradleProjects) throws FastOperationFailedException {
+		this.gradleProjects = gradleProjects;
+	}
+	
 	public void perform(ErrorHandler eh, IProgressMonitor m) {
-		m.beginTask("Reimporting "+p.getDisplayName(), 3);
+		m.beginTask("Reimporting Gradle Projects", 3);
 		try {
-			GradleImportOperation op = createImportOperation(new SubProgressMonitor(m, 1));
-			op.perform(eh, new SubProgressMonitor(m, 2));
+			if (!gradleProjects.isEmpty()) {
+				GradleImportOperation op = createImportOperation(new SubProgressMonitor(m, 1));
+				op.perform(eh, new SubProgressMonitor(m, 2));
+			}
 		} catch (FastOperationFailedException e) {
 			eh.handleError(e);
 		} catch (CoreException e) {
@@ -60,21 +69,24 @@ public class ReimportOperation {
 	private GradleImportOperation createImportOperation(IProgressMonitor m) throws FastOperationFailedException, OperationCanceledException, CoreException {
 		m.beginTask("Create re-import operation", 1);
 		try {
-			List<HierarchicalEclipseProject> projects = Arrays.asList((HierarchicalEclipseProject)p.getGradleModel(m));
-			List<HierarchicalEclipseProject> relatedProjects = p.getAllProjectsInBuild();
+			GradleRefreshPreferences prefs = gradleProjects.iterator().next().getRootProject().getRefreshPreferences();
+			List<HierarchicalEclipseProject> projects = new ArrayList<HierarchicalEclipseProject>(gradleProjects.size());
+			Set<HierarchicalEclipseProject> relatedProjectsSet = new HashSet<HierarchicalEclipseProject>();
+			for (GradleProject gradleProject : gradleProjects) {
+				projects.add(gradleProject.getGradleModel(m));
+				relatedProjectsSet.addAll(gradleProject.getAllProjectsInBuild());
+			}
 			GradleImportOperation op = new GradleImportOperation(
 				projects,
-				prefs.getAddResourceFilters(),
-				GradleImportOperation.createProjectMapping(prefs.getUseHierarchicalNames(), relatedProjects)
-			);
-			//op.setWorkingSets(workingSets); // this option only meaningfull on initial import. 
+				false,
+				GradleImportOperation.createProjectMapping(
+						prefs.getUseHierarchicalNames(), 
+						Arrays.asList(relatedProjectsSet.toArray(
+								new HierarchicalEclipseProject[relatedProjectsSet.size()]
+						)
+				))
+			);			
 			op.setQuickWorkingSet(null); // this option only meaningfull on initial import. 
-			op.setEnableDependencyManagement(p.isDependencyManaged());
-			op.setDoAfterTasks(prefs.getDoAfterTasks());	
-			op.setAfterTasks(prefs.getAfterTasks());
-			op.setDoBeforeTasks(prefs.getDoBeforeTasks());
-			op.setBeforeTasks(prefs.getBeforeTasks());
-			op.setEnableDSLD(prefs.getEnableDSLD());
 			op.setReimport(true);
 			op.verify();
 			return op;
@@ -82,5 +94,5 @@ public class ReimportOperation {
 			m.done();
 		}
 	}
-
+	
 }
