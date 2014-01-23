@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -56,6 +55,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.TaskUtil;
+import org.springsource.ide.eclipse.gradle.core.TaskUtil.ITaskProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
@@ -174,7 +174,7 @@ public class GradleImportOperation {
 			if (!projectsToImport.isEmpty()) {
 				List<HierarchicalEclipseProject> sorted = new GradleProjectSorter(projectsToImport).getSorted();
 				if (doBeforeTasks) {
-					boolean doneSome = doTasks(sorted, beforeTasks, eh, new SubProgressMonitor(monitor, tasksWork));
+					boolean doneSome = doBeforeTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork));
 					if (doneSome) {
 						refreshProjectPreferences(sorted);
 					}
@@ -184,7 +184,7 @@ public class GradleImportOperation {
 					JobUtil.checkCanceled(monitor);
 				}
 				if (doAfterTasks) {
-					boolean doneSome = doTasks(sorted, afterTasks, eh, new SubProgressMonitor(monitor, tasksWork-tasksWork/3));
+					boolean doneSome = doAfterTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork-tasksWork/3));
 					if (doneSome) {
 						refreshProjects(sorted, new SubProgressMonitor(monitor, tasksWork/3));
 					}
@@ -195,7 +195,7 @@ public class GradleImportOperation {
 			monitor.done();
 		}
 	}
-
+	
 	private void refreshProjectPreferences(List<HierarchicalEclipseProject> projects) {
 		for (HierarchicalEclipseProject p : projects) {
 			GradleProject gp = GradleCore.create(p); 
@@ -257,9 +257,40 @@ public class GradleImportOperation {
 		}
 	}
 
-	private boolean doTasks(List<HierarchicalEclipseProject> sorted, String[] taskNames, ErrorHandler eh, IProgressMonitor monitor) {
+	private boolean doBeforeTasks(List<HierarchicalEclipseProject> sorted, ErrorHandler eh, IProgressMonitor monitor) {
 		try {
-			return TaskUtil.bulkRunEclipseTasksOn(sorted, taskNames, monitor);
+			ITaskProvider taskProvider = isReimport ? new ITaskProvider() {
+				@Override
+				public String[] getTaskNames(GradleProject project) {
+					return project.getRefreshPreferences().getBeforeTasks();
+				}
+			} : new ITaskProvider() {
+				@Override
+				public String[] getTaskNames(GradleProject project) {
+					return getBeforeTasks();
+				}
+			};
+			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor);
+		} catch (Exception e) {
+			eh.handleError(e);
+			return true; // conservatively assume that something was done before the error happened.
+		}
+	}
+
+	private boolean doAfterTasks(List<HierarchicalEclipseProject> sorted, ErrorHandler eh, IProgressMonitor monitor) {
+		try {
+			ITaskProvider taskProvider = isReimport ? new ITaskProvider() {
+				@Override
+				public String[] getTaskNames(GradleProject project) {
+					return project.getRefreshPreferences().getAfterTasks();
+				}
+			} : new ITaskProvider() {
+				@Override
+				public String[] getTaskNames(GradleProject project) {
+					return getAfterTasks();
+				}
+			};
+			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor);
 		} catch (Exception e) {
 			eh.handleError(e);
 			return true; // conservatively assume that something was done before the error happened.
@@ -330,10 +361,12 @@ public class GradleImportOperation {
 
 			//3
 			GradleRefreshPreferences refreshPrefs = gProj.getRefreshPreferences();
-			refreshPrefs.copyFrom(this);
+			if (!isReimport) {
+				refreshPrefs.copyFrom(this);
+			}
 			
 			//4
-			if (addResourceFilters) {
+			if ((!isReimport && addResourceFilters) || (isReimport && refreshPrefs.getAddResourceFilters())) {
 				createResourceFilters(project, projectModel, new SubProgressMonitor(monitor, 1));
 			}
 			
@@ -365,7 +398,7 @@ public class GradleImportOperation {
 			}	
 			
 			//8..9
-			boolean generateOnly = !getEnableDependencyManagement();
+			boolean generateOnly = isReimport ? !gProj.isDependencyManaged() : !getEnableDependencyManagement();
 			if (generateOnly) {
 				try {
 					NatureUtils.ensure(project, new SubProgressMonitor(monitor, 1), 
