@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 GoPivotal, Inc.
+ * Copyright (c) 2012, 2014 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
  * the project. The refresh preferences are saved in the project when it is imported initially.
  * 
  * @author Kris De Volder
+ * @author Alex Boyko
  */
 public class ReimportOperation {
 	
