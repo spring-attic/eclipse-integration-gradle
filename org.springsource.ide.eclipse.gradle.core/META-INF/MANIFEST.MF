@@ -28,6 +28,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.springsource.ide.eclipse.gradle.core,
  org.springsource.ide.eclipse.gradle.core.actions,
+ org.springsource.ide.eclipse.gradle.core.api,
  org.springsource.ide.eclipse.gradle.core.classpathcontainer,
  org.springsource.ide.eclipse.gradle.core.dsld,
  org.springsource.ide.eclipse.gradle.core.launch,

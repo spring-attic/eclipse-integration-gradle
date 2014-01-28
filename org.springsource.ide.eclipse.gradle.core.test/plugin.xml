@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.springsource.ide.eclipse.gradle.core.projectConfigurators">
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$SingleConf"
+            id="org.springsource.ide.eclipse.gradle.core.test.configurator_single"
+            name="Single Conf">
+      </configurator>
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$TreeConf1"
+            id="org.springsource.ide.eclipse.gradle.core.test.tree_conf1"
+            name="Tree Conf 1">
+      </configurator>
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$TreeConf2"
+            id="org.springsource.ide.eclipse.gradle.core.test.tree_conf2"
+            name="Tree Conf 2">
+         <secondaryTo
+               id="org.springsource.ide.eclipse.gradle.core.test.tree_conf1">
+         </secondaryTo>
+      </configurator>
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfA"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_a"
+            name="DAG Conf A">
+      </configurator>
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfB"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_b"
+            name="DAG Conf B">
+      </configurator>
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfC"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_c"
+            name="DAG Conf C">
+         <secondaryTo
+               id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_a">
+         </secondaryTo>
+         <secondaryTo
+               id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_b">
+         </secondaryTo>
+      </configurator>
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfD"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_d"
+            name="DAG Conf D">
+         <secondaryTo
+               id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_c">
+         </secondaryTo>
+      </configurator>
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfE"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_e"
+            name="DAG Conf E">
+         <secondaryTo
+               id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_c">
+         </secondaryTo>
+      </configurator>
+   </extension>
+
+</plugin>

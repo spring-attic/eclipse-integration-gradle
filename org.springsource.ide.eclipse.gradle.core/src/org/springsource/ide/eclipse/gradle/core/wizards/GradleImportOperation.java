@@ -54,6 +54,8 @@ import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.ProjectConfigurationManager;
+import org.springsource.ide.eclipse.gradle.core.ProjectConfigurationRequest;
 import org.springsource.ide.eclipse.gradle.core.TaskUtil;
 import org.springsource.ide.eclipse.gradle.core.TaskUtil.ITaskProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
@@ -378,7 +380,12 @@ public class GradleImportOperation {
 			
 			//5
 			if (isReimport) {
+				String comment = project.getDescription().getComment();
 				project.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+				// Keep the comment after refresh
+				IProjectDescription description = project.getDescription();
+				description.setComment(comment);
+				project.setDescription(description, new SubProgressMonitor(monitor, 1));
 				forceClasspathUpToDate(project);
 			} else {
 				project.open(new SubProgressMonitor(monitor, 1));
@@ -418,6 +425,11 @@ public class GradleImportOperation {
 			} else {
 				gProj.convertToGradleProject(projectMapper, eh, new SubProgressMonitor(monitor, 2));
 			}
+			
+			// Configure project. Delegated to clients.
+			ProjectConfigurationManager.getInstance().configure(
+					new ProjectConfigurationRequest(gProj.getGradleModel(),
+							gProj.getProject()), monitor);
 			
 			//10
 			if (haveWorkingSets) {
