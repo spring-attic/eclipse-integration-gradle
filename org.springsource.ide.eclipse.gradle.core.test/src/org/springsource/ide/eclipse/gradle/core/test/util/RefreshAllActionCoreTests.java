@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.test.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -134,6 +136,125 @@ public class RefreshAllActionCoreTests extends GradleTest {
 		
 		assertSourceFolders(project, DEFAULT_SRC_FOLDERS);
 		assertClasspathJarEntry("commons-collections-3.1.jar", project);
+	}
+	
+	public void testNoProjectConfigurators() throws Exception {
+		String projectName = "quickstart";
+		File projectLoc = extractJavaSample(projectName);
+		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
+		importOp.setEnableDependencyManagement(false); 
+		importOp.setEnableDSLD(false);
+		
+		performImport(importOp);
+		GradleProject gradleProject = getGradleProject(projectName);		
+		IProject project = gradleProject.getProject();
+		
+		assertTrue("Comment must be empty after initial import",
+				project.getDescription().getComment() == null
+						|| project.getDescription().getComment().isEmpty());
+		
+		refreshAll(gradleProject);
+		
+		assertTrue("Configurators must have changed project comment",
+				project.getDescription().getComment() == null
+						|| project.getDescription().getComment().isEmpty());
+	}
+
+	public void testSingleProjectConfigurator() throws Exception {
+		String projectName = "quickstart";
+		File projectLoc = extractJavaSample(projectName);
+		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
+		importOp.setEnableDependencyManagement(false); 
+		importOp.setEnableDSLD(false);
+		
+		performImport(importOp);
+		GradleProject gradleProject = getGradleProject(projectName);
+		IProject project = gradleProject.getProject();
+		IProjectDescription description = project.getDescription();
+		
+		// One project configurator
+		description.setComment(TestProjectConfigurators.INITIAL_COMMENT_SINGLE);
+		project.setDescription(description, new NullProgressMonitor());
+		refreshAll(gradleProject);
+		
+		String testStr = TestProjectConfigurators.INITIAL_COMMENT_SINGLE
+				+ TestProjectConfigurators.DELIMITER
+				+ TestProjectConfigurators.SINGLE_CONF;
+		assertEquals(testStr, project.getDescription().getComment());
+	}
+	
+	public void testTreeProjectConfigurator() throws Exception {
+		String projectName = "quickstart";
+		File projectLoc = extractJavaSample(projectName);
+		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
+		importOp.setEnableDependencyManagement(false); 
+		importOp.setEnableDSLD(false);
+		
+		performImport(importOp);
+		GradleProject gradleProject = getGradleProject(projectName);
+		IProject project = gradleProject.getProject();
+		IProjectDescription description = project.getDescription();
+		
+		// One project configurator
+		description.setComment(TestProjectConfigurators.INITIAL_COMMENT_TREE);
+		project.setDescription(description, new NullProgressMonitor());
+		refreshAll(gradleProject);
+		
+		String testStr = TestProjectConfigurators.INITIAL_COMMENT_TREE
+				+ TestProjectConfigurators.DELIMITER
+				+ TestProjectConfigurators.TREE_CONF1
+				+ TestProjectConfigurators.DELIMITER
+				+ TestProjectConfigurators.TREE_CONF2;
+		
+		assertEquals(testStr, project.getDescription()
+				.getComment());
+	}
+
+	public void testDAGProjectConfigurator() throws Exception {
+		String projectName = "quickstart";
+		File projectLoc = extractJavaSample(projectName);
+		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
+		importOp.setEnableDependencyManagement(false); 
+		importOp.setEnableDSLD(false);
+		
+		performImport(importOp);
+		GradleProject gradleProject = getGradleProject(projectName);
+		IProject project = gradleProject.getProject();
+		IProjectDescription description = project.getDescription();
+		
+		// One project configurator
+		description.setComment(TestProjectConfigurators.INITIAL_COMMENT_DAG);
+		project.setDescription(description, new NullProgressMonitor());
+		refreshAll(gradleProject);
+		
+		String[] tokens = project.getDescription().getComment().split(TestProjectConfigurators.DELIMITER);
+		assertEquals(6, tokens.length);
+		assertEquals(tokens[0], TestProjectConfigurators.INITIAL_COMMENT_DAG);
+		assertTrue(
+				"Expected either <" + TestProjectConfigurators.DAG_CONF_A
+						+ "> or <" + TestProjectConfigurators.DAG_CONF_B + ">",
+				TestProjectConfigurators.DAG_CONF_A.equals(tokens[1])
+						|| TestProjectConfigurators.DAG_CONF_B
+								.equals(tokens[1]));
+		assertTrue(
+				"Expected either <" + TestProjectConfigurators.DAG_CONF_A
+						+ "> or <" + TestProjectConfigurators.DAG_CONF_B + ">",
+				TestProjectConfigurators.DAG_CONF_A.equals(tokens[2])
+						|| TestProjectConfigurators.DAG_CONF_B
+								.equals(tokens[2]));
+		assertEquals(TestProjectConfigurators.DAG_CONF_C, tokens[3]);
+		assertTrue(
+				"Expected either <" + TestProjectConfigurators.DAG_CONF_D
+						+ "> or <" + TestProjectConfigurators.DAG_CONF_E + ">",
+				TestProjectConfigurators.DAG_CONF_D.equals(tokens[4])
+						|| TestProjectConfigurators.DAG_CONF_E
+								.equals(tokens[4]));
+		assertTrue(
+				"Expected either <" + TestProjectConfigurators.DAG_CONF_D
+						+ "> or <" + TestProjectConfigurators.DAG_CONF_E + ">",
+				TestProjectConfigurators.DAG_CONF_D.equals(tokens[5])
+						|| TestProjectConfigurators.DAG_CONF_E
+								.equals(tokens[5]));
 	}
 
 	/**
