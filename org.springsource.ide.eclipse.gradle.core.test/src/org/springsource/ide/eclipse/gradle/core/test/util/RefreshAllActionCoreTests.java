@@ -161,56 +161,67 @@ public class RefreshAllActionCoreTests extends GradleTest {
 	}
 
 	public void testSingleProjectConfigurator() throws Exception {
-		String projectName = "quickstart";
-		File projectLoc = extractJavaSample(projectName);
-		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
-		importOp.setEnableDependencyManagement(false); 
-		importOp.setEnableDSLD(false);
-		
-		performImport(importOp);
-		GradleProject gradleProject = getGradleProject(projectName);
-		IProject project = gradleProject.getProject();
-		IProjectDescription description = project.getDescription();
-		
-		// One project configurator
-		description.setComment(TestProjectConfigurators.INITIAL_COMMENT_SINGLE);
-		project.setDescription(description, new NullProgressMonitor());
-		refreshAll(gradleProject);
-		
-		String testStr = TestProjectConfigurators.INITIAL_COMMENT_SINGLE
-				+ TestProjectConfigurators.DELIMITER
-				+ TestProjectConfigurators.SINGLE_CONF;
-		assertEquals(testStr, project.getDescription().getComment());
+		StringBuilder expected = new StringBuilder().append(TestProjectConfigurators.INITIAL_COMMENT_SINGLE)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.SINGLE_CONF);
+		testConfigurators(TestProjectConfigurators.INITIAL_COMMENT_SINGLE, expected.toString());
 	}
 	
 	public void testTreeProjectConfigurator() throws Exception {
-		String projectName = "quickstart";
-		File projectLoc = extractJavaSample(projectName);
-		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
-		importOp.setEnableDependencyManagement(false); 
-		importOp.setEnableDSLD(false);
+		StringBuilder expected = new StringBuilder().append(TestProjectConfigurators.INITIAL_COMMENT_TREE)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.TREE_CONF1)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.TREE_CONF2);
 		
-		performImport(importOp);
-		GradleProject gradleProject = getGradleProject(projectName);
-		IProject project = gradleProject.getProject();
-		IProjectDescription description = project.getDescription();
-		
-		// One project configurator
-		description.setComment(TestProjectConfigurators.INITIAL_COMMENT_TREE);
-		project.setDescription(description, new NullProgressMonitor());
-		refreshAll(gradleProject);
-		
-		String testStr = TestProjectConfigurators.INITIAL_COMMENT_TREE
-				+ TestProjectConfigurators.DELIMITER
-				+ TestProjectConfigurators.TREE_CONF1
-				+ TestProjectConfigurators.DELIMITER
-				+ TestProjectConfigurators.TREE_CONF2;
-		
-		assertEquals(testStr, project.getDescription()
-				.getComment());
+		testConfigurators(TestProjectConfigurators.INITIAL_COMMENT_TREE, expected.toString());		
 	}
 
 	public void testDAGProjectConfigurator() throws Exception {
+		StringBuilder expected = new StringBuilder().append(TestProjectConfigurators.INITIAL_COMMENT_DAG)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_CONF_B)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_CONF_A)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_CONF_C)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_CONF_E)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_CONF_D);				
+				
+		testConfigurators(TestProjectConfigurators.INITIAL_COMMENT_DAG, expected.toString());
+	}
+	
+	public void testAfterDAGProjectConfigurator() throws Exception {
+		StringBuilder expected = new StringBuilder().append(TestProjectConfigurators.INITIAL_COMMENT_DAG_AFTER)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_AFTER_B)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_AFTER_D)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_AFTER_C)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_AFTER_A);
+		
+		testConfigurators(TestProjectConfigurators.INITIAL_COMMENT_DAG_AFTER, expected.toString());
+	}
+	
+	public void testBeforeDAGProjectConfigurator() throws Exception {
+		StringBuilder expected = new StringBuilder().append(TestProjectConfigurators.INITIAL_COMMENT_DAG_BEFORE)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_BEFORE_C)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_BEFORE_B)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_BEFORE_A)
+				.append(TestProjectConfigurators.DELIMITER)
+				.append(TestProjectConfigurators.DAG_BEFORE_D);
+		
+		testConfigurators(TestProjectConfigurators.INITIAL_COMMENT_DAG_BEFORE, expected.toString());
+	}
+
+	private void testConfigurators(String testIdComment, String expectedResult) throws Exception {
 		String projectName = "quickstart";
 		File projectLoc = extractJavaSample(projectName);
 		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
@@ -223,38 +234,11 @@ public class RefreshAllActionCoreTests extends GradleTest {
 		IProjectDescription description = project.getDescription();
 		
 		// One project configurator
-		description.setComment(TestProjectConfigurators.INITIAL_COMMENT_DAG);
+		description.setComment(testIdComment);
 		project.setDescription(description, new NullProgressMonitor());
 		refreshAll(gradleProject);
 		
-		String[] tokens = project.getDescription().getComment().split(TestProjectConfigurators.DELIMITER);
-		assertEquals(6, tokens.length);
-		assertEquals(tokens[0], TestProjectConfigurators.INITIAL_COMMENT_DAG);
-		assertTrue(
-				"Expected either <" + TestProjectConfigurators.DAG_CONF_A
-						+ "> or <" + TestProjectConfigurators.DAG_CONF_B + ">",
-				TestProjectConfigurators.DAG_CONF_A.equals(tokens[1])
-						|| TestProjectConfigurators.DAG_CONF_B
-								.equals(tokens[1]));
-		assertTrue(
-				"Expected either <" + TestProjectConfigurators.DAG_CONF_A
-						+ "> or <" + TestProjectConfigurators.DAG_CONF_B + ">",
-				TestProjectConfigurators.DAG_CONF_A.equals(tokens[2])
-						|| TestProjectConfigurators.DAG_CONF_B
-								.equals(tokens[2]));
-		assertEquals(TestProjectConfigurators.DAG_CONF_C, tokens[3]);
-		assertTrue(
-				"Expected either <" + TestProjectConfigurators.DAG_CONF_D
-						+ "> or <" + TestProjectConfigurators.DAG_CONF_E + ">",
-				TestProjectConfigurators.DAG_CONF_D.equals(tokens[4])
-						|| TestProjectConfigurators.DAG_CONF_E
-								.equals(tokens[4]));
-		assertTrue(
-				"Expected either <" + TestProjectConfigurators.DAG_CONF_D
-						+ "> or <" + TestProjectConfigurators.DAG_CONF_E + ">",
-				TestProjectConfigurators.DAG_CONF_D.equals(tokens[5])
-						|| TestProjectConfigurators.DAG_CONF_E
-								.equals(tokens[5]));
+		assertEquals(expectedResult, project.getDescription().getComment());
 	}
 
 	/**

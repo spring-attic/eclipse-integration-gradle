@@ -40,6 +40,18 @@ public class TestProjectConfigurators {
 	public static final String DAG_CONF_D = "dagConfigD";
 	public static final String DAG_CONF_E = "dagConfigE";
 	
+	public static final String INITIAL_COMMENT_DAG_BEFORE = "Test_Before_DAG";
+	public static final String DAG_BEFORE_A = "dag_before_A"; //$NON-NLS-N1$
+	public static final String DAG_BEFORE_B = "dag_before_B"; //$NON-NLS-N1$
+	public static final String DAG_BEFORE_C = "dag_before_C"; //$NON-NLS-N1$
+	public static final String DAG_BEFORE_D = "dag_before_D"; //$NON-NLS-N1$
+	
+	public static final String INITIAL_COMMENT_DAG_AFTER = "Test_After_DAG";
+	public static final String DAG_AFTER_A = "dag_after_A"; //$NON-NLS-N1$
+	public static final String DAG_AFTER_B = "dag_after_B"; //$NON-NLS-N1$
+	public static final String DAG_AFTER_C = "dag_after_C"; //$NON-NLS-N1$
+	public static final String DAG_AFTER_D = "dag_after_D"; //$NON-NLS-N1$
+
 	public static abstract class TestConfigurator implements IProjectConfigurator {
 		
 		abstract protected String getPrefix();
@@ -146,4 +158,92 @@ public class TestProjectConfigurators {
 		}
 	}
 
+	public static class DagBeforeA extends TestConfigurator {
+		@Override
+		protected String getPrefix() {
+			return INITIAL_COMMENT_DAG_BEFORE;
+		}
+		@Override
+		protected String getAddition() {
+			return DAG_BEFORE_A;
+		}
+	}
+
+	public static class DagBeforeB extends TestConfigurator {
+		@Override
+		protected String getPrefix() {
+			return INITIAL_COMMENT_DAG_BEFORE;
+		}
+		@Override
+		protected String getAddition() {
+			return DAG_BEFORE_B;
+		}
+	}
+	
+	public static class DagBeforeC extends TestConfigurator {
+		@Override
+		protected String getPrefix() {
+			return INITIAL_COMMENT_DAG_BEFORE;
+		}
+		@Override
+		protected String getAddition() {
+			return DAG_BEFORE_C;
+		}
+	}
+	
+	public static class DagBeforeD extends TestConfigurator {
+		@Override
+		protected String getPrefix() {
+			return INITIAL_COMMENT_DAG_BEFORE;
+		}
+		@Override
+		protected String getAddition() {
+			return DAG_BEFORE_D;
+		}
+	}
+
+	public static class DagAfterA extends TestConfigurator {
+		@Override
+		protected String getPrefix() {
+			return INITIAL_COMMENT_DAG_AFTER;
+		}
+		@Override
+		protected String getAddition() {
+			return DAG_AFTER_A;
+		}
+	}
+
+	public static class DagAfterB extends TestConfigurator {
+		@Override
+		protected String getPrefix() {
+			return INITIAL_COMMENT_DAG_AFTER;
+		}
+		@Override
+		protected String getAddition() {
+			return DAG_AFTER_B;
+		}
+	}
+	
+	public static class DagAfterC extends TestConfigurator {
+		@Override
+		protected String getPrefix() {
+			return INITIAL_COMMENT_DAG_AFTER;
+		}
+		@Override
+		protected String getAddition() {
+			return DAG_AFTER_C;
+		}
+	}
+	
+	public static class DagAfterD extends TestConfigurator {
+		@Override
+		protected String getPrefix() {
+			return INITIAL_COMMENT_DAG_AFTER;
+		}
+		@Override
+		protected String getAddition() {
+			return DAG_AFTER_D;
+		}
+	}
+	
 }
