@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ public class GroovySanityTest extends GradleTest {
     }
 	
 	public void testSanity() throws BundleException {
-		checkSanity(8); //Currently some of the imported projects expecting Groovy 1.8 or they will fail.
+		checkSanity(2); //Currently some of the imported projects expecting Groovy 2.2 or they will fail.
 	}
 
 	public static void checkSanity(int expectMinor) throws BundleException {
