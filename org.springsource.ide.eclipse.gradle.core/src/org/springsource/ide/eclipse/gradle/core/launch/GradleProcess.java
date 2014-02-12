@@ -79,13 +79,13 @@ public class GradleProcess extends PlatformObject implements IProcess {
 	}
 
 	public List<String> getTasks() {
-		return GradleLaunchConfigurationDelegate.getTasks(conf);
+		return GradleLaunchConfigurationDelegate.getTasksList(conf);
 	}
 	
 	protected void run() throws CoreException {
 		final GradleProject project = getProject();
 		if (project!=null) {
-			final List<String> taskList = GradleLaunchConfigurationDelegate.getTasks(conf);
+			final List<String> taskList = GradleLaunchConfigurationDelegate.getTasksList(conf);
 			if (!taskList.isEmpty()) {
 				JobUtil.schedule(JobUtil.NO_RULE, new GradleRunnable(getLabel()) {
 					@Override

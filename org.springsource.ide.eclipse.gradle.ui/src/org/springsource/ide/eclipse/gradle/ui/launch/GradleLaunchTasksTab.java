@@ -11,9 +11,7 @@
 package org.springsource.ide.eclipse.gradle.ui.launch;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -22,63 +20,56 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
-import org.eclipse.ui.dialogs.FilteredTree;
-import org.eclipse.ui.dialogs.PatternFilter;
-import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
+import org.springsource.ide.eclipse.gradle.ui.cli.editor.TasksViewer;
 
 
 /**
  * @author Kris De Volder
+ * @author Alex Boyko
  */
 public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 
 	private static final boolean DEBUG = false;
 	
-	private Combo projectCombo;
-	private CheckboxTreeViewer taskSelectionTreeViewer;
-	private GradleProject project;
-	private GradleTaskCheckStateProvider tasksChecked = new GradleTaskCheckStateProvider(this);
+	private static final String CTRL_SPACE_LABEL = "<Ctrl> + <Space>";
+	private static final String EDITOR_INFO_LABEL = "Type tasks in the editor below. Use " + CTRL_SPACE_LABEL + " to activate content assistant.";
 	
-	private Text taskOrderText;
-	private Button orderButton;
-
-	private Button clearButton;
+	private Combo projectCombo;
+	private GradleProject project;
+	private GradleTasksIndex tasksIndex= new GradleTasksIndex();
+	
+	private TasksViewer tasksViewer;
 
 	private Button refreshButton;
 	
@@ -88,87 +79,11 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
         page.setLayout(layout);
         
         createProjectCombo(page);
-        createTaskTree(page);
-        
-        createTaskList(page);
-		
+        createTaskEditor(page);
+
 		setControl(page);
 	}
 
-	/**
-	 * Creates the widgets that display the target order
-	 */
-	private void createTaskList(Composite parent) {
-		Font font= parent.getFont();
-
-		Label label = new Label(parent, SWT.NONE);
-		label.setText("Task execution order:");
-		label.setFont(font);
-
-		Composite orderComposite = new Composite(parent, SWT.NONE);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		orderComposite.setLayoutData(gd);
-		GridLayout layout = new GridLayout(2, false);
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
-		orderComposite.setLayout(layout);
-		orderComposite.setFont(font);
-
-		taskOrderText = new Text(orderComposite, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL | SWT.READ_ONLY);
-		taskOrderText.setFont(font);
-		gd = new GridData(GridData.FILL_HORIZONTAL|GridData.FILL_VERTICAL);
-		gd.heightHint = 40;
-		gd.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		taskOrderText.setLayoutData(gd);
-
-		Composite buttonColumn = new Composite(orderComposite, SWT.NONE);
-		layout = new GridLayout(1, false);
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
-		buttonColumn.setLayout(layout);
-		buttonColumn.setFont(font);
-		
-		orderButton = createPushButton(buttonColumn, "Order...", null);
-		gd = (GridData)orderButton.getLayoutData();
-		gd.verticalAlignment = GridData.BEGINNING;
-		orderButton.setFont(font);
-		orderButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleOrderPressed();
-			}
-		});
-		clearButton = createPushButton(buttonColumn, "Clear", null);
-		gd = (GridData)orderButton.getLayoutData();
-		gd.verticalAlignment = GridData.BEGINNING;
-		clearButton.setFont(font);
-		clearButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleClearPressed();
-			}
-		});
-		updateOrderedTargets();
-	}
-
-	/**
-	 * Handle the "clear" button which deselects everything.
-	 */
-	private void handleClearPressed() {
-		setChecked(Arrays.asList(new String[0]));
-	}
-
-	/**
-	 * The target order button has been pressed. Prompt the
-	 * user to reorder the selected targets. 
-	 */
-	private void handleOrderPressed() {
-		GradleTaskOrderDialog dialog = new GradleTaskOrderDialog(getShell(), tasksChecked.toArray());
-		int ok = dialog.open();
-		if (ok == Window.OK) {
-			String[] targets = dialog.getTargets();
-			setChecked(Arrays.asList(targets));
-		}
-	}
-	
 	private void createProjectCombo(Composite _parent) {
 		GridDataFactory grabHor = GridDataFactory.fillDefaults().grab(true, false);
 		Composite parent = new Composite(_parent, SWT.NONE);
@@ -194,7 +109,15 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 		
 		projectCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				projectComboChanged();
+				String newProjectName = projectCombo.getText();
+				if ("".equals(newProjectName)) {
+					setProject(null);
+					setTasksDocument("");
+				} else {
+					IProject newProject = ResourcesPlugin.getWorkspace().getRoot().getProject(newProjectName);
+					setProject(GradleCore.create(newProject));
+					setTasksDocument(tasksViewer.getDocument().get());
+				}
 			}
 		});
 		
@@ -204,29 +127,21 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 		refreshButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
-				try {
-					GradleProject currentProject = project;
-					if (currentProject!=null) {
-						currentProject.requestGradleModelRefresh();
-						taskSelectionTreeViewer.refresh();
+
+				GradleProject currentProject = project;
+				if (currentProject != null) {
+					try {
+						project.requestGradleModelRefresh();
+					} catch (CoreException e) {
+						// ignore
 					}
-				} catch (CoreException e) {
-					GradleCore.log(e);
+					tasksIndex.setProject(project);
 				}
+
 			}
 		});
 		
 		grabHor.align(SWT.RIGHT, SWT.CENTER).applyTo(refreshButton);
-	}
-	
-	private void projectComboChanged() {
-		String newProjectName = projectCombo.getText();
-		if ("".equals(newProjectName)) {
-			setProject(null);
-		} else {
-			IProject newProject = ResourcesPlugin.getWorkspace().getRoot().getProject(newProjectName);
-			setProject(GradleCore.create(newProject));
-		}
 	}
 	
 	private List<GradleProject> getGradleProjects() {
@@ -243,57 +158,31 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 		}
 		return result;
 	}
-
-	private void createTaskTree(Composite parent) {
-		PatternFilter filter = new PatternFilter();
-		FilteredTree filteredTree = new FilteredTree(parent, SWT.CHECK | SWT.BORDER, filter, true) {
-			@Override
-			protected TreeViewer doCreateTreeViewer(Composite parent, int style) {
-				return new ContainerCheckedTreeViewer(parent, style);
-			}
-		};
-		taskSelectionTreeViewer = (CheckboxTreeViewer)filteredTree.getViewer();
-		filteredTree.setLayoutData(new GridData(GridData.FILL_BOTH));
-        
-		//Add multi column support
-		Tree tree = taskSelectionTreeViewer.getTree();
-		tree.setHeaderVisible(true);
-		TreeColumn column1 = new TreeColumn(tree, SWT.LEFT);
-		column1.setText("Project/Task");
-		TreeColumn column2 = new TreeColumn(tree, SWT.LEFT);
-		column2.setText("Description");
-		column1.pack();
-		column2.pack();
-        
-        taskSelectionTreeViewer.setLabelProvider(new GradleTaskTreeLabelProvider());
-        taskSelectionTreeViewer.setContentProvider(new GradleTaskTreeContentProvider(taskSelectionTreeViewer, true));
-        taskSelectionTreeViewer.setCheckStateProvider(tasksChecked);
-        taskSelectionTreeViewer.addCheckStateListener(tasksChecked);
+	
+	private void createTaskEditor(final Composite parent) {
 		
-        if (project!=null) {
-        	setTreeInput(project);
-        }
+		StyledText styledText = new StyledText(parent, SWT.READ_ONLY | SWT.WRAP);
+		styledText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		styledText.setBackground(parent.getBackground());
+		styledText.setText(EDITOR_INFO_LABEL);
+		styledText.setStyleRange(new StyleRange(EDITOR_INFO_LABEL
+				.indexOf(CTRL_SPACE_LABEL), CTRL_SPACE_LABEL.length(),
+				styledText.getForeground(), styledText.getBackground(),
+				SWT.BOLD | SWT.ITALIC));
+		
+
+		tasksViewer = new TasksViewer(parent, tasksIndex);
+		
+		tasksViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		setTasksDocument("");
 	}
 	
-	private GradleProject getTreeInput() {
-		if (taskSelectionTreeViewer!=null) {
-			return (GradleProject)taskSelectionTreeViewer.getInput();
-		}
-		return null;
-	}
-
-	private void setTreeInput(GradleProject project) {
-		if (taskSelectionTreeViewer!=null) {
-			taskSelectionTreeViewer.setInput(project);
-			Tree tree = taskSelectionTreeViewer.getTree();
-			for (TreeColumn col : tree.getColumns()) {
-				col.pack();
-			}
-		}
-	}
-
+	
+	
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		setProject(getContext());
+		setTasksDocument("");
 	}
 
 	private void setProject(GradleProject project) {
@@ -302,15 +191,8 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 		if (this.project==project) //Don't do anything if project is unchanged
 			return;
 
-//		if (this.project!=null) {
-//			this.project.removeModelListener(modelListener);
-//		}
 		this.project = project;
-		setChecked(Arrays.asList(new String[0]));
-//		if (this.project!=null) {
-//			this.project.addModelListener(modelListener);
-//		}
-		setTreeInput(project);
+		tasksIndex.setProject(project);
 		if (projectCombo!=null) {
 			if (project!=null) {
 				projectCombo.setText(project.getName());
@@ -321,14 +203,6 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 		updateLaunchConfigurationDialog();
 	}
 	
-	@Override
-	public void dispose() {
-//		if (project!=null && modelListener!=null) {
-//			project.removeModelListener(modelListener);
-//		}
-		super.dispose();
-	}
-
 	private GradleProject getContext() {
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
@@ -375,16 +249,24 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 		}
 		debug("<<< initializing Gradle launch tab");
 		setProject(GradleLaunchConfigurationDelegate.getProject(conf));
-		setChecked(GradleLaunchConfigurationDelegate.getTasks(conf));
+		setTasksDocument(GradleLaunchConfigurationDelegate.getTasks(conf));
 	}
 
-	private void setChecked(List<String> tasks) {
-		tasksChecked.setChecked(tasks);
-		if (taskSelectionTreeViewer!=null) {
-			taskSelectionTreeViewer.refresh();
-		}
-		updateOrderedTargets();
-		updateLaunchConfigurationDialog();
+	private void setTasksDocument(String tasks) {
+		Document document = new Document(tasks);
+		document.addDocumentListener(new IDocumentListener() {
+			
+			@Override
+			public void documentChanged(DocumentEvent event) {
+				GradleLaunchTasksTab.this.updateLaunchConfigurationDialog();
+			}
+			
+			@Override
+			public void documentAboutToBeChanged(DocumentEvent event) {
+				// empty
+			}
+		});
+		tasksViewer.setDocument(document);
 	}
 	
 	@Override
@@ -392,22 +274,6 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 		super.updateLaunchConfigurationDialog();
 	}
 	
-	protected void updateOrderedTargets() {
-		if (taskOrderText!=null) {
-			List<String> tasks = getSelectedTasks();
-			StringBuffer s = new StringBuffer();
-			boolean comma = false;
-			for (String taskPath : tasks) {
-				if (comma) {
-					s.append(", ");
-				}
-				s.append(taskPath);
-				comma = true;
-			}
-			taskOrderText.setText(s.toString());
-		}
-	}
-
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
@@ -427,41 +293,7 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 	
 	public void performApply(ILaunchConfigurationWorkingCopy conf) {
 		GradleLaunchConfigurationDelegate.setProject(conf, project);
-		GradleLaunchConfigurationDelegate.setTasks(conf, getSelectedTasks());
-	}
-
-	/**
-	 * Gets tasks selected in the actual GUI widget (rather than from the checked state provider, because the checked state provider
-	 * may actually contain task paths strings that don't even exist in the task tree (anymore). Moreover, when we call this we are
-	 * about to save the task tree state, and it would be best to weed out non-existent tasks here. Only the tasks that are actually
-	 * selected in the GUI tree (these should be real tasks since they are populated from the model) will be returned.
-	 */
-	private List<String> getSelectedTasks() {
-		List<String> result = tasksChecked.getChecked();
-		Set<String> validTasks = getValidTasks();
-		if (validTasks!=null) {
-			result.retainAll(validTasks);
-		}
-		return result;
-	}
-
-	/**
-	 * @return THe set of tasks that is valid. May return null if it is not possible at the moment
-	 * to determine task validity (typically, this happens if we don;t have a Gradle project model
-	 * ready yet. Callers should be ready to deal with that situation.
-	 */
-	private Set<String> getValidTasks() {
-		try {
-			GradleProject gp = getTreeInput();
-			if (gp!=null) {
-				return gp.getAllTasks();
-			}
-		} catch (FastOperationFailedException e) {
-			//Ignore: may happen if gradle model not ready
-		} catch (CoreException e) {
-			GradleCore.log(e);
-		}
-		return null; // Couldn't determine what is valid
+		GradleLaunchConfigurationDelegate.setTasks(conf, tasksViewer.getDocument().get());
 	}
 
 	private boolean haveGradleModel() {
@@ -476,6 +308,12 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 
 	public String getName() {
 		return "Gradle Tasks";
+	}
+
+	@Override
+	public void dispose() {
+		tasksViewer.dispose();
+		super.dispose();
 	}
 
 }

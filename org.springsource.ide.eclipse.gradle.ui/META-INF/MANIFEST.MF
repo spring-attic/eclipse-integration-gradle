@@ -18,10 +18,13 @@ Require-Bundle: org.eclipse.ui,
  org.codehaus.groovy.eclipse.core;resolution:=optional,
  org.eclipse.jdt.launching,
  org.eclipse.jdt.debug.ui,
- org.springsource.ide.eclipse.gradle.toolingapi
+ org.springsource.ide.eclipse.gradle.toolingapi,
+ org.eclipse.ui.editors,
+ org.eclipse.jface.text
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Export-Package: org.springsource.ide.eclipse.gradle.ui.actions,
- org.springsource.ide.eclipse.gradle.ui.launch,
- org.springsource.ide.eclipse.gradle.ui.util
+Export-Package: org.springsource.ide.eclipse.gradle.ui,
+ org.springsource.ide.eclipse.gradle.ui.actions,
+ org.springsource.ide.eclipse.gradle.ui.util,
+ org.springsource.ide.eclipse.gradle.ui.wizards

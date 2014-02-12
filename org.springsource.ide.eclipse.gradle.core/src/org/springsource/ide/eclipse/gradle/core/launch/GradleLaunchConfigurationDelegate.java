@@ -13,6 +13,7 @@ package org.springsource.ide.eclipse.gradle.core.launch;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -45,7 +46,9 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	private static final boolean DEBUG = true;
 	
 	private static final String TASK_LIST = ID + ".TASKLIST";
+	private static final String TASK_TEXT = ID + ".TASKTEXT";
 	private static final List<String> DEFAULT_TASK_LIST = Arrays.asList(new String[0]);
+	private static final String DEFAULT_TASK_TEXT = "";
 	private static final boolean DEFAULT_ENABLE_WORKSPACE_REFRESH = true;
 	
 	private static final String JVM_ARGS = ID+".JVM_ARGS";
@@ -252,17 +255,55 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	 * (by the user, doesn't include taks executed automatically because of dependencies).
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<String> getTasks(ILaunchConfiguration conf) {
+	public static String getTasks(ILaunchConfiguration conf) {
+		String tasksText = DEFAULT_TASK_TEXT;
 		try {
-			return conf.getAttribute(TASK_LIST, DEFAULT_TASK_LIST);
+			tasksText = conf.getAttribute(TASK_TEXT, DEFAULT_TASK_TEXT);
 		} catch (CoreException e) {
 			GradleCore.log(e);
-			return DEFAULT_TASK_LIST;
 		}
+		if (tasksText.isEmpty()) {
+			try {
+				StringBuilder sb = new StringBuilder();
+				for (String task : (List<String>) conf.getAttribute(TASK_LIST, DEFAULT_TASK_LIST)) {
+					sb.append(task);
+					sb.append('\n');
+				}
+				tasksText = sb.toString();
+			} catch (CoreException e) {
+				GradleCore.log(e);
+			}
+		}
+		return tasksText;
 	}
 
 	public static void setTasks(ILaunchConfigurationWorkingCopy conf, List<String> checked) {
 		conf.setAttribute(TASK_LIST, checked);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static List<String> getTasksList(ILaunchConfiguration conf) {
+		String tasksText = DEFAULT_TASK_TEXT;
+		try {
+			tasksText = conf.getAttribute(TASK_TEXT, DEFAULT_TASK_TEXT);
+		} catch (CoreException e) {
+			GradleCore.log(e);
+		}
+		if (tasksText.isEmpty()) {
+			try {
+				return conf.getAttribute(TASK_LIST, DEFAULT_TASK_LIST);
+			} catch (CoreException e) {
+				GradleCore.log(e);
+				return DEFAULT_TASK_LIST;
+			}
+		} else {
+			return Arrays.asList(Pattern.compile("\\s+").split(tasksText)); //$NON-NLS-1$
+		}
+	}
+	
+	public static void setTasks(ILaunchConfigurationWorkingCopy conf, String tasksText) {
+		conf.removeAttribute(TASK_LIST);
+		conf.setAttribute(TASK_TEXT, tasksText);
 	}
 
 	/**
@@ -350,7 +391,7 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 				for (ILaunchConfiguration conf : configs) {
 					GradleProject confProject = GradleLaunchConfigurationDelegate.getProject(conf);
 					if (confProject==project) {
-						List<String> tasks = GradleLaunchConfigurationDelegate.getTasks(conf);
+						List<String> tasks = GradleLaunchConfigurationDelegate.getTasksList(conf);
 						if (tasks.size()==1 && tasks.get(0).equals(task)) {
 							return conf;
 						}

@@ -1,40 +1,26 @@
-/*******************************************************************************
- * Copyright (c) 2012 GoPivotal, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- * GoPivotal, Inc. - initial API and implementation
- *******************************************************************************/
-package org.springsource.ide.eclipse.gradle.ui.launch;
+package org.springsource.ide.eclipse.gradle.ui.taskview;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.gradle.tooling.model.Task;
 import org.gradle.tooling.model.eclipse.EclipseProject;
+import org.springsource.ide.eclipse.gradle.ui.GradleUI;
 import org.springsource.ide.eclipse.gradle.ui.util.GradleLabelProvider;
 import org.springsource.ide.eclipse.gradle.ui.wizards.GradleProjectTreeLabelProviderWithDescription;
 
+public class TaskLabelProvider extends GradleLabelProvider
+		implements
+			ITableLabelProvider,
+			ILabelProvider {
 
-/**
- * Label provider for tree containing Gradle projects and tasks.
- * 
- * @author Kris De Volder
- */
-public class GradleTaskTreeLabelProvider extends GradleLabelProvider implements ITableLabelProvider, ILabelProvider {
-	
 	GradleProjectTreeLabelProviderWithDescription projectLabelProvider = new GradleProjectTreeLabelProviderWithDescription(false);
-	
-	Image taskImg  =  getImage("icons/target.gif");
 	
 	public Image getColumnImage(Object element, int columnIndex) {
 		if (element instanceof EclipseProject) {
 			return projectLabelProvider.getColumnImage(element, columnIndex);
 		} else if (element instanceof Task) {
-			return columnIndex==0?taskImg:null;
+			return columnIndex==0? GradleUI.getDefault().getImageRegistry().get(GradleUI.IMAGE_TARGET) : null;
 		}
 		return null;
 	}
@@ -74,5 +60,6 @@ public class GradleTaskTreeLabelProvider extends GradleLabelProvider implements 
 	public String getText(Object element) {
 		return getColumnText(element, 0);
 	}
+
 
 }
