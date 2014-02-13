@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.ui.GradleUI;
 import org.springsource.ide.eclipse.gradle.ui.util.GradleLabelProvider;
 
 
@@ -24,13 +25,6 @@ import org.springsource.ide.eclipse.gradle.ui.util.GradleLabelProvider;
  */
 public class GradleProjectTreeLabelProvider extends GradleLabelProvider implements ILabelProvider {
 
-	// Images for tree nodes
-	private Image file;
-
-	private Image dir;
-	
-	private Image disabled;
-
 	private final boolean USE_TRANSPARANT_ICONS;
 
 	/**
@@ -39,16 +33,6 @@ public class GradleProjectTreeLabelProvider extends GradleLabelProvider implemen
 	 */
 	public GradleProjectTreeLabelProvider(boolean useTransparantIcons) {
 		this.USE_TRANSPARANT_ICONS = useTransparantIcons;
-		// Create the images
-		try {
-			file = getImage("icons/gradle-proj-folder.png");
-			dir =  getImage("icons/gradle-multiproj-folder.png");
-			if (useTransparantIcons) {
-				disabled = getImage("icons/gradle-multiproj-folder-disabled.png");
-			}
-		} catch (Exception e) {
-			// Swallow it; we'll do without images
-		}
 	}
 	
 	/**
@@ -61,19 +45,19 @@ public class GradleProjectTreeLabelProvider extends GradleLabelProvider implemen
 	public Image getImage(Object arg) {
 		HierarchicalEclipseProject project = (HierarchicalEclipseProject) arg;
 		if (project.getChildren().isEmpty()) {
-			return file;
+			return GradleUI.getDefault().getImageRegistry().get(GradleUI.IMAGE_PROJECT_FOLDER);
 		} else {
 			if (USE_TRANSPARANT_ICONS) {
 				GradleProject gp = GradleCore.create(project);
 				if (gp.getProject()==null) {
 					//non-existent = not yet imported project
-					return dir;
+					return GradleUI.getDefault().getImageRegistry().get(GradleUI.IMAGE_MULTIPROJECT_FOLDER);
 				} else {
 					//existing project = already imported
-					return disabled;
+					return GradleUI.getDefault().getImageRegistry().get(GradleUI.IMAGE_MULTIPROJECT_FOLDER_DISABLED);
 				}
 			} else {
-				return dir;
+				return GradleUI.getDefault().getImageRegistry().get(GradleUI.IMAGE_MULTIPROJECT_FOLDER);
 			}
 		}
 	}
@@ -88,19 +72,6 @@ public class GradleProjectTreeLabelProvider extends GradleLabelProvider implemen
 	public String getText(Object arg) {
 		HierarchicalEclipseProject project = (HierarchicalEclipseProject) arg;
 		return project.getName();
-	}
-
-	/**
-	 * Called when this LabelProvider is being disposed
-	 */
-	public void dispose() {
-		// Dispose the images
-		if (dir != null)
-			dir.dispose();
-		if (file != null)
-			file.dispose();
-		if (disabled != null)
-			disabled.dispose();
 	}
 
 	/**

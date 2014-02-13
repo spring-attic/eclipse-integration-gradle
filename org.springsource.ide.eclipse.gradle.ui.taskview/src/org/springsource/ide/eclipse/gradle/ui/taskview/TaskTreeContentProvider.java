@@ -1,14 +1,6 @@
-/*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- * Pivotal Software, Inc. - initial API and implementation
- *******************************************************************************/
-package org.springsource.ide.eclipse.gradle.ui.launch;
+package org.springsource.ide.eclipse.gradle.ui.taskview;
+
+import java.util.Collection;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -18,39 +10,26 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.gradle.tooling.model.DomainObjectSet;
-import org.gradle.tooling.model.Task;
+import org.gradle.tooling.model.GradleTask;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
-import org.springsource.ide.eclipse.gradle.ui.wizards.GradleProjectTreeContentProvider;
 
-
-/**
- * @author Kris De Volder
- */
-public class GradleTaskTreeContentProvider implements ITreeContentProvider {
-	
+public class TaskTreeContentProvider implements ITreeContentProvider {
 	private static final Object[] NO_ELEMENTS = new Object[0];
 	
-	private GradleProjectTreeContentProvider projectProv = null; 
-	
 	private TreeViewer viewer;
+	private GradleProject currentProject;
+	private boolean isLocalTasks;
 	
-	public GradleTaskTreeContentProvider(TreeViewer viewer, boolean showProjects) {
-		if (showProjects) {
-			this.projectProv = new GradleProjectTreeContentProvider();
-		}
+	public TaskTreeContentProvider(TreeViewer viewer) {
 		this.viewer = viewer;
 	}
 	
 	public void dispose() {
 		try {
-			if (projectProv!=null) {
-				projectProv.dispose();
-			}
 			if (currentProject!=null) {
 				if (modelListener!=null) {
 					currentProject.removeModelListener(modelListener);
@@ -80,15 +59,10 @@ public class GradleTaskTreeContentProvider implements ITreeContentProvider {
 		}
 	};
 
-	private GradleProject currentProject;
-
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		Assert.isTrue(this.viewer == viewer);
 		Assert.isTrue(newInput==null || newInput instanceof GradleProject);
 		setProject((GradleProject)newInput);
-		if (projectProv!=null) {
-			projectProv.inputChanged(viewer, oldInput, newInput);
-		}
 	}
 
 	private void setProject(GradleProject project) {
@@ -110,8 +84,7 @@ public class GradleTaskTreeContentProvider implements ITreeContentProvider {
 			return NO_ELEMENTS;
 		} else {
 			try {
-				EclipseProject model = root.requestGradleModel();
-				return getChildren(model);
+				return getGradleTasks(root.requestGradleModel());
 			} catch (FastOperationFailedException e) {
 				return new Object[] {"model not yet available"};
 			} catch (CoreException e) {
@@ -120,39 +93,28 @@ public class GradleTaskTreeContentProvider implements ITreeContentProvider {
 			}
 		}
 	}
+	
+	private GradleTask[] getGradleTasks(EclipseProject project) {
+		Collection<? extends GradleTask> tasksCollection = isLocalTasks
+				? GradleProject.getTasks(project)
+				: GradleProject.getAggregateTasks(project).values();
+		return tasksCollection.toArray(new GradleTask[tasksCollection.size()]);
+	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof EclipseProject) {
-			EclipseProject parentProj = (EclipseProject) parentElement;
-			DomainObjectSet<? extends Task> tasks = GradleProject.getTasks(parentProj);
-			if (projectProv!=null) {
-				Object[] projects = projectProv.getChildren(parentElement);
-				Object[] children = new Object[projects.length+tasks.size()];
-				int i = 0;
-				for (Task task : tasks) {
-					children[i++] = task;
-				}
-				System.arraycopy(projects, 0, children, i, projects.length);
-				return children;
-			} else {
-				return tasks.toArray();
-			}
-		} 
 		return NO_ELEMENTS;
 	}
 
 	public Object getParent(Object element) {
-		if (element instanceof EclipseProject && projectProv!=null) {
-			return projectProv.getParent(element);
-		} else if (element instanceof Task) {
-			return ((Task)element).getProject();
-		}
 		return null;
 	}
 
 	public boolean hasChildren(Object element) {
-		Object[] c = getChildren(element);
-		return c!=null && c.length>0;
+		return false;
+	}
+
+	public void setLocalTasks(boolean isLocalTasks) {
+		this.isLocalTasks = isLocalTasks;
 	}
 
 }

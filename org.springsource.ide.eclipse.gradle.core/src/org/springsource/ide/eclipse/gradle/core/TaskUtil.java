@@ -58,7 +58,7 @@ public class TaskUtil {
 			Job.getJobManager().beginRule(JobUtil.LIGHT_RULE, new SubProgressMonitor(mon, 5));
 			//cumulative work: 5%
 			try {
-				project = project.getRootProject(); //Workaround for bug http://issues.gradle.org/browse/GRADLE-1765
+//				project = project.getRootProject(); //Workaround for bug http://issues.gradle.org/browse/GRADLE-1765
 				// is ok to go via root, since task path strings are 'absolute' anyway.
 				ProjectConnection conn = GradleModelProvider.getGradleConnector(project, new SubProgressMonitor(mon, 5));
 				//cumulative work: 10%
@@ -107,8 +107,8 @@ public class TaskUtil {
 				out.println("[sts] -----------------------------------------------------");
 				//cumulative work: 90%
 			}
-		} catch (FastOperationFailedException e) {
-			throw ExceptionUtil.coreException(e);
+//		} catch (FastOperationFailedException e) {
+//			throw ExceptionUtil.coreException(e);
 		} finally {
 			mon.done();
 		}

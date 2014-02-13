@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
-import static org.springsource.ide.eclipse.gradle.core.util.JobUtil.*;
+import static org.springsource.ide.eclipse.gradle.core.util.JobUtil.NO_RULE;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -22,12 +22,12 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -37,29 +37,21 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.part.ViewPart;
 import org.gradle.tooling.model.Task;
-import org.gradle.tooling.model.eclipse.EclipseTask;
-import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
-import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
-import org.springsource.ide.eclipse.gradle.ui.launch.GradleTaskTreeContentProvider;
-import org.springsource.ide.eclipse.gradle.ui.launch.GradleTaskTreeLabelProvider;
 import org.springsource.ide.eclipse.gradle.ui.util.DialogSettingsUtil;
 import org.springsource.ide.eclipse.gradle.ui.util.SelectionUtils;
 
-
-import org.eclipse.debug.core.ILaunchConfiguration;
-
 /**
- * @author Kris De Volder
- * @since 2.9
+ * @author Alex Boyko
+ * @since 3.5
  */
 public class GradleTasksView extends ViewPart {
 
@@ -83,16 +75,16 @@ public class GradleTasksView extends ViewPart {
 
 	private static final String IS_LINKING_ENABLED = "isLinkingEnabled";
 	private static final boolean DEFAULT_IS_LINKING_ENABLED = false;
+	private static final String IS_DISPLAY_PROJECT_LOCAL_TASKS = "isDisplayProjectLocalTasks";
+	private static final boolean DEFAULT_IS_DISPLAY_PROJECT_LOCAL_TASKS = false;
 	private static final String SELECTED_PROJECT = "selectedProject";
 
 	private TreeViewer viewer;
+	private boolean displayProjectLocalTasks;
 	
-//	private DrillDownAdapter drillDownAdapter;
 	private Action linkWithSelectionAction;
 	private Action refreshAction;
-//
-//	private Action action1;
-//	private Action action2;
+	private Action toggleProjectTasks;
 	private Action doubleClickAction;
 
 	private SelectionListener selectionListener;
@@ -105,6 +97,9 @@ public class GradleTasksView extends ViewPart {
 	public GradleTasksView() {
 		dialogSettings = GradleTasksViewPlugin.getDefault().getDialogSettingsSection(this.getClass().getName());
 		isLinkingEnabled = DialogSettingsUtil.getBoolean(dialogSettings, IS_LINKING_ENABLED, DEFAULT_IS_LINKING_ENABLED);
+		displayProjectLocalTasks = DialogSettingsUtil.getBoolean(
+				dialogSettings, IS_DISPLAY_PROJECT_LOCAL_TASKS,
+				DEFAULT_IS_DISPLAY_PROJECT_LOCAL_TASKS);
 	}
 
 	public void projectSelected(GradleProject p) {
@@ -127,19 +122,14 @@ public class GradleTasksView extends ViewPart {
 		
 		PatternFilter filter = new PatternFilter();
 		FilteredTree filteredTree = new FilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
-//		{
-//			@Override
-//			protected TreeViewer doCreateTreeViewer(Composite parent, int style) {
-//				return new ContainerCheckedTreeViewer(parent, style);
-//			}
-//		};
-		
 		
 		viewer = filteredTree.getViewer();
-//		drillDownAdapter = new DrillDownAdapter(viewer);
-		viewer.setContentProvider(new GradleTaskTreeContentProvider(viewer, false));
-		viewer.setLabelProvider(new GradleTaskTreeLabelProvider());
-//		viewer.setSorter(new ViewerSorter());
+		TaskTreeContentProvider tasksProvider = new TaskTreeContentProvider(viewer);
+		tasksProvider.setLocalTasks(displayProjectLocalTasks);
+		viewer.setContentProvider(tasksProvider);
+		
+		viewer.setLabelProvider(new TaskLabelProvider());
+		viewer.setSorter(new ViewerSorter());
 
 		// Create the help context id for the viewer's control
 //		PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.springsource.ide.eclipse.gradle.ui.taskview.viewer");
@@ -184,51 +174,22 @@ public class GradleTasksView extends ViewPart {
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
-//		manager.add(action1);
-//		manager.add(new Separator());
-//		manager.add(action2);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
-//		manager.add(action1);
-//		manager.add(action2);
-//		manager.add(new Separator());
-////		drillDownAdapter.addNavigationActions(manager);
-//		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(linkWithSelectionAction);
 		manager.add(refreshAction);
-//		manager.add(action1);
-//		manager.add(action2);
-//		manager.add(new Separator());
-//		drillDownAdapter.addNavigationActions(manager);
+		manager.add(toggleProjectTasks);
 	}
 
 	private void makeActions() {
 		linkWithSelectionAction = new ToggleLinkingAction(this);
 		refreshAction = new RefreshAction(this);
-//		action1 = new Action() {
-//			public void run() {
-//				showMessage("Action 1 executed");
-//			}
-//		};
-//		action1.setText("Action 1");
-//		action1.setToolTipText("Action 1 tooltip");
-//		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-//			getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-//		
-//		action2 = new Action() {
-//			public void run() {
-//				showMessage("Action 2 executed");
-//			}
-//		};
-//		action2.setText("Action 2");
-//		action2.setToolTipText("Action 2 tooltip");
-//		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-//				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		toggleProjectTasks = new ToggleProjectTasks(this, displayProjectLocalTasks);
 		doubleClickAction = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
@@ -237,8 +198,17 @@ public class GradleTasksView extends ViewPart {
 					Task task = (Task) obj;
 					GradleProject project = projectSelector.getProject();
 					if (project!=null) {
-						final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, task.getPath());
-						JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName()+ " "+task.getPath()) {
+						String taskStr = displayProjectLocalTasks ? task.getPath() : task.getName();
+//						if (displayProjectLocalTasks) {
+//							try {
+//								String projectPath = project.getGradleModel().getGradleProject().getPath();
+//								taskStr = taskStr.substring(projectPath.length());
+//							} catch (Exception e) {
+//								// ignore
+//							}
+//						}
+						final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, taskStr);
+						JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName() + " " + taskStr) {
 							@Override
 							public void doit(IProgressMonitor mon) throws Exception {
 								conf.launch("run", mon, false, true);
@@ -257,13 +227,7 @@ public class GradleTasksView extends ViewPart {
 			}
 		});
 	}
-	private void showMessage(String message) {
-		MessageDialog.openInformation(
-			viewer.getControl().getShell(),
-			"Gradle Tasks View",
-			message);
-	}
-
+	
 	/**
 	 * Passing the focus request to the viewer's control.
 	 */
@@ -284,6 +248,7 @@ public class GradleTasksView extends ViewPart {
 
 	private void saveDialogSettings() {
 		dialogSettings.put(IS_LINKING_ENABLED, isLinkingEnabled());
+		dialogSettings.put(IS_DISPLAY_PROJECT_LOCAL_TASKS, displayProjectLocalTasks);
 		DialogSettingsUtil.put(dialogSettings, SELECTED_PROJECT, projectSelector.getProject());
 	}
 	
@@ -309,4 +274,13 @@ public class GradleTasksView extends ViewPart {
 			viewer.refresh();
 		}
 	}
+
+	void setDisplayProjectLocalTasks(boolean displayProjectLocalTasks) {
+		if (this.displayProjectLocalTasks != displayProjectLocalTasks) {
+			this.displayProjectLocalTasks = displayProjectLocalTasks;
+			((TaskTreeContentProvider) viewer.getContentProvider()).setLocalTasks(displayProjectLocalTasks);
+			viewer.refresh();
+		}		
+	}
+	
 }

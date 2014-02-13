@@ -912,6 +912,23 @@ public class GradleProject {
 		return model.getGradleProject().getTasks();
 //		return model.getTasks();
 	}
+	
+	public static Map<String, GradleTask> getAggregateTasks(EclipseProject model) {
+		Map<String, GradleTask> tasksMap = new HashMap<String, GradleTask>();
+		collectAggregateTasks(model, tasksMap);
+		return tasksMap;
+	}
+	
+	private static void collectAggregateTasks(EclipseProject model, Map<String, GradleTask> tasksMap) {
+		DomainObjectSet<? extends EclipseProject> projects = model.getChildren();
+		for (EclipseProject p : projects) {
+			collectAggregateTasks(p, tasksMap);
+		}
+		DomainObjectSet<? extends GradleTask> tasks = getTasks(model);
+		for (GradleTask t : tasks) {
+			tasksMap.put(t.getName(), t);
+		}	
+	}
 
 
 	/**
