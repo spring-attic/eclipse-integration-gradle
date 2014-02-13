@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Pivotal Software, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.cli.editor;
 
 import java.util.concurrent.Executors;
@@ -17,6 +27,11 @@ import org.eclipse.jface.text.source.AnnotationModel;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
 
+/**
+ * 
+ * @author Alex Boyko
+ *
+ */
 public class TasksAnnotationModel extends AnnotationModel {
 	
 	public static final String ERROR_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.error"; //$NON-NLS-1$

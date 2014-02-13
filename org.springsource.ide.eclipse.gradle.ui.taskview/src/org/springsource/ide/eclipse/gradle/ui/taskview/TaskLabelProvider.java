@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Pivotal Software, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -9,6 +19,13 @@ import org.springsource.ide.eclipse.gradle.ui.GradleUI;
 import org.springsource.ide.eclipse.gradle.ui.util.GradleLabelProvider;
 import org.springsource.ide.eclipse.gradle.ui.wizards.GradleProjectTreeLabelProviderWithDescription;
 
+/**
+ * Label provider for Gradle Tasks
+ * 
+ * @author Kris De Volder
+ * @author Alex Boyko
+ * 
+ */
 public class TaskLabelProvider extends GradleLabelProvider
 		implements
 			ITableLabelProvider,

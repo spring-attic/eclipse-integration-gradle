@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Pivotal Software, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.cli.editor;
 
 import java.util.HashMap;
@@ -27,6 +37,11 @@ import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
 
+/**
+ * 
+ * @author Alex Boyko
+ *
+ */
 public class TasksViewer {
 	
 	private ISharedTextColors colorsCache = new ISharedTextColors() {
