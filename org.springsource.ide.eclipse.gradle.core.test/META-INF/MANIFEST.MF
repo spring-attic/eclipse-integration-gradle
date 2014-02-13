@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: org.springsource.ide.eclipse.gradle.core.test;singleton:=true
 Bundle-Version: 3.5.0.qualifier
-Bundle-Vendor: GoPivotal, Inc.
+Bundle-Vendor: Pivotal Software, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit,
  org.eclipse.ui.ide.application,

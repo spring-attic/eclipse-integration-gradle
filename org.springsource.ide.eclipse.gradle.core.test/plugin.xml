@@ -14,12 +14,10 @@
             name="Tree Conf 1">
       </configurator>
       <configurator
+            after="org.springsource.ide.eclipse.gradle.core.test.tree_conf1"
             class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$TreeConf2"
             id="org.springsource.ide.eclipse.gradle.core.test.tree_conf2"
             name="Tree Conf 2">
-         <secondaryTo
-               id="org.springsource.ide.eclipse.gradle.core.test.tree_conf1">
-         </secondaryTo>
       </configurator>
       <configurator
             class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfA"
@@ -27,36 +25,78 @@
             name="DAG Conf A">
       </configurator>
       <configurator
+            before="org.springsource.ide.eclipse.gradle.core.test.dag_conf_d, org.springsource.ide.eclipse.gradle.core.test.dag_conf_a"
             class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfB"
             id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_b"
             name="DAG Conf B">
       </configurator>
       <configurator
+            after="org.springsource.ide.eclipse.gradle.core.test.dag_conf_b"
+            before="org.springsource.ide.eclipse.gradle.core.test.dag_conf_d, "
             class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfC"
             id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_c"
             name="DAG Conf C">
-         <secondaryTo
-               id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_a">
-         </secondaryTo>
-         <secondaryTo
-               id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_b">
-         </secondaryTo>
       </configurator>
       <configurator
+            after="org.springsource.ide.eclipse.gradle.core.test.dag_conf_b, org.springsource.ide.eclipse.gradle.core.test.dag_conf_a, org.springsource.ide.eclipse.gradle.core.test.dag_conf_c"
+            before="  ,, ,vdf, fvdfv, fvdfv"
             class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfD"
             id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_d"
             name="DAG Conf D">
-         <secondaryTo
-               id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_c">
-         </secondaryTo>
       </configurator>
       <configurator
+            after="org.springsource.ide.eclipse.gradle.core.test.dag_conf_a, "
+            before="org.springsource.ide.eclipse.gradle.core.test.dag_conf_d"
             class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfE"
             id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_e"
             name="DAG Conf E">
-         <secondaryTo
-               id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_c">
-         </secondaryTo>
+      </configurator>
+      <configurator
+            after="org.springsource.ide.eclipse.gradle.core.test.dag_after_c"
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagAfterA"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_after_a"
+            name="DAG After A">
+      </configurator>
+      <configurator
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagAfterB"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_after_b"
+            name="DAG After B">
+      </configurator>
+      <configurator
+            after="org.springsource.ide.eclipse.gradle.core.test.dag_after_b, org.springsource.ide.eclipse.gradle.core.test.dag_after_d"
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagAfterC"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_after_c"
+            name="DAG After C">
+      </configurator>
+      <configurator
+            after="org.springsource.ide.eclipse.gradle.core.test.dag_after_b"
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagAfterD"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_after_d"
+            name="DAG After D">
+      </configurator>
+      <configurator
+            before="org.springsource.ide.eclipse.gradle.core.test.dag_before_d"
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagBeforeA"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_before_a"
+            name="DAG Before A">
+      </configurator>
+      <configurator
+            before="org.springsource.ide.eclipse.gradle.core.test.dag_before_a"
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagBeforeB"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_before_b"
+            name="DAG Before B">
+      </configurator>
+      <configurator
+            before="org.springsource.ide.eclipse.gradle.core.test.dag_before_a, org.springsource.ide.eclipse.gradle.core.test.dag_before_b"
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagBeforeC"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_before_c"
+            name="DAG Before C">
+      </configurator>
+      <configurator
+            before="nonExistentconfigurator"
+            class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagBeforeD"
+            id="org.springsource.ide.eclipse.gradle.core.test.dag_before_d"
+            name="DAG Before D">
       </configurator>
    </extension>
 

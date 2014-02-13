@@ -6,7 +6,7 @@
          <meta.schema plugin="org.springsource.ide.eclipse.gradle.core" id="projectConfigurators" name="Project Configurators"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         Allows clietns to contribute project configurators. These objects provide clients with ability to configure a project based on the information inferred from the Gradle model of the project. A project configurator may add a nature or dependency if it is missing. Gradle project import and refresh are typical scenarios when project configurators are invoked.
       </documentation>
    </annotation>
 
@@ -15,6 +15,9 @@
          <appinfo>
             <meta.element />
          </appinfo>
+         <documentation>
+            One or more project configurators contributions can be defined
+         </documentation>
       </annotation>
       <complexType>
          <sequence>
@@ -48,21 +51,25 @@
    </element>
 
    <element name="configurator">
+      <annotation>
+         <documentation>
+            Project configurator element required to provide project configurator class and a unique identifier
+         </documentation>
+      </annotation>
       <complexType>
          <sequence>
-            <element ref="secondaryTo" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Project configurator unique id
                </documentation>
             </annotation>
          </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Project configurator class
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.springsource.ide.eclipse.gradle.core.IProjectConfigurator"/>
@@ -72,19 +79,21 @@
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  
+                  Project configurator name
                </documentation>
             </annotation>
          </attribute>
-      </complexType>
-   </element>
-
-   <element name="secondaryTo">
-      <complexType>
-         <attribute name="id" type="string" use="required">
+         <attribute name="after" type="string">
             <annotation>
                <documentation>
-                  
+                  Separated by commas unique identifires of projects configurators after whcih this project configurator will be configuring a project.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="before" type="string">
+            <annotation>
+               <documentation>
+                  Separated by commas unique identifires of projects configurators before whcih this project configurator will be configuring a project.
                </documentation>
             </annotation>
          </attribute>
@@ -96,7 +105,7 @@
          <meta.section type="since"/>
       </appinfo>
       <documentation>
-         [Enter the first release in which this extension point appears.]
+         3.5.0
       </documentation>
    </annotation>
 
@@ -105,7 +114,18 @@
          <meta.section type="examples"/>
       </appinfo>
       <documentation>
-         [Enter extension point usage example here.]
+         The following is an example of a Project Configuration extension definition from (from Spring Tool Suite code base):
+&lt;p&gt;
+&lt;pre&gt;
+&lt;extension point=&quot;org.springsource.ide.eclipse.gradle.core.projectConfigurators&quot;&gt;
+ &lt;configurator
+  class=&quot;org.springframework.ide.eclipse.wizard.gettingstarted.importing.SpringProjectConfigurator&quot;
+  id=&quot;org.springframework.ide.eclipse.springproject&quot;
+  name=&quot;Spring&quot;&gt;
+ &lt;/configurator&gt;
+&lt;/extension&gt;
+&lt;/pre&gt;
+&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -114,7 +134,8 @@
          <meta.section type="apiinfo"/>
       </appinfo>
       <documentation>
-         [Enter API information here.]
+         &lt;p&gt;Unique identifiers must be provided for each project configurator contribution.&lt;/p&gt;
+&lt;p&gt;Project contributor class must implement &lt;b&gt;&lt;i&gt;org.springsource.ide.eclipse.gradle.core.api.IProjectConfigurator&lt;/i&gt;&lt;/b&gt; interface.&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -123,9 +144,17 @@
          <meta.section type="implementation"/>
       </appinfo>
       <documentation>
-         [Enter information about supplied implementation of this extension point.]
+         &lt;p&gt;The com.springframework.ide.eclipse.wizard plug-in provides a complete implementation of the &lt;samp&gt;project configurator&lt;/samp&gt; contribution in &lt;i&gt;org.springframework.ide.eclipse.wizard.gettingstarted.importings&lt;/i&gt; package.&lt;/p&gt;
       </documentation>
    </annotation>
 
+   <annotation>
+      <appinfo>
+         <meta.section type="copyright"/>
+      </appinfo>
+      <documentation>
+         Copyright (c) 2014 Pivotal Software Inc. All rights reserved.
+      </documentation>
+   </annotation>
 
 </schema>

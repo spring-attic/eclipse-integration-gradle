@@ -14,8 +14,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -39,17 +42,35 @@ public final class ProjectConfigurationManager {
 	private static final String ATTR__ID = "id"; //$NON-NLS-1$
 	private static final String ATTR__CLASS = "class"; //$NON-NLS-1$
 //	private static final String ATTR__NAME = "name"; //$NON-NLS-1$
-	private static final String ELMT__SECONDARY_TO = "secondaryTo"; //$NON-NLS-1$
+	private static final String ATTR__AFTER = "after"; //$NON-NLS-1$
+	private static final String ATTR__BEFORE = "before"; //$NON-NLS-1$
+	
+	private static final String IDS_SEPARATOR = ","; //$NON-NLS-1$
 	
 	private static ProjectConfigurationManager INSTANCE = null;
 	
-	private List<ProjectConfiguratorDescriptor> descriptors = Collections.emptyList();
+	private IProjectConfigurator[] configurators = new IProjectConfigurator[0];
 	
 	public static ProjectConfigurationManager getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new ProjectConfigurationManager();
 		}
 		return INSTANCE;
+	}
+	
+	private static List<String> extractIds(String idStr) {
+		if (idStr == null) {
+			return Collections.emptyList();
+		}
+		List<String> list = new ArrayList<String>();
+		StringTokenizer tokenizer = new StringTokenizer(idStr, IDS_SEPARATOR);
+		while (tokenizer.hasMoreElements()) {
+			String id = tokenizer.nextToken().trim();
+			if (!id.isEmpty()) {
+				list.add(id);
+			}
+		}
+		return list;
 	}
 	
 	private ProjectConfigurationManager() {
@@ -73,13 +94,57 @@ public final class ProjectConfigurationManager {
 			}
 		}
 		
-		this.descriptors = new DescriptorsTopoSort(descriptorsMap).getSorted();
+		// Topologically sort project configurator descriptors.
+		DescriptorsTopoSort topoSort = new DescriptorsTopoSort(createPredecessorsMap(descriptorsMap));
+		List<ProjectConfiguratorDescriptor> descriptors = topoSort.getSorted();
+		if (topoSort.hasCycle()) {
+			GradleCore
+					.log("Cycle detected in the graph constructed from contributed Gradle Project Configurators. Gradle projects may not be configured appropriately.");
+		}
+		
+		this.configurators = new IProjectConfigurator[descriptors.size()];
+		for (int i = 0; i < descriptors.size(); i++) {
+			this.configurators[i] = descriptors.get(i).configurator;
+		}
+	}
+	
+	private static Map<ProjectConfiguratorDescriptor, Set<ProjectConfiguratorDescriptor>> createPredecessorsMap(Map<String, ProjectConfiguratorDescriptor> descriptors) {
+		Map<ProjectConfiguratorDescriptor, Set<ProjectConfiguratorDescriptor>> predecessorsMap = new HashMap<ProjectConfiguratorDescriptor, Set<ProjectConfiguratorDescriptor>>();
+		for (ProjectConfiguratorDescriptor descriptor : descriptors.values()) {
+			
+			// Handle "after" ids
+			Set<ProjectConfiguratorDescriptor> predecessors = predecessorsMap.get(descriptor);
+			if (predecessors == null) {
+				predecessors = new HashSet<ProjectConfiguratorDescriptor>();
+				predecessorsMap.put(descriptor, predecessors);
+			}
+			for (String afterId : descriptor.after) {
+				ProjectConfiguratorDescriptor after = descriptors.get(afterId);
+				if (after != null) {
+					predecessors.add(after);
+				}
+			}
+			
+			// Handle "before" ids
+			for (String beforeId : descriptor.before) {
+				ProjectConfiguratorDescriptor before = descriptors.get(beforeId);
+				if (before != null) {
+					predecessors = predecessorsMap.get(before);
+					if (predecessors == null) {
+						predecessors = new HashSet<ProjectConfiguratorDescriptor>();
+						predecessorsMap.put(before, predecessors);
+					}
+					predecessors.add(descriptor);
+				}
+			}
+		}
+		return predecessorsMap;
 	}
 	
 	public void configure(IProjectConfigurationRequest request, IProgressMonitor monitor) {
-		for (ProjectConfiguratorDescriptor descriptor : descriptors) {
+		for (IProjectConfigurator configurator : this.configurators) {
 			try {
-				descriptor.configurator.configure(request, monitor);
+				configurator.configure(request, monitor);
 			} catch (Exception e) {
 				GradleCore.log(e);
 			}
@@ -90,43 +155,45 @@ public final class ProjectConfigurationManager {
 		
 		String id;
 //		String name;
-		String[] secondaryTo;
+		List<String> before;
+		List<String> after;
 		IProjectConfigurator configurator;
 		
 		ProjectConfiguratorDescriptor(IConfigurationElement element) throws CoreException {
 			super();
 			this.id = element.getAttribute(ATTR__ID);
 //			this.name = element.getAttribute(ATTR__NAME);
-			this.configurator = (IProjectConfigurator) element.createExecutableExtension(ATTR__CLASS);
-			IConfigurationElement[] secondaryElements = element.getChildren(ELMT__SECONDARY_TO);
-			this.secondaryTo = new String[secondaryElements.length];
-			for (int i = 0; i < secondaryElements.length; i++) {
-				this.secondaryTo[i] = secondaryElements[i].getAttribute(ATTR__ID);
+			this.configurator = (IProjectConfigurator) element.createExecutableExtension(ATTR__CLASS);			
+			this.before = extractIds(element.getAttribute(ATTR__BEFORE));
+			this.after = extractIds(element.getAttribute(ATTR__AFTER));
+		}
+
+		@Override
+		public int hashCode() {
+			return id.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof ProjectConfiguratorDescriptor) {
+				ProjectConfiguratorDescriptor other = (ProjectConfiguratorDescriptor) obj;
+				return id.equals(other.id);
 			}
-		}	
+			return false;
+		}
+		
+		
 	}
 	
 	private class DescriptorsTopoSort extends TopoSort<ProjectConfiguratorDescriptor> {
 		
 		public DescriptorsTopoSort(
-				final Map<String, ProjectConfiguratorDescriptor> descriptors) {
-			super(descriptors.values(), new PartialOrder<ProjectConfiguratorDescriptor>() {
+				final Map<ProjectConfiguratorDescriptor, Set<ProjectConfiguratorDescriptor>> predecessorsMap) {
+			super(predecessorsMap.keySet(), new PartialOrder<ProjectConfiguratorDescriptor>() {
 				@Override
 				public Collection<ProjectConfiguratorDescriptor> getPredecessors(
 						ProjectConfiguratorDescriptor descriptor) {
-					if (descriptor.secondaryTo.length == 0) {
-						return Collections.emptyList();
-					} else {
-						ArrayList<ProjectConfiguratorDescriptor> predecessors = new ArrayList<ProjectConfiguratorDescriptor>(
-								descriptor.secondaryTo.length);
-						for (String id : descriptor.secondaryTo) {
-							ProjectConfiguratorDescriptor predecessor = descriptors.get(id);
-							if (predecessor != null) {
-								predecessors.add(predecessor);
-							}
-						}
-						return predecessors;
-					}
+					return predecessorsMap.get(descriptor);
 				}
 			});
 		}
