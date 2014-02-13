@@ -128,7 +128,7 @@ public class GradleTasksIndex {
 			}
 			if (taskStr.startsWith(Project.PATH_SEPARATOR)) {
 				int index = taskStr.lastIndexOf(Project.PATH_SEPARATOR);
-				String projectPath = taskStr.substring(0, index == 0 ? index + 1 : index);
+				String projectPath = taskStr.substring(0, index == 0 ? 1 : index);
 				String taskName = taskStr.substring(index + 1);
 				GradleProject targetProject = this.project.getGradleProject().findByPath(projectPath);
 				if (targetProject != null) {
@@ -160,7 +160,7 @@ public class GradleTasksIndex {
 				collectAllTasksBfs(projects, results);
 			} else if (prefix.startsWith(Project.PATH_SEPARATOR)) {
 				int index = prefix.lastIndexOf(Project.PATH_SEPARATOR);
-				String projectPrefix = prefix.substring(0, index == 0 ? index + 1 : index);
+				String projectPrefix = prefix.substring(0, index == 0 ? 1 : index);
 				String suffix = prefix.substring(index + 1, prefix.length());
 				
 				GradleProject candidateProject = project.getGradleProject()
