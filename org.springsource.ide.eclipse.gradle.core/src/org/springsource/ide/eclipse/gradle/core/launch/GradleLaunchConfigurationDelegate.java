@@ -11,8 +11,10 @@
 package org.springsource.ide.eclipse.gradle.core.launch;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
@@ -297,7 +299,12 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 				return DEFAULT_TASK_LIST;
 			}
 		} else {
-			return Arrays.asList(Pattern.compile("\\s+").split(tasksText)); //$NON-NLS-1$
+			List<String> tasks = new ArrayList<String>();
+			Matcher matcher = Pattern.compile("\\S+").matcher(tasksText); //$NON-NLS-1$
+			while(matcher.find()) {
+				tasks.add(matcher.group());
+			}
+			return tasks;
 		}
 	}
 	
