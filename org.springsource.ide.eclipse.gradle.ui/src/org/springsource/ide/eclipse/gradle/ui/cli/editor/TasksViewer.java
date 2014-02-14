@@ -14,28 +14,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.IHandler;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISharedTextColors;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
-import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
+import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 
 /**
  * 
@@ -45,7 +52,7 @@ import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
 public class TasksViewer {
 	
 	private ISharedTextColors colorsCache = new ISharedTextColors() {
-
+		
 		private Map<RGB, Color> colors = new HashMap<RGB, Color>();
 		
 		@Override
@@ -70,14 +77,18 @@ public class TasksViewer {
 
 	};
 	
+	private IHandlerService service;
+	
+	private IHandlerActivation activation;
+	
 	private SourceViewerDecorationSupport decorationSupport = null;
 	
 	private SourceViewer viewer = null;
 	
-	private GradleTasksIndex tasksIndex;
+	private GradleProjectIndex tasksIndex;
 	
 	@SuppressWarnings("unchecked")
-	public TasksViewer(Composite parent, GradleTasksIndex tasksIndex) {
+	public TasksViewer(Composite parent, GradleProjectIndex tasksIndex) {
 		super();
 		this.tasksIndex = tasksIndex;
 		DefaultMarkerAnnotationAccess markerAccess = new DefaultMarkerAnnotationAccess();		
@@ -88,7 +99,11 @@ public class TasksViewer {
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER
 						| SWT.FULL_SELECTION);
 		
-		viewer.configure(new TasksViewerConfiguration(tasksIndex));
+		IPreferenceStore preferences = EditorsUI.getPreferenceStore();
+		
+		viewer.configure(new TasksViewerConfiguration(tasksIndex, preferences));
+		
+		viewer.setEditable(true);
 		
 		decorationSupport = new SourceViewerDecorationSupport(viewer, overviewRuler, new DefaultMarkerAnnotationAccess(), colorsCache);
 
@@ -96,7 +111,6 @@ public class TasksViewer {
 			decorationSupport.setAnnotationPreference(preference);
 		}
 		
-		IPreferenceStore preferences = EditorsUI.getPreferenceStore();
 		decorationSupport.install(preferences);
 		
 		Font font = null;
@@ -117,29 +131,23 @@ public class TasksViewer {
 			viewer.getTextWidget().setFont(font);
 		}
 		
-		viewer.appendVerifyKeyListener(new VerifyKeyListener() {
-			public void verifyKey(VerifyEvent event) {
-
-				// Check for Ctrl+Spacebar
-				if (event.stateMask == SWT.CTRL
-						&& (event.character == ' ' || event.keyCode == ' ')) {
-
-					// Check if source viewer is able to perform operation
-					if (viewer
-							.canDoOperation(SourceViewer.CONTENTASSIST_PROPOSALS))
-
-						// Perform operation
-						viewer
-								.doOperation(SourceViewer.CONTENTASSIST_PROPOSALS);
-
-					// Veto this key press to avoid further processing
-					event.doit = false;
-				}
-			}
-		});
+		activateHandler();
 	}
 	
-	public Control getControl() {
+    private void activateHandler(){
+    	IHandler handler = new AbstractHandler() {
+			public Object execute(ExecutionEvent event) throws org.eclipse.core.commands.ExecutionException {
+				viewer.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
+				return null;
+			}
+		};
+		IWorkbench workbench = PlatformUI.getWorkbench();
+		service = (IHandlerService)workbench.getAdapter(IHandlerService.class);
+		
+		activation = service.activateHandler(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, handler);
+    }
+    
+    public Control getControl() {
 		return viewer.getControl();
 	}
 	
@@ -152,7 +160,15 @@ public class TasksViewer {
 	}
 	
 	public void dispose() {
-		decorationSupport.dispose();
+    	if(activation != null) {
+    		service.deactivateHandler(activation);
+    	}
+		if (tasksIndex != null) {
+			tasksIndex.dispose();
+		}
+		if (decorationSupport != null) {
+			decorationSupport.dispose();
+		}
 	}
 
 }

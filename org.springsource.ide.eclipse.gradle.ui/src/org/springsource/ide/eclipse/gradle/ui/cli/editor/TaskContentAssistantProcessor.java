@@ -21,8 +21,11 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.viewers.StyledString;
+import org.gradle.api.Project;
+import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.GradleTask;
-import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
+import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
+import org.springsource.ide.eclipse.gradle.ui.GradleUI;
 
 /**
  * 
@@ -32,14 +35,14 @@ import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
 public class TaskContentAssistantProcessor implements IContentAssistProcessor {
 	
 	private final IContextInformation[] NO_CONTEXTS = { };
-    private final char[] PROPOSAL_ACTIVATION_CHARS = { ':' };
+    private final char[] PROPOSAL_ACTIVATION_CHARS = { Project.PATH_SEPARATOR.charAt(0) };
     private ICompletionProposal[] NO_COMPLETIONS = { };
 	private static final String AGGREGATE_LABEL  = "[Aggregate]";
 	private static final String LOCAL_LABEL = "[Local]";
     
-	private GradleTasksIndex index;
+	private GradleProjectIndex index;
 	
-	TaskContentAssistantProcessor(GradleTasksIndex index) {
+	TaskContentAssistantProcessor(GradleProjectIndex index) {
 		super();
 		this.index = index;
 	}
@@ -54,6 +57,7 @@ public class TaskContentAssistantProcessor implements IContentAssistProcessor {
 
 	            contribureAggregateTasksProposals(proposals, prefix, offset);
 	            contributeLocalTasksProposals(proposals, prefix, offset);
+	            contributeProjectsProposals(proposals, prefix, offset);
 	            
 	            return proposals.toArray(new ICompletionProposal[proposals.size()]);
 	         } catch (Exception e) {
@@ -110,22 +114,43 @@ public class TaskContentAssistantProcessor implements IContentAssistProcessor {
     		displayString.append(AGGREGATE_LABEL, StyledString.DECORATIONS_STYLER);
     		displayString.append(' ');
     		displayString.append(task.getPath(), StyledString.QUALIFIER_STYLER);
-    		proposals.add(new TaskCompletionProposal(offset - prefix.length(),
-				offset, task.getName(), displayString, task
-						.getDescription()));
+			proposals.add(new TaskCompletionProposal(offset - prefix.length(),
+					offset, task.getName(), displayString, task
+							.getDescription(), GradleUI.getDefault()
+							.getImageRegistry().get(GradleUI.IMAGE_TARGET)));
         }		
 	}
 	
 	private void contributeLocalTasksProposals(List<ICompletionProposal> proposals, String prefix, int offset) {
         for (GradleTask task : index.findTasks(prefix)) {
         	StyledString displayString = new StyledString();
-    		displayString.append(task.getPath());
+    		displayString.append(task.getName());
     		displayString.append(' ');
     		displayString.append(LOCAL_LABEL, StyledString.DECORATIONS_STYLER);
-    		proposals.add(new TaskCompletionProposal(offset - prefix.length(),
-				offset, task.getPath(), displayString, task
-						.getDescription()));	            	
+    		displayString.append(' ');
+    		displayString.append(task.getPath(), StyledString.QUALIFIER_STYLER);
+			proposals.add(new TaskCompletionProposal(offset - (prefix.length() - 1 - prefix.lastIndexOf(Project.PATH_SEPARATOR)),
+					offset, task.getName(), displayString, task
+							.getDescription(), GradleUI.getDefault()
+							.getImageRegistry().get(GradleUI.IMAGE_TARGET)));
         }		
+	}
+	
+	private void contributeProjectsProposals(List<ICompletionProposal> proposals, String prefix, int offset) {
+		for (GradleProject project : index.findProjects(prefix)) {
+			StyledString displayString = new StyledString();
+	   		displayString.append(project.getPath());
+    		displayString.append(' ');
+    		displayString.append(project.getName(), StyledString.DECORATIONS_STYLER);
+    		String replaceString = project.getPath();
+    		if (replaceString.lastIndexOf(Project.PATH_SEPARATOR) != replaceString.length() - Project.PATH_SEPARATOR.length()) {
+    			replaceString += Project.PATH_SEPARATOR;
+    		}
+			proposals.add(new TaskCompletionProposal(offset - prefix.length(),
+					offset, replaceString, displayString, project
+							.getDescription(), GradleUI.getDefault()
+							.getImageRegistry().get(GradleUI.IMAGE_MULTIPROJECT_FOLDER)));			
+		}
 	}
 	
 }

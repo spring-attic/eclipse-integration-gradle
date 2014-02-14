@@ -19,7 +19,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.gradle.tooling.model.GradleTask;
-import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
+import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 
 /**
  * 
@@ -28,9 +28,9 @@ import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
  */
 public class TaskInformationProvider extends DefaultTextHover implements IInformationProvider {
 	
-	private GradleTasksIndex tasksIndex;
+	private GradleProjectIndex tasksIndex;
 	
-	public TaskInformationProvider(ISourceViewer sourceViewer, GradleTasksIndex tasksIndex) {
+	public TaskInformationProvider(ISourceViewer sourceViewer, GradleProjectIndex tasksIndex) {
 		super(sourceViewer);
 		this.tasksIndex = tasksIndex;
 	}

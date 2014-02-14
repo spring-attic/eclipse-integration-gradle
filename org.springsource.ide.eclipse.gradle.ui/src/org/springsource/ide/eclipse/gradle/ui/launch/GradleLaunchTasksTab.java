@@ -50,7 +50,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
-import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
+import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 import org.springsource.ide.eclipse.gradle.ui.cli.editor.TasksViewer;
 
 
@@ -67,7 +67,7 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 	
 	private Combo projectCombo;
 	private GradleProject project;
-	private GradleTasksIndex tasksIndex= new GradleTasksIndex();
+	private GradleProjectIndex tasksIndex= new GradleProjectIndex();
 	
 	private TasksViewer tasksViewer;
 

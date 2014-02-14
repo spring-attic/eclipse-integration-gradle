@@ -25,7 +25,6 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.springsource.ide.eclipse.gradle.ui.GradleUI;
 
 /**
  * Task Completion Proposal
@@ -47,13 +46,15 @@ public class TaskCompletionProposal
 	private String description;
 	private int startOffset;
 	private int endOffset;
+	private Image image;
 	
-	public TaskCompletionProposal(int startOffset, int endOffset, String replacementString, StyledString displayString, String description) {
+	public TaskCompletionProposal(int startOffset, int endOffset, String replacementString, StyledString displayString, String description, Image image) {
 		this.startOffset = startOffset;
 		this.endOffset = endOffset;
 		this.displayString = displayString;
 		this.replacementString = replacementString;
 		this.description = description;
+		this.image = image;
 	}
 
 	@Override
@@ -151,7 +152,7 @@ public class TaskCompletionProposal
 
 	@Override
 	public Image getImage() {
-		return GradleUI.getDefault().getImageRegistry().get(GradleUI.IMAGE_TARGET);
+		return image;
 	}
 
 	@Override

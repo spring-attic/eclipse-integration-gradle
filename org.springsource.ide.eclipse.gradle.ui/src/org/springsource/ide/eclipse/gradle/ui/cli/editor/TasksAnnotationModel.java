@@ -25,7 +25,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.gradle.tooling.model.eclipse.EclipseProject;
-import org.springsource.ide.eclipse.gradle.core.util.GradleTasksIndex;
+import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 
 /**
  * 
@@ -40,7 +40,7 @@ public class TasksAnnotationModel extends AnnotationModel {
 	private static final long UPDATE_DELAY_MILISECONDS = 500L;
 	private static final String REGEX_MATCH_WORDS = "\\S+";
 	
-	private GradleTasksIndex index;
+	private GradleProjectIndex index;
 	
 	private ScheduledExecutorService scheduledExecutor = null;
 	private ScheduledFuture<?> scheduledJob = null;
@@ -58,7 +58,7 @@ public class TasksAnnotationModel extends AnnotationModel {
 		}		
 	};
 	
-	public TasksAnnotationModel(GradleTasksIndex index) {
+	public TasksAnnotationModel(GradleProjectIndex index) {
 		super();
 		this.index = index;
 	}
