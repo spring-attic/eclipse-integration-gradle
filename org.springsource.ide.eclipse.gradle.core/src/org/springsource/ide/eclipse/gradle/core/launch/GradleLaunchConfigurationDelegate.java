@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -280,7 +280,12 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	}
 
 	public static void setTasks(ILaunchConfigurationWorkingCopy conf, List<String> checked) {
-		conf.setAttribute(TASK_LIST, checked);
+		StringBuilder sb = new StringBuilder();
+		for (String task : checked) {
+			sb.append(task);
+			sb.append('\n');
+		}
+		conf.setAttribute(TASK_TEXT, sb.toString());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -299,13 +304,17 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 				return DEFAULT_TASK_LIST;
 			}
 		} else {
-			List<String> tasks = new ArrayList<String>();
-			Matcher matcher = Pattern.compile("\\S+").matcher(tasksText); //$NON-NLS-1$
-			while(matcher.find()) {
-				tasks.add(matcher.group());
-			}
-			return tasks;
+			return parseTasks(tasksText);
 		}
+	}
+	
+	private static List<String> parseTasks(String tasksText) {
+		List<String> tasks = new ArrayList<String>();
+		Matcher matcher = Pattern.compile("\\S+").matcher(tasksText); //$NON-NLS-1$
+		while(matcher.find()) {
+			tasks.add(matcher.group());
+		}
+		return tasks;		
 	}
 	
 	public static void setTasks(ILaunchConfigurationWorkingCopy conf, String tasksText) {
@@ -374,7 +383,7 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		ILaunchConfigurationWorkingCopy conf = null; 
 		try {
 			conf = createDefault(project, LaunchUtil.generateConfigName(project.getName()+" "+task));
-			setTasks(conf, Arrays.asList(task));
+			setTasks(conf, parseTasks(task));
 			if (save) {
 				return conf.doSave();
 			} 

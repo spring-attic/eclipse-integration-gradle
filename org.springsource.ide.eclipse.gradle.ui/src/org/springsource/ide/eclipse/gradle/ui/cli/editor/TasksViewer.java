@@ -31,7 +31,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -88,24 +87,27 @@ public class TasksViewer {
 	private GradleProjectIndex tasksIndex;
 	
 	@SuppressWarnings("unchecked")
-	public TasksViewer(Composite parent, GradleProjectIndex tasksIndex) {
+	public TasksViewer(Composite parent, GradleProjectIndex tasksIndex, boolean consoleMode) {
 		super();
 		this.tasksIndex = tasksIndex;
-		DefaultMarkerAnnotationAccess markerAccess = new DefaultMarkerAnnotationAccess();		
-		OverviewRuler overviewRuler = new OverviewRuler(
+		DefaultMarkerAnnotationAccess markerAccess = new DefaultMarkerAnnotationAccess();
+		
+		OverviewRuler overviewRuler = consoleMode ? null : new OverviewRuler(
 				markerAccess, 12, colorsCache);
 		
-		viewer = new SourceViewer(parent, null, overviewRuler, true,
-				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER
-						| SWT.FULL_SELECTION);
+		int style = SWT.NONE;
+		if (!consoleMode) {
+			style = SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER
+					| SWT.FULL_SELECTION;
+		}
+		
+		viewer = new SourceViewer(parent, null, overviewRuler, true, style);
 		
 		IPreferenceStore preferences = EditorsUI.getPreferenceStore();
 		
 		viewer.configure(new TasksViewerConfiguration(tasksIndex, preferences));
 		
-		viewer.setEditable(true);
-		
-		decorationSupport = new SourceViewerDecorationSupport(viewer, overviewRuler, new DefaultMarkerAnnotationAccess(), colorsCache);
+		decorationSupport = new SourceViewerDecorationSupport(viewer, overviewRuler, markerAccess, colorsCache);
 
 		for (AnnotationPreference preference : (List<AnnotationPreference>) new MarkerAnnotationPreferences().getAnnotationPreferences()) {
 			decorationSupport.setAnnotationPreference(preference);
@@ -147,20 +149,16 @@ public class TasksViewer {
 		activation = service.activateHandler(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, handler);
     }
     
-    public Control getControl() {
-		return viewer.getControl();
-	}
-	
+    public SourceViewer getSourceViewer() {
+    	return viewer;
+    }
+    
 	public void setDocument(IDocument document) {
 		viewer.setDocument(document, new TasksAnnotationModel(tasksIndex));
 	}
 	
-	public IDocument getDocument() {
-		return viewer.getDocument();
-	}
-	
 	public void dispose() {
-    	if(activation != null) {
+    	if(activation != null && service != null) {
     		service.deactivateHandler(activation);
     	}
 		if (tasksIndex != null) {

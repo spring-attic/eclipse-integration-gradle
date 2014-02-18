@@ -116,7 +116,7 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 				} else {
 					IProject newProject = ResourcesPlugin.getWorkspace().getRoot().getProject(newProjectName);
 					setProject(GradleCore.create(newProject));
-					setTasksDocument(tasksViewer.getDocument().get());
+					setTasksDocument(tasksViewer.getSourceViewer().getDocument().get());
 				}
 			}
 		});
@@ -171,9 +171,9 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 				SWT.BOLD | SWT.ITALIC));
 		
 
-		tasksViewer = new TasksViewer(parent, tasksIndex);
+		tasksViewer = new TasksViewer(parent, tasksIndex, false);
 		
-		tasksViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
+		tasksViewer.getSourceViewer().getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		setTasksDocument("");
 	}
@@ -293,7 +293,7 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 	
 	public void performApply(ILaunchConfigurationWorkingCopy conf) {
 		GradleLaunchConfigurationDelegate.setProject(conf, project);
-		GradleLaunchConfigurationDelegate.setTasks(conf, tasksViewer.getDocument().get());
+		GradleLaunchConfigurationDelegate.setTasks(conf, tasksViewer.getSourceViewer().getDocument().get());
 	}
 
 	private boolean haveGradleModel() {

@@ -85,6 +85,14 @@
                label="Toggle DSL Support"
                menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
          </action>
+      <action
+            class="org.springsource.ide.eclipse.gradle.ui.actions.ConsoleInplaceDialogActionDelegate"
+            enablesFor="+"
+            icon="icons/gradle-launch.png"
+            id="org.springsource.ide.eclipse.gradle.ui.actions.Console"
+            label="Tasks Quick Launcher"
+            menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+      </action>
       </objectContribution>
       <objectContribution
             adaptable="true"
@@ -134,6 +142,14 @@
                label="Toggle DSL Support"
                menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh">
          </action>
+      <action
+            class="org.springsource.ide.eclipse.gradle.ui.actions.ConsoleInplaceDialogActionDelegate"
+            enablesFor="+"
+            icon="icons/gradle-launch.png"
+            id="org.springsource.ide.eclipse.gradle.ui.actions.Console"
+            label="Tasks Quick Launcher"
+            menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh">
+      </action>
       </objectContribution>
 </extension>
 <extension

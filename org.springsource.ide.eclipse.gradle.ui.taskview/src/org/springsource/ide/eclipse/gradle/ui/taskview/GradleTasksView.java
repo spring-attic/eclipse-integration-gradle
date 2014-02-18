@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
 import static org.springsource.ide.eclipse.gradle.core.util.JobUtil.NO_RULE;
+
+import java.util.Collections;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,6 +28,7 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
@@ -42,7 +45,6 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.part.ViewPart;
 import org.gradle.tooling.model.Task;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
@@ -50,6 +52,7 @@ import org.springsource.ide.eclipse.gradle.ui.util.DialogSettingsUtil;
 import org.springsource.ide.eclipse.gradle.ui.util.SelectionUtils;
 
 /**
+ * @author Kris De Volder
  * @author Alex Boyko
  * @since 3.5
  */
@@ -86,6 +89,7 @@ public class GradleTasksView extends ViewPart {
 	private Action refreshAction;
 	private Action toggleProjectTasks;
 	private Action doubleClickAction;
+	private TasksConsoleAction tasksConsoleAction;
 
 	private SelectionListener selectionListener;
 
@@ -106,6 +110,7 @@ public class GradleTasksView extends ViewPart {
 		if (viewer!=null) {
 			projectSelector.setProject(p);
 			viewer.setInput(p);
+			tasksConsoleAction.selectChanged(new StructuredSelection(Collections.singletonList(p.getProject())));
 			saveDialogSettings();
 		}
 	}
@@ -181,15 +186,17 @@ public class GradleTasksView extends ViewPart {
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(toggleProjectTasks);
+		manager.add(tasksConsoleAction);
 		manager.add(linkWithSelectionAction);
 		manager.add(refreshAction);
-		manager.add(toggleProjectTasks);
 	}
 
 	private void makeActions() {
+		tasksConsoleAction = new TasksConsoleAction();
+		toggleProjectTasks = new ToggleProjectTasks(this, displayProjectLocalTasks);
 		linkWithSelectionAction = new ToggleLinkingAction(this);
 		refreshAction = new RefreshAction(this);
-		toggleProjectTasks = new ToggleProjectTasks(this, displayProjectLocalTasks);
 		doubleClickAction = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
@@ -199,14 +206,6 @@ public class GradleTasksView extends ViewPart {
 					GradleProject project = projectSelector.getProject();
 					if (project!=null) {
 						String taskStr = displayProjectLocalTasks ? task.getPath() : task.getName();
-//						if (displayProjectLocalTasks) {
-//							try {
-//								String projectPath = project.getGradleModel().getGradleProject().getPath();
-//								taskStr = taskStr.substring(projectPath.length());
-//							} catch (Exception e) {
-//								// ignore
-//							}
-//						}
 						final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, taskStr);
 						JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName() + " " + taskStr) {
 							@Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public class GradleUI extends AbstractUIPlugin {
 	public static final String IMAGE_PROJECT_FOLDER = "projectFolder"; //$NON-NLS-1$
 	public static final String IMAGE_MULTIPROJECT_FOLDER = "multiProjectFolder"; //$NON-NLS-1$
 	public static final String IMAGE_MULTIPROJECT_FOLDER_DISABLED = "multiProjectFolderDisabled"; //$NON-NLS-1$
+	public static final String IMAGE_LAUNCH = "launch"; //$NON-NLS-1$
 	
 	private static final Map<String, String> IMAGE_DESCRIPTOR_MAP = new HashMap<String, String>();
 	
@@ -47,7 +48,8 @@ public class GradleUI extends AbstractUIPlugin {
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_TARGET, "icons/target.gif");
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_PROJECT_FOLDER, "icons/gradle-proj-folder.png");
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_MULTIPROJECT_FOLDER, "icons/gradle-multiproj-folder.png");
-		IMAGE_DESCRIPTOR_MAP.put(IMAGE_MULTIPROJECT_FOLDER_DISABLED, "icons/gradle-multiproj-folder-disabled.png");		
+		IMAGE_DESCRIPTOR_MAP.put(IMAGE_MULTIPROJECT_FOLDER_DISABLED, "icons/gradle-multiproj-folder-disabled.png");
+		IMAGE_DESCRIPTOR_MAP.put(IMAGE_LAUNCH, "icons/gradle-launch.png");
 	}
 
 	// The shared instance
