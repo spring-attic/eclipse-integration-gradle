@@ -34,6 +34,9 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistEvent;
+import org.eclipse.jface.text.contentassist.ICompletionListener;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.util.Geometry;
 import org.eclipse.jface.viewers.StyledString;
@@ -784,6 +787,26 @@ public class ConsoleInplaceDialog {
 				}
 			}
 			
+		});
+		
+		commandText.getSourceViewer().getContentAssistantFacade().addCompletionListener(new ICompletionListener() {
+			
+			@Override
+			public void assistSessionStarted(ContentAssistEvent event) {
+				isDeactivateListenerActive = false;
+			}
+			
+			@Override
+			public void assistSessionEnded(ContentAssistEvent event) {
+				isDeactivateListenerActive = true;
+				dialogShell.setActive();
+			}
+
+			@Override
+			public void selectionChanged(ICompletionProposal proposal,
+					boolean smartToggle) {
+				// nothing
+			}
 		});
 		
 		return commandText;
