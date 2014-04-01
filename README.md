@@ -52,13 +52,14 @@ sites are available:
 Pasting the above URLs into a web browser will not work. You need
 to follow the instructions given below to use an Eclipse update site.
 
- 1. Open **Help >> Install New Software**
+ 1. In Eclipse Open **Help >> Install New Software**
  2. Paste a Gradle update site link into the "Work with" text box.
- 3. Ensure that the option "Group Items by Category" is enabled.
- 4. Select the top-level node 'Extensions / Gradle Integration'. 
- 5. Click "Next".
- 6. Review the list of software that will be installed. Click "Next" again.
- 7. Review and accept licence agreements and Click "Finish".
+ 3. Click the Add button at the top of the screen.
+ 4. Ensure that the option "Group Items by Category" is enabled.
+ 5. Select the top-level node 'Extensions / Gradle Integration'. 
+ 6. Click "Next".  This may take a while.
+ 7. Review the list of software that will be installed. Click "Next" again.
+ 8. Review and accept licence agreements and Click "Finish".
 
 If you follow this installation procedure in a plain Eclipse, this will install the STS Dashboard.
 This gives you an easy way to subsequently install Groovy Eclipse as well. See instructions on 
