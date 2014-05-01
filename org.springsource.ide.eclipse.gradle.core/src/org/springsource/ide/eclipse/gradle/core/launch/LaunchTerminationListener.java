@@ -11,16 +11,11 @@
 package org.springsource.ide.eclipse.gradle.core.launch;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchesListener;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.debug.core.model.IProcess;
-import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
-import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
-import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 
 
 /**

@@ -17,9 +17,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.springsource.ide.eclipse.gradle.core.util.DownloadManager;
+import org.springsource.ide.eclipse.gradle.core.util.DownloadManager.DownloadRequestor;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ZipFileUtil;
-import org.springsource.ide.eclipse.gradle.core.util.DownloadManager.DownloadRequestor;
 
 
 /**

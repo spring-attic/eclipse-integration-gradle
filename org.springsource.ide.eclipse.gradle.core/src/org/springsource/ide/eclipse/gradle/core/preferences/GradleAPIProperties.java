@@ -12,16 +12,12 @@ package org.springsource.ide.eclipse.gradle.core.preferences;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
-import org.gradle.tooling.model.GradleTask;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.toolingapi.GradleToolingApi;
 
@@ -38,8 +34,6 @@ public class GradleAPIProperties {
 	 */
 	private static final String LIB_PLUGIN_ID = GradleToolingApi.PLUGIN_ID;
 	
-	private static final long serialVersionUID = 1L;
-
 	public List<File> getGradleAPIJars() {
 		ArrayList<File> result = new ArrayList<File>();
 		try {

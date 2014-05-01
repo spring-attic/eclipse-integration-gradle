@@ -105,7 +105,7 @@ public class GradleDependencyComputer {
 		try {
 			debug("gradleModel ready: "+Integer.toHexString(System.identityHashCode(gradleModel))+" "+gradleModel);
 			DomainObjectSet<? extends ExternalDependency> gClasspath = gradleModel.getClasspath();
-			ClassPath classpath = new ClassPath(project, gClasspath.size());
+			ClassPath classpath = new ClassPath(project);
 			boolean export = GradleCore.getInstance().getPreferences().isExportDependencies(); //TODO: maybe should be project preference?
 			for (ExternalDependency gEntry : gClasspath) {
 				// Get the location of the jar itself

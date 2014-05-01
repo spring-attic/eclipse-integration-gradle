@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.util;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 
 

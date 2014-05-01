@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -29,7 +28,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JavaModelManager.PerProjectInfo;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.ClassPath;
@@ -37,7 +35,6 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleDependencyComputer;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.GradleSaveParticipant;
-import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 
 
@@ -263,7 +260,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 */
 	public static void removeFrom(IJavaProject javaProject, IProgressMonitor mon) throws JavaModelException {
 		IClasspathEntry[] classpath = javaProject.getRawClasspath();
-		ClassPath newClasspath = new ClassPath(GradleCore.create(javaProject), classpath.length);
+		ClassPath newClasspath = new ClassPath(GradleCore.create(javaProject));
 		for (IClasspathEntry e : classpath) {
 			if (!isGradleContainerEntry(e)) {
 				newClasspath.add(e);

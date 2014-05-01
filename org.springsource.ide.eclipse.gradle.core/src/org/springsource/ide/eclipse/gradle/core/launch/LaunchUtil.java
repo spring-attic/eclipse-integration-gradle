@@ -20,8 +20,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
-import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 
 
 /**

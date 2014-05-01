@@ -114,10 +114,6 @@ public class TaskUtil {
 		}
 	}
 
-	private static String getJavaHome() {
-		return System.getenv().get("JAVA_HOME");
-	}
-	
 	/**
 	 * Run a bunch of tasks 'in bulk'. It is possible that no tasks will be executed, if there are no
 	 * tasks matching the provided list of names in the specified project list.

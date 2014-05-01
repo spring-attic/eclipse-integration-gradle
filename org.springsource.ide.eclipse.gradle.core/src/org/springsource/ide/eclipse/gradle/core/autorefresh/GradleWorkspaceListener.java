@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.autorefresh;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -27,8 +25,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
-import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 

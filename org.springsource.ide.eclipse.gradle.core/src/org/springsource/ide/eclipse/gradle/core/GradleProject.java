@@ -59,7 +59,6 @@ import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfiguration
 import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
-import org.springsource.ide.eclipse.gradle.core.preferences.IJavaHomePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
@@ -406,7 +405,7 @@ public class GradleProject {
 			}
 
 			//Remove old source entries and replace with new ones.
-			ClassPath newClasspath = new ClassPath(this, oldClasspath.length);
+			ClassPath newClasspath = new ClassPath(this);
 			newClasspath.addAll(sourceEntries);
 			for (IClasspathEntry oldEntry : oldClasspath) {
 				if (oldEntry.getEntryKind()!=IClasspathEntry.CPE_SOURCE) {
@@ -454,7 +453,7 @@ public class GradleProject {
 			}
 
 			//Remove old project entries and replace with new ones.
-			ClassPath newClasspath = new ClassPath(this, entries.size());
+			ClassPath newClasspath = new ClassPath(this);
 			newClasspath.addAll(entries);
 			for (IClasspathEntry oldEntry : oldClasspath) {
 				if (oldEntry.getEntryKind()!=IClasspathEntry.CPE_PROJECT) {

@@ -30,19 +30,13 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamsProxy;
-import org.gradle.tooling.BuildLauncher;
+import org.eclipse.debug.ui.RefreshTab;
 import org.gradle.tooling.GradleConnectionException;
-import org.gradle.tooling.ProjectConnection;
-import org.springsource.ide.eclipse.gradle.core.GradleModelProvider;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.TaskUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
-import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
-
-
-import org.eclipse.debug.ui.RefreshTab;
 
 /**
  * Wrapper class that adapts something that executes gradle tasks to an {@link IProcess} that can

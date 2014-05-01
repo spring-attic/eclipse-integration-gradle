@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.dsld;
 
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.jdt.groovy.model.GroovyCompilationUnit;
-import org.eclipse.jdt.groovy.search.AbstractSimplifiedTypeLookup;
-import org.eclipse.jdt.groovy.search.VariableScope;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 
 

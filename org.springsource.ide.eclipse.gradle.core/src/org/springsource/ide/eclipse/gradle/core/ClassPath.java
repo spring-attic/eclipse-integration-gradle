@@ -72,13 +72,10 @@ public class ClassPath {
 		IClasspathEntry.CPE_VARIABLE
 	};
 	
-	private static int MAX_ORDER_CAT = 5; //Will be used for anything that falls outside the kindOrderCat classification (but shouldn't be any). 
-	
 	/**
 	 * Entries, divided-up by category so that categories always maintain their order no matter
 	 * what order entries are added in.
 	 */
-	@SuppressWarnings("unchecked")
 	private Map<Integer, Collection<IClasspathEntry>> entryMap = new HashMap<Integer, Collection<IClasspathEntry>>(kindOrdering.length);
 
 	public class ClasspathEntryComparator implements Comparator<IClasspathEntry> {
@@ -116,15 +113,7 @@ public class ClassPath {
 		addAll(Arrays.asList(rawEntries));
 	}
 	
-	/**
-	 * Create an empty classpath. 
-	 * @param size   Hint about the size the classpath will likely be after all elements have been added.
-	 */
-	public ClassPath(GradleProject project, int size) {
-		this(project);
-	}
-
-	private ClassPath(GradleProject project) {
+	public ClassPath(GradleProject project) {
 		this.enableSorting = project.getProjectPreferences().getEnableClasspatEntrySorting();
 	}
 
