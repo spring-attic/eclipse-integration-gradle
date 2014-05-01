@@ -135,7 +135,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 				if (oldModel==gradleModel) {
 					return getPersistedEntries();
 				} else {
-					IClasspathEntry[] entries = dependencyComputer.getLibraryEntries(gradleModel);
+					IClasspathEntry[] entries = dependencyComputer.getClassPath(gradleModel).toArray();
 					setPersistedEntries(entries);
 					oldModel = gradleModel;
 					return entries;

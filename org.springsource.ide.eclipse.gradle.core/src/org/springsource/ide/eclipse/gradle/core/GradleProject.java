@@ -56,7 +56,6 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPa
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClasspathContainerInitializer;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
-import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
@@ -134,33 +133,13 @@ public class GradleProject {
 	public void refreshDependencies(IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask("Refresh dependencies "+getName(), 3);
 		try {
-			refreshProjectDependencies(ProjectMapperFactory.workspaceMapper(), new SubProgressMonitor(monitor, 1));
+			// TODO JON remove this line!
+//			refreshProjectDependencies(ProjectMapperFactory.workspaceMapper(), new SubProgressMonitor(monitor, 1));
 			refreshClasspathContainer(new SubProgressMonitor(monitor, 1));
 //			WTPUtil.addWebLibraries(this); only doing this on project import for now.
 		} finally {
 			monitor.done();
 		}
-	}
-
-	/**
-	 * Refreshes the project dependencies, bringing then in synch with the gradleModel.
-	 * (Note that this doesn't force the gradleModel itself to be updated!)
-	 */
-	private void refreshProjectDependencies(IProjectMapper projectMapper, SubProgressMonitor monitor) throws OperationCanceledException, CoreException {
-		monitor.beginTask("Refresh project dependencies "+getName(), 2);
-		IDirtyProjectListener dirtyProjects = DependencyRefresher.getInstanceGently();
-		if (dirtyProjects!=null) {
-			dirtyProjects.removeDirty(this);
-		}
-		try {
-			EclipseProject projectModel = getGradleModel(new SubProgressMonitor(monitor, 1));
-			setProjectDependencies(projectModel, projectMapper, new SubProgressMonitor(monitor, 1));
-		} finally {
-			monitor.done();
-		}
-//		if (GlobalSettings.DEBUG) {
-//			printDependencyGraph();
-//		}
 	}
 
 	public boolean isDependencyManaged() {
@@ -421,61 +400,6 @@ public class GradleProject {
 	}
 	
 	/**
-	 * @param all
-	 * @param subProgressMonitor
-	 */
-	private void setProjectDependencies(EclipseProject projectModel, IProjectMapper projectMapper, IProgressMonitor monitor) throws JavaModelException {
-		DomainObjectSet<? extends EclipseProjectDependency> projectDeps = projectModel.getProjectDependencies();
-		//TODO: we remove and re-add all project dep entries, even if they didn't change. Should we optimize this to
-		// only add/remove when entries have changed?
-		
-		//TODO: We could mark 'our' entries with a special classpath attribute. That way user's can add their own
-		//  and we can avoid zapping them on each refresh.
-		
-		//TODO: access rules etc.. (what is that? can gradle give something like this to us, or is just using the default ok)		
-		
-		IJavaProject javaProject = getJavaProject();
-		IClasspathEntry[] oldClasspath = javaProject.getRawClasspath();
-		int totalWork = 2 * (projectDeps.size()+oldClasspath.length);
-		monitor.beginTask("Converting gradle project dependencies to Eclipse", totalWork);
-		try {
-			//Convert gradle entries into Eclipse classpath entries
-			List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-			for (EclipseProjectDependency dep : projectDeps) {
-				IClasspathEntry newEntry = newProjectEntry(projectMapper, dep);
-				if (newEntry!=null) {
-					entries.add(newEntry);
-				}
-				monitor.worked(1);
-			}
-			for (IClasspathEntry newEntry : this.getDependencyComputer().getProjectEntries(projectModel)) {
-				entries.add(newEntry);
-			}
-
-			//Remove old project entries and replace with new ones.
-			ClassPath newClasspath = new ClassPath(this);
-			newClasspath.addAll(entries);
-			for (IClasspathEntry oldEntry : oldClasspath) {
-				if (oldEntry.getEntryKind()!=IClasspathEntry.CPE_PROJECT) {
-					newClasspath.add(oldEntry);
-				}
-				monitor.worked(1);
-			}
-			
-			newClasspath.setOn(javaProject, new SubProgressMonitor(monitor,totalWork/2));
-		} finally {
-			monitor.done();
-		}
-	}
-
-	private IClasspathEntry newProjectEntry(IProjectMapper projectMapper, EclipseProjectDependency dep) {
-		HierarchicalEclipseProject target = dep.getTargetProject();
-		IProject eclipseTarget = projectMapper.get(target);
-		return JavaCore.newProjectEntry(eclipseTarget.getFullPath(), GlobalSettings.exportProjectEntries);
-	}
-
-	
-	/**
 	 * Create an Eclipse source classpath entry from a Gradle source entry. May return null
 	 * if the entry looks invalid (e.g. the corresponding folder doesn't exist in the project)
 	 * @param oldEntries old source entries indexed by path, used to copy over exclusions and inclusions so they don't get lost.
@@ -700,11 +624,7 @@ public class GradleProject {
 			refreshSourceFolders(eh, new SubProgressMonitor(monitor, 1));
 			debug("refreshed source folders");
 			
-			//4: Refresh project deps
-			refreshProjectDependencies(projectMapping, new SubProgressMonitor(monitor, 1));
-			debug("refreshed project dependencies");
-			
-			//5: Force root project cache to be set
+			//4: Force root project cache to be set
 			try {
 				getRootProject();
 				debug("root project cached");
@@ -717,16 +637,15 @@ public class GradleProject {
 				monitor.worked(1);
 			}
 			
-			//6: Enable DSL support
+			//5: Enable DSL support
 			DSLDSupport.maybeAdd(this, eh, new SubProgressMonitor(monitor, 1));
 			debug("DSLDSupport maybe added");
 			
-			//7: Add classpath container
+			//6: Add classpath container
 			GradleClassPathContainer.addTo(getJavaProject(), new SubProgressMonitor(monitor, 1));
 			debug("Classpath container added");
 
-			
-			//8: Add WTP fixups
+			//7: Add WTP fixups
 			WTPUtil.addWebLibraries(this);
 			monitor.worked(1);
 		} catch (CoreException e) {

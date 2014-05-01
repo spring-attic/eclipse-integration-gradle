@@ -79,7 +79,7 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	/**
 	 * @return Whether classpath entry sorting is enabled. This preference is shared by all projects in a project hierarchy.
 	 */
-	public boolean getEnableClasspatEntrySorting() {
+	public boolean getEnableClasspathEntrySorting() {
 		try {
 			GradleProjectPreferences rootPrefs = getRootProjectPreferences();
 			return rootPrefs.get(ENABLE_CLASSPATH_SORTING, DEFAULT_ENABLE_CLASSPATH_SORTING);

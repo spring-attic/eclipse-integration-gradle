@@ -123,7 +123,7 @@ public class GradleDSLDClasspathContainer implements IClasspathContainer {
 	 */
 	public static void removeFrom(IJavaProject javaProject, IProgressMonitor mon) throws JavaModelException {
 		IClasspathEntry[] classpath = javaProject.getRawClasspath();
-		ClassPath newClasspath = new ClassPath(GradleCore.create(javaProject), classpath.length);
+		ClassPath newClasspath = new ClassPath(GradleCore.create(javaProject));
 		for (IClasspathEntry e : classpath) {
 			if (!isGradleDSLDContainerEntry(e)) {
 				newClasspath.add(e);

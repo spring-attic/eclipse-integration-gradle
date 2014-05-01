@@ -13,13 +13,12 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
-import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.eclipse.EclipseProject;
+import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.MarkerMaker;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
-import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
 import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 
@@ -41,15 +40,15 @@ public class GradleDependencyComputer {
 	
 	private GradleProject project;
 	private ClassPath classpath; // computed classpath or null if not yet computed.
-	private EclipseProject model; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
+	private EclipseProject gradleModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
 	
 	public GradleDependencyComputer(GradleProject project) {
 		this.project = project;
 		this.classpath = null;
-		this.model = null;
+		this.gradleModel = null;
 	}
 	
-	private void addJarEntry(ClassPath classpath, IPath jarPath, ExternalDependency gEntry, boolean export) {
+	private void addJarEntry(IPath jarPath, ExternalDependency gEntry, boolean export) {
 		// Get the location of a source jar, if any.
 		IPath sourceJarPath = null;
 		File sourceJarFile = gEntry.getSource();
@@ -91,23 +90,23 @@ public class GradleDependencyComputer {
 		}
 	}
 	
-	public ClassPath getClassPath(EclipseProject model) {
-		if (classpath==null || !model.equals(this.model)) {
-			classpath = computeEntries(model);
-			this.model = model;
+	public ClassPath getClassPath(EclipseProject gradleModel) {
+		if (classpath==null || !gradleModel.equals(this.gradleModel)) {
+			this.gradleModel = gradleModel;
+			classpath = computeEntries();
 		}
 		return classpath;
 	}
-
+	
 	//TODO: right now this only computes 'jar' entries. Should also compute project dependencies It was pulled out from GradleClassPathContainer
-	private ClassPath computeEntries(EclipseProject gradleModel) {
+	private ClassPath computeEntries() {
 		MarkerMaker markers = new MarkerMaker(project, GradleClassPathContainer.ERROR_MARKER_ID);
 		try {
 			debug("gradleModel ready: "+Integer.toHexString(System.identityHashCode(gradleModel))+" "+gradleModel);
-			DomainObjectSet<? extends ExternalDependency> gClasspath = gradleModel.getClasspath();
-			ClassPath classpath = new ClassPath(project);
+			classpath = new ClassPath(project);
 			boolean export = GradleCore.getInstance().getPreferences().isExportDependencies(); //TODO: maybe should be project preference?
-			for (ExternalDependency gEntry : gClasspath) {
+			
+			for (ExternalDependency gEntry : gradleModel.getClasspath()) {
 				// Get the location of the jar itself
 				File file = gEntry.getFile();
 				IPath jarPath = new Path(file.getAbsolutePath()); 
@@ -116,12 +115,12 @@ public class GradleDependencyComputer {
 					if (project.getProjectPreferences().getRemapJarsToMavenProjects()) {	
 						IProject projectDep = M2EUtils.getMavenProject(gEntry);
 						if (projectDep!=null) {
-							addProjectDependency(classpath, projectDep, gEntry);
+							addProjectDependency(projectDep, export);
 							remapped = true;
 						}
 					}
 					if (!remapped) {
-						addJarEntry(classpath, jarPath, gEntry, export);
+						addJarEntry(jarPath, gEntry, export);
 					}
 				} else {
 					//'non jar' entries may happen when project has a dependency on a sourceSet's output folder.
@@ -143,7 +142,7 @@ public class GradleDependencyComputer {
 							//We don't know what this is, but it exists. Give it the benefit of the doubt and try to treat it 
 							//the same as a 'jar'... pray... and hope for the best. 
 							//Note: one possible thing this could be is an output folder containing .class files.
-							addJarEntry(classpath, jarPath, gEntry, export);
+							addJarEntry(jarPath, gEntry, export);
 							markers.reportWarning("Unknown type of Gradle Dependency was treated as 'jar' entry: "+jarPath);
 						} else {
 							//Adding this will cause very wonky behavior see: https://issuetracker.springsource.com/browse/STS-2531
@@ -153,33 +152,18 @@ public class GradleDependencyComputer {
 					}
 				}
 			}
+			
+			for (EclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
+				addProjectDependency(GradleCore.create(dep.getTargetProject()).getProject(), export);
+			}
+			
 			return classpath;
 		} finally {
 			markers.schedule();
 		}
 	}
 
-	private void addProjectDependency(ClassPath classpath, IProject projectDep, ExternalDependency gEntry) {
-		classpath.add(JavaCore.newProjectEntry(projectDep.getFullPath(), GlobalSettings.exportProjectEntries));
+	private void addProjectDependency(IProject projectDep, boolean export) {
+		classpath.add(JavaCore.newProjectEntry(projectDep.getFullPath(), export));
 	}
-
-	public synchronized IClasspathEntry[] getLibraryEntries(EclipseProject gradleModel) {
-		ensureComputedFor(gradleModel);
-		return classpath.getLibraryEntries();
-	}
-	
-	public synchronized IClasspathEntry[] getProjectEntries(EclipseProject gradleModel) {
-		ensureComputedFor(gradleModel);
-		return classpath.getProjectEntries();
-	}
-
-	private void ensureComputedFor(EclipseProject gradleModel) {
-		if (this.model==gradleModel && classpath!=null) {
-			return; //Already computed
-		} else {
-			classpath = computeEntries(gradleModel);
-		}
-	}
-
-
 }

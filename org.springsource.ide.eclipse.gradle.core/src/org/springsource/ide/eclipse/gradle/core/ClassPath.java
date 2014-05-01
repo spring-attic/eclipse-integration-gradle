@@ -114,7 +114,7 @@ public class ClassPath {
 	}
 	
 	public ClassPath(GradleProject project) {
-		this.enableSorting = project.getProjectPreferences().getEnableClasspatEntrySorting();
+		this.enableSorting = project.getProjectPreferences().getEnableClasspathEntrySorting();
 	}
 
 	public Collection<IClasspathEntry> createEntrySet(int size) {
@@ -163,10 +163,6 @@ public class ClassPath {
 	public void removeLibraryEntries() {
 		entryMap.remove(IClasspathEntry.CPE_LIBRARY);
 	}
-
-//	private static boolean isLibrary(IClasspathEntry element) {
-//		return element.getEntryKind()==IClasspathEntry.CPE_LIBRARY;
-//	}
 
 	public IClasspathEntry[] toArray() {
 		ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
@@ -273,20 +269,4 @@ public class ClassPath {
 		}
 		return false;
 	}
-
-	public IClasspathEntry[] getSourceFolders() {
-		Collection<IClasspathEntry> entries = getEntries(IClasspathEntry.CPE_SOURCE);
-		return entries.toArray(new IClasspathEntry[entries.size()]);
-	}
-
-	public IClasspathEntry[] getLibraryEntries() {
-		Collection<IClasspathEntry> entries = getEntries(IClasspathEntry.CPE_LIBRARY);
-		return entries.toArray(new IClasspathEntry[entries.size()]);
-	}
-
-	public IClasspathEntry[] getProjectEntries() {
-		Collection<IClasspathEntry> entries = getEntries(IClasspathEntry.CPE_PROJECT);
-		return entries.toArray(new IClasspathEntry[entries.size()]);
-	}
-
 }
