@@ -10,9 +10,16 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
+import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITableFontProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
 import org.gradle.tooling.model.Task;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.ui.GradleUI;
@@ -29,9 +36,12 @@ import org.springsource.ide.eclipse.gradle.ui.wizards.GradleProjectTreeLabelProv
 public class TaskLabelProvider extends GradleLabelProvider
 		implements
 			ITableLabelProvider,
-			ILabelProvider {
+			ILabelProvider,
+			ITableFontProvider {
 
 	GradleProjectTreeLabelProviderWithDescription projectLabelProvider = new GradleProjectTreeLabelProviderWithDescription(false);
+	
+	private Font taskNameFont = null;
 	
 	public Image getColumnImage(Object element, int columnIndex) {
 		if (element instanceof EclipseProject) {
@@ -57,7 +67,6 @@ public class TaskLabelProvider extends GradleLabelProvider
 		case 0:
 			return element.getName();
 		case 1:
-//			return element.getPath(); //Hack: so we can see these (and understand what they look like) probably not for users to see
 			return element.getDescription();
 		default: //There should really only be 2 columns but ...
 			return "";
@@ -68,6 +77,9 @@ public class TaskLabelProvider extends GradleLabelProvider
 	public void dispose() {
 		super.dispose();
 		projectLabelProvider.dispose();
+		if (taskNameFont != null) {
+			taskNameFont.dispose();
+		}
 	}
 
 	public Image getImage(Object element) {
@@ -78,5 +90,23 @@ public class TaskLabelProvider extends GradleLabelProvider
 		return getColumnText(element, 0);
 	}
 
+	@Override
+	public Font getFont(Object element, int columnIndex) {
+		if (columnIndex == 0) {
+			return getTaskNameFont();
+		} else {
+			return JFaceResources.getDefaultFont();
+		}
+	}
 
+	private Font getTaskNameFont() {
+		if (taskNameFont == null) {
+			FontData[] fontData = FontDescriptor.copy(JFaceResources.getDefaultFontDescriptor().getFontData());
+			for (int i = 0; i < fontData.length; i++) {
+				fontData[i].setStyle(fontData[i].getStyle() | SWT.BOLD);
+			}
+			taskNameFont = FontDescriptor.createFrom(fontData).createFont(PlatformUI.getWorkbench().getDisplay());
+		}
+		return taskNameFont;
+	}
 }

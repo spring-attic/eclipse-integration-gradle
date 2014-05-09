@@ -28,15 +28,16 @@ import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 import org.springsource.ide.eclipse.gradle.ui.GradleUI;
 
 /**
+ * Completion processor for Gradle tasks and  projects content proposals
  * 
  * @author Alex Boyko
  *
  */
 public class TaskContentAssistantProcessor implements IContentAssistProcessor {
 	
-	private final IContextInformation[] NO_CONTEXTS = { };
-    private final char[] PROPOSAL_ACTIVATION_CHARS = { Project.PATH_SEPARATOR.charAt(0) };
-    private ICompletionProposal[] NO_COMPLETIONS = { };
+	private static final IContextInformation[] NO_CONTEXTS = { };
+    private static final char[] PROPOSAL_ACTIVATION_CHARS = (Project.PATH_SEPARATOR.charAt(0) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_").toCharArray();
+    private static ICompletionProposal[] NO_COMPLETIONS = { };
 	private static final String AGGREGATE_LABEL  = "[Aggregate]";
 	private static final String LOCAL_LABEL = "[Local]";
     

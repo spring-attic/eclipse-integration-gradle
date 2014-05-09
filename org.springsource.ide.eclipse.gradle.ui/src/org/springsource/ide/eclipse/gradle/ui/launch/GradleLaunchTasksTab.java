@@ -172,6 +172,7 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 		
 
 		tasksViewer = new TasksViewer(parent, tasksIndex, false);
+		tasksViewer.setActivateContentAssistOnEmptyDocument(true);
 		
 		tasksViewer.getSourceViewer().getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
 		

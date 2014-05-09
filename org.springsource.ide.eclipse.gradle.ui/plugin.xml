@@ -87,6 +87,7 @@
          </action>
       <action
             class="org.springsource.ide.eclipse.gradle.ui.actions.ConsoleInplaceDialogActionDelegate"
+            definitionId="org.springsource.ide.eclipse.gradle.ui.OpenTasksQuickLauncher"
             enablesFor="+"
             icon="icons/gradle-launch.png"
             id="org.springsource.ide.eclipse.gradle.ui.actions.Console"
@@ -316,6 +317,43 @@
               id="org.springsource.ide.eclipse.gradle.launch">
         </configurationType>
       </shortcut>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="org.springsource.ide.eclipse.gradle.ui.commands"
+            name="SpringSource Gradle Tools">
+      </category>
+      <command
+            categoryId="org.springsource.ide.eclipse.gradle.ui.commands"
+            description="Open Gradle tasks quick launcher dialog"
+            id="org.springsource.ide.eclipse.gradle.ui.OpenTasksQuickLauncher"
+            name="Open Gradle Tasks Quick Launcher">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.springsource.ide.eclipse.gradle.ui.OpenTasksQuickLauncher"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M2+M3+R">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.springsource.ide.eclipse.gradle.ui.global"
+            label="Gradle Global Actions"
+            visible="true">
+         <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.ConsoleInplaceDialogActionDelegate"
+               definitionId="org.springsource.ide.eclipse.gradle.ui.OpenTasksQuickLauncher"
+               icon="icons/gradle-launch.png"
+               id="org.springsource.ide.eclipse.gradle.ui.GlobalKeyBindingOpenTasksQuickLauncher"
+               label="Open Gradle Tasks Quick Launcher">
+         </action>
+      </actionSet>
    </extension>
 
 </plugin>

@@ -35,6 +35,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -129,6 +130,13 @@ public class GradleTasksView extends ViewPart {
 		FilteredTree filteredTree = new FilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
 		
 		viewer = filteredTree.getViewer();
+		
+		viewer.getTree().setLinesVisible(false);
+		TreeColumn title = new TreeColumn(viewer.getTree(), SWT.NONE, 0);
+		title.setAlignment(SWT.LEFT);
+		TreeColumn description = new TreeColumn(viewer.getTree(), SWT.NONE, 1);
+		description.setAlignment(SWT.LEFT);
+		
 		TaskTreeContentProvider tasksProvider = new TaskTreeContentProvider(viewer);
 		tasksProvider.setLocalTasks(displayProjectLocalTasks);
 		viewer.setContentProvider(tasksProvider);

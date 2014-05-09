@@ -134,6 +134,10 @@ public class TaskCompletionProposal
 			// ignore
 		}
 	}
+	
+	String getReplacementString() {
+		return replacementString;
+	}
 
 	@Override
 	public Point getSelection(IDocument document) {

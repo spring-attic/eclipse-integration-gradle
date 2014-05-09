@@ -53,6 +53,7 @@ public class ConsoleInplaceDialogActionDelegate extends GradleProjectActionDeleg
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 		super.selectionChanged(action, selection);
+		action.setEnabled(true);
 
 		// Have selected something in the editor - therefore
 		// want to close the inplace view if haven't already done so

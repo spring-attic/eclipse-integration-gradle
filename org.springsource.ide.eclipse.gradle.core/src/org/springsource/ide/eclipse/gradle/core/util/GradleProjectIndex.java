@@ -79,7 +79,9 @@ public class GradleProjectIndex {
 	public void setProject(org.springsource.ide.eclipse.gradle.core.GradleProject project) {
 		try {
 			resetIndex();
-			initializeIndexRequest(project.requestGradleModel());
+			if (project != null) {
+				initializeIndexRequest(project.requestGradleModel());
+			}
 		} catch (FastOperationFailedException e) {
 			project.addModelListener(new IGradleModelListener() {
 				@Override

@@ -21,14 +21,21 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistEvent;
+import org.eclipse.jface.text.contentassist.ICompletionListener;
+import org.eclipse.jface.text.contentassist.ICompletionListenerExtension2;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
@@ -41,6 +48,7 @@ import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+import org.gradle.api.Project;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 
 /**
@@ -49,6 +57,8 @@ import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
  *
  */
 public class TasksViewer {
+	
+	private static final int CONTENT_ASSIST_DELAY = 4000; /* 4 seconds */
 	
 	private ISharedTextColors colorsCache = new ISharedTextColors() {
 		
@@ -85,6 +95,40 @@ public class TasksViewer {
 	private SourceViewer viewer = null;
 	
 	private GradleProjectIndex tasksIndex;
+	
+	private boolean activateContentAssistIfProjectSeparatorDetected = false;
+	
+	private ICompletionListener completionListener = new CompletionListener();
+	
+	private boolean activateContentAssistOnEmptyDocument = false;
+	
+	private FocusListener focusListener = new FocusListener() {
+
+		@Override
+		public void focusGained(FocusEvent e) {
+			e.display.timerExec(CONTENT_ASSIST_DELAY, new Runnable() {
+
+				@Override
+				public void run() {
+					if (viewer != null && viewer.getTextWidget() != null
+							&& !viewer.getTextWidget().isDisposed() 
+							&& viewer.getTextWidget().isFocusControl()
+							&& viewer.getDocument() != null
+							&& viewer.getDocument().get().isEmpty()
+							&& viewer.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS)) {
+						viewer.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
+					}
+				}
+				
+			});
+		}
+		
+		@Override
+		public void focusLost(FocusEvent e) {
+			// ignore
+		}
+				
+	};
 	
 	@SuppressWarnings("unchecked")
 	public TasksViewer(Composite parent, GradleProjectIndex tasksIndex, boolean consoleMode) {
@@ -134,8 +178,29 @@ public class TasksViewer {
 		}
 		
 		activateHandler();
+		
+		setActivateContentAssistIfProjectSeparatorDetected(true);
+		
 	}
 	
+	public boolean isActivateContentAssistIfProjectSeparatorDetected() {
+		return activateContentAssistIfProjectSeparatorDetected;
+	}
+
+	public void setActivateContentAssistIfProjectSeparatorDetected(
+			boolean activateContentAssistIfProjectSeparatorDetected) {
+		if (this.activateContentAssistIfProjectSeparatorDetected != activateContentAssistIfProjectSeparatorDetected) {
+			if (activateContentAssistIfProjectSeparatorDetected) {
+				viewer.getContentAssistantFacade().addCompletionListener(
+						completionListener);
+			} else {
+				viewer.getContentAssistantFacade().removeCompletionListener(
+						completionListener);
+			}
+			this.activateContentAssistIfProjectSeparatorDetected = activateContentAssistIfProjectSeparatorDetected;
+		}
+	}
+
     private void activateHandler(){
     	IHandler handler = new AbstractHandler() {
 			public Object execute(ExecutionEvent event) throws org.eclipse.core.commands.ExecutionException {
@@ -158,6 +223,12 @@ public class TasksViewer {
 	}
 	
 	public void dispose() {
+		if (isActivateContentAssistIfProjectSeparatorDetected()) {
+			viewer.getContentAssistantFacade().removeCompletionListener(completionListener);
+		}
+		if (isActivateContentAssistOnEmptyDocument()) {
+			viewer.getTextWidget().removeFocusListener(focusListener);
+		}
     	if(activation != null && service != null) {
     		service.deactivateHandler(activation);
     	}
@@ -168,5 +239,57 @@ public class TasksViewer {
 			decorationSupport.dispose();
 		}
 	}
+	
+	public boolean isActivateContentAssistOnEmptyDocument() {
+		return activateContentAssistOnEmptyDocument;
+	}
 
+	public void setActivateContentAssistOnEmptyDocument(
+			boolean activateContentAssistOnEmptyDocument) {
+		if (this.activateContentAssistOnEmptyDocument != activateContentAssistOnEmptyDocument) {
+			if (activateContentAssistOnEmptyDocument) {
+				viewer.getTextWidget().addFocusListener(focusListener);
+			} else {
+				viewer.getTextWidget().removeFocusListener(focusListener);
+			}
+			this.activateContentAssistOnEmptyDocument = activateContentAssistOnEmptyDocument;
+		}
+	}
+
+	private class CompletionListener implements ICompletionListener, ICompletionListenerExtension2 {
+		
+		@Override
+		public void applied(ICompletionProposal proposal) {
+			if (proposal instanceof TaskCompletionProposal) {
+				TaskCompletionProposal taskProposal = (TaskCompletionProposal) proposal;
+				if (taskProposal.getReplacementString().endsWith(Project.PATH_SEPARATOR)) {
+					Point position = proposal.getSelection(viewer.getDocument());
+					viewer.setSelectedRange(position.x, position.y);
+					viewer.revealRange(position.x, position.y);
+					if (viewer.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS)) {
+						viewer.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
+					}
+				}
+			}
+		}
+
+		@Override
+		public void assistSessionStarted(ContentAssistEvent event) {
+			// nothing
+		}
+
+		@Override
+		public void assistSessionEnded(ContentAssistEvent event) {
+			// nothing
+		}
+
+		@Override
+		public void selectionChanged(ICompletionProposal proposal,
+				boolean smartToggle) {
+			// nothing
+		}
+		
+	}
+
+	
 }
