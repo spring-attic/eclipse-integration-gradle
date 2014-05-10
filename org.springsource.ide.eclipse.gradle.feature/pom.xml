@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springsource.ide.eclipse.gradle</groupId>
     <artifactId>org.springsource.ide.eclipse.gradle.parent</artifactId>
-    <version>3.5.1-SNAPSHOT</version>
+    <version>3.6.0-SNAPSHOT</version>
   </parent>
   <artifactId>org.springsource.ide.eclipse.gradle.feature</artifactId>
   <packaging>eclipse-feature</packaging>

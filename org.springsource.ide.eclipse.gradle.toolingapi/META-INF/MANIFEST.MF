@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Toolingapi
 Bundle-SymbolicName: org.springsource.ide.eclipse.gradle.toolingapi
-Bundle-Version: 3.5.1.qualifier
+Bundle-Version: 3.6.0.qualifier
 Bundle-Activator: org.springsource.ide.eclipse.gradle.toolingapi.GradleToolingApi
 Bundle-Vendor: Pivotal Software, Inc.
 Require-Bundle: org.eclipse.ui,

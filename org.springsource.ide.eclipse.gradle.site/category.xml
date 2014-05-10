@@ -17,20 +17,20 @@
    
    <!-- Optional add ons for the Gradle tooling -->
    <feature
-      url="org.springframework.ide.eclipse.uaa.feature_3.5.1.qualifier.jar"
-      id="org.springframework.ide.eclipse.uaa.feature" version="3.5.1.qualifier">
+      url="org.springframework.ide.eclipse.uaa.feature_3.6.0.qualifier.jar"
+      id="org.springframework.ide.eclipse.uaa.feature" version="3.6.0.qualifier">
       <category name="Extensions / Gradle Integration" />
    </feature>
 
    <feature 
-       url="features/org.springsource.ide.eclipse.dashboard_3.5.1.qualifier.jar" 
-   	   id="org.springsource.ide.eclipse.dashboard" version="3.5.1.qualifier">
+       url="features/org.springsource.ide.eclipse.dashboard_3.6.0.qualifier.jar" 
+   	   id="org.springsource.ide.eclipse.dashboard" version="3.6.0.qualifier">
        <category name="Extensions / Gradle Integration"/>
    </feature>
    
    <feature 
-       url="features/org.springsource.ide.eclipse.commons_3.5.1.qualifier.jar" 
-   	   id="org.springsource.ide.eclipse.commons" version="3.5.1.qualifier">
+       url="features/org.springsource.ide.eclipse.commons_3.6.0.qualifier.jar" 
+   	   id="org.springsource.ide.eclipse.commons" version="3.6.0.qualifier">
    </feature>
    
    <!-- gradle -->
