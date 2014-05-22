@@ -15,11 +15,6 @@
 	<dist.secretKey>${secretKey}</dist.secretKey>
   </properties>  
 
-  <profiles>
-  	<profile>
-  		<!-- stuff related to zipping and uploading the update site is only activated for
-  		     37 builds -->
-		<id>e37</id>
 		<build>
 			<plugins>
 			  <plugin>
@@ -135,7 +130,5 @@
 				</plugin>
 			</plugins>
 		</build>
-  	</profile>
-  </profiles>
 
 </project>
