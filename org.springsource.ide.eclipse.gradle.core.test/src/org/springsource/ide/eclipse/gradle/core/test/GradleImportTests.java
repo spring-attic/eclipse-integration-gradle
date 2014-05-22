@@ -241,9 +241,9 @@ public class GradleImportTests extends GradleTest {
 		}
 	}
 
-	public void testImportSpringSecurity() throws Exception {
-		//TODO: test currently failing.
-		/// See http://forums.gradle.org/gradle/topics/tooling_api_1_2_model_build_fails_when_there_are_unresolved_dependencies
+	public void DISABLEDtestImportSpringSecurity() throws Exception {
+		//Test disabled. To reenable need to use more recent version of spring-security that is compatible
+		// with current groovy eclipse compiler.
 		
 		setSnapshotDistro();
 		GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-security", 
