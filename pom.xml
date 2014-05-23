@@ -603,7 +603,7 @@
 						<skip>${test.skip}</skip>
 						<useUIThread>${test.useUIThread}</useUIThread>
 						<useUIHarness>true</useUIHarness>
-						<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
+						<forkedProcessTimeoutInSeconds>14400</forkedProcessTimeoutInSeconds>
 						<showEclipseLog>true</showEclipseLog>
 						<testSuite>${project.artifactId}</testSuite>
 						<testClass>${test.class}</testClass>
