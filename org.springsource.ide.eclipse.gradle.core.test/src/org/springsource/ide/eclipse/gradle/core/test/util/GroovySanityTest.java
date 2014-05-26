@@ -29,7 +29,7 @@ public class GroovySanityTest extends GradleTest {
     }
 	
 	public void testSanity() throws BundleException {
-		checkSanity(8); //Currently some of the imported projects expecting Groovy 1.8 or they will fail.
+		checkSanity(1); //Expect Groovy 2.1 at the moment
 	}
 
 	public static void checkSanity(int expectMinor) throws BundleException {
