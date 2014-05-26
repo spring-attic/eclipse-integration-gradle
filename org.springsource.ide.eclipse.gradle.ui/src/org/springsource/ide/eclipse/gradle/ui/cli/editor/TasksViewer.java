@@ -21,10 +21,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ContentAssistEvent;
-import org.eclipse.jface.text.contentassist.ICompletionListener;
-import org.eclipse.jface.text.contentassist.ICompletionListenerExtension2;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.OverviewRuler;
@@ -35,7 +31,6 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
@@ -48,7 +43,6 @@ import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
-import org.gradle.api.Project;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 
 /**
@@ -97,8 +91,6 @@ public class TasksViewer {
 	private GradleProjectIndex tasksIndex;
 	
 	private boolean activateContentAssistIfProjectSeparatorDetected = false;
-	
-	private ICompletionListener completionListener = new CompletionListener();
 	
 	private boolean activateContentAssistOnEmptyDocument = false;
 	
@@ -178,27 +170,11 @@ public class TasksViewer {
 		}
 		
 		activateHandler();
-		
-		setActivateContentAssistIfProjectSeparatorDetected(true);
-		
+				
 	}
 	
 	public boolean isActivateContentAssistIfProjectSeparatorDetected() {
 		return activateContentAssistIfProjectSeparatorDetected;
-	}
-
-	public void setActivateContentAssistIfProjectSeparatorDetected(
-			boolean activateContentAssistIfProjectSeparatorDetected) {
-		if (this.activateContentAssistIfProjectSeparatorDetected != activateContentAssistIfProjectSeparatorDetected) {
-			if (activateContentAssistIfProjectSeparatorDetected) {
-				viewer.getContentAssistantFacade().addCompletionListener(
-						completionListener);
-			} else {
-				viewer.getContentAssistantFacade().removeCompletionListener(
-						completionListener);
-			}
-			this.activateContentAssistIfProjectSeparatorDetected = activateContentAssistIfProjectSeparatorDetected;
-		}
 	}
 
     private void activateHandler(){
@@ -223,9 +199,6 @@ public class TasksViewer {
 	}
 	
 	public void dispose() {
-		if (isActivateContentAssistIfProjectSeparatorDetected()) {
-			viewer.getContentAssistantFacade().removeCompletionListener(completionListener);
-		}
 		if (isActivateContentAssistOnEmptyDocument()) {
 			viewer.getTextWidget().removeFocusListener(focusListener);
 		}
@@ -255,41 +228,5 @@ public class TasksViewer {
 			this.activateContentAssistOnEmptyDocument = activateContentAssistOnEmptyDocument;
 		}
 	}
-
-	private class CompletionListener implements ICompletionListener, ICompletionListenerExtension2 {
-		
-		@Override
-		public void applied(ICompletionProposal proposal) {
-			if (proposal instanceof TaskCompletionProposal) {
-				TaskCompletionProposal taskProposal = (TaskCompletionProposal) proposal;
-				if (taskProposal.getReplacementString().endsWith(Project.PATH_SEPARATOR)) {
-					Point position = proposal.getSelection(viewer.getDocument());
-					viewer.setSelectedRange(position.x, position.y);
-					viewer.revealRange(position.x, position.y);
-					if (viewer.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS)) {
-						viewer.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
-					}
-				}
-			}
-		}
-
-		@Override
-		public void assistSessionStarted(ContentAssistEvent event) {
-			// nothing
-		}
-
-		@Override
-		public void assistSessionEnded(ContentAssistEvent event) {
-			// nothing
-		}
-
-		@Override
-		public void selectionChanged(ICompletionProposal proposal,
-				boolean smartToggle) {
-			// nothing
-		}
-		
-	}
-
 	
 }

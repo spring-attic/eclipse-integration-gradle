@@ -144,9 +144,9 @@ public class TaskContentAssistantProcessor implements IContentAssistProcessor {
     		displayString.append(' ');
     		displayString.append(project.getName(), StyledString.DECORATIONS_STYLER);
     		String replaceString = project.getPath();
-    		if (replaceString.lastIndexOf(Project.PATH_SEPARATOR) != replaceString.length() - Project.PATH_SEPARATOR.length()) {
-    			replaceString += Project.PATH_SEPARATOR;
-    		}
+//    		if (replaceString.lastIndexOf(Project.PATH_SEPARATOR) != replaceString.length() - Project.PATH_SEPARATOR.length()) {
+//    			replaceString += Project.PATH_SEPARATOR;
+//    		}
 			proposals.add(new TaskCompletionProposal(offset - prefix.length(),
 					offset, replaceString, displayString, project
 							.getDescription(), GradleUI.getDefault()
