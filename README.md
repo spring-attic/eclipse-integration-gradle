@@ -71,7 +71,7 @@ If you have a question that Google can't answer, the best way is to go to the [S
 
 There you can also ask questions and search for other people with related or similar problems (and solutions). New versions of the Gradle Eclipse Integration (and other tooling that is brought to you by SpringSource) are announced there as well.
 
-With regards to bug reports, please go to the [STS issue tracker](https://issuetracker.springsource.com/browse/STS) and choose the GRADLE component when filing new issues.
+With regards to bug reports, please go to the [STS issue tracker](https://issuetracker.springsource.com/browse/STS) and choose the [GRADLE component](https://issuetracker.springsource.com/browse/STS-3405?jql=project%20%3D%20STS%20AND%20resolution%20%3D%20Unresolved%20AND%20component%20%3D%20GRADLE%20ORDER%20BY%20priority%20DESC) when filing new issues.
 
 ## Developing Eclipse Integration Gradle
 
