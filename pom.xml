@@ -231,46 +231,6 @@
 				<repository>
 					<id>swtbot</id>
 					<layout>p2</layout>
-					<url> 	http://download.eclipse.org/eclipse/updates/4.4milestones</url>
-				</repository>
-				<repository>
-					<id>greclipse43</id>
-					<layout>p2</layout>
-					<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.eclipse-integration-commons-version}/e3.7/</url>
-				</repository>
-
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>e44</id>
-			<properties>
-				<dist.target>e4.4</dist.target>
-				<dist.platform.name>Luna</dist.platform.name>
-				<dist.platform.id>luna</dist.platform.id>
-				<dist.platform.version>4.4</dist.platform.version>
-				<package.qualifierPrefix>e44</package.qualifierPrefix>
-				<version.weaving>1.0.0.R3_6_2</version.weaving>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform</id>
-					<layout>p2</layout>
-					<url>http://download.eclipse.org/eclipse/updates/4.4/</url>
-				</repository>
-				<repository> 
-					<id>kepler</id>
-					<layout>p2</layout>
-					<url>http://download.eclipse.org/releases/luna/</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
 					<url>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/</url>
 				</repository>
 				<repository>
