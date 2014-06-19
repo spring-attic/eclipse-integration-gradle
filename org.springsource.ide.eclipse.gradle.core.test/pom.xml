@@ -20,7 +20,7 @@
       <id>GrailsCore</id>
       <properties>
           <test.class>org.springsource.ide.eclipse.gradle.core.test.GrailsCoreBuildTest</test.class>
-          <groovy.compiler.feature>org.codehaus.groovy21.feature.feature.group</groovy.compiler.feature>
+          <groovy.compiler.feature>org.codehaus.groovy23.feature.feature.group</groovy.compiler.feature>
       </properties>
     </profile>
     <profile>
