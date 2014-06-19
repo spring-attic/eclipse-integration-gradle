@@ -261,12 +261,14 @@
 					<!--  <url>http://download.eclipse.org/eclipse/updates/4.4/</url> -->
 					<url>http://download.eclipse.org/eclipse/updates/4.4milestones</url>
 				</repository>
-				<!-- doesn't exist yet, try if we really need it (and what for) 
 				 <repository> 
 					<id>kepler</id>
 					<layout>p2</layout>
+					<!-- should be this but it doesn't exist yet: 
+					   <url>http://download.eclipse.org/releases/luna/</url>
+					  -->
 					<url>http://download.eclipse.org/releases/kepler/</url>
-				</repository> -->
+				</repository>
 				<repository>
 					<id>swtbot</id>
 					<layout>p2</layout>
