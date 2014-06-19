@@ -22,11 +22,12 @@
       <category name="Extensions / Gradle Integration" />
    </feature>
 
+   <!-- Dashboard: removed should only be consumed from commons update site 
    <feature 
        url="features/org.springsource.ide.eclipse.dashboard_3.6.0.qualifier.jar" 
    	   id="org.springsource.ide.eclipse.dashboard" version="3.6.0.qualifier">
        <category name="Extensions / Gradle Integration"/>
-   </feature>
+   </feature> -->
    
    <feature 
        url="features/org.springsource.ide.eclipse.commons_3.6.0.qualifier.jar" 
@@ -39,72 +40,5 @@
       <category name="Extensions / Gradle Integration"/>
    </feature>
 
-
-    <!-- Third party dependencies (note: copied from the commons site, probably too much stuff here
-         but that's ok. As long we don't have stuff missing) -->
-    
-	<bundle id="javax.el" version="0.0.0"/>
-	<bundle id="javax.el.source" version="0.0.0"/>
-	<bundle id="javax.jms" version="0.0.0"/>
-	<bundle id="javax.jms.source" version="0.0.0"/>
-	<bundle id="org.apache.commons.codec" version="0.0.0"/>
-	<bundle id="org.apache.commons.codec.source" version="0.0.0"/>
-	<bundle id="org.apache.httpcomponents.httpclient" version="0.0.0"/>
-	<bundle id="org.apache.httpcomponents.httpclient.source" version="0.0.0"/>
-	<bundle id="org.apache.httpcomponents.httpcore" version="0.0.0"/>
-	<bundle id="org.apache.httpcomponents.httpcore.source" version="0.0.0"/>
-	<bundle id="com.springsource.util.common" version="0.0.0"/>
-	<bundle id="com.springsource.util.common.source" version="0.0.0"/>
-	<bundle id="edu.emory.mathcs.backport" version="0.0.0"/>
-	<bundle id="edu.emory.mathcs.backport.source" version="0.0.0"/>
-	<bundle id="javax.activation" version="0.0.0"/>
-	<bundle id="javax.annotation" version="0.0.0"/>
-	<bundle id="javax.annotation.source" version="0.0.0"/>
-	<bundle id="javax.mail" version="0.0.0"/>
-	<bundle id="javax.xml.stream" version="0.0.0"/>
-	<bundle id="javax.xml.ws" version="0.0.0"/>
-	<bundle id="org.aopalliance" version="0.0.0"/>
-	<bundle id="org.apache.commons.collections" version="0.0.0"/>
-	<bundle id="org.apache.commons.collections.source" version="0.0.0"/>
-	<bundle id="org.apache.commons.io" version="0.0.0"/>
-	<bundle id="org.apache.commons.io.source" version="0.0.0"/>
-	<bundle id="org.apache.commons.logging" version="0.0.0"/>
-	<bundle id="org.apache.commons.logging.source" version="0.0.0"/>
-	<bundle id="org.springframework.aop" version="0.0.0"/>
-	<bundle id="org.springframework.aop.source" version="0.0.0"/>
-	<bundle id="org.springframework.beans" version="0.0.0"/>
-	<bundle id="org.springframework.beans.source" version="0.0.0"/>
-	<bundle id="org.springframework.context" version="0.0.0"/>
-	<bundle id="org.springframework.context.source" version="0.0.0"/>
-	<bundle id="org.springframework.context.support" version="0.0.0"/>
-	<bundle id="org.springframework.context.support.source" version="0.0.0"/>
-	<bundle id="org.springframework.core" version="0.0.0"/>
-	<bundle id="org.springframework.core.source" version="0.0.0"/>
-	<bundle id="org.springframework.data.core" version="0.0.0"/>
-	<bundle id="org.springframework.data.core.source" version="0.0.0"/>
-	<bundle id="org.springframework.expression" version="0.0.0"/>
-	<bundle id="org.springframework.expression.source" version="0.0.0"/>
-	<bundle id="org.springframework.jdbc" version="0.0.0"/>
-	<bundle id="org.springframework.jdbc.source" version="0.0.0"/>
-	<bundle id="org.springframework.jms" version="0.0.0"/>
-	<bundle id="org.springframework.jms.source" version="0.0.0"/>
-	<bundle id="org.springframework.orm" version="0.0.0"/>
-	<bundle id="org.springframework.orm.source" version="0.0.0"/>
-	<bundle id="org.springframework.oxm" version="0.0.0"/>
-	<bundle id="org.springframework.oxm.source" version="0.0.0"/>
-	<bundle id="org.springframework.transaction" version="0.0.0"/>
-	<bundle id="org.springframework.transaction.source" version="0.0.0"/>
-	<bundle id="org.springframework.web.servlet" version="0.0.0"/>
-	<bundle id="org.springframework.web.servlet.source" version="0.0.0"/>
-	<bundle id="org.springframework.web" version="0.0.0"/>
-	<bundle id="org.springframework.web.source" version="0.0.0"/>
-
-	<bundle id="org.springframework.uaa.client" version="0.0.0"/>
-	<bundle id="org.springframework.roo.wrapping.bcpg-jdk15" version="0.0.0"/>
-	<bundle id="org.springframework.roo.wrapping.bcprov-jdk15" version="0.0.0"/>
-	<bundle id="org.springframework.roo.wrapping.json-simple" version="0.0.0"/>
-	<bundle id="com.google.protobuf" version="0.0.0"/>
-	<bundle id="com.google.protobuf.source" version="0.0.0"/>
-	<bundle id="org.codehaus.jackson.core" version="0.0.0"/>
 
 </site>
