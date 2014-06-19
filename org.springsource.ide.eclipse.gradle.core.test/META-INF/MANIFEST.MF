@@ -36,4 +36,9 @@ Require-Bundle: org.junit,
  org.eclipse.m2e.discovery,
  org.eclipse.m2e.core.ui,
  org.eclipse.m2e.scm,
- org.springsource.ide.eclipse.gradle.toolingapi
+ org.springsource.ide.eclipse.gradle.toolingapi,
+ org.eclipse.equinox.ds,
+ org.eclipse.equinox.event,
+ org.grails.ide.eclipse.resources,
+ org.eclipse.ui.workbench
+ 
