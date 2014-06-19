@@ -121,9 +121,6 @@
 
 		<profile>
 			<id>e37</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<dist.target>e3.7</dist.target>
 				<dist.platform.name>Indigo</dist.platform.name>
@@ -246,6 +243,48 @@
 
 			</repositories>
 		</profile>
+		
+		<profile>
+			<id>e44</id>
+			<properties>
+				<dist.target>e4.4</dist.target>
+				<dist.platform.name>Luna</dist.platform.name>
+				<dist.platform.id>luna</dist.platform.id>
+				<dist.platform.version>4.4</dist.platform.version>
+				<package.qualifierPrefix>e44</package.qualifierPrefix>
+				<version.weaving>1.0.0.R3_6_2</version.weaving>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform</id>
+					<layout>p2</layout>
+					<!--  <url>http://download.eclipse.org/eclipse/updates/4.4/</url> -->
+					<url>http://download.eclipse.org/eclipse/updates/4.4milestones</url>
+				</repository>
+				<!-- doesn't exist yet, try if we really need it (and what for) 
+				 <repository> 
+					<id>kepler</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/kepler/</url>
+				</repository> -->
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+					<id>greclipse44</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
+				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.eclipse-integration-commons-version}/e4.4/</url>
+				</repository>
+			</repositories>
+		</profile>
+
 		
 
 		<profile>
