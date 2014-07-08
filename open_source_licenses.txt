@@ -1,6 +1,7 @@
 open_source_license.txt
 
-Gradle Integration for Eclipse 3.5.0 GA
+Gradle Integration for Eclipse 3.6.0 GA
+
 
 =================================================================
 Pivotal makes available all content in this download ("Content"). 
@@ -19,6 +20,7 @@ TABLE OF CONTENTS
 The following is a listing of the open source components detailed in this document. 
 This list is provided for your convenience; please read further if you wish to review 
 the copyright notice(s) and the full text of the license associated with each component.
+
 
 
 
@@ -48,22 +50,22 @@ SECTION 2: Apache License, V2.0
    >>> kryo-2.20
    >>> objenesis-1.2
    >>> org.apache.commons.logging-1.1.1
-   >>> org.springframework.aop-4.0.0.m1
-   >>> org.springframework.beans-4.0.0.m1
-   >>> org.springframework.context-4.0.0.m1
-   >>> org.springframework.context.support-4.0.0.m1
-   >>> org.springframework.core-4.0.0.m1
+   >>> org.springframework.aop-4.0.2
+   >>> org.springframework.beans-4.0.2
+   >>> org.springframework.context-4.0.2
+   >>> org.springframework.context.support-4.0.2
+   >>> org.springframework.core-4.0.2
    >>> org.springframework.data.core-1.7.0
-   >>> org.springframework.expression-4.0.0.m1
-   >>> org.springframework.jdbc-4.0.0.m1
-   >>> org.springframework.jms-4.0.0.m1
-   >>> org.springframework.orm-4.0.0.m1
-   >>> org.springframework.oxm-4.0.0.m1
+   >>> org.springframework.expression-4.0.2
+   >>> org.springframework.jdbc-4.0.2
+   >>> org.springframework.jms-4.0.2
+   >>> org.springframework.orm-4.0.2
+   >>> org.springframework.oxm-4.0.2
    >>> org.springframework.roo.wrapping.json-simple-1.1.0
-   >>> org.springframework.transaction-4.0.0.m1
+   >>> org.springframework.transaction-4.0.2
    >>> org.springframework.uaa.client-1.0.3
-   >>> org.springframework.web-4.0.0.m1
-   >>> org.springframework.web.servlet-4.0.0.m1
+   >>> org.springframework.web-4.0.2
+   >>> org.springframework.web.servlet-4.0.2
    >>> org.springsource.util.common-2.0.0
 
 
@@ -94,18 +96,18 @@ SECTION 4: Eclipse Public License, V1.0
    >>> org.eclipse.fx.javafx-2.2.0
    >>> org.eclipse.fx.osgi-0.9.0
    >>> org.eclipse.fx.osgi.util-0.9.0
-   >>> org.springframework.ide.eclipse.uaa-3.5.0
-   >>> org.springsource.ide.eclipse.commons.browser-3.5.0
-   >>> org.springsource.ide.eclipse.commons.completions-3.5.0
-   >>> org.springsource.ide.eclipse.commons.configurator-3.5.0
-   >>> org.springsource.ide.eclipse.commons.content.core-3.5.0
-   >>> org.springsource.ide.eclipse.commons.core-3.5.0
-   >>> org.springsource.ide.eclipse.commons.frameworks.core-3.5.0
-   >>> org.springsource.ide.eclipse.commons.frameworks.ui-3.5.0
-   >>> org.springsource.ide.eclipse.commons.gettingstarted-3.5.0
-   >>> org.springsource.ide.eclipse.commons.livexp-3.5.0
-   >>> org.springsource.ide.eclipse.commons.ui-3.5.0
-   >>> org.springsource.ide.eclipse.dashboard.ui-3.5.0
+   >>> org.springframework.ide.eclipse.uaa-3.6.0
+   >>> org.springsource.ide.eclipse.commons.browser-3.6.0
+   >>> org.springsource.ide.eclipse.commons.completions-3.6.0
+   >>> org.springsource.ide.eclipse.commons.configurator-3.6.0
+   >>> org.springsource.ide.eclipse.commons.content.core-3.6.0
+   >>> org.springsource.ide.eclipse.commons.core-3.6.0
+   >>> org.springsource.ide.eclipse.commons.frameworks.core-3.6.0
+   >>> org.springsource.ide.eclipse.commons.frameworks.ui-3.6.0
+   >>> org.springsource.ide.eclipse.commons.gettingstarted-3.6.0
+   >>> org.springsource.ide.eclipse.commons.livexp-3.6.0
+   >>> org.springsource.ide.eclipse.commons.ui-3.6.0
+   >>> org.springsource.ide.eclipse.dashboard.ui-3.6.0
 
 
 
@@ -116,7 +118,6 @@ APPENDIX. Standard License Files
    >>> Eclipse Public License, V1.0
 
    >>> Common Development and Distribution License, V1.0
-
 
 
 
@@ -383,7 +384,7 @@ This product includes/uses software(s) developed by 'an unknown organization'
 - Unnamed - logkit: logkit: jar: 1.0.1
 
 
->>> org.springframework.aop-4.0.0.m1
+>>> org.springframework.aop-4.0.2
 
 Copyright 2002-2007 the original author or authors.
 
@@ -396,7 +397,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 
->>> org.springframework.beans-4.0.0.m1
+>>> org.springframework.beans-4.0.2
 
 Copyright 2002-2007 the original author or authors.
 
@@ -408,7 +409,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 
->>> org.springframework.context-4.0.0.m1
+>>> org.springframework.context-4.0.2
 
 Copyright 2002-2008 the original author or authors.
 
@@ -421,7 +422,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 
->>> org.springframework.context.support-4.0.0.m1
+>>> org.springframework.context.support-4.0.2
 
 Copyright 2002-2008 the original author or authors.
 
@@ -432,7 +433,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 
->>> org.springframework.core-4.0.0.m1
+>>> org.springframework.core-4.0.2
 
 Copyright 2002-2008 the original author or authors.
 
@@ -462,7 +463,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> org.springframework.expression-4.0.0.m1
+>>> org.springframework.expression-4.0.2
 
 Copyright 2002-2009 the original author or authors.
 
@@ -475,7 +476,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 
->>> org.springframework.jdbc-4.0.0.m1
+>>> org.springframework.jdbc-4.0.2
 
 Copyright 2002-2009 the original author or authors.
 
@@ -488,7 +489,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 
->>> org.springframework.jms-4.0.0.m1
+>>> org.springframework.jms-4.0.2
 
 Copyright 2002-2009 the original author or authors.
 
@@ -505,7 +506,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> org.springframework.orm-4.0.0.m1
+>>> org.springframework.orm-4.0.2
 
 Copyright 2002-2011 the original author or authors.
 
@@ -518,7 +519,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 
->>> org.springframework.oxm-4.0.0.m1
+>>> org.springframework.oxm-4.0.2
 
 Copyright 2002-2011 the original author or authors.
 
@@ -535,7 +536,7 @@ See the License for the specific language governing permissions and limitations 
 License: Apache 2.0
 
 
->>> org.springframework.transaction-4.0.0.m1
+>>> org.springframework.transaction-4.0.2
 
 Copyright 2002-2006 the original author or authors.
 
@@ -575,7 +576,7 @@ Other software is used by Spring UAA as follows:
 * Base64 (http://iharder.net/base64) is used for Base64 encoding and decoding. It has been formally granted to the public domain.
 
 
->>> org.springframework.web-4.0.0.m1
+>>> org.springframework.web-4.0.2
 
 Copyright 2002-2011 the original author or authors.
 
@@ -587,7 +588,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 
->>> org.springframework.web.servlet-4.0.0.m1
+>>> org.springframework.web.servlet-4.0.2
 
 Copyright 2007 the original author or authors.
 
@@ -624,7 +625,7 @@ Common Development and Distribution License, V1.0 is applicable to the following
 
 >>> javax.annotation-1.1.1
 
-[PLEASE NOTE: PIVOTAL SOFTWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE CDDL 1.0. PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF CDDL 1.0. THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.] 
+[PLEASE NOTE:  PIVOTAL SOFTWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE CDDL 1.0. PLEASE SEE THE APPENDIX TO REVIEW THE FULL TEXT OF CDDL 1.0. THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.] 
 
 License: CDDL 1.0
 
@@ -1110,7 +1111,7 @@ http://www.eclipse.org
 .
 
 
->>> org.springframework.ide.eclipse.uaa-3.5.0
+>>> org.springframework.ide.eclipse.uaa-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1123,7 +1124,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.browser-3.5.0
+>>> org.springsource.ide.eclipse.commons.browser-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1136,7 +1137,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.completions-3.5.0
+>>> org.springsource.ide.eclipse.commons.completions-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1149,7 +1150,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.configurator-3.5.0
+>>> org.springsource.ide.eclipse.commons.configurator-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1162,7 +1163,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.content.core-3.5.0
+>>> org.springsource.ide.eclipse.commons.content.core-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1175,7 +1176,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.core-3.5.0
+>>> org.springsource.ide.eclipse.commons.core-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1188,7 +1189,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.frameworks.core-3.5.0
+>>> org.springsource.ide.eclipse.commons.frameworks.core-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1201,7 +1202,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.frameworks.ui-3.5.0
+>>> org.springsource.ide.eclipse.commons.frameworks.ui-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1214,7 +1215,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.gettingstarted-3.5.0
+>>> org.springsource.ide.eclipse.commons.gettingstarted-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1227,7 +1228,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.livexp-3.5.0
+>>> org.springsource.ide.eclipse.commons.livexp-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1240,7 +1241,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.commons.ui-3.5.0
+>>> org.springsource.ide.eclipse.commons.ui-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -1253,7 +1254,7 @@ Third Party Content
 The Content includes items that have been sourced from third parties, as set out in the file called open_source_licenses.txt, located in the feature components of this project.
 
 
->>> org.springsource.ide.eclipse.dashboard.ui-3.5.0
+>>> org.springsource.ide.eclipse.dashboard.ui-3.6.0
 
 About Eclipse Integration Commons
 About Eclipse Integration Commons
@@ -2009,7 +2010,6 @@ constitute any admission of liability.
 
 
 
-
 ===========================================================================
 
 To the extent any open source components are licensed under the
@@ -2018,15 +2018,15 @@ source code and/or modifications to source code to be made
 available (as would be noted above), you may obtain a copy of
 the source code corresponding to the binaries for such open
 source components and modifications thereto, if any, (the
-"Source Files"), by downloading the Source Files from Pivotal website at
-(http://www.gopivotal.com/open-source),or by sending a request, 
-with your name and address to: Pivotal Software Inc.3496 Deer Creek Rd, 
-Palo Alto, CA 94304,Attention: General Counsel. 
-All such requests should clearly specify: OPEN SOURCE FILES REQUEST,
-Attention General Counsel. Pivotal shall mail a copy of the
-Source Files to you on a CD or equivalent physical medium. This
-offer to obtain a copy of the Source Files is valid for three
+"Source Files"), by downloading the Source Files from Pivotal's website at
+http://www.gopivotal.com/open-source, or by sending a request, 
+with your name and address to: Pivotal Software, Inc., 3496 Deer Creek Rd, 
+Palo Alto, CA 94304, Attention: General Counsel. All such requests should 
+clearly specify: OPEN SOURCE FILES REQUEST, Attention General Counsel. 
+Pivotal shall mail a copy of the Source Files to you on a CD or equivalent physical medium. 
+This offer to obtain a copy of the Source Files is valid for three
 years from the date you acquired this Software product. 
 Alternatively, the Source Files may accompany the Pivotal product.
 
-[GRADLEIDE350GASS030714]
+
+[GRADLEIDE360GASS070714]
