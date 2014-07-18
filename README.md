@@ -93,7 +93,7 @@ Steps:
  4. install Groovy Eclipse from this update site: `http://dist.codehaus.org/groovy/distributions/greclipse/snapshot/e4.2/`
     - install everything on the update site except 'm2e Configurator ...'
     - make sure you *do* install 'Groovy Eclipse Test Feature' if you want to be able to compile and run the Gradle IDE regressions tests.
- 5. install Eclipse Integration Gradle tooling from this update site: `http://dist.springsource.com/snapshot/TOOLS/nightly/gradle`
+ 5. install Eclipse Integration Gradle tooling from this update site: `http://dist.springsource.com/snapshot/TOOLS/gradle/nightly`
  
 ### Getting the source code
 
