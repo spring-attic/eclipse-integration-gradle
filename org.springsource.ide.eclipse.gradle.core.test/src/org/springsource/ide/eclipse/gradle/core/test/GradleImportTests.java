@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -519,7 +519,7 @@ public class GradleImportTests extends GradleTest {
 		setSnapshotDistro();
 		importGitProject(new GitProject("spring-data-redis", 
 				new URI("git://github.com/SpringSource/spring-data-redis.git"),
-				"9a31eb13")
+				"4c3419c")
 		);
 		
 		
@@ -529,8 +529,7 @@ public class GradleImportTests extends GradleTest {
 //		}
 		
 		assertProjects(
-				"spring-data-redis",
-				"docs"
+				"spring-data-redis"
 		);
 		
 	}

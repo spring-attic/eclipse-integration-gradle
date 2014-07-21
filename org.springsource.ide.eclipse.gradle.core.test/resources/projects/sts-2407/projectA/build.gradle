@@ -5,10 +5,12 @@ defaultTasks = ['build']
 subprojects {
 	apply plugin: 'java'
 	
-	springVersions = [framework: '3.0.5.RELEASE', security: '3.0.2.RELEASE', 
-			webflow: '2.3.0.RELEASE', frameworkMoble: '1.0.0.M3', integration: '2.0.5.RELEASE']
-	versions = [spring: springVersions, jetty: '8.0.0.RC0', aspectj: '1.6.4', slf4j: '1.6.2', logback: '0.9.30',
-			tomcat: "7.0.5", jmock: "2.5.1"]
+	ext {
+		springVersions = [framework: '3.0.5.RELEASE', security: '3.0.2.RELEASE', 
+				webflow: '2.3.0.RELEASE', frameworkMoble: '1.0.0.M3', integration: '2.0.5.RELEASE']
+		versions = [spring: springVersions, jetty: '8.0.0.RC0', aspectj: '1.6.4', slf4j: '1.6.2', logback: '0.9.30',
+				tomcat: "7.0.5", jmock: "2.5.1"]
+	}
 	
 	sourceCompatibility = JavaVersion.VERSION_1_6
 	targetCompatibility = JavaVersion.VERSION_1_6
