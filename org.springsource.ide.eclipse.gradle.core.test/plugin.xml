@@ -31,8 +31,8 @@
             name="DAG Conf B">
       </configurator>
       <configurator
-            after="org.springsource.ide.eclipse.gradle.core.test.dag_conf_b"
-            before="org.springsource.ide.eclipse.gradle.core.test.dag_conf_d, "
+            after="org.springsource.ide.eclipse.gradle.core.test.dag_conf_b, org.springsource.ide.eclipse.gradle.core.test.dag_conf_a"
+            before="org.springsource.ide.eclipse.gradle.core.test.dag_conf_d, org.springsource.ide.eclipse.gradle.core.test.dag_conf_e"
             class="org.springsource.ide.eclipse.gradle.core.test.util.TestProjectConfigurators$DagConfC"
             id="org.springsource.ide.eclipse.gradle.core.test.dag_conf_c"
             name="DAG Conf C">

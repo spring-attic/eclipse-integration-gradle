@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,9 +26,7 @@ import org.codehaus.groovy.eclipse.dsl.tests.InferencerWorkload.InferencerTask;
 import org.codehaus.jdt.groovy.model.GroovyCompilationUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -44,7 +42,6 @@ import org.springsource.ide.eclipse.gradle.core.dsld.GradleDSLDClasspathContaine
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.GradleInferencerWorkload;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
-import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 
 
@@ -128,8 +125,10 @@ public class GradleDSLDTests extends GradleTest {
 				" \n" + 
 				"/*!V:P!*/allprojects/*!*/ { \n" + 
 				"    version = '3.1.1.CI-SNAPSHOT'\n" + 
-				"    releaseBuild = version.endsWith('RELEASE')\n" + 
-				"    snapshotBuild = version.endsWith('SNAPSHOT')\n" + 
+				"    ext {\n" + 
+				"    	releaseBuild = version.endsWith('RELEASE')\n" + 
+				"    	snapshotBuild = version.endsWith('SNAPSHOT')\n" + 
+				"    }\n" + 
 				"\n" + 
 				"    group = 'org.springframework.security'\n" + 
 				"\n" + 
@@ -155,9 +154,9 @@ public class GradleDSLDTests extends GradleTest {
 		
 		GroovyCompilationUnit unit = getUnit(project, "build.gradle");
 		workload.perform(unit, false);
-//		for (InferencerTask task : workload) {
-//			assertType(unit, task.start, task.end, task.expectedResultType, task.expectedDeclaringType);
-//		}
+		for (InferencerTask task : workload) {
+			assertType(unit, task.start, task.end, task.expectedResultType, task.expectedDeclaringType);
+		}
 	}
 
 	public static void assertType(GroovyCompilationUnit unit, int start, int end, String expectedResultType, String expectedDeclaringType) {
