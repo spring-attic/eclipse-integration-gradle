@@ -199,9 +199,6 @@ public class TasksViewer {
 	}
 	
 	public void dispose() {
-		if (isActivateContentAssistOnEmptyDocument()) {
-			viewer.getTextWidget().removeFocusListener(focusListener);
-		}
     	if(activation != null && service != null) {
     		service.deactivateHandler(activation);
     	}
