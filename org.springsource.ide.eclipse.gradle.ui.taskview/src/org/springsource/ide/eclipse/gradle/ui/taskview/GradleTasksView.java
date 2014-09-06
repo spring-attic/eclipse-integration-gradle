@@ -35,6 +35,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISelectionListener;
@@ -111,6 +112,10 @@ public class GradleTasksView extends ViewPart {
 		if (viewer!=null) {
 			projectSelector.setProject(p);
 			viewer.setInput(p);
+			Tree tree = viewer.getTree();
+			for (TreeColumn col : tree.getColumns()) {
+				col.pack();
+			}
 			tasksConsoleAction.selectChanged(new StructuredSelection(Collections.singletonList(p.getProject())));
 			saveDialogSettings();
 		}
@@ -278,7 +283,7 @@ public class GradleTasksView extends ViewPart {
 		GradleProject project = projectSelector.getProject();
 		if (project!=null) {
 			project.requestGradleModelRefresh();
-			viewer.refresh();
+//			viewer.refresh();
 		}
 	}
 

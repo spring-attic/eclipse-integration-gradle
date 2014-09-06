@@ -18,8 +18,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.gradle.tooling.model.GradleTask;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
@@ -65,10 +63,6 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 					public void run() {
 						if (viewer!=null) {
 							viewer.refresh();
-							Tree tree = viewer.getTree();
-							for (TreeColumn col : tree.getColumns()) {
-								col.pack();
-							}
 						}
 					}
 				});
@@ -101,7 +95,8 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 			return NO_ELEMENTS;
 		} else {
 			try {
-				return getGradleTasks(root.requestGradleModel());
+				GradleTask[] gradleTasks = getGradleTasks(root.requestGradleModel());
+				return gradleTasks;
 			} catch (FastOperationFailedException e) {
 				return new Object[] {"model not yet available"};
 			} catch (CoreException e) {
