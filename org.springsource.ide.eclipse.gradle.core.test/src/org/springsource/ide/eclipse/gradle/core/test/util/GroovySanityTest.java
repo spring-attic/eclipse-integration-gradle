@@ -29,7 +29,7 @@ public class GroovySanityTest extends GradleTest {
     }
 	
 	public void testSanity() throws BundleException {
-		checkSanity(1); //Expect Groovy 2.1 at the moment
+		checkSanity(3); //Expect Groovy 2.3 at the moment
 	}
 
 	public static void checkSanity(int expectMinor) throws BundleException {
