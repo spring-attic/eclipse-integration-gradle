@@ -628,7 +628,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects("quickstart");
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.11.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
 		
 		assertNoRawLibraryEntries(project);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
