@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
-import org.springsource.ide.eclipse.gradle.core.util.Distributions;
 
 
 /**
@@ -112,13 +111,13 @@ public class GradleProjectTest extends GradleTest {
 		
 		//With Group model provider, forcing one model build should force all related models
 		//to become available.
-		projects[3].getSkeletalGradleModel(new NullProgressMonitor()); 
+		projects[3].getSkeletalGradleModel(new NullProgressMonitor(), null); 
 		for (TestProjectListener listener : listeners) {
 			listener.checkExpected(HierarchicalEclipseProject.class, 1);
 		}
 
 		//Forcing more detailed model should cause another round of update events.
-		projects[2].getGradleModel(new NullProgressMonitor()); 
+		projects[2].getGradleModel(new NullProgressMonitor(), null); 
 		for (TestProjectListener listener : listeners) {
 			listener.checkExpected(EclipseProject.class, 2);
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,8 @@ package org.springsource.ide.eclipse.gradle.core.test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
-import org.springsource.ide.eclipse.gradle.core.test.util.InterruptEater;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 
 
@@ -38,7 +36,7 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"}");
 
 				importOp.verify();
-				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
 				assertErrors(getProject(projectName), true,
 						"unresolved dependency - foo bar 1.2.3",
 						"unresolved dependency - peyo smurf 1.0.0"
@@ -60,11 +58,11 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"}");
 
 				importOp.verify();
-				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
 				
 				IProject p = getProject(projectName);
 				IJavaProject jp = getJavaProject(projectName);
-				GradleProject gp = getGradleProject(projectName);
+//				GradleProject gp = getGradleProject(projectName);
 				
 				assertErrors(p, true,
 						"unresolved dependency - foo bar 1.2.3",
@@ -100,11 +98,11 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"}");
 
 				importOp.verify();
-				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
 				
 				IProject p = getProject(projectName);
-				IJavaProject jp = getJavaProject(projectName);
-				GradleProject gp = getGradleProject(projectName);
+//				IJavaProject jp = getJavaProject(projectName);
+//				GradleProject gp = getGradleProject(projectName);
 
 				//Outcomment one of the entries. Error should go away if dependencies are refreshed
 				createFile(p, "build.gradle", 

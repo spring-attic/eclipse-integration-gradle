@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -513,7 +513,7 @@ public class GradleImportWizardPageOne extends WizardPage {
 				public void doit(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 					GradleProject selectedProject = GradleCore.create(rf);
 					selectedProject.invalidateGradleModel(); // TODO: with better invalidation from Gradle, this may not be necessary
-					selectedProject.getSkeletalGradleModel(monitor); //forces model to be built
+					selectedProject.getSkeletalGradleModel(monitor, cancellationSource.token()); //forces model to be built
 
 					try {
 						

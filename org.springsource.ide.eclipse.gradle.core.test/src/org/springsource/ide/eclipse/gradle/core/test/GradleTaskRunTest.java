@@ -51,7 +51,7 @@ public class GradleTaskRunTest extends GradleTest {
 		assertProjects(name);
 
 		GradleProject project = GradleCore.create(jproject);
-		Set<String> tasks = project.getAllTasks(new NullProgressMonitor());
+		Set<String> tasks = project.getAllTasks(new NullProgressMonitor(), null);
 		assertTrue(tasks.contains(":hello"));
 		
 		ILaunchConfigurationWorkingCopy launchConf = (ILaunchConfigurationWorkingCopy) GradleLaunchConfigurationDelegate.createDefault(project, false);
@@ -655,7 +655,7 @@ public class GradleTaskRunTest extends GradleTest {
 			assertProjects(name);
 
 			GradleProject project = GradleCore.create(jproject);
-			Set<String> tasks = project.getAllTasks(new NullProgressMonitor());
+			Set<String> tasks = project.getAllTasks(new NullProgressMonitor(), null);
 			assertTrue(tasks.contains(":hello"));
 
 			ILaunchConfigurationWorkingCopy launchConf = (ILaunchConfigurationWorkingCopy) GradleLaunchConfigurationDelegate.createDefault(project, false);
@@ -673,7 +673,7 @@ public class GradleTaskRunTest extends GradleTest {
 	}
 	
 	public static void assertTasks(GradleProject project, String... expectedTasks) throws OperationCanceledException, CoreException {
-		Set<String> actualTasks = project.getAllTasks(new NullProgressMonitor());
+		Set<String> actualTasks = project.getAllTasks(new NullProgressMonitor(), null);
 		for (String expectedTask : expectedTasks) {
 			assertTrue("Expected task is missing "+expectedTask, actualTasks.contains(expectedTask));
 		}

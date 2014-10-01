@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.util;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -33,9 +30,7 @@ public class JobUtil {
 	 * Instead use the schedule method that allows specifying an explicit rule.
 	 */
 	public static Job schedule(GradleRunnable runable) {
-		Job job = runable.asJob();
-		schedule(job, buildRule());
-		return job;
+		return schedule(runable.asJob(), buildRule());
 	}
 
 	/**
@@ -44,17 +39,16 @@ public class JobUtil {
 	 * Be careful when using this method of running tasks because it provides no
 	 * guarantees whatsoever about what other things may be executing concurrently.
 	 */
-	public static void schedule(ISchedulingRule rule, GradleRunnable runable) {
-		schedule(runable.asJob(), rule);
+	public static Job schedule(ISchedulingRule rule, GradleRunnable runable) {
+		return schedule(runable.asJob(), rule);
 	}
 
 
 	/**
 	 * Schedule this job as a "workspace job" (atomic operation, so only one resource delta generated for whole job).
 	 */
-	public static void workspaceJob(GradleRunnable runable) {
-		Job job = runable.asWorkspaceJob();
-		schedule(job);
+	public static Job workspaceJob(GradleRunnable runable) {
+		return schedule(runable.asWorkspaceJob());
 	}
 	
 	/**
@@ -70,18 +64,18 @@ public class JobUtil {
 	public static Job userJob(GradleRunnable runable) {
 		Job job = runable.asJob();
 		job.setUser(true);
-		schedule(job);
-		return job;
+		return schedule(job);
 	}
 	
-	private static void schedule(Job job, ISchedulingRule rule) {
+	private static Job schedule(Job job, ISchedulingRule rule) {
 		job.setPriority(Job.BUILD);
 		job.setRule(rule);
 		job.schedule();
+		return job;
 	}
 	
-	private static void schedule(Job job) {
-		schedule(job, buildRule());
+	private static Job schedule(Job job) {
+		return schedule(job, buildRule());
 	}
 	
 

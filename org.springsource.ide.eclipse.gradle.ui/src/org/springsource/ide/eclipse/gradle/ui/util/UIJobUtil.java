@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,17 +42,27 @@ public class UIJobUtil {
 	 * suppressed when another modal dialog is already open).
 	 */
 	public static void withProgressDialog(Shell shell, final GradleRunnable runnable) {
-		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(shell);
+		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(shell) {
+			@Override
+			protected void cancelPressed() {
+				super.cancelPressed();
+				runnable.getCancellationSource().cancel();
+			}
+		};
 		try {
-			progressDialog.run(true, false, runnable);
+			progressDialog.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			//TODO: probably, this should propagate error messages to the context, because this called from some UI
-			// context, like a dialog, and this dialog may want to display the error in a dialog status line rather than popup message.
-			MessageDialog.openError(shell, "Error in runnable '"+runnable+"'", ExceptionUtil.getMessage(e) 
-					+ "\nSee error log for details");
-			GradleCore.log(e);
+			if (!progressDialog.getProgressMonitor().isCanceled()) {
+				//TODO: probably, this should propagate error messages to the context, because this called from some UI
+				// context, like a dialog, and this dialog may want to display the error in a dialog status line rather than popup message.
+				MessageDialog.openError(shell, "Error in runnable '"+runnable+"'", ExceptionUtil.getMessage(e) 
+						+ "\nSee error log for details");
+				GradleCore.log(e);
+			}
 		} catch (InterruptedException e) {
-			throw new OperationCanceledException();
+			if (!progressDialog.getProgressMonitor().isCanceled()) {
+				throw new OperationCanceledException();
+			}
 		}
 	}
 	

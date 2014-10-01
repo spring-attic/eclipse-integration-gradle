@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
@@ -53,6 +52,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
@@ -245,7 +245,7 @@ public abstract class GradleTest extends TestCase {
 		IProject[] projects = getProjects();
 		for (IProject p : projects) {
 			GradleProject gp = GradleCore.create(p);
-			gp.getGradleModel(new NullProgressMonitor()); 
+			gp.getGradleModel(new NullProgressMonitor(), null); 
 		}
 		
 		//Now do an eclipse build
@@ -356,7 +356,7 @@ public abstract class GradleTest extends TestCase {
 				Job job = JobUtil.schedule(new GradleRunnable("Import Gradle project") {
 					@Override
 					public void doit(IProgressMonitor mon) throws Exception {
-						importOp.perform(ignoreErrors(new ErrorHandler.Test(IStatus.ERROR), ignoreableErrors), mon);
+						importOp.perform(ignoreErrors(new ErrorHandler.Test(IStatus.ERROR), ignoreableErrors), mon, cancellationSource.token());
 					}
 			
 				});
@@ -374,7 +374,7 @@ public abstract class GradleTest extends TestCase {
 			throws NameClashException, CoreException, ExistingProjectException,
 			MissingProjectDependencyException {
 		importTestProjectOperation(testProj)
-			.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+			.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
 	}
 
 	public static GradleImportOperation importTestProjectOperation(File testProj)
@@ -409,7 +409,7 @@ public abstract class GradleTest extends TestCase {
 	
 	public static void importGitProject(GitProject project) throws IOException, InterruptedException, NameClashException, ExistingProjectException, MissingProjectDependencyException, CoreException {
 		GradleImportOperation op = importGitProjectOperation(project);
-		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+		op.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
 	}
 
 	public static Test defaultTestErrorHandler() {
@@ -573,7 +573,7 @@ public abstract class GradleTest extends TestCase {
 	 * nothing else.
 	 */
 	public static IJavaProject simpleProject(String projName, String buildFileContents) throws Exception {
-		simpleProjectImport(projName, buildFileContents).perform(defaultTestErrorHandler(), new NullProgressMonitor());
+		simpleProjectImport(projName, buildFileContents).perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
 		return getJavaProject(projName);
 	}
 
@@ -587,7 +587,7 @@ public abstract class GradleTest extends TestCase {
 		
 		GradleProject gp = GradleCore.create(project);
 		ErrorHandler eh = new ErrorHandler.Test();
-		gp.convertToGradleProject(ProjectMapperFactory.workspaceMapper(), eh, new NullProgressMonitor());
+		gp.convertToGradleProject(ProjectMapperFactory.workspaceMapper(), eh, new NullProgressMonitor(), null);
 		return gp;
 	}
 	

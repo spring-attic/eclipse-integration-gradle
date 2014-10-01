@@ -3,20 +3,21 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/gradle-core-2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gradle-tooling-api-2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gradle-wrapper-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gradle-core-2.1.jar" sourcepath="lib/gradle-core-2.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gradle-tooling-api-2.1.jar" sourcepath="lib/gradle-tooling-api-2.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gradle-wrapper-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-simple-1.7.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gradle-resources-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gradle-resources-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gradle-base-services-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gradle-base-services-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-jdk5-17.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/asm-4.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/reflectasm-1.07-shaded.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/minlog-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/objenesis-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kryo-2.20.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gradle-messaging-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gradle-messaging-2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gradle-base-services-groovy-2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

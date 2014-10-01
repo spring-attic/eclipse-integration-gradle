@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,13 +52,13 @@ public class RefreshDependenciesActionCore {
 						monitor.worked(workUnit);
 					}
 					for (GradleProject gp : gps) {
-						gp.getGradleModel(new SubProgressMonitor(monitor, workUnit));
+						gp.getGradleModel(new SubProgressMonitor(monitor, workUnit), cancellationSource.token());
 					}
 					JobUtil.schedule(new Continuable("Refresh project dependencies", projects.size(), cont) {
 						@Override
 						public void doit(Continuation<Void> cont, IProgressMonitor monitor) throws Exception {
 							for (GradleProject gp : gps) {
-								gp.refreshDependencies(new SubProgressMonitor(monitor, 1));
+								gp.refreshDependencies(new SubProgressMonitor(monitor, 1), cancellationSource.token());
 							}
 							cont.apply(null);
 						}

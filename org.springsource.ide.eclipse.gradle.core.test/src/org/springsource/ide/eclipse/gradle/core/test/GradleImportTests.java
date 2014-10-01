@@ -55,7 +55,6 @@ import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfiguration
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
-import org.springsource.ide.eclipse.gradle.core.preferences.GradleAPIProperties;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
@@ -550,7 +549,7 @@ public class GradleImportTests extends GradleTest {
 		assertArrayEquals(new String[] { "afterEclipseImport" }, 
 				importOp.getAfterTasks());
 		
-		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
 		assertProjects(projectName);
 		
 		//Check expected source folder has expected exclusions
@@ -575,7 +574,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(name);
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.11.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 	
@@ -610,7 +609,7 @@ public class GradleImportTests extends GradleTest {
 		GradleImportOperation importOp = importTestProjectOperation(location);
 		importOp.setDoAfterTasks(false);
 		
-		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
+		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor(), null);
 		assertFalse(theFile.exists());
 	}
 	
@@ -628,7 +627,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects("quickstart");
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.11.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
 		
 		assertNoRawLibraryEntries(project);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
@@ -654,7 +653,7 @@ public class GradleImportTests extends GradleTest {
 	 */
 	private void generateEclipseFiles(GradleProject project) throws OperationCanceledException, CoreException {
 		String taskPath = ":eclipse";
-		Set<String> tasks = project.getAllTasks(new NullProgressMonitor());
+		Set<String> tasks = project.getAllTasks(new NullProgressMonitor(), null);
 		assertTrue(tasks.contains(taskPath));
 		
 		ILaunchConfigurationWorkingCopy launchConf = (ILaunchConfigurationWorkingCopy) GradleLaunchConfigurationDelegate.createDefault(project, false);
@@ -675,7 +674,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(name);
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.11.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 	
@@ -747,7 +746,7 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testImportSpringIntegration() throws Exception {
-		GradleAPIProperties props = GradleCore.getInstance().getAPIProperties();
+//		GradleAPIProperties props = GradleCore.getInstance().getAPIProperties();
 		URI distro = null;
 //		if (!props.isSnapshot()) {
 			//We are running the 'regular' build!
@@ -764,7 +763,7 @@ public class GradleImportTests extends GradleTest {
 				).setRecursive(true)
 		);
 		op.setEnableDSLD(true);
-		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+		op.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
 
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (IProject proj : projects) {
@@ -854,7 +853,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleImportOperation importOp = GradleImportOperation.importAll(rootLocation);
 		importOp.verify();
-		importOp.perform(new ErrorHandler.Test(IStatus.ERROR), new NullProgressMonitor());
+		importOp.perform(new ErrorHandler.Test(IStatus.ERROR), new NullProgressMonitor(), null);
 	}
 	
 	public void disabledTestTimedImport() throws Exception {
@@ -989,7 +988,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleProject gSubproject = getGradleProject(subprojectName);
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
 
 		//Now 'main' should no longer exist, but spain should
 		mainType = subproject.findType("Main");
@@ -999,7 +998,7 @@ public class GradleImportTests extends GradleTest {
 		
 		//Re-refreshing should not be a problem...
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
 		
 		//Nothing changed, should still pass the same assertions
 		mainType = subproject.findType("Main");
@@ -1035,7 +1034,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleProject gSubproject = getGradleProject(subprojectName);
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
 		
 		//This time, both of the main types should be found since we added both source folders.
 		assertNotNull(subproject);

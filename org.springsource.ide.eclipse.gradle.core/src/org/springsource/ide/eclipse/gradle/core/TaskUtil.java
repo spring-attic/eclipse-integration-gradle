@@ -23,7 +23,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.gradle.api.internal.CompositeDomainObjectSet;
 import org.gradle.api.internal.DefaultDomainObjectSet;
 import org.gradle.tooling.BuildLauncher;
+import org.gradle.tooling.CancellationToken;
 import org.gradle.tooling.ProjectConnection;
+import org.gradle.tooling.internal.consumer.CancellationTokenInternal;
 import org.gradle.tooling.model.Task;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
@@ -46,12 +48,12 @@ public class TaskUtil {
 		String[] getTaskNames(GradleProject project);
 	}
 	
-	public static void execute(GradleProject project,  ILaunchConfiguration conf, Collection<String> taskList, IProgressMonitor mon) throws CoreException {
+	public static void execute(GradleProject project,  ILaunchConfiguration conf, Collection<String> taskList, IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException {
 		Console console = ConsoleUtil.getConsole("Executing tasks on "+project.getDisplayName());
-		execute(project, conf, taskList, mon, new PrintStream(console.out), new PrintStream(console.err));
+		execute(project, conf, taskList, mon, new PrintStream(console.out), new PrintStream(console.err), cancellationToken);
 	}
 
-	public static void execute(GradleProject project, ILaunchConfiguration conf, Collection<String> taskList, IProgressMonitor mon, PrintStream out, PrintStream err) throws CoreException {
+	public static void execute(GradleProject project, ILaunchConfiguration conf, Collection<String> taskList, final IProgressMonitor mon, final PrintStream out, PrintStream err, CancellationToken cancellationToken) throws CoreException {
 		mon.beginTask("Executing tasks", 90);
 		try {
 			BuildLauncher build;
@@ -68,6 +70,20 @@ public class TaskUtil {
 
 				build.setStandardError(err);
 				build.setStandardOutput(out);
+				if (cancellationToken != null) {
+					build.withCancellationToken(cancellationToken);
+					/*
+					 * Hack to print something in the console right away to give user a heads up that cancel is pending
+					 */
+					if (cancellationToken instanceof CancellationTokenInternal) {
+						((CancellationTokenInternal)cancellationToken).getToken().addCallback(new Runnable() {
+							@Override
+							public void run() {
+								out.println("[sts] Cancellation request posted...");
+							}	
+						});
+					}
+				}
 				mon.worked(2);
 				//cumulative work: 12%
 
@@ -97,9 +113,13 @@ public class TaskUtil {
 				out.println("[sts] -----------------------------------------------------");
 				out.println("[sts] Build finished succesfully!");
 			} catch (Exception e) { 
-				//only exceptions raised by the Gradle build itself are caught here.
-				out.println("[sts] Build failed");
-				e.printStackTrace(out);
+				// only exceptions raised by the Gradle build itself are caught here.
+				if (mon.isCanceled()) {
+					out.println("[sts] Build cancelled");
+				} else {
+					out.println("[sts] Build failed");
+					e.printStackTrace(out);
+				}
 				throw ExceptionUtil.coreException(e);
 			} finally {
 				String duration = TimeUtils.minutusAndSecondsFromMillis(System.currentTimeMillis()-startTime);
@@ -114,10 +134,6 @@ public class TaskUtil {
 		}
 	}
 
-	private static String getJavaHome() {
-		return System.getenv().get("JAVA_HOME");
-	}
-	
 	/**
 	 * Run a bunch of tasks 'in bulk'. It is possible that no tasks will be executed, if there are no
 	 * tasks matching the provided list of names in the specified project list.
@@ -129,7 +145,7 @@ public class TaskUtil {
 	 * @throws OperationCanceledException
 	 * @throws CoreException
 	 */
-	public static boolean bulkRunTasks(List<HierarchicalEclipseProject> sortedProjects, ITaskProvider taskNamesProvider, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static boolean bulkRunTasks(List<HierarchicalEclipseProject> sortedProjects, ITaskProvider taskNamesProvider, IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Run eclipse tasks", sortedProjects.size()*3);
 		try {
 			if (sortedProjects.size()>0) {
@@ -148,7 +164,7 @@ public class TaskUtil {
 					}
 					String[] taskNamesToRun = taskNamesProvider.getTaskNames(project);
 					DefaultDomainObjectSet<String> subCollection = new DefaultDomainObjectSet<String>(String.class);
-					for (Task task : project.getTasks(new SubProgressMonitor(monitor, 2))) {
+					for (Task task : project.getTasks(new SubProgressMonitor(monitor, 2), cancellationToken)) {
 						for (int i = 0; i < taskNamesToRun.length; i++) {
 							String path = task.getPath();
 							if (task.getName().equals(taskNamesToRun[i]) || path.equals(taskNamesToRun[i])) {
@@ -161,7 +177,7 @@ public class TaskUtil {
 				
 				//Running the tasks: ticks: sorted.size
 				if (!tasksToRun.isEmpty()) {
-					execute(rootProject, null, tasksToRun, new SubProgressMonitor(monitor, sortedProjects.size()) );
+					execute(rootProject, null, tasksToRun, new SubProgressMonitor(monitor, sortedProjects.size()), cancellationToken);
 					return true;
 				} else {
 					monitor.worked(sortedProjects.size());
@@ -179,13 +195,13 @@ public class TaskUtil {
 	 * 
 	 * @return true if some tasks where actually found and executed.
 	 */
-	public static boolean bulkRunEclipseTasksOn(List<HierarchicalEclipseProject> sortedProjects, final String[] taskNamesToRun, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static boolean bulkRunEclipseTasksOn(List<HierarchicalEclipseProject> sortedProjects, final String[] taskNamesToRun, IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
 		return bulkRunTasks(sortedProjects, new ITaskProvider() {
 			@Override
 			public String[] getTaskNames(GradleProject project) {
 				return taskNamesToRun;
 			}
-		}, monitor);
+		}, monitor, cancellationToken);
 	}
 	
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class RefreshSourceFoldersAction extends RefreshAction {
 				public void doit(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 					ErrorHandler eh = ErrorHandler.forRefreshSourceFolders();
 					project.invalidateGradleModel();
-					project.refreshSourceFolders(eh, monitor);
+					project.refreshSourceFolders(eh, monitor, cancellationSource.token());
 					eh.rethrowAsCore();
 				}
 			});

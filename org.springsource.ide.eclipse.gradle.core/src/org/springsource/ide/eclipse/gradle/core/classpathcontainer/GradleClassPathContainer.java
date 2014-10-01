@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,15 +13,11 @@ package org.springsource.ide.eclipse.gradle.core.classpathcontainer;
 import java.io.Serializable;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -29,7 +25,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JavaModelManager.PerProjectInfo;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.ClassPath;
@@ -37,7 +32,9 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleDependencyComputer;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.GradleSaveParticipant;
-import org.springsource.ide.eclipse.gradle.core.preferences.GlobalSettings;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
+import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 
 
@@ -100,33 +97,25 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 			return job; // A job is already scheduled. Don't schedule another job!
 		}
 
-		job = new Job("Update Gradle Classpath for "+project.getName()) {
+		GradleRunnable runnable = new GradleRunnable("Update Gradle Classpath for "+project.getName()) {
+			
 			@Override
-			public IStatus run(IProgressMonitor monitor) {
+			public void doit(IProgressMonitor monitor) throws Exception {
 				monitor.beginTask("Initializing Gradle Classpath Container", IProgressMonitor.UNKNOWN);
 				
 				try {
-					project.getGradleModel(monitor); // Forces initialisation of the model.
+					project.getGradleModel(monitor, cancellationSource.token()); // Forces initialisation of the model.
 					notifyJDT();
-					return Status.OK_STATUS;
 				} catch (Exception e) {
-					return new Status(IStatus.ERROR, GradleCore.PLUGIN_ID, "Error while initializing classpath container", e);
+					throw ExceptionUtil.coreException("Error while initializing classpath container");
 				} finally {
 					monitor.done();
 					job = null;
 				}
 			}
 		};
-		job.setUser(popupProgress);
-		schedule(job);
+		job = popupProgress ? JobUtil.userJob(runnable) : JobUtil.schedule(runnable);
 		return job;
-	}
-
-	private void schedule(Job job) {
-		job.setPriority(Job.BUILD);
-		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		job.schedule();
-		//			join(job);
 	}
 
 	public synchronized IClasspathEntry[] getClasspathEntries() {

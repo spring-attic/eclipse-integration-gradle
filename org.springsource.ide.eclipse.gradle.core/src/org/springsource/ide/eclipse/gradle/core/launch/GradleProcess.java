@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,19 +30,13 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamsProxy;
-import org.gradle.tooling.BuildLauncher;
+import org.eclipse.debug.ui.RefreshTab;
 import org.gradle.tooling.GradleConnectionException;
-import org.gradle.tooling.ProjectConnection;
-import org.springsource.ide.eclipse.gradle.core.GradleModelProvider;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.TaskUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
-import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
-
-
-import org.eclipse.debug.ui.RefreshTab;
 
 /**
  * Wrapper class that adapts something that executes gradle tasks to an {@link IProcess} that can
@@ -58,6 +52,7 @@ public class GradleProcess extends PlatformObject implements IProcess {
 	}
 	
 	boolean isRunning = true;
+	private Job job;
 	private ILaunchConfiguration conf;
 	private ILaunch launch;
 	private Map<String,String> attribs = new HashMap<String, String>();
@@ -84,17 +79,17 @@ public class GradleProcess extends PlatformObject implements IProcess {
 	
 	protected void run() throws CoreException {
 		final GradleProject project = getProject();
-		if (project!=null) {
+		if (project!=null && job == null) {
 			final List<String> taskList = GradleLaunchConfigurationDelegate.getTasksList(conf);
 			if (!taskList.isEmpty()) {
-				JobUtil.schedule(JobUtil.NO_RULE, new GradleRunnable(getLabel()) {
+				job = JobUtil.schedule(JobUtil.NO_RULE, new GradleRunnable(getLabel()) {
 					@Override
 					public void doit(IProgressMonitor mon) throws Exception {
 						mon.beginTask("Executing tasks", 10);
 						try {
 							fireCreateEvent();
 							try {
-								TaskUtil.execute(project, conf, taskList, new SubProgressMonitor(mon, 8), out, err);
+								TaskUtil.execute(project, conf, taskList, new SubProgressMonitor(mon, 8), out, err, cancellationSource.token());
 								ISchedulingRule rule = JobUtil.buildRule();
 								Job.getJobManager().beginRule(rule, new SubProgressMonitor(mon, 1));
 								try {
@@ -104,12 +99,12 @@ public class GradleProcess extends PlatformObject implements IProcess {
 								}
 							} finally {
 								fireTerminateEvent();
+								job = null;
 							}
 						} finally {
 							mon.done();
 						}
 					}
-
 				});
 			} else {
 				throw ExceptionUtil.coreException("Couldn't launch "+conf.getName()+" because no tasks have been selected");
@@ -152,7 +147,7 @@ public class GradleProcess extends PlatformObject implements IProcess {
 //	}
 
 	public boolean canTerminate() {
-		return false;
+		return job != null;
 	}
 
 	public boolean isTerminated() {
@@ -160,8 +155,8 @@ public class GradleProcess extends PlatformObject implements IProcess {
 	}
 
 	public void terminate() throws DebugException {
-		if (!isTerminated()) {
-			throw new DebugException(ExceptionUtil.status("Forced termination of GradleProcess isn't supported by the Tooling API"));
+		if (!isTerminated() && job != null) {
+			job.cancel();
 		}
 	}
 

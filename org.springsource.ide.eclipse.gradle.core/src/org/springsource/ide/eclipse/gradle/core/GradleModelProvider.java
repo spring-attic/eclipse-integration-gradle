@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springsource.ide.eclipse.gradle.core;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -21,11 +22,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.gradle.tooling.CancellationToken;
+import org.gradle.tooling.GradleConnectionException;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ModelBuilder;
 import org.gradle.tooling.ProgressEvent;
 import org.gradle.tooling.ProgressListener;
 import org.gradle.tooling.ProjectConnection;
+import org.gradle.tooling.internal.consumer.CancellationTokenInternal;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
@@ -65,7 +69,7 @@ public abstract class GradleModelProvider {
 	/**
 	 * Requests that the model provider lazy initialises its cache with models that satisfy the requested level of detail.
 	 */
-	public abstract <T extends HierarchicalEclipseProject> void ensureModels(Class<T> type, IProgressMonitor mon) throws CoreException, OperationCanceledException;
+	public abstract <T extends HierarchicalEclipseProject> void ensureModels(Class<T> type, IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException, OperationCanceledException;
 	
 	/**
 	 * Retrieves a model from the cache. Never returns null. 
@@ -273,7 +277,7 @@ public abstract class GradleModelProvider {
 		}
 
 		@Override
-		public <T extends HierarchicalEclipseProject> void ensureModels(Class<T> requiredType, IProgressMonitor mon) throws CoreException, OperationCanceledException {
+		public <T extends HierarchicalEclipseProject> void ensureModels(Class<T> requiredType, IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException, OperationCanceledException {
 			synchronized (this) {
 				if (satisfies(requiredType)) {
 					return;
@@ -287,7 +291,7 @@ public abstract class GradleModelProvider {
 			//precompute what we need in local variables so concurrent threads can safely keep using the old provider state.
 			T model = null;
 			try {
-				model = buildModel(rootProject, requiredType, mon);
+				model = buildModel(rootProject, requiredType, mon, cancellationToken);
 				Map<GradleProject, HierarchicalEclipseProject> cache = new IdentityHashMap<GradleProject, HierarchicalEclipseProject>();
 				walk(model, cache);
 				synchronized (this) {
@@ -350,12 +354,12 @@ public abstract class GradleModelProvider {
 	}
 
 	
-	public static <T extends HierarchicalEclipseProject> T buildModel(GradleProject rootProject, Class<T> requiredType, final IProgressMonitor monitor) throws CoreException {
+	public static <T extends HierarchicalEclipseProject> T buildModel(GradleProject rootProject, Class<T> requiredType, final IProgressMonitor monitor, CancellationToken cancellationToken) throws CoreException {
 		File projectLoc = rootProject.getLocation();
 		final int totalWork = 10000;
 		monitor.beginTask("Creating Gradle model for "+projectLoc, totalWork+100);
 		ProjectConnection connection = null;
-		Console console = null;
+		final Console console = ConsoleUtil.getConsole("Building Gradle Model '"+projectLoc+"'");
 		try {
 			connection = getGradleConnector(rootProject, new SubProgressMonitor(monitor, 100));
 
@@ -364,9 +368,26 @@ public abstract class GradleModelProvider {
 			
 			ModelBuilder<T> builder = connection.model(requiredType);
 			rootProject.configureOperation(builder, null);
-			console = ConsoleUtil.getConsole("Building Gradle Model '"+projectLoc+"'");
 			builder.setStandardOutput(console.out);
 			builder.setStandardError(console.err);
+			if (cancellationToken != null) {
+				builder.withCancellationToken(cancellationToken);
+				/*
+				 * Hack to print something in the console right away to give user a heads up that cancel is pending
+				 */
+				if (cancellationToken instanceof CancellationTokenInternal) {
+					((CancellationTokenInternal)cancellationToken).getToken().addCallback(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								console.out.write("Cancellation request posted...\n".getBytes());
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}	
+					});
+				}
+			}
 			builder.addProgressListener(new ProgressListener() {
 				
 				int remainingWork = totalWork;
@@ -384,6 +405,8 @@ public abstract class GradleModelProvider {
 			});
 			T model = builder.get();  // blocks until the model is available
 			return model;
+		} catch (GradleConnectionException e) {
+			throw e;
 		} catch (Exception e) {
 			throw ExceptionUtil.coreException(e);
 		} finally {

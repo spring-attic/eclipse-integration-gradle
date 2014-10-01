@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,7 +80,7 @@ public class RefreshAllActionCoreTests extends GradleTest {
 				build.toString()
 		);
 		importOp.setEnableDSLD(false);
-		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
+		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor(), null);
 		
 		GradleProject project = getGradleProject(projectName);
 		DSLDSupport.getInstance().enableFor(project, false, new NullProgressMonitor());
@@ -114,7 +114,7 @@ public class RefreshAllActionCoreTests extends GradleTest {
 		);
 		importOp.setEnableDSLD(false);
 		importOp.setEnableDependencyManagement(false);
-		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
+		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor(), null);
 		
 		GradleProject project = getGradleProject(projectName);
 		DSLDSupport.getInstance().enableFor(project, false, new NullProgressMonitor());

@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.gradle.tooling.CancellationToken;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
@@ -51,12 +52,12 @@ public class ReimportOperation {
 		this.gradleProjects = gradleProjects;
 	}
 	
-	public void perform(ErrorHandler eh, IProgressMonitor m) {
+	public void perform(ErrorHandler eh, IProgressMonitor m, CancellationToken cancellationToken) {
 		m.beginTask("Reimporting Gradle Projects", 3);
 		try {
 			if (!gradleProjects.isEmpty()) {
-				GradleImportOperation op = createImportOperation(new SubProgressMonitor(m, 1));
-				op.perform(eh, new SubProgressMonitor(m, 2));
+				GradleImportOperation op = createImportOperation(new SubProgressMonitor(m, 1), cancellationToken);
+				op.perform(eh, new SubProgressMonitor(m, 2), cancellationToken);
 			}
 		} catch (FastOperationFailedException e) {
 			eh.handleError(e);
@@ -67,14 +68,14 @@ public class ReimportOperation {
 		}
 	}
 
-	private GradleImportOperation createImportOperation(IProgressMonitor m) throws FastOperationFailedException, OperationCanceledException, CoreException {
+	private GradleImportOperation createImportOperation(IProgressMonitor m, CancellationToken cancellationToken) throws FastOperationFailedException, OperationCanceledException, CoreException {
 		m.beginTask("Create re-import operation", 1);
 		try {
 			GradleRefreshPreferences prefs = gradleProjects.iterator().next().getRootProject().getRefreshPreferences();
 			List<HierarchicalEclipseProject> projects = new ArrayList<HierarchicalEclipseProject>(gradleProjects.size());
 			Set<HierarchicalEclipseProject> relatedProjectsSet = new HashSet<HierarchicalEclipseProject>();
 			for (GradleProject gradleProject : gradleProjects) {
-				projects.add(gradleProject.getGradleModel(m));
+				projects.add(gradleProject.getGradleModel(m, cancellationToken));
 				relatedProjectsSet.addAll(gradleProject.getAllProjectsInBuild());
 			}
 			GradleImportOperation op = new GradleImportOperation(

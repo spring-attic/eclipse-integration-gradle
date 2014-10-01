@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.gradle.tooling.CancellationToken;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -77,13 +78,13 @@ public class NewGradleProjectOperation {
 		Assert.isLegal(sampleProject!=null, "Forgot to wire up 'sampleProject'?");
 	}
 
-	public boolean perform(IProgressMonitor mon) throws CoreException {
+	public boolean perform(IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException {
 		assertComplete();
-		createProjectContents(mon);
+		createProjectContents(mon, cancellationToken);
 		return true;
 	}
 
-	private void createProjectContents(IProgressMonitor mon) throws CoreException {
+	private void createProjectContents(IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException {
 		mon.beginTask("Create project contents", 1);
 		try {
 			//Setup the directory where the project will be created.
@@ -103,7 +104,7 @@ public class NewGradleProjectOperation {
 			try {
 				GradleImportOperation importOp = GradleImportOperation.importAll(location);
 				ErrorHandler eh = ErrorHandler.forImportWizard();
-				importOp.perform(eh, new SubProgressMonitor(mon, 1));
+				importOp.perform(eh, new SubProgressMonitor(mon, 1), cancellationToken);
 				eh.rethrowAsCore();
 			} catch (NameClashException e) {
 				throw ExceptionUtil.coreException(e);

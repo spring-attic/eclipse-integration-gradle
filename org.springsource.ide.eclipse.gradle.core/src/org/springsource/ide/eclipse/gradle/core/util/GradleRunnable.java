@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.gradle.tooling.CancellationTokenSource;
+import org.gradle.tooling.GradleConnector;
 
 /**
  * Wrapper for long running operations, provides a way to turn the operation into
@@ -31,12 +33,14 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 	
 	protected String jobName = "Gradle Job "+generateId();
 	private int jobCtr = 0;
+	protected CancellationTokenSource cancellationSource;
 	private synchronized int generateId() {
 		return jobCtr++;
 	}
 	
 	public GradleRunnable(String jobName) {
 		this.jobName = jobName;
+		this.cancellationSource = GradleConnector.newCancellationTokenSource();
 	}
 
 	public abstract void doit(IProgressMonitor mon) throws Exception;
@@ -49,7 +53,7 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 					doit(monitor);
 					return Status.OK_STATUS;
 				} catch (Throwable e) {
-					return ExceptionUtil.status(e);
+					return monitor.isCanceled() ? Status.CANCEL_STATUS : ExceptionUtil.status(e);
 				}
 			}
 			
@@ -57,6 +61,13 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 			public Job yieldRule(IProgressMonitor monitor) { //Avoids a deadlocking problem when WTP tasks call yieldRule
 				return null;
 			}
+
+			@Override
+			protected void canceling() {
+				super.canceling();
+				cancellationSource.cancel();
+			}			
+			
 		};
 	}
 
@@ -71,6 +82,12 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 				} catch (Throwable e) {
 					return ExceptionUtil.status(e);
 				}
+			}
+			
+			@Override
+			protected void canceling() {
+				super.canceling();
+				cancellationSource.cancel();
 			}
 		};
 	}
@@ -93,6 +110,10 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 		}
 	}
 	
+	public CancellationTokenSource getCancellationSource() {
+		return cancellationSource;
+	}
+
 	@Override
 	public String toString() {
 		return jobName;
