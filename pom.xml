@@ -258,16 +258,12 @@
 				<repository>
 					<id>platform</id>
 					<layout>p2</layout>
-					<!--  <url>http://download.eclipse.org/eclipse/updates/4.4/</url> -->
-					<url>http://download.eclipse.org/eclipse/updates/4.4milestones</url>
+					<url>http://download.eclipse.org/eclipse/updates/4.4</url>
 				</repository>
 				 <repository> 
-					<id>kepler</id>
+					<id>luna</id>
 					<layout>p2</layout>
-					<!-- should be this but it doesn't exist yet: 
-					   <url>http://download.eclipse.org/releases/luna/</url>
-					  -->
-					<url>http://download.eclipse.org/releases/kepler/</url>
+					<url>http://download.eclipse.org/releases/luna/</url>
 				</repository>
 				<repository>
 					<id>swtbot</id>
