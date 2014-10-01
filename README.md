@@ -79,7 +79,7 @@ The remainder of this documents expects a familiarity with Eclipse architecture 
 
 ### Setting up the Development Environment and Target Platform  
 
-The instructions here are tested starting with a 'clean' copy of Eclipse 4.2 JEE. It is also possible to setup a similar environment based on Eclipse 3.7.2.
+The instructions here are tested starting with a 'clean' copy of Eclipse 4.4 JEE. It is also possible to setup a similar environment based on older versions of Eclipse.
 
 First we will start by setting up a suitable instance of Eclipse. This instance will serve a double purpose:
   
