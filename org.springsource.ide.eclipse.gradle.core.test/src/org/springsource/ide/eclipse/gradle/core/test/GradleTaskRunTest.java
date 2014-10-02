@@ -17,8 +17,13 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
@@ -606,6 +611,74 @@ public class GradleTaskRunTest extends GradleTest {
 		assertContains("Looks like it worked", process.getStreamsProxy().getOutputStreamMonitor().getContents());
 	}
 	
+	/**
+	 * Tests whether task cancellation works.
+	 * @throws Exception 
+	 */
+	public void testTaskCancellation() throws Exception {
+		IJavaProject jp = simpleProject("concurrent", 
+				"def waitSomeTime(long timeout) {\n" + 
+				"	long sleepTime = 0;\n" + 
+				"   long sleptFor = 0;\n" +
+				"	while (sleptFor < timeout) {\n" + 
+				"		println \"Waiting... ${sleptFor}\"\n" + 
+				"		sleepTime += 100;\n" + 
+				"		Thread.sleep(sleepTime)\n" +
+				"		sleptFor += sleepTime\n"+
+				"	}\n" + 
+				"}\n" + 
+				"\n" + 
+				"task slow << {\n" + 
+				"	File start = new File(\"${projectDir}/START\");\n" + 
+				"	println start.absolutePath;\n" + 
+				"	start.createNewFile()\n" + 
+				"	waitSomeTime(20000)\n" +
+				"}\n");
+		final GradleProject gp = GradleCore.create(jp);
+		
+		ILaunch launch = LaunchUtil.createLaunch(gp, ":slow");
+		final GradleProcess process = LaunchUtil.findGradleProcess(launch);
+
+		new Job("Cancellation") {
+
+			@Override
+			protected IStatus run(IProgressMonitor arg0) {
+				File start = new File(gp.getLocation(), "START");
+				for (long counter = 0; counter <= 10000 && !start.exists(); counter += 200) {
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				try {
+					process.terminate();
+				} catch (DebugException e) {
+					e.printStackTrace();
+				}
+
+				for (long counter = 0; counter <= 10000 && !process.isTerminated(); counter += 200) {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				return Status.OK_STATUS;
+			}
+			
+		}.schedule();
+
+		LaunchUtil.synchLaunch(launch);
+		assertContains("Build cancelled", process.getStreamsProxy().getOutputStreamMonitor().getContents());
+	}
+
 	public void testSimpleTaskWithDifferentReleases() throws Exception {
 		class Result {
 			int minorVersion;

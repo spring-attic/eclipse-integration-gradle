@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springsource.ide.eclipse.gradle.core.launch;
 
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
@@ -19,6 +20,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IProcess;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
@@ -32,11 +34,14 @@ import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 public class LaunchUtil {
 
 	public static GradleProcess synchLaunch(ILaunchConfiguration launchConf) throws CoreException {
+		return synchLaunch(launchConf.launch("run", new NullProgressMonitor(), false, true));
+	}
+	
+	public static GradleProcess synchLaunch(ILaunch launch) {
 		DebugPlugin mgr = DebugPlugin.getDefault();
 		LaunchTerminationListener listener = null;
 		try {
 			//DebugUITools.launch(launchConf, "run");
-			ILaunch launch = launchConf.launch("run", new NullProgressMonitor(), false, true);
 			listener = new LaunchTerminationListener(launch);
 			mgr.getLaunchManager().addLaunchListener(listener);
 			return listener.waitForProcess();
@@ -45,6 +50,21 @@ public class LaunchUtil {
 				mgr.getLaunchManager().removeLaunchListener(listener);
 			}
 		}
+	}
+	
+	public static ILaunch createLaunch(GradleProject project, String... tasks) throws CoreException {
+		ILaunchConfigurationWorkingCopy conf = (ILaunchConfigurationWorkingCopy) GradleLaunchConfigurationDelegate.createDefault(project, false);
+		GradleLaunchConfigurationDelegate.setTasks(conf, Arrays.asList(tasks));
+		return conf.launch("run", new NullProgressMonitor(), false, true);
+	}
+	
+	public static GradleProcess findGradleProcess(ILaunch launch) {
+		IProcess[] processes = launch.getProcesses();
+		if (processes!=null && processes.length>0) {
+			Assert.isTrue(processes.length==1);
+			return (GradleProcess) processes[0];
+		}
+		return null;
 	}
 
 	/**

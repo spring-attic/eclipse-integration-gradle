@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,17 +10,10 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.launch;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchesListener;
 import org.eclipse.debug.core.ILaunchesListener2;
-import org.eclipse.debug.core.model.IProcess;
-import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
-import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
-import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 
 
 /**
@@ -85,12 +78,7 @@ class LaunchTerminationListener implements ILaunchesListener, ILaunchesListener2
 
 	public GradleProcess waitForProcess() {
 		waitForProcessTermination();
-		IProcess[] processes = launch.getProcesses();
-		if (processes!=null && processes.length>0) {
-			Assert.isTrue(processes.length==1);
-			return (GradleProcess) processes[0];
-		}
-		return null;
+		return LaunchUtil.findGradleProcess(launch);
 	}
 
 }
