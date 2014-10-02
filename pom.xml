@@ -253,7 +253,6 @@
 				<dist.platform.version>4.4</dist.platform.version>
 				<package.qualifierPrefix>e44</package.qualifierPrefix>
 				<version.weaving>1.0.0.R3_6_2</version.weaving>
-				<test.vmargs>-Dosgi.configuration.area.default=null -Dosgi.user.area.default=null -Dosgi.user.area=@user.home -Dosgi.instance.area.default=null ${test.osvmargs}</test.vmargs>
 			</properties>
 			<repositories>
 				<repository>
