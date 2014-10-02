@@ -161,6 +161,10 @@ public class GradleImportOperation {
 		}
 		return false;
 	}
+	
+	public void perform(ErrorHandler eh, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		perform(eh, monitor, null);
+	}
 
 	public void perform(ErrorHandler eh, IProgressMonitor monitor, CancellationToken cancellationToken) throws CoreException, OperationCanceledException {
 		int totalWork = projectsToImport.size();

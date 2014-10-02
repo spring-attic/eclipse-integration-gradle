@@ -48,11 +48,19 @@ public class TaskUtil {
 		String[] getTaskNames(GradleProject project);
 	}
 	
+	public static void execute(GradleProject project,  ILaunchConfiguration conf, Collection<String> taskList, IProgressMonitor mon) throws CoreException {
+		execute(project, conf, taskList, mon, null);
+	}
+	
 	public static void execute(GradleProject project,  ILaunchConfiguration conf, Collection<String> taskList, IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException {
 		Console console = ConsoleUtil.getConsole("Executing tasks on "+project.getDisplayName());
 		execute(project, conf, taskList, mon, new PrintStream(console.out), new PrintStream(console.err), cancellationToken);
 	}
 
+	public static void execute(GradleProject project, ILaunchConfiguration conf, Collection<String> taskList, final IProgressMonitor mon, final PrintStream out, PrintStream err) throws CoreException {
+		execute(project, conf, taskList, mon, out, err, null);
+	}
+	
 	public static void execute(GradleProject project, ILaunchConfiguration conf, Collection<String> taskList, final IProgressMonitor mon, final PrintStream out, PrintStream err, CancellationToken cancellationToken) throws CoreException {
 		mon.beginTask("Executing tasks", 90);
 		try {
@@ -134,6 +142,10 @@ public class TaskUtil {
 		}
 	}
 
+	public static boolean bulkRunTasks(List<HierarchicalEclipseProject> sortedProjects, ITaskProvider taskNamesProvider, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+		return bulkRunTasks(sortedProjects, taskNamesProvider, monitor, null);
+	}
+	
 	/**
 	 * Run a bunch of tasks 'in bulk'. It is possible that no tasks will be executed, if there are no
 	 * tasks matching the provided list of names in the specified project list.
@@ -141,6 +153,7 @@ public class TaskUtil {
 	 * @param sortedProjects a list of topologically sorted projects
 	 * @param taskNamesProvider provider of task names to run per project
 	 * @param monitor the progress monitor
+	 * @param cancellationToken token to cancel the gradle daemon operation
 	 * @return <code>true</code> if any tasks have been executed
 	 * @throws OperationCanceledException
 	 * @throws CoreException
@@ -204,4 +217,7 @@ public class TaskUtil {
 		}, monitor, cancellationToken);
 	}
 	
+	public static boolean bulkRunEclipseTasksOn(List<HierarchicalEclipseProject> sortedProjects, final String[] taskNamesToRun, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+		return bulkRunEclipseTasksOn(sortedProjects, taskNamesToRun, monitor, null);
+	}
 }

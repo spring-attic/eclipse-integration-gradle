@@ -78,6 +78,10 @@ public class NewGradleProjectOperation {
 		Assert.isLegal(sampleProject!=null, "Forgot to wire up 'sampleProject'?");
 	}
 
+	public boolean perform(IProgressMonitor mon) throws CoreException {
+		return perform(mon, null);
+	}
+	
 	public boolean perform(IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException {
 		assertComplete();
 		createProjectContents(mon, cancellationToken);
