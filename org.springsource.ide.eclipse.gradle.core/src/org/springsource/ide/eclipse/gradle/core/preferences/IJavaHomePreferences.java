@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.preferences;
 
-import org.eclipse.core.runtime.Assert;
 
 
 /**

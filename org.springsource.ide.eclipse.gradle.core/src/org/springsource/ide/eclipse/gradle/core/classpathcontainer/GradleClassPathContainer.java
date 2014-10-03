@@ -127,7 +127,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 				if (oldModel==gradleModel) {
 					return getPersistedEntries();
 				} else {
-					IClasspathEntry[] entries = dependencyComputer.getLibraryEntries(gradleModel);
+					IClasspathEntry[] entries = dependencyComputer.getClassPath(gradleModel).toArray();
 					setPersistedEntries(entries);
 					oldModel = gradleModel;
 					return entries;
@@ -252,7 +252,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 */
 	public static void removeFrom(IJavaProject javaProject, IProgressMonitor mon) throws JavaModelException {
 		IClasspathEntry[] classpath = javaProject.getRawClasspath();
-		ClassPath newClasspath = new ClassPath(GradleCore.create(javaProject), classpath.length);
+		ClassPath newClasspath = new ClassPath(GradleCore.create(javaProject));
 		for (IClasspathEntry e : classpath) {
 			if (!isGradleContainerEntry(e)) {
 				newClasspath.add(e);

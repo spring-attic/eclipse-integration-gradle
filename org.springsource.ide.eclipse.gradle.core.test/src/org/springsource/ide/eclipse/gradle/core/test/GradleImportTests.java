@@ -1057,7 +1057,7 @@ public class GradleImportTests extends GradleTest {
 		assertTrue(GradleProjectPreferences.DEFAULT_ENABLE_CLASSPATH_SORTING);
 		for (String name : projectNames) {
 			GradleProject gp = getGradleProject(name);
-			assertEquals(GradleProjectPreferences.DEFAULT_ENABLE_CLASSPATH_SORTING, gp.getProjectPreferences().getEnableClasspatEntrySorting());
+			assertEquals(GradleProjectPreferences.DEFAULT_ENABLE_CLASSPATH_SORTING, gp.getProjectPreferences().getEnableClasspathEntrySorting());
 		}
 		GradleProject gp = getGradleProject("suba");
 		IJavaProject jp = gp.getJavaProject();
@@ -1093,7 +1093,7 @@ public class GradleImportTests extends GradleTest {
 		for (String name : projectNames) {
 			//Setting this should affect all projects in the hierarchy
 			GradleProject p = getGradleProject(name);
-			assertEquals(false, p.getProjectPreferences().getEnableClasspatEntrySorting());
+			assertEquals(false, p.getProjectPreferences().getEnableClasspathEntrySorting());
 		}
 		
 		

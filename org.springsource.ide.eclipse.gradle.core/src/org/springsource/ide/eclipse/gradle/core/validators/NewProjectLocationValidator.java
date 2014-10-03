@@ -10,17 +10,15 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.validators;
 
+import static org.springsource.ide.eclipse.gradle.core.validators.ValidationResult.error;
+
 import java.io.File;
 import java.io.FilenameFilter;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 import org.springsource.ide.eclipse.gradle.core.util.expression.ValueListener;
-
-
-import static org.springsource.ide.eclipse.gradle.core.validators.ValidationResult.error;
 
 /**
  * Validation logic for functionality that expects to a new directory. 
@@ -34,9 +32,6 @@ import static org.springsource.ide.eclipse.gradle.core.validators.ValidationResu
  * @author Kris De Volder
  */
 public class NewProjectLocationValidator extends Validator implements ValueListener<String> {
-	
-	private static final boolean DEBUG = (""+Platform.getLocation()).equals("/tmp/testws");
-	
 	private String elementName;
 	private LiveExpression<String> pathExp;
 	private LiveExpression<String> projectNameExp;

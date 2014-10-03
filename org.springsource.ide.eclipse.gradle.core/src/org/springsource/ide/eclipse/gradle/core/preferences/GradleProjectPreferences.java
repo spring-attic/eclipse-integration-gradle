@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.launching.IVMInstall;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
@@ -80,7 +79,7 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	/**
 	 * @return Whether classpath entry sorting is enabled. This preference is shared by all projects in a project hierarchy.
 	 */
-	public boolean getEnableClasspatEntrySorting() {
+	public boolean getEnableClasspathEntrySorting() {
 		try {
 			GradleProjectPreferences rootPrefs = getRootProjectPreferences();
 			return rootPrefs.get(ENABLE_CLASSPATH_SORTING, DEFAULT_ENABLE_CLASSPATH_SORTING);

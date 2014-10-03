@@ -15,7 +15,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchesListener;
 import org.eclipse.debug.core.ILaunchesListener2;
 
-
 /**
  * A DebugEvent listener that is used for testing purposes. The listener provides a way to
  * Grab a hold of and then wait for the termination of a GradleProcess that is expected to 

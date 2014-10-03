@@ -45,8 +45,6 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	
 	public static final String ID = "org.springsource.ide.eclipse.gradle.launch";
 
-	private static final boolean DEBUG = true;
-	
 	private static final String TASK_LIST = ID + ".TASKLIST";
 	private static final String TASK_TEXT = ID + ".TASKTEXT";
 	private static final List<String> DEFAULT_TASK_LIST = Arrays.asList(new String[0]);
@@ -192,12 +190,6 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		return null;
 	}
 
-	private static void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
-		}
-	}
-	
 	/**
 	 * Returns the gradle project associated with this launch configuration. This returns null if no project is associated
 	 * with the configuration. 
@@ -256,7 +248,6 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	 * @return list of Gradle path strings identifying a set/list of tasks that are selected for execution 
 	 * (by the user, doesn't include taks executed automatically because of dependencies).
 	 */
-	@SuppressWarnings("unchecked")
 	public static String getTasks(ILaunchConfiguration conf) {
 		String tasksText = DEFAULT_TASK_TEXT;
 		try {
@@ -288,7 +279,6 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		conf.setAttribute(TASK_TEXT, sb.toString());
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static List<String> getTasksList(ILaunchConfiguration conf) {
 		String tasksText = DEFAULT_TASK_TEXT;
 		try {

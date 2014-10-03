@@ -15,7 +15,6 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.springsource.ide.eclipse.gradle.core.util.DownloadManager;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 
@@ -27,8 +26,6 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
  */
 public class LocalSample extends SampleProject {
 
-	private static final String DISTRO_SUFFIX = "-all.zip";
-	private DownloadManager downloadManager;
 	private String name;
 	private File copyFrom;
 

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core;
 
-import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 
 /**
  * A listener that can be added to a project to get notified whenever the Gradle project's
