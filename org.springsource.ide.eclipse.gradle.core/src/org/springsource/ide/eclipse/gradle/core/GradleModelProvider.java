@@ -355,6 +355,7 @@ public abstract class GradleModelProvider {
 
 	
 	public static <T extends HierarchicalEclipseProject> T buildModel(GradleProject rootProject, Class<T> requiredType, final IProgressMonitor monitor, CancellationToken cancellationToken) throws CoreException {
+		SystemPropertyCleaner.clean();
 		File projectLoc = rootProject.getLocation();
 		final int totalWork = 10000;
 		monitor.beginTask("Creating Gradle model for "+projectLoc, totalWork+100);
