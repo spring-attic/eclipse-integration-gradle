@@ -33,24 +33,24 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 	
 	protected String jobName = "Gradle Job "+generateId();
 	private int jobCtr = 0;
-	protected CancellationTokenSource cancellationSource;
 	private synchronized int generateId() {
 		return jobCtr++;
 	}
 	
 	public GradleRunnable(String jobName) {
 		this.jobName = jobName;
-		this.cancellationSource = GradleConnector.newCancellationTokenSource();
 	}
 
 	public abstract void doit(IProgressMonitor mon) throws Exception;
 
 	public Job asJob() {
 		return new Job(jobName) {
+			private CancellationTokenSource cancellationSource;
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				this.cancellationSource = GradleConnector.newCancellationTokenSource();
 				try {
-					doit(monitor);
+					doit(new GradleOpearionProgressMonitor(monitor, cancellationSource.token()));
 					return Status.OK_STATUS;
 				} catch (Throwable e) {
 					return monitor.isCanceled() ? Status.CANCEL_STATUS : ExceptionUtil.status(e);
@@ -73,11 +73,13 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 
 	public WorkspaceJob asWorkspaceJob() {
 		return new WorkspaceJob(jobName) {
+			private CancellationTokenSource cancellationSource;
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor)
 					throws CoreException {
+				this.cancellationSource = GradleConnector.newCancellationTokenSource();
 				try {
-					doit(monitor);
+					doit(new GradleOpearionProgressMonitor(monitor, cancellationSource.token()));
 					return Status.OK_STATUS;
 				} catch (Throwable e) {
 					return ExceptionUtil.status(e);
@@ -110,10 +112,6 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 		}
 	}
 	
-	public CancellationTokenSource getCancellationSource() {
-		return cancellationSource;
-	}
-
 	@Override
 	public String toString() {
 		return jobName;

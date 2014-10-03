@@ -32,6 +32,7 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperation
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil.Console;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.GradleOpearionProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
 
@@ -49,19 +50,11 @@ public class TaskUtil {
 	}
 	
 	public static void execute(GradleProject project,  ILaunchConfiguration conf, Collection<String> taskList, IProgressMonitor mon) throws CoreException {
-		execute(project, conf, taskList, mon, null);
-	}
-	
-	public static void execute(GradleProject project,  ILaunchConfiguration conf, Collection<String> taskList, IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException {
 		Console console = ConsoleUtil.getConsole("Executing tasks on "+project.getDisplayName());
-		execute(project, conf, taskList, mon, new PrintStream(console.out), new PrintStream(console.err), cancellationToken);
+		execute(project, conf, taskList, mon, new PrintStream(console.out), new PrintStream(console.err));
 	}
 
 	public static void execute(GradleProject project, ILaunchConfiguration conf, Collection<String> taskList, final IProgressMonitor mon, final PrintStream out, PrintStream err) throws CoreException {
-		execute(project, conf, taskList, mon, out, err, null);
-	}
-	
-	public static void execute(GradleProject project, ILaunchConfiguration conf, Collection<String> taskList, final IProgressMonitor mon, final PrintStream out, PrintStream err, CancellationToken cancellationToken) throws CoreException {
 		mon.beginTask("Executing tasks", 90);
 		try {
 			BuildLauncher build;
@@ -78,18 +71,22 @@ public class TaskUtil {
 
 				build.setStandardError(err);
 				build.setStandardOutput(out);
+				CancellationToken cancellationToken = GradleOpearionProgressMonitor
+						.findCancellationToken(mon);
 				if (cancellationToken != null) {
 					build.withCancellationToken(cancellationToken);
 					/*
-					 * Hack to print something in the console right away to give user a heads up that cancel is pending
+					 * Hack to print something in the console right away to give
+					 * user a heads up that cancel is pending
 					 */
 					if (cancellationToken instanceof CancellationTokenInternal) {
-						((CancellationTokenInternal)cancellationToken).getToken().addCallback(new Runnable() {
-							@Override
-							public void run() {
-								out.println("[sts] Cancellation request posted...");
-							}	
-						});
+						((CancellationTokenInternal) cancellationToken)
+								.getToken().addCallback(new Runnable() {
+									@Override
+									public void run() {
+										out.println("[sts] Cancellation request posted...");
+									}
+								});
 					}
 				}
 				mon.worked(2);
@@ -142,10 +139,6 @@ public class TaskUtil {
 		}
 	}
 
-	public static boolean bulkRunTasks(List<HierarchicalEclipseProject> sortedProjects, ITaskProvider taskNamesProvider, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-		return bulkRunTasks(sortedProjects, taskNamesProvider, monitor, null);
-	}
-	
 	/**
 	 * Run a bunch of tasks 'in bulk'. It is possible that no tasks will be executed, if there are no
 	 * tasks matching the provided list of names in the specified project list.
@@ -158,7 +151,7 @@ public class TaskUtil {
 	 * @throws OperationCanceledException
 	 * @throws CoreException
 	 */
-	public static boolean bulkRunTasks(List<HierarchicalEclipseProject> sortedProjects, ITaskProvider taskNamesProvider, IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
+	public static boolean bulkRunTasks(List<HierarchicalEclipseProject> sortedProjects, ITaskProvider taskNamesProvider, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Run eclipse tasks", sortedProjects.size()*3);
 		try {
 			if (sortedProjects.size()>0) {
@@ -177,7 +170,7 @@ public class TaskUtil {
 					}
 					String[] taskNamesToRun = taskNamesProvider.getTaskNames(project);
 					DefaultDomainObjectSet<String> subCollection = new DefaultDomainObjectSet<String>(String.class);
-					for (Task task : project.getTasks(new SubProgressMonitor(monitor, 2), cancellationToken)) {
+					for (Task task : project.getTasks(new SubProgressMonitor(monitor, 2))) {
 						for (int i = 0; i < taskNamesToRun.length; i++) {
 							String path = task.getPath();
 							if (task.getName().equals(taskNamesToRun[i]) || path.equals(taskNamesToRun[i])) {
@@ -190,7 +183,7 @@ public class TaskUtil {
 				
 				//Running the tasks: ticks: sorted.size
 				if (!tasksToRun.isEmpty()) {
-					execute(rootProject, null, tasksToRun, new SubProgressMonitor(monitor, sortedProjects.size()), cancellationToken);
+					execute(rootProject, null, tasksToRun, new SubProgressMonitor(monitor, sortedProjects.size()));
 					return true;
 				} else {
 					monitor.worked(sortedProjects.size());
@@ -208,16 +201,13 @@ public class TaskUtil {
 	 * 
 	 * @return true if some tasks where actually found and executed.
 	 */
-	public static boolean bulkRunEclipseTasksOn(List<HierarchicalEclipseProject> sortedProjects, final String[] taskNamesToRun, IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
+	public static boolean bulkRunEclipseTasksOn(List<HierarchicalEclipseProject> sortedProjects, final String[] taskNamesToRun, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		return bulkRunTasks(sortedProjects, new ITaskProvider() {
 			@Override
 			public String[] getTaskNames(GradleProject project) {
 				return taskNamesToRun;
 			}
-		}, monitor, cancellationToken);
+		}, monitor);
 	}
 	
-	public static boolean bulkRunEclipseTasksOn(List<HierarchicalEclipseProject> sortedProjects, final String[] taskNamesToRun, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-		return bulkRunEclipseTasksOn(sortedProjects, taskNamesToRun, monitor, null);
-	}
 }

@@ -51,7 +51,7 @@ public class ConvertToGradleProjectActionDelegate extends GradleProjectActionDel
 			@Override
 			public void doit(IProgressMonitor monitor) throws CoreException {
 				ErrorHandler eh = new ErrorHandler.KeepFirst();
-				project.convertToGradleProject(ProjectMapperFactory.workspaceMapper(), eh, monitor, cancellationSource.token());
+				project.convertToGradleProject(ProjectMapperFactory.workspaceMapper(), eh, monitor);
 				eh.rethrowAsCore();
 			}
 		}); 

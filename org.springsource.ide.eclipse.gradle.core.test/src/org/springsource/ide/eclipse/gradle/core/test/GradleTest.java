@@ -245,7 +245,7 @@ public abstract class GradleTest extends TestCase {
 		IProject[] projects = getProjects();
 		for (IProject p : projects) {
 			GradleProject gp = GradleCore.create(p);
-			gp.getGradleModel(new NullProgressMonitor(), null); 
+			gp.getGradleModel(new NullProgressMonitor()); 
 		}
 		
 		//Now do an eclipse build
@@ -356,7 +356,7 @@ public abstract class GradleTest extends TestCase {
 				Job job = JobUtil.schedule(new GradleRunnable("Import Gradle project") {
 					@Override
 					public void doit(IProgressMonitor mon) throws Exception {
-						importOp.perform(ignoreErrors(new ErrorHandler.Test(IStatus.ERROR), ignoreableErrors), mon, cancellationSource.token());
+						importOp.perform(ignoreErrors(new ErrorHandler.Test(IStatus.ERROR), ignoreableErrors), mon);
 					}
 			
 				});
@@ -374,7 +374,7 @@ public abstract class GradleTest extends TestCase {
 			throws NameClashException, CoreException, ExistingProjectException,
 			MissingProjectDependencyException {
 		importTestProjectOperation(testProj)
-			.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+			.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 	}
 
 	public static GradleImportOperation importTestProjectOperation(File testProj)
@@ -409,7 +409,7 @@ public abstract class GradleTest extends TestCase {
 	
 	public static void importGitProject(GitProject project) throws IOException, InterruptedException, NameClashException, ExistingProjectException, MissingProjectDependencyException, CoreException {
 		GradleImportOperation op = importGitProjectOperation(project);
-		op.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 	}
 
 	public static Test defaultTestErrorHandler() {
@@ -573,7 +573,7 @@ public abstract class GradleTest extends TestCase {
 	 * nothing else.
 	 */
 	public static IJavaProject simpleProject(String projName, String buildFileContents) throws Exception {
-		simpleProjectImport(projName, buildFileContents).perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+		simpleProjectImport(projName, buildFileContents).perform(defaultTestErrorHandler(), new NullProgressMonitor());
 		return getJavaProject(projName);
 	}
 
@@ -587,7 +587,7 @@ public abstract class GradleTest extends TestCase {
 		
 		GradleProject gp = GradleCore.create(project);
 		ErrorHandler eh = new ErrorHandler.Test();
-		gp.convertToGradleProject(ProjectMapperFactory.workspaceMapper(), eh, new NullProgressMonitor(), null);
+		gp.convertToGradleProject(ProjectMapperFactory.workspaceMapper(), eh, new NullProgressMonitor());
 		return gp;
 	}
 	

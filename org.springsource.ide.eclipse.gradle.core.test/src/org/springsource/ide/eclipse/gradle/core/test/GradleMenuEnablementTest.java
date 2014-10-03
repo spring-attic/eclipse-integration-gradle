@@ -140,7 +140,7 @@ public class GradleMenuEnablementTest extends GradleTest {
 		String projectName = "quickstart";
 		GradleImportOperation op = importSampleProjectOperation(projectName);
 		op.setEnableDSLD(true);
-		op.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 		IProject project = getProject(projectName);
 		IJavaProject jp = JavaCore.create(project);
 		

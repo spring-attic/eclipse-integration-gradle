@@ -549,7 +549,7 @@ public class GradleImportTests extends GradleTest {
 		assertArrayEquals(new String[] { "afterEclipseImport" }, 
 				importOp.getAfterTasks());
 		
-		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 		assertProjects(projectName);
 		
 		//Check expected source folder has expected exclusions
@@ -609,7 +609,7 @@ public class GradleImportTests extends GradleTest {
 		GradleImportOperation importOp = importTestProjectOperation(location);
 		importOp.setDoAfterTasks(false);
 		
-		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
 		assertFalse(theFile.exists());
 	}
 	
@@ -653,7 +653,7 @@ public class GradleImportTests extends GradleTest {
 	 */
 	private void generateEclipseFiles(GradleProject project) throws OperationCanceledException, CoreException {
 		String taskPath = ":eclipse";
-		Set<String> tasks = project.getAllTasks(new NullProgressMonitor(), null);
+		Set<String> tasks = project.getAllTasks(new NullProgressMonitor());
 		assertTrue(tasks.contains(taskPath));
 		
 		ILaunchConfigurationWorkingCopy launchConf = (ILaunchConfigurationWorkingCopy) GradleLaunchConfigurationDelegate.createDefault(project, false);
@@ -763,7 +763,7 @@ public class GradleImportTests extends GradleTest {
 				).setRecursive(true)
 		);
 		op.setEnableDSLD(true);
-		op.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (IProject proj : projects) {
@@ -853,7 +853,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleImportOperation importOp = GradleImportOperation.importAll(rootLocation);
 		importOp.verify();
-		importOp.perform(new ErrorHandler.Test(IStatus.ERROR), new NullProgressMonitor(), null);
+		importOp.perform(new ErrorHandler.Test(IStatus.ERROR), new NullProgressMonitor());
 	}
 	
 	public void disabledTestTimedImport() throws Exception {
@@ -988,7 +988,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleProject gSubproject = getGradleProject(subprojectName);
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
 
 		//Now 'main' should no longer exist, but spain should
 		mainType = subproject.findType("Main");
@@ -998,7 +998,7 @@ public class GradleImportTests extends GradleTest {
 		
 		//Re-refreshing should not be a problem...
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
 		
 		//Nothing changed, should still pass the same assertions
 		mainType = subproject.findType("Main");
@@ -1034,7 +1034,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleProject gSubproject = getGradleProject(subprojectName);
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
 		
 		//This time, both of the main types should be found since we added both source folders.
 		assertNotNull(subproject);

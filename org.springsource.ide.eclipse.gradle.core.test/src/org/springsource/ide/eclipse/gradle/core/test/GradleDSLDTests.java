@@ -80,7 +80,7 @@ public class GradleDSLDTests extends GradleTest {
 	private IJavaProject simpleDSLDProject(String projName, String buildFileContents) throws Exception {
 		GradleImportOperation importOp = simpleProjectImport(projName, buildFileContents);
 		importOp.setEnableDSLD(true);
-		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 		return getJavaProject(projName);
 	}
 

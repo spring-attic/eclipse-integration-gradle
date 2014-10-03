@@ -80,7 +80,7 @@ public class RefreshAllActionCoreTests extends GradleTest {
 				build.toString()
 		);
 		importOp.setEnableDSLD(false);
-		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
 		
 		GradleProject project = getGradleProject(projectName);
 		DSLDSupport.getInstance().enableFor(project, false, new NullProgressMonitor());
@@ -114,7 +114,7 @@ public class RefreshAllActionCoreTests extends GradleTest {
 		);
 		importOp.setEnableDSLD(false);
 		importOp.setEnableDependencyManagement(false);
-		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
 		
 		GradleProject project = getGradleProject(projectName);
 		DSLDSupport.getInstance().enableFor(project, false, new NullProgressMonitor());
