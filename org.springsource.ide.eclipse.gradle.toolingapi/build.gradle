@@ -30,7 +30,7 @@ import groovy.transform.Field;
  */
 apply plugin: 'java'
 
-gradleRepoUrl = "http://repo.gradle.org/gradle/libs-releases"
+ext.gradleRepoUrl = "http://repo.gradle.org/gradle/libs-releases"
 
 task wrapper(type: Wrapper) {
 //	gradleVersion = '1.0-milestone-7'
@@ -79,15 +79,15 @@ task printVersion << {
 
 //What version of the gradle api jars is this build based on.
 //apiVersion = '1.0-milestone-7'
-apiVersion = getApiVersion()
+ext.apiVersion = getApiVersion()
 println "apiVersion = ${apiVersion}"
 
 //apiVersion = '1.0-milestone-+'
 //apiVersion = "1.0-rc-1"
 
 repositories {
-	mavenRepo name: 'libs-repo-snap', urls: "http://repo.gradle.org/gradle/libs-snapshots"
-	mavenRepo name: 'libs-repo', urls: gradleRepoUrl
+	mavenRepo name: 'libs-repo-snap', url: "http://repo.gradle.org/gradle/libs-snapshots"
+	mavenRepo name: 'libs-repo', url: gradleRepoUrl
 }
 
 dependencies {
@@ -102,7 +102,7 @@ dependencies {
 configurations.compile.resolve()
 configurations.compile.dependencies.each { dep ->
 	dependencies {
-		compileSource group: dep.group, name: dep.name, version: dep.version, classifier: 'sources', type: 'source'
+		compileSource group: dep.group, name: dep.name, version: dep.version, classifier: 'sources'
 	}
 }
 
