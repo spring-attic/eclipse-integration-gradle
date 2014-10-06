@@ -72,7 +72,7 @@ public class GradleSampleProjectTest extends GradleTest {
 		gui.location.setValue(SampleProject.getDefaultProjectLocation(gui.name.getValue()));
 		gui.sampleProject.setValue(sampleProject);
 		
-		gui.newProjectOp.perform(new NullProgressMonitor(), null);
+		gui.newProjectOp.perform(new NullProgressMonitor());
 		
 		assertProjects(findProjectNames(gui.name.getValue()));
 	}
@@ -85,7 +85,7 @@ public class GradleSampleProjectTest extends GradleTest {
 		gui.location.setValue(new File(newLocationHome, gui.name.getValue()).toString());
 		gui.sampleProject.setValue(sampleProject);
 		
-		gui.newProjectOp.perform(new NullProgressMonitor(), null);
+		gui.newProjectOp.perform(new NullProgressMonitor());
 		
 		assertProjects(findProjectNames(gui.name.getValue()));
 	}

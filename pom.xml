@@ -303,12 +303,12 @@
 
 		<profile>
 			<id>osx</id>
-			<activation>
-				<property>
-					<name>java.vendor.url</name>
-					<value>http://www.apple.com/</value>
-				</property>
-			</activation>
+				<activation>
+                	<os>
+                  		<family>mac</family>
+                    	<name>mac os x</name>
+                	</os>
+            	</activation>
 			<properties>
 				<test.osvmargs>-Dosgi.ws=cocoa -XstartOnFirstThread</test.osvmargs>
 			</properties>

@@ -513,7 +513,7 @@ public class GradleImportWizardPageOne extends WizardPage {
 				public void doit(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 					GradleProject selectedProject = GradleCore.create(rf);
 					selectedProject.invalidateGradleModel(); // TODO: with better invalidation from Gradle, this may not be necessary
-					selectedProject.getSkeletalGradleModel(monitor, cancellationSource.token()); //forces model to be built
+					selectedProject.getSkeletalGradleModel(monitor); //forces model to be built
 
 					try {
 						

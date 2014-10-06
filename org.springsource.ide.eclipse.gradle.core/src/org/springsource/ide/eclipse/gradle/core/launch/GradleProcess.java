@@ -89,7 +89,7 @@ public class GradleProcess extends PlatformObject implements IProcess {
 						try {
 							fireCreateEvent();
 							try {
-								TaskUtil.execute(project, conf, taskList, new SubProgressMonitor(mon, 8), out, err, cancellationSource.token());
+								TaskUtil.execute(project, conf, taskList, new SubProgressMonitor(mon, 8), out, err);
 								ISchedulingRule rule = JobUtil.buildRule();
 								Job.getJobManager().beginRule(rule, new SubProgressMonitor(mon, 1));
 								try {

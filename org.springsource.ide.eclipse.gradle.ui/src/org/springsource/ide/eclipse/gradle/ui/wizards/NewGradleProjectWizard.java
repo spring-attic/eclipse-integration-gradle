@@ -44,7 +44,7 @@ public class NewGradleProjectWizard extends Wizard implements INewWizard {
 		JobUtil.userJob(new GradleRunnable("Create Gradle project(s)") {
 			@Override
 			public void doit(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-				operation.perform(monitor, cancellationSource.token());
+				operation.perform(monitor);
 			}
 		});
 		return true;

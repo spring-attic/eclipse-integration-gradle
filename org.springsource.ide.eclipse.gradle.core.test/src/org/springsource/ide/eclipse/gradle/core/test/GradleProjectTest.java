@@ -111,13 +111,13 @@ public class GradleProjectTest extends GradleTest {
 		
 		//With Group model provider, forcing one model build should force all related models
 		//to become available.
-		projects[3].getSkeletalGradleModel(new NullProgressMonitor(), null); 
+		projects[3].getSkeletalGradleModel(new NullProgressMonitor()); 
 		for (TestProjectListener listener : listeners) {
 			listener.checkExpected(HierarchicalEclipseProject.class, 1);
 		}
 
 		//Forcing more detailed model should cause another round of update events.
-		projects[2].getGradleModel(new NullProgressMonitor(), null); 
+		projects[2].getGradleModel(new NullProgressMonitor()); 
 		for (TestProjectListener listener : listeners) {
 			listener.checkExpected(EclipseProject.class, 2);
 		}

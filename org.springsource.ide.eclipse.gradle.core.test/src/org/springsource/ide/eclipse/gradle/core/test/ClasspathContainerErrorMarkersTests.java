@@ -36,7 +36,7 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"}");
 
 				importOp.verify();
-				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 				assertErrors(getProject(projectName), true,
 						"unresolved dependency - foo bar 1.2.3",
 						"unresolved dependency - peyo smurf 1.0.0"
@@ -58,7 +58,7 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"}");
 
 				importOp.verify();
-				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 				
 				IProject p = getProject(projectName);
 				IJavaProject jp = getJavaProject(projectName);
@@ -98,7 +98,7 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"}");
 
 				importOp.verify();
-				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+				importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 				
 				IProject p = getProject(projectName);
 //				IJavaProject jp = getJavaProject(projectName);
