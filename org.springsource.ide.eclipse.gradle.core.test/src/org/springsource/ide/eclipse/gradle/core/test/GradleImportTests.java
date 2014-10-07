@@ -130,13 +130,11 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testImportSpringFramework() throws Exception {
-		JavaXXRuntime.java7everyone();
+		JavaXXRuntime.java8everyone();
 		String[] projectNames = {
-				"spring",
 				"spring-aop",
 				"spring-aspects",
 				"spring-beans",
-				"spring-build-src",
 				"spring-context",
 				"spring-context-support",
 				"spring-core",
@@ -146,15 +144,13 @@ public class GradleImportTests extends GradleTest {
 				"spring-jdbc",
 				"spring-jms",
 				"spring-orm",
-				"spring-orm-hibernate4",
 				"spring-oxm",
+				"spring-struts",
 				"spring-test",
-				"spring-test-mvc",
 				"spring-tx",
 				"spring-web",
 				"spring-webmvc",
-				"spring-webmvc-portlet",
-				"spring-webmvc-tiles3"
+				"spring-webmvc-portlet"		
 		};
 		
 		//			boolean good = false;
@@ -166,24 +162,23 @@ public class GradleImportTests extends GradleTest {
 		//				}
 		//			}
 		//		
-		URI distro = new URI("http://services.gradle.org/distributions/gradle-1.3-bin.zip");
-		GradleCore.getInstance().getPreferences().setDistribution(distro);
+// Use wrapper version
+//		URI distro = new URI("http://services.gradle.org/distributions/gradle-1.3-bin.zip");
+//		GradleCore.getInstance().getPreferences().setDistribution(distro);
 
 		final GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-framework", 
 				new URI("git://github.com/SpringSource/spring-framework.git"),
-				"db3bbb5f8cb945b8f29fbd83aff9bbd2dbc70e1c"
+				//"db3bbb5f8cb945b8f29fbd83aff9bbd2dbc70e1c"
+				"v4.1.1.RELEASE"
 			)
 		);
-
-		
-		
 
 		String[] beforeTasks = {
 				//These tasks are set based on the shell script included with spring framework:
 				//https://github.com/SpringSource/spring-framework/blob/0ae973f995229bce0c5b9ffe25fe1f5340559656/import-into-eclipse.sh
 				"cleanEclipse",
+				"eclipse",				
 				":spring-oxm:compileTestJava",
-				"eclipse"				
 		};
 		
 		importOp.setEnableDSLD(false); // cause some compilation errors in this project so turn off
