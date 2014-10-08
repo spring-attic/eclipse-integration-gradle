@@ -337,6 +337,10 @@ public class GradleImportOperation {
 		try {
 			GradleProject gProj = GradleCore.create(projectModel);
 			
+			//For reimport case we must preserve whether the project has dep managment enabled.
+			// We must check this early on before the .classpath is obliterated by the reimport.
+			boolean wasDependencyManaged = gProj.isDependencyManaged();
+			
 			//1
 			IWorkspace ws = ResourcesPlugin.getWorkspace();
 			String projectName = getEclipseName(projectModel);
@@ -411,7 +415,7 @@ public class GradleImportOperation {
 			}	
 			
 			//8..9
-			boolean generateOnly = isReimport ? !gProj.isDependencyManaged() : !getEnableDependencyManagement();
+			boolean generateOnly = isReimport ? !wasDependencyManaged : !getEnableDependencyManagement();
 			if (generateOnly) {
 				try {
 					NatureUtils.ensure(project, new SubProgressMonitor(monitor, 1), 

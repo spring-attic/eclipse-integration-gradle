@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -579,6 +580,43 @@ public class GradleImportTests extends GradleTest {
 		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
+	
+	public void testImportJavaQuickStartAndRefresh() throws Exception {
+//		GradleClassPathContainer.DEBUG = true;
+		String name = "quickstart";
+		importSampleProject(name);
+		
+		IJavaProject project = getJavaProject(name);
+		GradleProject gp = GradleCore.create(project);
+		dumpJavaProjectInfo(project);
+		
+		assertProjects(name);
+		assertJarEntry(project, "commons-collections-3.2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertTrue("Dependency management should be enabled", gp.isDependencyManaged());
+		
+		RefreshAllActionCore.callOn(Arrays.asList(gp.getProject())).join();
+		
+		//Project should basically still be the same:
+		assertProjects(name);
+		assertJarEntry(project, "commons-collections-3.2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertTrue("Dependency management should be enabled", gp.isDependencyManaged());
+
+		//Now try disabling dep management...
+		GradleClassPathContainer.removeFrom(project, new NullProgressMonitor());
+		assertFalse("Dependency management should be disabled", gp.isDependencyManaged());
+		RefreshAllActionCore.callOn(Arrays.asList(gp.getProject())).join();
+
+		// project is pretty much same. Only difference is that dependency are now attached directly. But they should
+		// still be there.
+		assertProjects(name);
+		assertJarEntry(project, "commons-collections-3.2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertFalse("Dependency management should be disabled", gp.isDependencyManaged());
+
+	}
+	
 	
 	/**
 	 * Test whether afterImportTasks are executed after an import
