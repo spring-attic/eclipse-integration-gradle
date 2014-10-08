@@ -132,25 +132,32 @@ public class GradleImportTests extends GradleTest {
 	public void testImportSpringFramework() throws Exception {
 		JavaXXRuntime.java8everyone();
 		String[] projectNames = {
+				"spring",
 				"spring-aop",
 				"spring-aspects",
 				"spring-beans",
+				"spring-beans-groovy",
+				"spring-build-src",
 				"spring-context",
 				"spring-context-support",
 				"spring-core",
 				"spring-expression",
+				"spring-framework-bom",
 				"spring-instrument",
 				"spring-instrument-tomcat",
 				"spring-jdbc",
 				"spring-jms",
+				"spring-messaging",
 				"spring-orm",
+				"spring-orm-hibernate4",
 				"spring-oxm",
-				"spring-struts",
 				"spring-test",
 				"spring-tx",
 				"spring-web",
 				"spring-webmvc",
-				"spring-webmvc-portlet"		
+				"spring-webmvc-portlet",
+				"spring-webmvc-tiles2",
+				"spring-websocket"
 		};
 		
 		//			boolean good = false;
