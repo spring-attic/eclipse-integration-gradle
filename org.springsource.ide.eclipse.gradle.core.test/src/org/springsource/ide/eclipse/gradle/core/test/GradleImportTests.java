@@ -1160,7 +1160,7 @@ public class GradleImportTests extends GradleTest {
 			System.out.println("HOME = "+home);
 			System.out.println("user.home = "+System.getProperty("user.home"));
 			System.out.println("maven.repo.local = "+System.getProperty("maven.repo.local"));
-			IProject mvnProject = importEclipseProject("sts2405/myLib");
+			final IProject mvnProject = importEclipseProject("sts2405/myLib");
 			String mvnLocalRepo = userHome +"/.m2/repository";
 			assertNoErrors(mvnProject, true);
 			new ExternalCommand(
@@ -1182,16 +1182,24 @@ public class GradleImportTests extends GradleTest {
 			IProject gradleProject = getProject("main");
 			assertNoErrors(gradleProject, true);
 	
-			IJavaProject jp = JavaCore.create(gradleProject);
+			final IJavaProject jp = JavaCore.create(gradleProject);
 			assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", jp);
 			assertClasspathProjectEntry(mvnProject, jp);
 	
 			GradleCore.create(gradleProject).getProjectPreferences().setRemapJarsToMavenProjects(false);
 			RefreshDependenciesActionCore.synchCallOn(gradleProject);
-			assertNoClasspathProjectEntry(mvnProject, jp);
-			assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
+			//allthough the refresh dependencies is using a 'synchCall' the refreshing of classpath container is 
+			//always asynchronous. So we must wait a little bit for the classpath container to refresh
+			new ACondition("Check classpath aftter disabling 'Remap Jars to Maven Projects'") {
+				@Override
+				public boolean test() throws Exception {
+					assertNoClasspathProjectEntry(mvnProject, jp);
+					assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
+					return true;
+				}
+			}.waitFor(5000);
 		} finally{
-			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
+//			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
 		}
 	}
 
