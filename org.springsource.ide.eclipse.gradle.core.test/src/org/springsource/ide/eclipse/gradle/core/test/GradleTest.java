@@ -680,6 +680,19 @@ public abstract class GradleTest extends TestCase {
 				msg.append(e+"\n");
 			}
 		}
+		//Also try looking inside classpath container:
+		GradleProject gp = GradleCore.create(project);
+		if (gp.isDependencyManaged()) {
+			for (IClasspathEntry e : gp.getClassPathcontainer().getClasspathEntries()) {
+				if (e.getEntryKind()==IClasspathEntry.CPE_PROJECT) {
+					IPath path = e.getPath();
+					if (expectProject.getFullPath().equals(path)) {
+						return; //OK
+					}
+					msg.append(e+"\n");
+				}
+			}
+		}
 		fail("Not found '"+expectProject+"':\n"+msg.toString());
 	}
 
