@@ -1199,7 +1199,7 @@ public class GradleImportTests extends GradleTest {
 				}
 			}.waitFor(5000);
 		} finally{
-//			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
+			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
 		}
 	}
 
