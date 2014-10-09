@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.gradle.tooling.CancellationToken;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -79,16 +78,12 @@ public class NewGradleProjectOperation {
 	}
 
 	public boolean perform(IProgressMonitor mon) throws CoreException {
-		return perform(mon, null);
-	}
-	
-	public boolean perform(IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException {
 		assertComplete();
-		createProjectContents(mon, cancellationToken);
+		createProjectContents(mon);
 		return true;
 	}
 
-	private void createProjectContents(IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException {
+	private void createProjectContents(IProgressMonitor mon) throws CoreException {
 		mon.beginTask("Create project contents", 1);
 		try {
 			//Setup the directory where the project will be created.
@@ -108,7 +103,7 @@ public class NewGradleProjectOperation {
 			try {
 				GradleImportOperation importOp = GradleImportOperation.importAll(location);
 				ErrorHandler eh = ErrorHandler.forImportWizard();
-				importOp.perform(eh, new SubProgressMonitor(mon, 1), cancellationToken);
+				importOp.perform(eh, new SubProgressMonitor(mon, 1));
 				eh.rethrowAsCore();
 			} catch (NameClashException e) {
 				throw ExceptionUtil.coreException(e);

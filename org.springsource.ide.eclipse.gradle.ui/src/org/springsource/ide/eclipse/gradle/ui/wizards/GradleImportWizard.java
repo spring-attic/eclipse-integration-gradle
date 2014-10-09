@@ -63,7 +63,7 @@ public class GradleImportWizard extends Wizard implements IImportWizard {
 			@Override
 			public void doit(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 				ErrorHandler eh = ErrorHandler.forImportWizard();
-				operation.perform(eh, monitor, cancellationSource.token());
+				operation.perform(eh, monitor);
 				eh.rethrowAsCore();
 			}
 		});

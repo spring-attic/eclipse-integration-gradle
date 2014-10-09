@@ -38,7 +38,7 @@ public class RefreshSourceFoldersAction extends RefreshAction {
 				public void doit(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 					ErrorHandler eh = ErrorHandler.forRefreshSourceFolders();
 					project.invalidateGradleModel();
-					project.refreshSourceFolders(eh, monitor, cancellationSource.token());
+					project.refreshSourceFolders(eh, monitor);
 					eh.rethrowAsCore();
 				}
 			});

@@ -70,7 +70,7 @@ public class RefreshAllActionCore {
 							monitor.worked(1);
 						}
 						for (GradleProject p : projects) {
-							p.getGradleModel(new SubProgressMonitor(monitor, 1), cancellationSource.token());
+							p.getGradleModel(new SubProgressMonitor(monitor, 1));
 						}
 						JobUtil.schedule(new Continuable("Reimporting "+jobName, projects.size(), cont) {
 							@Override
@@ -86,7 +86,7 @@ public class RefreshAllActionCore {
 									batch.add(project);
 								}
 								for (List<GradleProject> batch : batches.values()) {
-									new ReimportOperation(batch).perform(eh, new SubProgressMonitor(monitor, batch.size()), cancellationSource.token());
+									new ReimportOperation(batch).perform(eh, new SubProgressMonitor(monitor, batch.size()));
 								}
 								eh.rethrowAsCore();
 								cont.apply(null);

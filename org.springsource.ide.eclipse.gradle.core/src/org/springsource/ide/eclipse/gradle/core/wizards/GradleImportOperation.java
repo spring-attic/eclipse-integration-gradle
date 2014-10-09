@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
-import org.gradle.tooling.CancellationToken;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
@@ -163,10 +162,6 @@ public class GradleImportOperation {
 	}
 	
 	public void perform(ErrorHandler eh, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		perform(eh, monitor, null);
-	}
-
-	public void perform(ErrorHandler eh, IProgressMonitor monitor, CancellationToken cancellationToken) throws CoreException, OperationCanceledException {
 		int totalWork = projectsToImport.size();
 		int tasksWork = (totalWork+4)/5;
 		if (doBeforeTasks) {
@@ -184,18 +179,18 @@ public class GradleImportOperation {
 				List<HierarchicalEclipseProject> sorted = new GradleProjectSorter(projectsToImport).getSorted();
 				
 				// Execute "before" tasks and only refresh preference if anything was executed 
-				tasksExecuted = doBeforeTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork), cancellationToken);
+				tasksExecuted = doBeforeTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork));
 				if (tasksExecuted) {
 					refreshProjectPreferences(sorted);
 				}
 					
 				for (HierarchicalEclipseProject project : sorted) {
-					importProject(project, eh, new SubProgressMonitor(monitor, 1), cancellationToken);
+					importProject(project, eh, new SubProgressMonitor(monitor, 1));
 					JobUtil.checkCanceled(monitor);
 				}
 				
 				// Execute "after" tasks and refresh projects because they've been imported by now
-				tasksExecuted = doAfterTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork-tasksWork/3), cancellationToken);
+				tasksExecuted = doAfterTasks(sorted, eh, new SubProgressMonitor(monitor, tasksWork-tasksWork/3));
 				if (tasksExecuted) {
 					refreshProjects(sorted, new SubProgressMonitor(monitor, tasksWork/3));
 				}
@@ -268,7 +263,7 @@ public class GradleImportOperation {
 		}
 	}
 
-	private boolean doBeforeTasks(List<HierarchicalEclipseProject> sorted, ErrorHandler eh, IProgressMonitor monitor, CancellationToken cancellationToken) {
+	private boolean doBeforeTasks(List<HierarchicalEclipseProject> sorted, ErrorHandler eh, IProgressMonitor monitor) {
 		try {
 			ITaskProvider taskProvider = isReimport ? new ITaskProvider() {
 				@Override
@@ -282,14 +277,14 @@ public class GradleImportOperation {
 					return getDoBeforeTasks() ? getBeforeTasks() : new String[0];
 				}
 			};
-			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor, cancellationToken);
+			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor);
 		} catch (Exception e) {
 			eh.handleError(e);
 			return true; // conservatively assume that something was done before the error happened.
 		}
 	}
 
-	private boolean doAfterTasks(List<HierarchicalEclipseProject> sorted, ErrorHandler eh, IProgressMonitor monitor, CancellationToken cancellationToken) {
+	private boolean doAfterTasks(List<HierarchicalEclipseProject> sorted, ErrorHandler eh, IProgressMonitor monitor) {
 		try {
 			ITaskProvider taskProvider = isReimport ? new ITaskProvider() {
 				@Override
@@ -303,7 +298,7 @@ public class GradleImportOperation {
 					return getDoAfterTasks() ? getAfterTasks() : new String[0];
 				}
 			};
-			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor, cancellationToken);
+			return TaskUtil.bulkRunTasks(sorted, taskProvider, monitor);
 		} catch (Exception e) {
 			eh.handleError(e);
 			return true; // conservatively assume that something was done before the error happened.
@@ -327,7 +322,7 @@ public class GradleImportOperation {
 		}
 	}
 	
-	private void importProject(HierarchicalEclipseProject projectModel, ErrorHandler eh, IProgressMonitor monitor, CancellationToken cancellationToken) {
+	private void importProject(HierarchicalEclipseProject projectModel, ErrorHandler eh, IProgressMonitor monitor) {
 		final boolean haveWorkingSets = workingSets.length>0 || quickWorkingSetName!=null;
 		//This provisional implementation just creates a linked project pointing to wherever the root folder
 		// is pointing to.
@@ -341,6 +336,10 @@ public class GradleImportOperation {
 		monitor.beginTask("Import "+projectModel.getName(), totalWork);
 		try {
 			GradleProject gProj = GradleCore.create(projectModel);
+			
+			//For reimport case we must preserve whether the project has dep managment enabled.
+			// We must check this early on before the .classpath is obliterated by the reimport.
+			boolean wasDependencyManaged = gProj.isDependencyManaged();
 			
 			//1
 			IWorkspace ws = ResourcesPlugin.getWorkspace();
@@ -416,7 +415,7 @@ public class GradleImportOperation {
 			}	
 			
 			//8..9
-			boolean generateOnly = isReimport ? !gProj.isDependencyManaged() : !getEnableDependencyManagement();
+			boolean generateOnly = isReimport ? !wasDependencyManaged : !getEnableDependencyManagement();
 			if (generateOnly) {
 				try {
 					NatureUtils.ensure(project, new SubProgressMonitor(monitor, 1), 
@@ -428,7 +427,7 @@ public class GradleImportOperation {
 					eh.handleError(e);
 				}
 			} else {
-				gProj.convertToGradleProject(projectMapper, eh, new SubProgressMonitor(monitor, 2), cancellationToken);
+				gProj.convertToGradleProject(projectMapper, eh, new SubProgressMonitor(monitor, 2));
 			}
 			
 			// Configure project. Delegated to clients.
@@ -715,7 +714,7 @@ public class GradleImportOperation {
 
 	public static List<HierarchicalEclipseProject> allProjects(File rootFolder) throws OperationCanceledException, CoreException {
 		GradleProject proj = GradleCore.create(rootFolder);
-		HierarchicalEclipseProject root = proj.getSkeletalGradleModel(new NullProgressMonitor(), null);
+		HierarchicalEclipseProject root = proj.getSkeletalGradleModel(new NullProgressMonitor());
 		return new ArrayList<HierarchicalEclipseProject>(GradleProjectUtil.getAllProjects(root));
 	}
 

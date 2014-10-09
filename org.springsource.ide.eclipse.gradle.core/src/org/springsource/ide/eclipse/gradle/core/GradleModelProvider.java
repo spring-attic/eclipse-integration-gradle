@@ -35,6 +35,7 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperation
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil.Console;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.GradleOpearionProgressMonitor;
 
 
 /**
@@ -69,7 +70,7 @@ public abstract class GradleModelProvider {
 	/**
 	 * Requests that the model provider lazy initialises its cache with models that satisfy the requested level of detail.
 	 */
-	public abstract <T extends HierarchicalEclipseProject> void ensureModels(Class<T> type, IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException, OperationCanceledException;
+	public abstract <T extends HierarchicalEclipseProject> void ensureModels(Class<T> type, IProgressMonitor mon) throws CoreException, OperationCanceledException;
 	
 	/**
 	 * Retrieves a model from the cache. Never returns null. 
@@ -277,7 +278,7 @@ public abstract class GradleModelProvider {
 		}
 
 		@Override
-		public <T extends HierarchicalEclipseProject> void ensureModels(Class<T> requiredType, IProgressMonitor mon, CancellationToken cancellationToken) throws CoreException, OperationCanceledException {
+		public <T extends HierarchicalEclipseProject> void ensureModels(Class<T> requiredType, IProgressMonitor mon) throws CoreException, OperationCanceledException {
 			synchronized (this) {
 				if (satisfies(requiredType)) {
 					return;
@@ -291,7 +292,7 @@ public abstract class GradleModelProvider {
 			//precompute what we need in local variables so concurrent threads can safely keep using the old provider state.
 			T model = null;
 			try {
-				model = buildModel(rootProject, requiredType, mon, cancellationToken);
+				model = buildModel(rootProject, requiredType, mon);
 				Map<GradleProject, HierarchicalEclipseProject> cache = new IdentityHashMap<GradleProject, HierarchicalEclipseProject>();
 				walk(model, cache);
 				synchronized (this) {
@@ -354,7 +355,7 @@ public abstract class GradleModelProvider {
 	}
 
 	
-	public static <T extends HierarchicalEclipseProject> T buildModel(GradleProject rootProject, Class<T> requiredType, final IProgressMonitor monitor, CancellationToken cancellationToken) throws CoreException {
+	public static <T extends HierarchicalEclipseProject> T buildModel(GradleProject rootProject, Class<T> requiredType, final IProgressMonitor monitor) throws CoreException {
 		SystemPropertyCleaner.clean();
 		File projectLoc = rootProject.getLocation();
 		final int totalWork = 10000;
@@ -371,22 +372,28 @@ public abstract class GradleModelProvider {
 			rootProject.configureOperation(builder, null);
 			builder.setStandardOutput(console.out);
 			builder.setStandardError(console.err);
+			CancellationToken cancellationToken = GradleOpearionProgressMonitor
+					.findCancellationToken(monitor);
 			if (cancellationToken != null) {
 				builder.withCancellationToken(cancellationToken);
 				/*
-				 * Hack to print something in the console right away to give user a heads up that cancel is pending
+				 * Hack to print something in the console right away to give
+				 * user a heads up that cancel is pending
 				 */
 				if (cancellationToken instanceof CancellationTokenInternal) {
-					((CancellationTokenInternal)cancellationToken).getToken().addCallback(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								console.out.write("Cancellation request posted...\n".getBytes());
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}	
-					});
+					((CancellationTokenInternal) cancellationToken).getToken()
+							.addCallback(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										console.out
+												.write("Cancellation request posted...\n"
+														.getBytes());
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
+							});
 				}
 			}
 			builder.addProgressListener(new ProgressListener() {

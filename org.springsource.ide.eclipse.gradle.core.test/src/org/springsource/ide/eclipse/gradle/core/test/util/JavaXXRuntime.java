@@ -32,6 +32,10 @@ public class JavaXXRuntime {
 	// So we must provide the means to find it. Below is a list of places that we will
 	// check in order. If something exists there we will assume it is a Java 7 JDK.
 	
+	static String[] java8locations = {
+		"/home/kdvolder/Applications/jdk1.8.0_20", // On Kris's machine
+		"/opt/java/jdk/Sun/1.8"  // on springsource build server
+	};
 	static String[] java7locations = {
 		"/home/kdvolder/Applications/jdk1.7.0_17", // On Kris's machine
 		"/opt/java/jdk/Sun/1.7"  // on springsource build server
@@ -43,9 +47,14 @@ public class JavaXXRuntime {
 		"/opt/java/jdk/Sun/1.6"  // on springsource build server
 	};
 	
+	
 	/**
-	 * Switch 'everyone' to using Java 7 as a default.
+	 * Switch 'everyone' to using Java 8 as a default.
 	 */
+	public static void java8everyone() throws CoreException {
+		javaXXeveryone("1.8");
+	}
+	
 	public static void java7everyone() throws CoreException {
 		javaXXeveryone("1.7");
 	}
@@ -76,6 +85,8 @@ public class JavaXXRuntime {
 		vm = getJavaXXVM(version);
 		if (vm==null) {
 			vm = JavaUtils.createVM(getVMLocation(version));
+			//Seems the name is not generated (any more?) so we have to set something reasonable:
+			vm.setName("java_"+version);
 		}
 		if (!JavaUtils.isJavaXX(vm, version)) {
 			throw new Error("vm at "+vm.getInstallLocation()+ " doesn't look like a Java "+version);
@@ -100,7 +111,9 @@ public class JavaXXRuntime {
 	 */
 	private static File getVMLocation(String version) {
 		String[] locations = null;
-		if (version.equals("1.7")) {
+		if (version.equals("1.8")) {
+			locations = java8locations;
+		} else if (version.equals("1.7")) {
 			locations = java7locations;
 		} else if (version.equals("1.6")) {
 			locations = java6locations;
@@ -112,6 +125,5 @@ public class JavaXXRuntime {
 		}
 		throw new Error("Couldn't find a Java "+version+" VM");
 	}
-
 
 }

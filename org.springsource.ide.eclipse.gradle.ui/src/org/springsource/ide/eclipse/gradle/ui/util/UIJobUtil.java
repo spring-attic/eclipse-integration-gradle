@@ -12,6 +12,7 @@ package org.springsource.ide.eclipse.gradle.ui.util;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -19,8 +20,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
+import org.gradle.tooling.CancellationTokenSource;
+import org.gradle.tooling.GradleConnector;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.GradleOpearionProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 
 
@@ -43,10 +47,18 @@ public class UIJobUtil {
 	 */
 	public static void withProgressDialog(Shell shell, final GradleRunnable runnable) {
 		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(shell) {
+			
+			private CancellationTokenSource cancellationTokenSource = GradleConnector.newCancellationTokenSource();
+			
+			@Override
+			public IProgressMonitor getProgressMonitor() {
+				return new GradleOpearionProgressMonitor(super.getProgressMonitor(), cancellationTokenSource.token());
+			}
+
 			@Override
 			protected void cancelPressed() {
 				super.cancelPressed();
-				runnable.getCancellationSource().cancel();
+				cancellationTokenSource.cancel();
 			}
 		};
 		try {

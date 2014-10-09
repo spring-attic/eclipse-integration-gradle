@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.gradle.tooling.CancellationToken;
 import org.gradle.tooling.LongRunningOperation;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.GradleTask;
@@ -131,7 +130,7 @@ public class GradleProject {
 	 * Refreshes the contents of the classpath container to bring it in synch with the gradleModel.
 	 * (Note that this doesn't force the gradleModel itself to be updated!)
 	 */
-	public void refreshDependencies(IProgressMonitor monitor, CancellationToken cancellationToken) throws CoreException {
+	public void refreshDependencies(IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask("Refresh dependencies "+getName(), 3);
 		try {
 			// TODO JON remove this line!
@@ -172,10 +171,10 @@ public class GradleProject {
 	 * Reconfigures the project's source folders in Java classpath based on current gradle model.
 	 * (Note that this doesn't force the gradle model itself to be updated!)
 	 */
-	public void refreshSourceFolders(ErrorHandler eh, IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
+	public void refreshSourceFolders(ErrorHandler eh, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Refreshing source folders", 3);
 		try {
-			HierarchicalEclipseProject projectModel = getSkeletalGradleModel(new SubProgressMonitor(monitor, 1), cancellationToken);
+			HierarchicalEclipseProject projectModel = getSkeletalGradleModel(new SubProgressMonitor(monitor, 1));
 			
 			try {
 				DomainObjectSet<? extends EclipseLinkedResource> linkedResources = projectModel.getLinkedResources();
@@ -484,13 +483,13 @@ public class GradleProject {
 		return modelProvider;
 	}
 
-	GroupedModelProvider getModelProvider(Class<? extends HierarchicalEclipseProject> typeHint, IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
+	GroupedModelProvider getModelProvider(Class<? extends HierarchicalEclipseProject> typeHint, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Get model provider for '"+getDisplayName()+"'", 1);
 		try {
 			return getModelProvider();
 		} catch (FastOperationFailedException e) {
 			GroupedModelProvider provider = GradleModelProvider.create(this);
-			provider.ensureModels(typeHint, new SubProgressMonitor(monitor, 1), cancellationToken);
+			provider.ensureModels(typeHint, new SubProgressMonitor(monitor, 1));
 			return provider;
 		} finally {
 			monitor.done();
@@ -522,7 +521,7 @@ public class GradleProject {
 				@Override
 				public void doit(IProgressMonitor mon) throws Exception {
 					try {
-						getGradleModel(mon, cancellationSource.token());
+						getGradleModel(mon);
 					} finally {
 						finishedModelUpdateJob();
 					}
@@ -545,16 +544,16 @@ public class GradleProject {
 	 * hold the thread synch lock, since that will block concurrent 'fast' operations from returning quickly.
 	 * @throws  
 	 */
-	private <T extends HierarchicalEclipseProject> T getGradleModel(Class<T> type, IProgressMonitor monitor, CancellationToken cancellationToken) 
+	private <T extends HierarchicalEclipseProject> T getGradleModel(Class<T> type, IProgressMonitor monitor) 
 	throws OperationCanceledException, CoreException {
 		monitor.beginTask("Get model for '"+getDisplayName()+"'", 2);
 		try {
 			//1:
-			GradleModelProvider provider = getModelProvider(type, new SubProgressMonitor(monitor, 1), cancellationToken);
+			GradleModelProvider provider = getModelProvider(type, new SubProgressMonitor(monitor, 1));
 			
 			//2:
 			while (true) {
-				provider.ensureModels(type, new SubProgressMonitor(monitor, 1), cancellationToken);
+				provider.ensureModels(type, new SubProgressMonitor(monitor, 1));
 				try {
 					return provider.getCachedModel(this, type);
 				} catch (FastOperationFailedException e) {
@@ -566,16 +565,16 @@ public class GradleProject {
 		}
 	}
 		
-	public EclipseProject getGradleModel(IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
-		return getGradleModel(EclipseProject.class, monitor, cancellationToken);
+	public EclipseProject getGradleModel(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+		return getGradleModel(EclipseProject.class, monitor);
 	}
 	
 	public HierarchicalEclipseProject getSkeletalGradleModel() throws FastOperationFailedException, CoreException {
 		return getGradleModel(HierarchicalEclipseProject.class);
 	}
 	
-	public HierarchicalEclipseProject getSkeletalGradleModel(IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
-		return getGradleModel(HierarchicalEclipseProject.class, monitor,cancellationToken);
+	public HierarchicalEclipseProject getSkeletalGradleModel(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+		return getGradleModel(HierarchicalEclipseProject.class, monitor);
 	}
 	
 	/**
@@ -604,7 +603,7 @@ public class GradleProject {
 	 * to the project. A GradleProject instance is only a kind of proxy/wrapper but its creation doesn't
 	 * itself enforce any kind of constraints on the underlying project.
 	 */
-	public void convertToGradleProject(IProjectMapper projectMapping, ErrorHandler eh, IProgressMonitor monitor, CancellationToken cancellationToken) {
+	public void convertToGradleProject(IProjectMapper projectMapping, ErrorHandler eh, IProgressMonitor monitor) {
 		debug("convertToGradleProject called");
 		monitor.beginTask("Convert to Gradle project", 8);
 		try {
@@ -622,7 +621,7 @@ public class GradleProject {
 			debug("convertToGradleProject JRE container added");
 			
 			//3: Refresh source folders
-			refreshSourceFolders(eh, new SubProgressMonitor(monitor, 1), cancellationToken);
+			refreshSourceFolders(eh, new SubProgressMonitor(monitor, 1));
 			debug("refreshed source folders");
 			
 			//4: Force root project cache to be set
@@ -784,10 +783,10 @@ public class GradleProject {
 	/**
 	 * @return a set of tasks obtained from this project alone.
 	 */
-	public DomainObjectSet<? extends GradleTask> getTasks(IProgressMonitor monitor, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
+	public DomainObjectSet<? extends GradleTask> getTasks(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Retrieve tasks for "+getDisplayName(), 1);
 		try {
-			EclipseProject model = getGradleModel(new SubProgressMonitor(monitor, 1), cancellationToken);
+			EclipseProject model = getGradleModel(new SubProgressMonitor(monitor, 1));
 			return GradleProject.getTasks(model);
 		} finally {
 			monitor.done();
@@ -805,8 +804,8 @@ public class GradleProject {
 	/**
 	 * @return a set of "task path" strings obtained from this project and all subprojects.
 	 */
-	public Set<String> getAllTasks(IProgressMonitor mon, CancellationToken cancellationToken) throws OperationCanceledException, CoreException {
-		EclipseProject model = getGradleModel(mon, cancellationToken);
+	public Set<String> getAllTasks(IProgressMonitor mon) throws OperationCanceledException, CoreException {
+		EclipseProject model = getGradleModel(mon);
 		return getAllTasks(model);
 	}
 	

@@ -13,6 +13,7 @@ package org.springsource.ide.eclipse.gradle.core.test;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -130,31 +132,34 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testImportSpringFramework() throws Exception {
-		JavaXXRuntime.java7everyone();
+		JavaXXRuntime.java8everyone();
 		String[] projectNames = {
 				"spring",
 				"spring-aop",
 				"spring-aspects",
 				"spring-beans",
+				"spring-beans-groovy",
 				"spring-build-src",
 				"spring-context",
 				"spring-context-support",
 				"spring-core",
 				"spring-expression",
+				"spring-framework-bom",
 				"spring-instrument",
 				"spring-instrument-tomcat",
 				"spring-jdbc",
 				"spring-jms",
+				"spring-messaging",
 				"spring-orm",
 				"spring-orm-hibernate4",
 				"spring-oxm",
 				"spring-test",
-				"spring-test-mvc",
 				"spring-tx",
 				"spring-web",
 				"spring-webmvc",
 				"spring-webmvc-portlet",
-				"spring-webmvc-tiles3"
+				"spring-webmvc-tiles2",
+				"spring-websocket"
 		};
 		
 		//			boolean good = false;
@@ -166,24 +171,23 @@ public class GradleImportTests extends GradleTest {
 		//				}
 		//			}
 		//		
-		URI distro = new URI("http://services.gradle.org/distributions/gradle-1.3-bin.zip");
-		GradleCore.getInstance().getPreferences().setDistribution(distro);
+// Use wrapper version
+//		URI distro = new URI("http://services.gradle.org/distributions/gradle-1.3-bin.zip");
+//		GradleCore.getInstance().getPreferences().setDistribution(distro);
 
 		final GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-framework", 
 				new URI("git://github.com/SpringSource/spring-framework.git"),
-				"db3bbb5f8cb945b8f29fbd83aff9bbd2dbc70e1c"
+				//"db3bbb5f8cb945b8f29fbd83aff9bbd2dbc70e1c"
+				"v4.1.1.RELEASE"
 			)
 		);
-
-		
-		
 
 		String[] beforeTasks = {
 				//These tasks are set based on the shell script included with spring framework:
 				//https://github.com/SpringSource/spring-framework/blob/0ae973f995229bce0c5b9ffe25fe1f5340559656/import-into-eclipse.sh
 				"cleanEclipse",
+				"eclipse",				
 				":spring-oxm:compileTestJava",
-				"eclipse"				
 		};
 		
 		importOp.setEnableDSLD(false); // cause some compilation errors in this project so turn off
@@ -371,6 +375,7 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	
+
 	public void _testSTS1950RuntimeClasspathMergingFromSubprojectContainers() throws Exception {
 		//TODO: This test was disabled because test projects had a bunch of jars in it that 
 		// we would have to raise IP log tickets for to put it on the open-sourced git repo.
@@ -549,7 +554,7 @@ public class GradleImportTests extends GradleTest {
 		assertArrayEquals(new String[] { "afterEclipseImport" }, 
 				importOp.getAfterTasks());
 		
-		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+		importOp.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 		assertProjects(projectName);
 		
 		//Check expected source folder has expected exclusions
@@ -577,6 +582,43 @@ public class GradleImportTests extends GradleTest {
 		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
+	
+	public void testImportJavaQuickStartAndRefresh() throws Exception {
+//		GradleClassPathContainer.DEBUG = true;
+		String name = "quickstart";
+		importSampleProject(name);
+		
+		IJavaProject project = getJavaProject(name);
+		GradleProject gp = GradleCore.create(project);
+		dumpJavaProjectInfo(project);
+		
+		assertProjects(name);
+		assertJarEntry(project, "commons-collections-3.2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertTrue("Dependency management should be enabled", gp.isDependencyManaged());
+		
+		RefreshAllActionCore.callOn(Arrays.asList(gp.getProject())).join();
+		
+		//Project should basically still be the same:
+		assertProjects(name);
+		assertJarEntry(project, "commons-collections-3.2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertTrue("Dependency management should be enabled", gp.isDependencyManaged());
+
+		//Now try disabling dep management...
+		GradleClassPathContainer.removeFrom(project, new NullProgressMonitor());
+		assertFalse("Dependency management should be disabled", gp.isDependencyManaged());
+		RefreshAllActionCore.callOn(Arrays.asList(gp.getProject())).join();
+
+		// project is pretty much same. Only difference is that dependency are now attached directly. But they should
+		// still be there.
+		assertProjects(name);
+		assertJarEntry(project, "commons-collections-3.2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertFalse("Dependency management should be disabled", gp.isDependencyManaged());
+
+	}
+	
 	
 	/**
 	 * Test whether afterImportTasks are executed after an import
@@ -609,7 +651,7 @@ public class GradleImportTests extends GradleTest {
 		GradleImportOperation importOp = importTestProjectOperation(location);
 		importOp.setDoAfterTasks(false);
 		
-		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
 		assertFalse(theFile.exists());
 	}
 	
@@ -653,7 +695,7 @@ public class GradleImportTests extends GradleTest {
 	 */
 	private void generateEclipseFiles(GradleProject project) throws OperationCanceledException, CoreException {
 		String taskPath = ":eclipse";
-		Set<String> tasks = project.getAllTasks(new NullProgressMonitor(), null);
+		Set<String> tasks = project.getAllTasks(new NullProgressMonitor());
 		assertTrue(tasks.contains(taskPath));
 		
 		ILaunchConfigurationWorkingCopy launchConf = (ILaunchConfigurationWorkingCopy) GradleLaunchConfigurationDelegate.createDefault(project, false);
@@ -763,7 +805,7 @@ public class GradleImportTests extends GradleTest {
 				).setRecursive(true)
 		);
 		op.setEnableDSLD(true);
-		op.perform(defaultTestErrorHandler(), new NullProgressMonitor(), null);
+		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
 
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (IProject proj : projects) {
@@ -853,7 +895,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleImportOperation importOp = GradleImportOperation.importAll(rootLocation);
 		importOp.verify();
-		importOp.perform(new ErrorHandler.Test(IStatus.ERROR), new NullProgressMonitor(), null);
+		importOp.perform(new ErrorHandler.Test(IStatus.ERROR), new NullProgressMonitor());
 	}
 	
 	public void disabledTestTimedImport() throws Exception {
@@ -988,7 +1030,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleProject gSubproject = getGradleProject(subprojectName);
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
 
 		//Now 'main' should no longer exist, but spain should
 		mainType = subproject.findType("Main");
@@ -998,7 +1040,7 @@ public class GradleImportTests extends GradleTest {
 		
 		//Re-refreshing should not be a problem...
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
 		
 		//Nothing changed, should still pass the same assertions
 		mainType = subproject.findType("Main");
@@ -1034,7 +1076,7 @@ public class GradleImportTests extends GradleTest {
 		
 		GradleProject gSubproject = getGradleProject(subprojectName);
 		gSubproject.invalidateGradleModel();
-		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor(), null);
+		gSubproject.refreshSourceFolders(new ErrorHandler.Test(), new NullProgressMonitor());
 		
 		//This time, both of the main types should be found since we added both source folders.
 		assertNotNull(subproject);
@@ -1153,7 +1195,32 @@ public class GradleImportTests extends GradleTest {
 		}
 	}
 
+	public void testSTS2834RemapJarToGradleProject() throws Exception {
+		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
+									 // test projects. Will be cleaned up (deleted)
+									 // by setup of next test.
+		
+		importTestProject("sts2834/my-lib", true);
+		IProject libProject = getProject("my-lib");
+		assertProjects("repos", "my-lib");
+		
+		GradleProcess process = LaunchUtil.launchTasks(GradleCore.create(libProject), ":uploadArchives");
+		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
+		assertContains("BUILD SUCCESSFUL", output);
+
+		importTestProject("sts2834/my-app", true);
+		assertProjects("repos", "my-lib", "my-app");
+		
+		//TODO: flesh out this test. It just sets up the needed test projects but doesn't actually test
+		// whether the 'remap jar to gradle' functionality works.
+	}
 	
+	private void createGeneralProject(String name) throws CoreException {
+		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+		p.create(new NullProgressMonitor());
+		p.open(new NullProgressMonitor());
+	}
+
 	private void dumpRawClasspath(IJavaProject jp) throws JavaModelException {
 		System.out.println(">>> raw classpath for "+jp.getElementName());
 		for (IClasspathEntry e : jp.getRawClasspath()) {
