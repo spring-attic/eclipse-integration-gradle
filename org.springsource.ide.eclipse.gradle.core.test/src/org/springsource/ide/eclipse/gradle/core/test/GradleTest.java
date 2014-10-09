@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.codeassist.ThrownExceptionFinder;
 import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
@@ -115,8 +116,16 @@ public abstract class GradleTest extends TestCase {
 	public static void deleteAllProjects() throws CoreException {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (IProject p : projects) {
-			boolean deleteContent = false;
+			boolean deleteContent = isDefaultLocation(p);
 			p.delete(deleteContent, true, new NullProgressMonitor());
+		}
+	}
+
+	private static boolean isDefaultLocation(IProject p) throws CoreException {
+		try {
+			return p.getDescription().getLocationURI()==null;
+		} catch (Throwable e) {
+			return false;
 		}
 	}
 	
@@ -266,23 +275,40 @@ public abstract class GradleTest extends TestCase {
 			fail("Didn't find expected substring '"+expected+"' in \n'"+string+"'");
 		}
 	}
+
+	public static void importTestProject(String projectName) throws Exception {
+		importTestProject(projectName, false);
+	}
 	
 	/**
 	 * Imports a test project and all its subprojects into the workspace.
 	 */
-	public static void importTestProject(String projectName) throws IOException,
+	public static void importTestProject(String projectName, boolean copyToWorkspace) throws IOException,
 			NameClashException, CoreException, ExistingProjectException,
 			MissingProjectDependencyException {
-		File testProj = getTestProjectCopy(projectName);
+		File parentFolder = null;
+		if (copyToWorkspace) {
+			parentFolder = Platform.getLocation().toFile();
+		}
+		File testProj = getTestProjectCopy(projectName, parentFolder);
 		importTestProject(testProj);
 	}
 
+	
 	/**
 	 * Creates a 'fresh' copy of a test project and return a reference to its new location in the
 	 * file system. The project is not yet imported in the workspace.
 	 */
 	public static File getTestProjectCopy(String projectName) throws IOException {
-		return getTestFolderCopy("resources/projects/"+projectName);
+		return getTestProjectCopy(projectName, null);
+	}
+	
+	/**
+	 * Creates a 'fresh' copy of a test project and return a reference to its new location in the
+	 * file system. The project is not yet imported in the workspace.
+	 */
+	public static File getTestProjectCopy(String projectName, File parentFolder) throws IOException {
+		return getTestFolderCopy("resources/projects/"+projectName, parentFolder);
 	}
 
 	/**
@@ -487,16 +513,22 @@ public abstract class GradleTest extends TestCase {
 	 * Find a directory in the "test resources" of this test bundle and copy its contents into a new
 	 * temporary directory. Return a reference to the new directory.
 	 */
-	public static File getTestFolderCopy(String path) throws IOException {
+	public static File getTestFolderCopy(String path, File parentFolder) throws IOException {
 		File orgFolder = GradleTest.getTestFile(path);
-		return getFolderCopy(orgFolder);
+		return getFolderCopy(orgFolder, parentFolder);
 	}
 	
 	/**
 	 * Copy the contents of a given folder to a new temp folder. The temp folder
 	 * will have the same name as the original folder in its last path segment.
+	 * 
+	 * If parentFolder is not null, then the new folder is created under parentFolder
+	 * otherwise a new 'temporary' parentFolder is created.
 	 */
-	public static File getFolderCopy(File orgFolder) throws IOException {
+	public static File getFolderCopy(File orgFolder, File parentFolder) throws IOException {
+		if (parentFolder==null) {
+			parentFolder = TestUtils.createTempDirectory();
+		}
 		boolean done = false;
 		File copyFolder = null; 
 		while (!done) {
@@ -509,7 +541,7 @@ public abstract class GradleTest extends TestCase {
 			//'interrupts', like the file copying methods in apache FileUtils.
 			//See also here: http://stackoverflow.com/questions/1161297/why-are-we-getting-closedbyinterruptexception-from-filechannel-map-in-java-1-6
 			try {
-				copyFolder = new File(TestUtils.createTempDirectory(), orgFolder.getName());
+				copyFolder = new File(parentFolder, orgFolder.getName());
 				FileUtils.copyDirectory(orgFolder, copyFolder);
 				done = true;
 			} catch (ClosedByInterruptException e) {

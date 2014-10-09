@@ -13,6 +13,7 @@ package org.springsource.ide.eclipse.gradle.core.test;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -374,6 +375,7 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	
+
 	public void _testSTS1950RuntimeClasspathMergingFromSubprojectContainers() throws Exception {
 		//TODO: This test was disabled because test projects had a bunch of jars in it that 
 		// we would have to raise IP log tickets for to put it on the open-sourced git repo.
@@ -1193,7 +1195,32 @@ public class GradleImportTests extends GradleTest {
 		}
 	}
 
+	public void testSTS2834RemapJarToGradleProject() throws Exception {
+		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
+									 // test projects. Will be cleaned up (deleted)
+									 // by setup of next test.
+		
+		importTestProject("sts2834/my-lib", true);
+		IProject libProject = getProject("my-lib");
+		assertProjects("repos", "my-lib");
+		
+		GradleProcess process = LaunchUtil.launchTasks(GradleCore.create(libProject), ":uploadArchives");
+		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
+		assertContains("BUILD SUCCESSFUL", output);
+
+		importTestProject("sts2834/my-app", true);
+		assertProjects("repos", "my-lib", "my-app");
+		
+		//TODO: flesh out this test. It just sets up the needed test projects but doesn't actually test
+		// whether the 'remap jar to gradle' functionality works.
+	}
 	
+	private void createGeneralProject(String name) throws CoreException {
+		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+		p.create(new NullProgressMonitor());
+		p.open(new NullProgressMonitor());
+	}
+
 	private void dumpRawClasspath(IJavaProject jp) throws JavaModelException {
 		System.out.println(">>> raw classpath for "+jp.getElementName());
 		for (IClasspathEntry e : jp.getRawClasspath()) {
