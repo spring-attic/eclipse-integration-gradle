@@ -285,6 +285,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 				classpath.add(WTPUtil.addToDeploymentAssembly(project, JavaCore.newContainerEntry(new Path(ID), export)));
 //						GlobalSettings.exportClasspathContainer)));
 				classpath.removeLibraryEntries();
+				classpath.removeProjectEntries();
 				classpath.setOn(project, new SubProgressMonitor(mon, 9));
 				GradleCore.create(project).getClassPathcontainer().refreshMarkers();
 				sdebug("Done Adding to "+project.getElementName());

@@ -51,6 +51,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
@@ -58,6 +59,8 @@ import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
+import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
+import org.springsource.ide.eclipse.gradle.core.samples.SampleProjectRegistry;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
@@ -1261,6 +1264,26 @@ public class GradleImportTests extends GradleTest {
 				//Only there if DSLD enabled: JavaCore.newContainerEntry(new Path(GradleDSLDClasspathContainer.ID), false),
 		};
 		return expectedClasspath;
+	}
+
+	/**
+	 * Relates to STS 3818, when project dependencies are included in classpath container they shouldn't be included in
+	 * as explicit .classpath entries.
+	 */
+	public void testProjectDependciesManaged() throws Exception {
+		MockNewProjectWizardUI gui = new MockNewProjectWizardUI();
+		gui.name.setValue("flat-parent");
+		gui.location.setValue(SampleProject.getDefaultProjectLocation(gui.name.getValue()));
+		gui.sampleProject.setValue(SampleProjectRegistry.getInstance().get("flat-java-multiproject"));
+		gui.newProjectOp.perform(new NullProgressMonitor());
+		
+		assertProjects("flat-parent", "my-lib", "product");
+		
+		GradleProject gp = GradleCore.create(getProject("product"));
+		assertTrue(gp.isDependencyManaged());
+		assertClasspathProjectEntry(getProject("my-lib"), gp.getJavaProject());
+		
+		assertNoExplicitProjectEntries(gp.getJavaProject());
 	}
 	
 	//TODO: under what circumstances will linked resources returned by gradle api refer to files (not folders)?

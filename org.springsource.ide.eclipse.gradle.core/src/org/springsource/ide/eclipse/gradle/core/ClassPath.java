@@ -163,6 +163,13 @@ public class ClassPath {
 	public void removeLibraryEntries() {
 		entryMap.remove(IClasspathEntry.CPE_LIBRARY);
 	}
+	
+	/**
+	 * Removes all project entries from this classpath.
+	 */
+	public void removeProjectEntries() {
+		entryMap.remove(IClasspathEntry.CPE_PROJECT);
+	}
 
 	public IClasspathEntry[] toArray() {
 		ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();

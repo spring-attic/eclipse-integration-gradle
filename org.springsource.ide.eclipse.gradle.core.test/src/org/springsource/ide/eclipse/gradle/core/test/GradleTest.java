@@ -666,8 +666,29 @@ public abstract class GradleTest extends TestCase {
 		//ok!
 	}
 
+	/**
+	 * Check that there are no explicit project entries in the given project. I.e. any project entries 
+	 * are inside classpath container only.
+	 */
+	public static void assertNoExplicitProjectEntries(IJavaProject project) throws JavaModelException {
+		IClasspathEntry[] classpath = project.getRawClasspath();
+		boolean fail = false;
+		StringBuilder msg = new StringBuilder();
+		for (IClasspathEntry e : classpath) {
+			if (e.getEntryKind()==IClasspathEntry.CPE_PROJECT) {
+				fail = true;
+				msg.append(e+"\n");
+			}
+		}
+		if (fail) {
+			fail("Excplicit project entries found in classpath:\n"+msg.toString());
+		}
+	}
 
-
+	/**
+	 * Verifies that a project entry exists in a given project's classpath. The entry may be inside the classpath 
+	 * container or explicit in the .classpath.
+	 */
 	public static void assertClasspathProjectEntry(IProject expectProject, IJavaProject project) throws JavaModelException {
 		IClasspathEntry[] classpath = project.getRawClasspath();
 		StringBuilder msg = new StringBuilder();
