@@ -58,8 +58,10 @@ import org.osgi.framework.Bundle;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.ProjectMapperFactory;
+import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
+import org.springsource.ide.eclipse.gradle.core.test.GradleImportTests.WaitForRefresh;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
@@ -72,6 +74,7 @@ import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler.Test;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
+import org.springsource.ide.eclipse.gradle.core.util.Joinable;
 import org.springsource.ide.eclipse.gradle.core.util.ZipFileUtil;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation.ExistingProjectException;
@@ -777,6 +780,25 @@ public abstract class GradleTest extends TestCase {
 		project.create(projectDescription, new NullProgressMonitor());
 		project.open(new NullProgressMonitor());
 		return project;
+	}
+
+	/**
+	 * Helper to refresh dependencies for a project and wait for the container to become 'refreshed' (this is
+	 * normally an asynch operation). 
+	 */
+	public static void refreshDependencies(IProject project) throws Exception {
+		GradleClassPathContainer container = GradleCore.create(project).getClassPathcontainer();
+		WaitForRefresh waitForRefresh = new WaitForRefresh();
+		try {
+			container.addRefreshListener(waitForRefresh);
+			Joinable<Void> j = RefreshDependenciesActionCore.callOn(Arrays.asList(project));
+			if (j!=null) {
+				j.join();
+			}
+			waitForRefresh.waitFor(3000);
+		} finally {
+			container.removeRefreshListener(waitForRefresh);
+		}
 	}
 	
 }

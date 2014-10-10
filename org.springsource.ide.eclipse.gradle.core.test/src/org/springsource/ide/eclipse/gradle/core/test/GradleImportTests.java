@@ -1187,17 +1187,9 @@ public class GradleImportTests extends GradleTest {
 			assertClasspathProjectEntry(mvnProject, jp);
 	
 			GradleCore.create(gradleProject).getProjectPreferences().setRemapJarsToMavenProjects(false);
-			RefreshDependenciesActionCore.synchCallOn(gradleProject);
-			//allthough the refresh dependencies is using a 'synchCall' the refreshing of classpath container is 
-			//always asynchronous. So we must wait a little bit for the classpath container to refresh
-			new ACondition("Check classpath aftter disabling 'Remap Jars to Maven Projects'") {
-				@Override
-				public boolean test() throws Exception {
-					assertNoClasspathProjectEntry(mvnProject, jp);
-					assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
-					return true;
-				}
-			}.waitFor(5000);
+			refreshDependencies(gradleProject);
+			assertNoClasspathProjectEntry(mvnProject, jp);
+			assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
 		} finally{
 			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
 		}
@@ -1259,22 +1251,6 @@ public class GradleImportTests extends GradleTest {
 		}
 
 	}
-
-	private void refreshDependencies(IProject project) throws Exception {
-		GradleClassPathContainer container = GradleCore.create(project).getClassPathcontainer();
-		WaitForRefresh waitForRefresh = new WaitForRefresh();
-		try {
-			container.addRefreshListener(waitForRefresh);
-			Joinable<Void> j = RefreshDependenciesActionCore.callOn(Arrays.asList(project));
-			if (j!=null) {
-				j.join();
-			}
-			waitForRefresh.waitFor(3000);
-		} finally {
-			container.removeRefreshListener(waitForRefresh);
-		}
-	}
-
 
 	public void assertSts2175ExpectedCP(String firstProj, String secondProj, IClasspathEntry[] entries) {
 		assertEquals(3, entries.length);

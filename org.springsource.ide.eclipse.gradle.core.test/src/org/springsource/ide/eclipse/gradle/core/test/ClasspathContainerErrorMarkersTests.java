@@ -111,7 +111,7 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"//	compile 'foo:bar:1.2.3'\n" + 
 						"	compile 'peyo:smurf:1.0.0'\n" + 
 						"}");
-				RefreshDependenciesActionCore.synchCallOn(p);
+				refreshDependencies(p);
 				
 				assertErrors(p, true,
 //						"unresolved dependency - foo#bar;1.2.3",
@@ -125,7 +125,7 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 						"	compile 'new:one:1.2.3'\n" + 
 						"	compile 'peyo:smurf:1.0.0'\n" + 
 						"}");
-				RefreshDependenciesActionCore.synchCallOn(p);
+				refreshDependencies(p);
 				assertErrors(p, true,
 						"unresolved dependency - new one 1.2.3",
 						"unresolved dependency - peyo smurf 1.0.0"
