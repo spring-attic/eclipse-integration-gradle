@@ -20,13 +20,20 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.groovy.search.EqualityVisitor;
+import org.gradle.tooling.model.ExternalDependency;
+import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
+import org.gradle.tooling.model.gradle.GradlePublication;
+import org.gradle.tooling.model.gradle.ProjectPublications;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
@@ -191,6 +198,48 @@ public class GradleCore extends Plugin {
 
 	public static void warn(String message) {
 		log(new Status(IStatus.WARNING, GradleCore.PLUGIN_ID, message));
+	}
+
+	/**
+	 * Find gradle project in the Eclipse workspace corresponding to a gradle 'external dependency'.
+	 * @throws Exception 
+	 */
+	public static IProject getGradleProject(ExternalDependency gEntry, IProgressMonitor mon) {
+		Collection<GradleProject> projects = getGradleProjects();
+		File file = gEntry.getFile();
+		mon.beginTask("Searching workspace for "+file, 2*projects.size());
+		try {
+			for (GradleProject gp : projects) {
+				IProject p = gp.getProject();
+				if (p!=null) { //only projects that exist in the workspace are interesting.
+					ProjectPublications publications = gp.getPublications(new SubProgressMonitor(mon, 1));
+					for (GradlePublication pub : publications.getPublications()) {
+						if (matches(pub.getId(), gEntry.getGradleModuleVersion())) {
+							return p;
+						}
+					}
+					mon.worked(1);
+				}
+			}
+		} catch (Throwable e) {
+			GradleCore.log(e);
+		} finally {
+			mon.done();
+		}
+		return null;
+	}
+
+	private static boolean matches(GradleModuleVersion publication, GradleModuleVersion dependency) {
+		return equal(publication.getGroup(), dependency.getGroup())
+			&& equal(publication.getName(), dependency.getName())
+			&& equal(publication.getVersion(), dependency.getVersion());
+	}
+
+	private static boolean equal(String x, String y) {
+		if (x==null) {
+			return x == y;
+		}
+		return x.equals(y);
 	}
 
 }

@@ -1210,9 +1210,20 @@ public class GradleImportTests extends GradleTest {
 
 		importTestProject("sts2834/my-app", true);
 		assertProjects("repos", "my-lib", "my-app");
+		GradleProject app = GradleCore.create(getProject("my-app"));
+		GradleProject lib = GradleCore.create(getProject("my-lib"));
+
+		//Initially, remapping should be enabled:
+		assertTrue(app.getProjectPreferences().getRemapJarsToGradleProjects());
+		assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
+		assertClasspathProjectEntry(lib.getProject(), app.getJavaProject());
 		
-		//TODO: flesh out this test. It just sets up the needed test projects but doesn't actually test
-		// whether the 'remap jar to gradle' functionality works.
+		//Disable mapping and check whether changes are made to classpath accordingly:
+		app.getProjectPreferences().setRemapJarsToGradleProjects(false);
+		refreshDependencies(app.getProject());
+		assertNoClasspathProjectEntry(libProject, app.getJavaProject());
+		assertClasspathJarEntry("my-lib-1.0.jar", app);
+		
 	}
 	
 	private void createGeneralProject(String name) throws CoreException {

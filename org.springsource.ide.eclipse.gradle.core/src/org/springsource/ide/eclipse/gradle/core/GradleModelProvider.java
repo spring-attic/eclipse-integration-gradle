@@ -356,76 +356,7 @@ public abstract class GradleModelProvider {
 
 	
 	public static <T extends HierarchicalEclipseProject> T buildModel(GradleProject rootProject, Class<T> requiredType, final IProgressMonitor monitor) throws CoreException {
-		SystemPropertyCleaner.clean();
-		File projectLoc = rootProject.getLocation();
-		final int totalWork = 10000;
-		monitor.beginTask("Creating Gradle model for "+projectLoc, totalWork+100);
-		ProjectConnection connection = null;
-		final Console console = ConsoleUtil.getConsole("Building Gradle Model '"+projectLoc+"'");
-		try {
-			connection = getGradleConnector(rootProject, new SubProgressMonitor(monitor, 100));
-
-			// Load the Eclipse model for the project
-			monitor.subTask("Loading model");
-			
-			ModelBuilder<T> builder = connection.model(requiredType);
-			rootProject.configureOperation(builder, null);
-			builder.setStandardOutput(console.out);
-			builder.setStandardError(console.err);
-			CancellationToken cancellationToken = GradleOpearionProgressMonitor
-					.findCancellationToken(monitor);
-			if (cancellationToken != null) {
-				builder.withCancellationToken(cancellationToken);
-				/*
-				 * Hack to print something in the console right away to give
-				 * user a heads up that cancel is pending
-				 */
-				if (cancellationToken instanceof CancellationTokenInternal) {
-					((CancellationTokenInternal) cancellationToken).getToken()
-							.addCallback(new Runnable() {
-								@Override
-								public void run() {
-									try {
-										console.out
-												.write("Cancellation request posted...\n"
-														.getBytes());
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-								}
-							});
-				}
-			}
-			builder.addProgressListener(new ProgressListener() {
-				
-				int remainingWork = totalWork;
-				
-				public void statusChanged(ProgressEvent evt) {
-					debug("progress = '"+evt.getDescription()+"'");
-					monitor.subTask(evt.getDescription());
-					int worked = remainingWork / 100;
-					if (worked>0) {
-						monitor.worked(worked);
-						remainingWork -= worked;
-					}
-				}
-
-			});
-			T model = builder.get();  // blocks until the model is available
-			return model;
-		} catch (GradleConnectionException e) {
-			throw e;
-		} catch (Exception e) {
-			throw ExceptionUtil.coreException(e);
-		} finally {
-			monitor.done();
-			if (connection!=null) {
-				connection.close();
-			}
-			if (console!=null) {
-				console.close();
-			}
-		}
+		return GenericModelProvider.buildModel(rootProject, requiredType, monitor);
 	}
 
 	

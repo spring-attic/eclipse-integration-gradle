@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -98,7 +99,6 @@ public class GradleDependencyComputer {
 		return classpath;
 	}
 	
-	//TODO: right now this only computes 'jar' entries. Should also compute project dependencies It was pulled out from GradleClassPathContainer
 	private ClassPath computeEntries() {
 		MarkerMaker markers = new MarkerMaker(project, GradleClassPathContainer.ERROR_MARKER_ID);
 		try {
@@ -114,6 +114,13 @@ public class GradleDependencyComputer {
 					boolean remapped = false;
 					if (project.getProjectPreferences().getRemapJarsToMavenProjects()) {	
 						IProject projectDep = M2EUtils.getMavenProject(gEntry);
+						if (projectDep!=null) {
+							addProjectDependency(projectDep, export);
+							remapped = true;
+						}
+					}
+					if (!remapped && project.getProjectPreferences().getRemapJarsToGradleProjects()) {
+						IProject projectDep = GradleCore.getGradleProject(gEntry, new NullProgressMonitor());
 						if (projectDep!=null) {
 							addProjectDependency(projectDep, export);
 							remapped = true;
