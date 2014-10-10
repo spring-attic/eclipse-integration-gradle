@@ -41,7 +41,8 @@ import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
 	
 	private Button enableSortingButton;
-	private Button enableJarToProjectMappingButton;
+	private Button enableJarToMvnProjectMappingButton;
+	private Button enableJarToGradleProjectMappingButton;
 
 	public GradleProjectPropertyPage() {
 		super();
@@ -82,13 +83,18 @@ public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenc
             grabHorizontal.applyTo(group1);
             group1.setText("Dependency Management");
             group1.setLayout(new GridLayout(1, true));
-            enableJarToProjectMappingButton = new Button(group1, SWT.CHECK);
-            enableJarToProjectMappingButton.setText("Remap Jars to maven projects (requires Gradle 1.1 and m2e)");
-            enableJarToProjectMappingButton.setToolTipText("Try to replace jars in Gradle Dependencies by dependencies to maven projects in the workspace.");
-            enableJarToProjectMappingButton.setSelection(project.getProjectPreferences().getRemapJarsToMavenProjects());
+            enableJarToMvnProjectMappingButton = new Button(group1, SWT.CHECK);
+            enableJarToMvnProjectMappingButton.setText("Remap Jars to maven projects (requires Gradle 1.1 and m2e)");
+            enableJarToMvnProjectMappingButton.setToolTipText("Try to replace jars in Gradle Dependencies by dependencies to maven projects in the workspace.");
+            enableJarToMvnProjectMappingButton.setSelection(project.getProjectPreferences().getRemapJarsToMavenProjects());
             if (!M2EUtils.isInstalled()) {
-            	enableJarToProjectMappingButton.setEnabled(false);
+            	enableJarToMvnProjectMappingButton.setEnabled(false);
             }
+            
+            enableJarToGradleProjectMappingButton = new Button(group1, SWT.CHECK);
+            enableJarToGradleProjectMappingButton.setText("Remap Jars to Gradle Projects (requires Gradle 1.12 or later)");
+            enableJarToGradleProjectMappingButton.setToolTipText("Try to replace jars in Gradle Dependencies by dependencies to Gradle projects in the workspace.");
+            enableJarToGradleProjectMappingButton.setSelection(project.getProjectPreferences().getRemapJarsToGradleProjects());
         }
         return page;
 	}
@@ -98,10 +104,11 @@ public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenc
 		GradleProject gradleProject = getGradleProject();
 		GradleProjectPreferences prefs = gradleProject.getProjectPreferences();
 		prefs.setEnableClasspatEntrySorting(enableSortingButton.getSelection());
-		if (enableJarToProjectMappingButton!=null) {
+		if (enableJarToMvnProjectMappingButton!=null) {
 			//This can be null if M2E is not installed. In that case the option is not supported and the UI widgetry for it is not created.
-			prefs.setRemapJarsToMavenProjects(enableJarToProjectMappingButton.getSelection());
+			prefs.setRemapJarsToMavenProjects(enableJarToMvnProjectMappingButton.getSelection());
 		}
+		prefs.setRemapJarsToGradleProjects(enableJarToGradleProjectMappingButton.getSelection());
 		return true;
 	}
 
