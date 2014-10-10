@@ -13,6 +13,7 @@ package org.springsource.ide.eclipse.gradle.core.classpathcontainer;
 import java.io.Serializable;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,6 +45,16 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 @SuppressWarnings("restriction")
 public class GradleClassPathContainer implements IClasspathContainer /*, Cloneable*/ {
 	
+	/**
+	 * Listener that gets called when classpath container is refreshed. 
+	 * The main purpose of this listener is to allow test code to wait for refreshes
+	 * before proceeding with checking assertions about a classpath container they caused to
+	 * be refreshed.
+	 */
+	public interface IRefreshListener {
+		void classpathContainerRefreshed();
+	}
+
 	public static final String ERROR_MARKER_ID = "org.springsource.ide.eclipse.gradle.core.classpathcontainer";
 	private static final String GRADLE_CLASSPATHCONTAINER_KEY = "gradle.classpathcontainer";
 
@@ -76,7 +87,19 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 */
 	private EclipseProject oldModel = null;
 	private IClasspathEntry[] persistedEntries;
+	private IRefreshListener refreshListener;
+	
+	public void addRefreshListener(IRefreshListener l) {
+		Assert.isLegal(refreshListener==null);
+		refreshListener = l;
+	}
 
+	public void removeRefreshListener(IRefreshListener l) {
+		if (refreshListener==l) {
+			refreshListener=null;
+		}
+	}
+	
 	/**
 	 * Creates an uninitialised {@link GradleClassPathContainer}. If displayed in the UI it
 	 * will have no entries.
@@ -192,6 +215,13 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 //		System.err.println("JDT notified: "+this);
 //		JavaModelManager.getJavaModelManager().getClasspathContainer(getPath(), project);
 		setJDTClassPathContainer(project.getJavaProject(), path, null); // Makes JDT get our class path initialiser to run again.
+		notifyRefreshListener();
+	}
+
+	private void notifyRefreshListener() {
+		if (refreshListener!=null) {
+			refreshListener.classpathContainerRefreshed();
+		}
 	}
 
 	public static void setJDTClassPathContainer(IJavaProject project, IPath path, GradleClassPathContainer container) {

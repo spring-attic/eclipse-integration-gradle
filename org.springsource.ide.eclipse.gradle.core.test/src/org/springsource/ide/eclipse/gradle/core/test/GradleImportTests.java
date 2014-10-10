@@ -53,6 +53,7 @@ import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer.IRefreshListener;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
@@ -1116,22 +1117,18 @@ public class GradleImportTests extends GradleTest {
 		"	compile project(':subb')\n" + 
 		"}";
 
-		dumpRawClasspath(jp);
-		
 		createFile(getProject("suba"),"build.gradle", bThenC);
-		refreshDependencies();
+		refreshDependencies(getProject("suba"));
 		
-		dumpRawClasspath(jp);
-		
-		assertArrayEquals(
-				sts2175ExpectedCP("subb", "subc"), 
-				jp.getRawClasspath());
+		assertSts2175ExpectedCP(
+				"subb", "subc", 
+				gp.getClassPathcontainer().getClasspathEntries());
 		
 		createFile(getProject("suba"),"build.gradle", cThenB); //Build script order changed!!
-		refreshDependencies();
-		assertArrayEquals(
-				sts2175ExpectedCP("subb", "subc"), //Classpath order same (is sorted!)
-				jp.getRawClasspath());
+		refreshDependencies(getProject("suba"));
+		assertSts2175ExpectedCP(
+				"subb", "subc", //Classpath order same (is sorted!)
+				gp.getClassPathcontainer().getClasspathEntries());
 		
 		//Now disable sorting... the ordering should change
 		gp.getProjectPreferences().setEnableClasspatEntrySorting(false);
@@ -1142,16 +1139,16 @@ public class GradleImportTests extends GradleTest {
 		}
 		
 		
-		refreshDependencies();
-		assertArrayEquals(
-				sts2175ExpectedCP("subc", "subb"), //Classpath order same (is sorted!)
-				jp.getRawClasspath());
+		refreshDependencies(getProject("suba"));
+		assertSts2175ExpectedCP(
+				"subc", "subb", //Classpath order same (is sorted!)
+				gp.getClassPathcontainer().getClasspathEntries());
 		
 		createFile(getProject("suba"),"build.gradle", bThenC); //Order changed
-		refreshDependencies();
-		assertArrayEquals(
-				sts2175ExpectedCP("subb", "subc"), //Classpath order same (is sorted!)
-				jp.getRawClasspath());
+		refreshDependencies(getProject("suba"));
+		assertSts2175ExpectedCP(
+				"subb", "subc", //Classpath order same (is sorted!)
+				gp.getClassPathcontainer().getClasspathEntries());
 	}
 
 	public void testSTS2405RemapJarToMavenProject() throws Exception {
@@ -1241,30 +1238,51 @@ public class GradleImportTests extends GradleTest {
 	}
 
 	public void refreshDependencies() throws Exception {
+		//WARNING, this method does not wait for the classpath containers to be refreshed
 		Joinable<Void> j = RefreshDependenciesActionCore.callOn(Arrays.asList(getProjects()));
 		if (j!=null) {
 			j.join();
 		}
 	}
+	
+	public static class WaitForRefresh extends ACondition implements IRefreshListener {
+		private boolean refreshed = false;
+		
+		@Override
+		public void classpathContainerRefreshed() {
+			refreshed = true;
+		}
 
-	public IClasspathEntry[] sts2175ExpectedCP(String firstProj, String secondProj) {
-		IClasspathEntry[] expectedClasspath = {
-				JavaCore.newSourceEntry(new Path("/suba/src/main/java")),
-				JavaCore.newSourceEntry(new Path("/suba/src/test/java")),
-				JavaCore.newProjectEntry(new Path("/"+firstProj), true),
-				JavaCore.newProjectEntry(new Path("/"+secondProj), true),
-				
-				//Order is alphapbetic:
-				//Only there if DSLD enabled: JavaCore.newContainerEntry(GroovyDSLCoreActivator.CLASSPATH_CONTAINER_ID, false),
-				//Only there if DSLD enabled: JavaCore.newContainerEntry(GroovyClasspathContainer.CONTAINER_ID, false),
-				//org.eclipse
-				JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER"), true),
-				//org.springsource
-				JavaCore.newContainerEntry(new Path(GradleClassPathContainer.ID), true),
-				//Only there if DSLD enabled: JavaCore.newContainerEntry(new Path(GradleDSLDClasspathContainer.ID), false),
-		};
-		return expectedClasspath;
+		@Override
+		public boolean test() throws Exception {
+			return refreshed;
+		}
+
 	}
+
+	private void refreshDependencies(IProject project) throws Exception {
+		GradleClassPathContainer container = GradleCore.create(project).getClassPathcontainer();
+		WaitForRefresh waitForRefresh = new WaitForRefresh();
+		try {
+			container.addRefreshListener(waitForRefresh);
+			Joinable<Void> j = RefreshDependenciesActionCore.callOn(Arrays.asList(project));
+			if (j!=null) {
+				j.join();
+			}
+			waitForRefresh.waitFor(3000);
+		} finally {
+			container.removeRefreshListener(waitForRefresh);
+		}
+	}
+
+
+	public void assertSts2175ExpectedCP(String firstProj, String secondProj, IClasspathEntry[] entries) {
+		assertEquals(3, entries.length);
+		assertEquals(JavaCore.newProjectEntry(new Path("/"+firstProj), true), entries[0]);
+		assertEquals(JavaCore.newProjectEntry(new Path("/"+secondProj), true), entries[1]);
+		assertJarEntry("junit-4.8.2.jar", entries[2]);
+	}
+
 
 	/**
 	 * Relates to STS 3818, when project dependencies are included in classpath container they shouldn't be included in

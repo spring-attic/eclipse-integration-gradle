@@ -494,6 +494,12 @@ public abstract class GradleTest extends TestCase {
 		fail("Jar entry not found: "+jarName+"\nfound: "+seen.toString());
 	}
 	
+	
+	public static void assertJarEntry(String jarName, IClasspathEntry iClasspathEntry) {
+		assertEquals(IClasspathEntry.CPE_LIBRARY, iClasspathEntry.getEntryKind());
+		assertEquals(jarName, iClasspathEntry.getPath().lastSegment());
+	}
+	
 	public static void assertSourceFolder(IJavaProject project, String pathInProject) throws JavaModelException {
 		IClasspathEntry[] classpath = project.getRawClasspath();
 		StringBuffer seen = new StringBuffer();
