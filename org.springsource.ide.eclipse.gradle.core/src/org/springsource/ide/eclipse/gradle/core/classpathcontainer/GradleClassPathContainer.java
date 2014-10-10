@@ -281,6 +281,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 * Removes {@link GradleClassPathContainer} entries from the project's classpath.
 	 */
 	public static void removeFrom(IJavaProject javaProject, IProgressMonitor mon) throws JavaModelException {
+		GradleCore.create(javaProject).disposeClassPathcontainer();
 		IClasspathEntry[] classpath = javaProject.getRawClasspath();
 		ClassPath newClasspath = new ClassPath(GradleCore.create(javaProject));
 		for (IClasspathEntry e : classpath) {

@@ -76,6 +76,7 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 				
 				//If container is added again... error markers should return.
 				GradleClassPathContainer.addTo(jp, new NullProgressMonitor());
+				GradleClassPathContainer.waitForMarkerUpdates();
 				assertErrors(p, true,
 						"unresolved dependency - foo bar 1.2.3",
 						"unresolved dependency - peyo smurf 1.0.0"

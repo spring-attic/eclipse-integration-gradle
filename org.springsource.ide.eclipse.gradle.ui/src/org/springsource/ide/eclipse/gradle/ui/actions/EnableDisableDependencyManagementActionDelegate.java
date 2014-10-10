@@ -11,6 +11,7 @@
 package org.springsource.ide.eclipse.gradle.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -21,6 +22,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 

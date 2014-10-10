@@ -50,8 +50,6 @@ import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.gradle.tooling.model.gradle.ProjectPublications;
 import org.springsource.ide.eclipse.gradle.core.GradleModelProvider.GroupedModelProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
-import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
-import org.springsource.ide.eclipse.gradle.core.autorefresh.IDirtyProjectListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClasspathContainerInitializer;
@@ -124,9 +122,7 @@ public class GradleProject {
 
 	private GradleRefreshPreferences refreshPrefs;
 
-	private GradleDependencyComputer dependencyComputer = new GradleDependencyComputer(this);
-
-
+	private GradleDependencyComputer dependencyComputer;
 
 	public GradleProject(File canonicalFile) {
 		Assert.isLegal(canonicalFile!=null, "Project location must not be null");
@@ -450,6 +446,11 @@ public class GradleProject {
 	public void setClassPathContainer(GradleClassPathContainer it) {
 		Assert.isLegal(classPathContainer==null, "Classpath container set multiple times");
 		this.classPathContainer = it;
+	}
+	
+	public synchronized void disposeClassPathcontainer() {
+		this.classPathContainer = null;
+		this.dependencyComputer = null;
 	}
 
 	/**
@@ -1001,7 +1002,10 @@ public class GradleProject {
 		}
 	}
 
-	public GradleDependencyComputer getDependencyComputer() {
+	public synchronized GradleDependencyComputer getDependencyComputer() {
+		if (dependencyComputer==null) {
+			dependencyComputer = new GradleDependencyComputer(this);
+		}
 		return dependencyComputer;
 	}
 
