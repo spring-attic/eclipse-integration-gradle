@@ -17,21 +17,21 @@
    
    <!-- Optional add ons for the Gradle tooling -->
    <feature
-      url="org.springframework.ide.eclipse.uaa.feature_3.6.2.qualifier.jar"
-      id="org.springframework.ide.eclipse.uaa.feature" version="3.6.2.qualifier">
+      url="org.springframework.ide.eclipse.uaa.feature_3.6.3.qualifier.jar"
+      id="org.springframework.ide.eclipse.uaa.feature" version="3.6.3.qualifier">
       <category name="Extensions / Gradle Integration" />
    </feature>
 
    <!-- Dashboard: removed should only be consumed from commons update site 
    <feature 
-       url="features/org.springsource.ide.eclipse.dashboard_3.6.2.qualifier.jar" 
-   	   id="org.springsource.ide.eclipse.dashboard" version="3.6.2.qualifier">
+       url="features/org.springsource.ide.eclipse.dashboard_3.6.3.qualifier.jar" 
+   	   id="org.springsource.ide.eclipse.dashboard" version="3.6.3.qualifier">
        <category name="Extensions / Gradle Integration"/>
    </feature> -->
    
    <feature 
-       url="features/org.springsource.ide.eclipse.commons_3.6.2.qualifier.jar" 
-   	   id="org.springsource.ide.eclipse.commons" version="3.6.2.qualifier">
+       url="features/org.springsource.ide.eclipse.commons_3.6.3.qualifier.jar" 
+   	   id="org.springsource.ide.eclipse.commons" version="3.6.3.qualifier">
    </feature>
    
    <!-- gradle -->
