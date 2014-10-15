@@ -13,10 +13,10 @@ package org.springsource.ide.eclipse.gradle.core.test;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -51,7 +50,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
+import org.springsource.ide.eclipse.gradle.core.actions.ReimportOperation;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer.IRefreshListener;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
@@ -1149,6 +1148,42 @@ public class GradleImportTests extends GradleTest {
 		assertSts2175ExpectedCP(
 				"subb", "subc", //Classpath order same (is sorted!)
 				gp.getClassPathcontainer().getClasspathEntries());
+	}
+	
+	public void testSTS3742ClassPathContainerEntryOrder() throws Exception {
+		importTestProject("sts3742");
+		assertProjects(new String[] { "sts3742" });
+
+		GradleProject gp = getGradleProject("sts3742");
+		IJavaProject jp = gp.getJavaProject();
+		
+		assertWtpAfterGradleDependencies(jp);
+		
+		gp.getProjectPreferences().setEnableClasspatEntrySorting(false);
+		new ReimportOperation(Collections.singletonList(gp)).perform(null, new NullProgressMonitor());
+		assertWtpAfterGradleDependencies(jp);
+		
+		gp.getProjectPreferences().setEnableClasspatEntrySorting(true);
+		new ReimportOperation(Collections.singletonList(gp)).perform(null, new NullProgressMonitor());
+		assertWtpAfterGradleDependencies(jp);		
+	}
+	
+	private static void assertWtpAfterGradleDependencies(IJavaProject jp) throws JavaModelException {
+		int wtpIndex = -1;
+		int gradleDepIndex = -1;
+		IClasspathEntry[] entries = jp.getRawClasspath();
+		for (int i = 0; i < entries.length; i++) {
+			String path = entries[i].getPath().toString();
+			if (path.startsWith(GradleClassPathContainer.ID)) {
+				gradleDepIndex = i;
+			} else if (path.startsWith(WTPUtil.JST_J2EE_WEB_CONTAINER)) {
+				wtpIndex = i;
+			}
+		}
+		
+		assertTrue("Web App Libraries container is missing", wtpIndex >= 0);
+		assertTrue("Gradle Dependencies container is missing", gradleDepIndex >= 0);
+		assertTrue("Gradle Dependencies container is located after the Web App Libraries container on the classpath!", wtpIndex > gradleDepIndex);
 	}
 
 	public void testSTS2405RemapJarToMavenProject() throws Exception {

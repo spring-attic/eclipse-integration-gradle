@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 
 /**
  * Helper class to simplify manipulation of a project's class path.
@@ -91,8 +92,18 @@ public class ClassPath {
 		private String getCompareString(IClasspathEntry e) {
 			String str = e.getPath().toString();
 			if (e.getEntryKind()==IClasspathEntry.CPE_CONTAINER) {
-				//STS-3382: DSL support Groovy container should be last entry on classpath
-				if (str.startsWith("GROOVY_")) {
+				if (str.startsWith(JavaRuntime.JRE_CONTAINER)) {
+					/*
+					 * Make JRE Container to be the first
+					 */
+					str = "A";
+				} else if (str.startsWith(GradleClassPathContainer.ID)) {
+					/*
+					 * Make Gradle Dependencies to be the second after the JRE container
+					 */
+					str = "AA";
+				} else if (str.startsWith("GROOVY_")) {
+					//STS-3382: DSL support Groovy container should be last entry on classpath
 					str = "zzz"+str; 
 				}
 			}

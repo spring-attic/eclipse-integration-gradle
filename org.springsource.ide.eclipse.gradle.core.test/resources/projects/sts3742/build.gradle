@@ -1,0 +1,13 @@
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'eclipse-wtp'
+
+repositories {
+	
+	flatDir dirs: 'lib'
+}
+
+dependencies {
+	
+	compile name: 'my-jar'
+}

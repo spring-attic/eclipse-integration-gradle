@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -221,7 +221,9 @@ public class WTPUtil {
 				if (isWTPProject(jproj.getProject())) {
 					if (isWebApp(jproj)) {
 						ClassPath classpath = project.getClassPath();
-						classpath.add(JavaCore.newContainerEntry(new Path(JST_J2EE_WEB_CONTAINER)));
+						if (classpath.getContainer(JST_J2EE_WEB_CONTAINER) == null) {
+							classpath.add(JavaCore.newContainerEntry(new Path(JST_J2EE_WEB_CONTAINER)));
+						}
 						classpath.setOn(jproj, new NullProgressMonitor());
 					}
 				}
