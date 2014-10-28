@@ -26,10 +26,13 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
+import org.eclipse.core.resources.ISavedState;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 
 /**
  * This save participant maintains a per-project key value store. The keys are Strings and the
@@ -47,7 +50,7 @@ public class GradleSaveParticipant implements ISaveParticipant {
 		private static final long serialVersionUID = 1L;
 	}
 
-	private static final boolean DEBUG = false; // (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private static GradleSaveParticipant instance;
 	
@@ -137,17 +140,16 @@ public class GradleSaveParticipant implements ISaveParticipant {
 	public static synchronized GradleSaveParticipant getInstance() {
 		if (instance==null) {
 			debug("Starting gradle save participant");
-//			IWorkspace ws = ResourcesPlugin.getWorkspace();
+			IWorkspace ws = ResourcesPlugin.getWorkspace();
 			instance = new GradleSaveParticipant();
-//			try {
-//				ISavedState savedState = ws.addSaveParticipant(GradleCore.PLUGIN_ID, instance);
-//				if (savedState!=null) {
+			try {
+				ISavedState savedState = ws.addSaveParticipant(GradleCore.PLUGIN_ID, instance);
+//				if (savedState!=null) { //Seems savedState is awlays null so don't check it.
 					instance.restore();
 //				}
-//			} catch (CoreException e) {
-//				GradleCore.log(e);
-//			}
-			
+			} catch (CoreException e) {
+				GradleCore.log(e);
+			}
 		}
 		return instance;
 	}
