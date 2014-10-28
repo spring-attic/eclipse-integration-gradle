@@ -33,10 +33,10 @@
             objectClass="org.eclipse.core.resources.IResource"
              adaptable="true"
              id="org.springsource.ide.eclipse.gradle.menu">
-<!--   		<filter
+   		<filter
            name="projectNature"
            value="org.springsource.ide.eclipse.gradle.core.nature">
-        </filter> -->
+        </filter>
         <menu
              label="Gradle"
              id="org.springsource.ide.eclipse.gradle.menu">
