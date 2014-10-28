@@ -11,7 +11,6 @@
 package org.springsource.ide.eclipse.gradle.core;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -22,20 +21,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.gradle.tooling.CancellationToken;
-import org.gradle.tooling.GradleConnectionException;
 import org.gradle.tooling.GradleConnector;
-import org.gradle.tooling.ModelBuilder;
-import org.gradle.tooling.ProgressEvent;
-import org.gradle.tooling.ProgressListener;
 import org.gradle.tooling.ProjectConnection;
-import org.gradle.tooling.internal.consumer.CancellationTokenInternal;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
-import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
-import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil.Console;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
-import org.springsource.ide.eclipse.gradle.core.util.GradleOpearionProgressMonitor;
 
 
 /**
@@ -156,90 +146,6 @@ public abstract class GradleModelProvider {
 
 	/////////////////// Provider strategy building blocks /////////////////////////////////////////////////////////////////
 	
-//	/**
-//	 * Fully fleshed out models are expensive to construct so we use this model provider to prefetch them as much as possible.
-//	 */
-//	private static class PrefetchingModelProvider<T extends HierarchicalEclipseProject> extends GradleModelProvider<T> {
-//		
-//		public PrefetchingModelProvider(Class<T> type) {
-//			super(type);
-//		}
-//
-//		@Override
-//		public void requestModel(GradleProject project, final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-//			File projectLoc = project.getLocation();
-//			final int totalWork = 10000;
-//			monitor.beginTask("Creating Gradle model for "+projectLoc, totalWork+100);
-//			ProjectConnection connection = null;
-//			Console console = null;
-//			try {
-//				connection = getGradleConnector(project, new SubProgressMonitor(monitor, 100));
-//
-//				// Load the Eclipse model for the project
-//				monitor.subTask("Loading model");
-//				
-//				ModelBuilder<T> builder = connection.model(type);
-//				console = ConsoleUtil.getConsole("Building Gradle Model '"+projectLoc+"'");
-//				builder.setStandardOutput(console.out);
-//				builder.setStandardError(console.err);
-//				builder.addProgressListener(new ProgressListener() {
-//					
-//					int remainingWork = totalWork;
-//					
-//					public void statusChanged(ProgressEvent evt) {
-//						debug("progress = '"+evt.getDescription()+"'");
-//						monitor.subTask(evt.getDescription());
-//						int worked = remainingWork / 100;
-//						if (worked>0) {
-//							monitor.worked(worked);
-//							remainingWork -= worked;
-//						}
-//					}
-//
-//				});
-//				T model = builder.get();  // blocks until the model is available
-//				project.setGradleModel(model, true);
-//				walk(model, new HashSet<HierarchicalEclipseProject>());
-//			} catch (GradleConnectionException e) {
-//				if (project.getDistribution()==null) {
-//					//Try to recover by setting a recent distribution overriding the default
-//					URI distro = FallBackDistributionCore.getFallBackDistribution(projectLoc, e);
-//					if (distro!=null) {
-//						GradleCore.log(e);
-//						project.setDistribution(distro);
-//						requestModel(project, monitor);
-//						return;
-//					}
-//				}
-//				//We didn't return so recovery failed
-//				throw ExceptionUtil.coreException(e);
-//			} catch (Exception e) {
-//				throw ExceptionUtil.coreException(e);
-//			} finally {
-//				monitor.done();
-//				if (connection!=null) {
-//					connection.close();
-//				}
-//				if (console!=null) {
-//					console.close();
-//				}
-//			}
-//		}
-//
-//		private void walk(HierarchicalEclipseProject model, Set<HierarchicalEclipseProject> hashSet) {
-//			if (model!=null && !hashSet.contains(model)) {
-//				hashSet.add(model);
-//				GradleProject modelHolder = GradleCore.create(model);
-//				modelHolder.setGradleModel(model, false);
-//				
-//				walk(model.getParent(), hashSet);
-//				for (HierarchicalEclipseProject it : model.getChildren()) {
-//					walk(it, hashSet);
-//				}
-//			}
-//		}
-//	}
-
 	/**
 	 * Model provider that provides models for a group of related projects by building the model for a 
 	 * single representative project. This representative project is typically the root of the hierarchy

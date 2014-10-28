@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.groovy.search.EqualityVisitor;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
@@ -63,6 +62,8 @@ public class GradleCore extends Plugin {
 	private GradlePreferences gradlePreferences = null;
 
 	private GradleAPIProperties properties;
+	
+	private ProjectOpenCloseListenerManager openCloseListeners = null;
 
 	/*
 	 * (non-Javadoc)
@@ -85,6 +86,9 @@ public class GradleCore extends Plugin {
 		GradleCore.context = null;
 		if (gradlePreferences!=null) {
 			gradlePreferences.dispose();
+		}
+		if (openCloseListeners!=null) {
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(openCloseListeners);
 		}
 		super.stop(bundleContext);
 	}
@@ -240,6 +244,14 @@ public class GradleCore extends Plugin {
 			return x == y;
 		}
 		return x.equals(y);
+	}
+	
+	public synchronized void addOpenCloseListener(ProjectOpenCloseListener l) {
+		if (openCloseListeners==null) {
+			openCloseListeners = new ProjectOpenCloseListenerManager();
+			ResourcesPlugin.getWorkspace().addResourceChangeListener(openCloseListeners);
+		}
+		openCloseListeners.add(l);
 	}
 
 }

@@ -12,6 +12,7 @@ package org.springsource.ide.eclipse.gradle.core.classpathcontainer;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -34,6 +35,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleDependencyComputer;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.GradleSaveParticipant;
+import org.springsource.ide.eclipse.gradle.core.ProjectOpenCloseListener;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
@@ -89,6 +91,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	private EclipseProject oldModel = null;
 	private IClasspathEntry[] persistedEntries;
 	private IRefreshListener refreshListener;
+	private ProjectOpenCloseListener openCloseListener;
 	
 	public void addRefreshListener(IRefreshListener l) {
 		Assert.isLegal(refreshListener==null);
@@ -143,19 +146,22 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	}
 
 	public synchronized IClasspathEntry[] getClasspathEntries() {
+		ensureOpenCloseListener();
 		GradleDependencyComputer dependencyComputer = project.getDependencyComputer();
 		debug("getClassPathEntries called");
 		try {
 			EclipseProject gradleModel = project.getGradleModel();
 			if (gradleModel!=null) {
 				if (oldModel==gradleModel) {
-					return getPersistedEntries();
-				} else {
-					IClasspathEntry[] entries = dependencyComputer.getClassPath(gradleModel).toArray();
-					setPersistedEntries(entries);
-					oldModel = gradleModel;
-					return entries;
+					IClasspathEntry[] persisted = getPersistedEntries();
+					if (persisted!=null) {
+						return persisted;
+					}
 				}
+				IClasspathEntry[] entries = dependencyComputer.getClassPath(gradleModel).toArray();
+				setPersistedEntries(entries);
+				oldModel = gradleModel;
+				return entries;
 			}
 		} catch (CoreException e) {
 			GradleCore.log(e);
@@ -174,6 +180,27 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		};
 	}
 	
+	/**
+	 * Ensures that open close listener is registered to respond to openening and closing of projects
+	 * and update remapped jars in classpath container
+	 * 
+	 */
+	private void ensureOpenCloseListener() {
+		if (openCloseListener==null) {
+			openCloseListener = new ProjectOpenCloseListener() {
+				@Override
+				public void projectOpened(IProject project) {
+					quickRefreshAllContainers();
+				}
+				
+				@Override
+				public void projectClosed(IProject project) {
+					quickRefreshAllContainers();
+				}
+			};
+			GradleCore.getInstance().addOpenCloseListener(openCloseListener);
+		}
+	}
 
 	public String getDescription() {
 		String desc = "Gradle Dependencies";
@@ -243,13 +270,34 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		}
 	}
 
-//	private static IClasspathContainer getClone(GradleClassPathContainer container) throws CloneNotSupportedException {
-//		if (container!=null) {
-//			return (IClasspathContainer) container.clone();
-//		}
-//		return null;
-//	}
 
+	/**
+	 * Refresh classpath entries in all containers in the workspace quickly (i.e. without invalidating
+	 * the cached gradle models and rebuilding them). This is useful when the entries need to be
+	 * recomputed because a project was opened / closed and so jar -> gradle or 
+	 */
+	private void quickRefreshAllContainers() {
+		//TODO mechanism to avoid repeatedly scheduling many of these jobs in parallel.
+		final Collection<GradleProject> projects = GradleCore.getGradleProjects();
+		if (!projects.isEmpty()) {
+			JobUtil.schedule(new GradleRunnable("Refresh Gradle classpath containers") {
+				@Override
+				public void doit(IProgressMonitor mon) throws Exception {
+					mon.beginTask("Refresh Gradle Classpath Containers", projects.size());
+					for (GradleProject p : projects) {
+						GradleClassPathContainer classpath = p.getClassPathcontainer();
+						if (classpath!=null) {
+							mon.subTask("Refresh "+p.getName());
+							clearPersistedEntries();
+							notifyJDT();
+						}
+						mon.worked(1);
+					}
+				}
+			});
+		}
+	}
+	
 	@Override
 	public String toString() {
 		StringBuffer out = new StringBuffer(getDescription());
@@ -259,6 +307,15 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 //		}
 //		out.append("}");
 		return out.toString();
+	}
+	
+
+	/**
+	 * Ensures that entries will be recomputed next time around
+	 */
+	private void clearPersistedEntries() {
+		setPersistedEntries(null);
+		project.getDependencyComputer().clearPersistedEntries();
 	}
 
 	/**
@@ -350,6 +407,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		}
 	}
 
+	
 	private IClasspathEntry[] getPersistedEntries() {
 		if (persistedEntries!=null) {
 			debug("In memory persisted");
