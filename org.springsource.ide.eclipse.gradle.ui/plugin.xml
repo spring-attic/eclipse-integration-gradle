@@ -40,9 +40,9 @@
         <menu
              label="Gradle"
              id="org.springsource.ide.eclipse.gradle.menu">
-            <separator
-               	name="group1">
-            </separator>
+            <separator name="actions"/>
+            <separator name="toggle"/>
+            <separator name= "refresh"/>
         </menu> 
       </objectContribution>
       
@@ -55,35 +55,42 @@
                enablesFor="+"
                id="org.springsource.ide.eclipse.gradle.actions.refresh.all"
                label="Refresh All"
-               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/refresh">
          </action>
         <action
                class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshSourceFoldersAction"
                enablesFor="+"
                id="org.springsource.ide.eclipse.gradle.actions.refresh.sourcefolders"
                label="Refresh Source Folders"
-               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/refresh">
          </action>
         <action
                class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshDependenciesAction"
                enablesFor="+"
                id="org.springsource.ide.eclipse.gradle.actions.refresh.dependencies"
                label="Refresh Dependencies"
-               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/refresh">
+         </action>
+        <action
+               class="org.springsource.ide.eclipse.gradle.ui.actions.DisableGradleNatureAction"
+               enablesFor="+"
+               id="org.springsource.ide.eclipse.gradle.ui.actions.DisableGradleNatureAction"
+               label="Disable Gradle Nature"
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/toggle">
          </action>
         <action
                class="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDependencyManagementActionDelegate"
                enablesFor="+"
                id="org.springsource.ide.eclipse.gradle.ui.EnableDisableDependencyManagementActionDelegate"
                label="Enable Dependency Management"
-               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/toggle">
          </action>
         <action
                class="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
                enablesFor="+"
                id="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
                label="Toggle DSL Support"
-               menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+               menubarPath="org.springsource.ide.eclipse.gradle.menu/toggle">
          </action>
       <action
             class="org.springsource.ide.eclipse.gradle.ui.actions.ConsoleInplaceDialogActionDelegate"
@@ -92,7 +99,7 @@
             icon="icons/gradle-launch.png"
             id="org.springsource.ide.eclipse.gradle.ui.actions.Console"
             label="Tasks Quick Launcher"
-            menubarPath="org.springsource.ide.eclipse.gradle.menu/group1">
+            menubarPath="org.springsource.ide.eclipse.gradle.menu/actions">
       </action>
       </objectContribution>
       <objectContribution

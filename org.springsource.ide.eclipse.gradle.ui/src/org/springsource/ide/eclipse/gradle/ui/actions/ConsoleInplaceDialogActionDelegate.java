@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
+import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.ui.cli.inplace.ConsoleInplaceDialog;
 
 
@@ -44,7 +45,7 @@ public class ConsoleInplaceDialogActionDelegate extends GradleProjectActionDeleg
 	public void run(IAction action) {
 		Shell parent = PlatformUI.getWorkbench().getDisplay().getActiveShell();
 		ConsoleInplaceDialog dialog = ConsoleInplaceDialog.getInstance(parent);
-		dialog.setSelectedProject(getProject());
+		dialog.setSelectedProject(GradleNature.hasNature(getProject()) ? getProject() : null);
 		dialog.open();
 	}
 
