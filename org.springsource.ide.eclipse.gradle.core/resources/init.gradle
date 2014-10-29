@@ -1,0 +1,17 @@
+initscript {
+	repositories {
+		mavenLocal()
+		maven {
+			url new File('repo').toURI().toURL()
+		}
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath 'io.pivotal.gradle.eclipse.toolingapi:plugin:1.0'
+	}
+}
+
+allprojects {
+   apply plugin: io.pivotal.tooling.plugin.eclipse.EclipseToolingModelPlugin
+}

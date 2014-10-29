@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.gradle.tooling.model.ExternalDependency;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.MarkerMaker;
@@ -51,7 +52,7 @@ public class GradleDependencyComputer {
 	
 	private GradleProject project;
 	private ClassPath classpath; // computed classpath or null if not yet computed.
-	private EclipseProject gradleModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
+	private StsEclipseProject gradleModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
 	
 	public GradleDependencyComputer(GradleProject project) {
 		this.project = project;
@@ -101,7 +102,7 @@ public class GradleDependencyComputer {
 		}
 	}
 	
-	public ClassPath getClassPath(EclipseProject gradleModel) {
+	public ClassPath getClassPath(StsEclipseProject gradleModel) {
 		if (classpath==null || !gradleModel.equals(this.gradleModel)) {
 			this.gradleModel = gradleModel;
 			classpath = computeEntries();

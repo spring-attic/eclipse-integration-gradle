@@ -88,6 +88,7 @@ println "apiVersion = ${apiVersion}"
 repositories {
 	mavenRepo name: 'libs-repo-snap', urls: "http://repo.gradle.org/gradle/libs-snapshots"
 	mavenRepo name: 'libs-repo', urls: gradleRepoUrl
+	mavenLocal()
 }
 
 dependencies {
@@ -95,6 +96,7 @@ dependencies {
 	compile "org.gradle:gradle-core:$apiVersion",
 			"org.gradle:gradle-tooling-api:$apiVersion",
 			"org.gradle:gradle-wrapper:$apiVersion",
+			'io.pivotal.gradle.eclipse.toolingapi:model:1.0',
 			'org.slf4j:slf4j-simple:1.7.5',
 			'commons-collections:commons-collections:3.2.1'
 }

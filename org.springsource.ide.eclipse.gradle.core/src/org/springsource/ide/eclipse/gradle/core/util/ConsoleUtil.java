@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IOConsole;
@@ -65,15 +66,18 @@ public class ConsoleUtil {
 	private static final int MAX_SIZE = 5;
 
 	public static Color getOutputColor() {
-		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_OUT_COLOR);
+		return new Color(Display.getCurrent(), 0, 0, 0);
+//		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_OUT_COLOR);
 	}
 	
 	public static Color getErrorColor() {
-		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_ERR_COLOR);
+		return new Color(Display.getCurrent(), 255, 0, 0);
+//		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_ERR_COLOR);
 	}
 	
 	public static Color getInputColor() {
-		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_IN_COLOR);
+		return new Color(Display.getCurrent(), 0, 0, 0);
+//		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_IN_COLOR);
 	}
 	
 	private static LinkedList<IOConsole> history = new LinkedList<IOConsole>();

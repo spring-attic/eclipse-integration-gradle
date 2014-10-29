@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +30,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -48,6 +53,7 @@ import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.EclipseSourceDirectory;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.gradle.tooling.model.gradle.ProjectPublications;
+import org.osgi.framework.Bundle;
 import org.springsource.ide.eclipse.gradle.core.GradleModelProvider.GroupedModelProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
@@ -105,6 +111,8 @@ public class GradleProject {
 	 * from the tooling api.
 	 */
 	private GenericModelProvider<ProjectPublications> publicationsModelProvider;
+	
+	private GenericModelProvider<StsEclipseProject> stsEclipseModelProvider;
 	
 	/**
 	 * The class path container for this project is created lazily.
@@ -321,10 +329,16 @@ public class GradleProject {
 			if (jvmArgs!=null) {
 				gradleOp.setJvmArguments(jvmArgs);
 			}
-			String[] pgmArgs = projectPrefs.getProgramArgs();
-			if (pgmArgs!=null) {
-				gradleOp.withArguments(pgmArgs);
-			}
+			
+			List<String> arguments = new ArrayList<String>();
+			arguments.add("--init-script");
+			arguments.add(getInitScript().getAbsolutePath());
+	
+			if(projectPrefs.getProgramArgs() != null)
+				arguments.addAll(Arrays.asList(projectPrefs.getProgramArgs()));
+			
+			gradleOp.withArguments(arguments.toArray(new String[arguments.size()]));
+			
 			GradleLaunchConfigurationDelegate.configureOperation(gradleOp, conf);
 		} catch (Exception e) {
 			//The idea of this catch block is capture 'unsupported' operation exception
@@ -334,6 +348,26 @@ public class GradleProject {
 			// That really doesn't leave us with a practical way to handle the exceptions.
 			GradleCore.log(e);
 		}
+	}
+	
+	private File getInitScript() {
+		Bundle bundle = Platform.getBundle(GradleCore.PLUGIN_ID);
+		try {
+			File bundleFile = FileLocator.getBundleFile(bundle);
+			if (bundleFile != null && bundleFile.exists() && bundleFile.isDirectory()) {
+				File initScript = new File(bundleFile, "resources/init.gradle");
+				if (initScript.exists()) {
+					return initScript;
+				} else {
+					GradleCore.log("init.gradle not found in plugin "+GradleCore.PLUGIN_ID);
+				}
+			} else {
+				GradleCore.log("Couldn't access the plugin "+GradleCore.PLUGIN_ID+" as a directory. Maybe it is not installed as an 'exploded' bundle?");
+			}
+		} catch (IOException e) {
+			GradleCore.log(e);
+		}
+		return null;
 	}
 	
 	/**
@@ -469,6 +503,15 @@ public class GradleProject {
 
 	public EclipseProject getGradleModel() throws FastOperationFailedException, CoreException {
 		return getGradleModel(EclipseProject.class);
+	}
+	
+	public StsEclipseProject getStsGradleModel(IProgressMonitor mon) throws Exception {
+		synchronized (this) {
+			if (stsEclipseModelProvider==null) {
+				stsEclipseModelProvider = new GenericModelProvider<StsEclipseProject>(this, StsEclipseProject.class);
+			}
+		}
+		return stsEclipseModelProvider.get(mon);
 	}
 	
 	public ProjectPublications getPublications(IProgressMonitor mon) throws Exception {
@@ -615,6 +658,7 @@ public class GradleProject {
 		if (provider!=null) {
 			provider.invalidate();
 		}
+		stsEclipseModelProvider = null;
 		publicationsModelProvider = null;
 	}
 
