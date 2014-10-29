@@ -1,0 +1,13 @@
+defaultTasks 'publish', 'updateLibs:updateLibs'
+def gradleApiVersion = '2.1'
+
+subprojects {
+	apply plugin: 'java'
+	
+    group = 'io.pivotal.gradle.eclipse.toolingapi'
+    version = '1.0'
+
+	repositories {
+		mavenCentral()
+	}
+}

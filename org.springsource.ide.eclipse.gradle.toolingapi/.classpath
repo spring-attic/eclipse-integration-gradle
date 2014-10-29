@@ -14,7 +14,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/gradle-messaging-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gradle-base-services-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gradle-base-services-groovy-2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/groovy-all-2.3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-jdk5-17.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kryo-2.20.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/reflectasm-1.07-shaded.jar"/>

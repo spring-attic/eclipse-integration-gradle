@@ -25,10 +25,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>${basedir}</workingDirectory>
-							<executable>${basedir}/gradlew</executable>
-							<arguments>
-								<argument>updateLibs</argument>
-							</arguments>
+							<executable>${basedir}/../toolingapi/gradlew</executable>
 							<outputFile>${basedir}/gradle.out</outputFile>
 						</configuration>
 					</execution>

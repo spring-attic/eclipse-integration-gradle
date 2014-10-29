@@ -1,0 +1,7 @@
+apply plugin: 'groovy'
+
+dependencies {
+    compile project(':model')
+	compile 'org.codehaus.groovy:groovy-all:2.3.3'
+	testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+}

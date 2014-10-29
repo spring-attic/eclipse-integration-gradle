@@ -1,0 +1,2 @@
+include 'model', 'plugin', 'integrationTests', 'updateLibs'
+

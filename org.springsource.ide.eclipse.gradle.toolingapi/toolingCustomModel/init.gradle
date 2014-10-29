@@ -1,8 +1,7 @@
 initscript {
 	repositories {
-		mavenLocal()
 		maven {
-			url new File('repo').toURI().toURL()
+			url System.getProperty('org.springsource.ide.eclipse.gradle.toolingApiRepo')
 		}
 		mavenCentral()
 	}

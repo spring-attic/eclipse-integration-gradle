@@ -70,6 +70,7 @@ import org.springsource.ide.eclipse.gradle.core.util.IllegalClassPathEntryExcept
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
+import org.springsource.ide.eclipse.gradle.toolingapi.GradleToolingApi;
 
 
 /**
@@ -325,10 +326,13 @@ public class GradleProject {
 			if (javaHome!=null) {
 				gradleOp.setJavaHome(javaHome);
 			}
-			String[] jvmArgs = projectPrefs.getJVMArgs();
-			if (jvmArgs!=null) {
-				gradleOp.setJvmArguments(jvmArgs);
-			}
+			
+			List<String> jvmArguments = new ArrayList<String>();
+			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + getRepo().getAbsolutePath());
+			if(projectPrefs.getJVMArgs() != null)
+				jvmArguments.addAll(Arrays.asList(projectPrefs.getJVMArgs()));
+			
+			gradleOp.setJvmArguments(jvmArguments.toArray(new String[jvmArguments.size()]));
 			
 			List<String> arguments = new ArrayList<String>();
 			arguments.add("--init-script");
@@ -350,12 +354,32 @@ public class GradleProject {
 		}
 	}
 	
-	private File getInitScript() {
-		Bundle bundle = Platform.getBundle(GradleCore.PLUGIN_ID);
+	private File getRepo() {
+		Bundle bundle = Platform.getBundle(GradleToolingApi.PLUGIN_ID);
 		try {
 			File bundleFile = FileLocator.getBundleFile(bundle);
 			if (bundleFile != null && bundleFile.exists() && bundleFile.isDirectory()) {
-				File initScript = new File(bundleFile, "resources/init.gradle");
+				File repository = new File(bundleFile, "toolingCustomModel/repo");
+				if (repository.exists()) {
+					return repository;
+				} else {
+					GradleCore.log("repository not found in plugin "+GradleCore.PLUGIN_ID);
+				}
+			} else {
+				GradleCore.log("Couldn't access the plugin "+GradleCore.PLUGIN_ID+" as a directory. Maybe it is not installed as an 'exploded' bundle?");
+			}
+		} catch (IOException e) {
+			GradleCore.log(e);
+		}
+		return null;
+	}
+	
+	private File getInitScript() {
+		Bundle bundle = Platform.getBundle(GradleToolingApi.PLUGIN_ID);
+		try {
+			File bundleFile = FileLocator.getBundleFile(bundle);
+			if (bundleFile != null && bundleFile.exists() && bundleFile.isDirectory()) {
+				File initScript = new File(bundleFile, "toolingCustomModel/init.gradle");
 				if (initScript.exists()) {
 					return initScript;
 				} else {
