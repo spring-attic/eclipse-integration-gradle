@@ -1261,6 +1261,48 @@ public class GradleImportTests extends GradleTest {
 		
 	}
 	
+	public void testRemapJarToGradleOpenCloseListener() throws Exception {
+		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
+		 // test projects. Will be cleaned up (deleted)
+		 // by setup of next test.
+		
+		importTestProject("sts2834/my-lib", true);
+		final IProject libProject = getProject("my-lib");
+		assertProjects("repos", "my-lib");
+		
+		GradleProcess process = LaunchUtil.launchTasks(GradleCore.create(libProject), ":uploadArchives");
+		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
+		assertContains("BUILD SUCCESSFUL", output);
+
+		importTestProject("sts2834/my-app", true);
+		assertProjects("repos", "my-lib", "my-app");
+		final GradleProject app = GradleCore.create(getProject("my-app"));
+		GradleProject lib = GradleCore.create(getProject("my-lib"));
+
+		//Initially, remapping should be enabled:
+		assertTrue(GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects());
+		assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
+		assertClasspathProjectEntry(lib.getProject(), app.getJavaProject());
+		
+		libProject.close(new NullProgressMonitor());
+		new ACondition("Project remapped to jar") {
+			public boolean test() throws Exception {
+				assertNoClasspathProjectEntry(libProject, app.getJavaProject());
+				assertClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
+				return true;
+			}
+		}.waitFor(4000);
+		
+		libProject.open(new NullProgressMonitor());
+		new ACondition("Jar remapped to project") {
+			public boolean test() throws Exception {
+				assertClasspathProjectEntry(libProject, app.getJavaProject());
+				assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
+				return true;
+			}
+		}.waitFor(4000);
+	}
+	
 	private void createGeneralProject(String name) throws CoreException {
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 		p.create(new NullProgressMonitor());

@@ -749,13 +749,14 @@ public abstract class GradleTest extends TestCase {
 			}
 		}
 	}
-
-
 	
-	public static void assertClasspathJarEntry(String jarFile, GradleProject project)
-			throws JavaModelException {
-				assertClasspathJarEntry(jarFile, project.getJavaProject().getResolvedClasspath(true));
-			}
+	public static void assertClasspathJarEntry(String jarFile, GradleProject project) throws JavaModelException {
+		assertClasspathJarEntry(jarFile, project.getJavaProject().getResolvedClasspath(true));
+	}
+	
+	public static void assertClasspathJarEntry(String jarFile, IJavaProject javaProject) throws JavaModelException {
+		assertClasspathJarEntry(jarFile, javaProject.getResolvedClasspath(true));
+	}
 
 	public static void assertNoClasspathJarEntry(String string, IJavaProject jp) throws JavaModelException {
 		assertNoClasspathJarEntry(string, jp.getResolvedClasspath(true));
