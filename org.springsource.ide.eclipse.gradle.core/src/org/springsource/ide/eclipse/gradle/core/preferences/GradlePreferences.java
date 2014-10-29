@@ -34,6 +34,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.util.JavaRuntimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wtp.DeploymentExclusions;
 import org.springsource.ide.eclipse.gradle.core.wtp.RegexpListDeploymentExclusions;
@@ -74,6 +75,11 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	public static final boolean DEFAULT_EXPORT_DEPENDENCIES =  true; //This is probably the wrong behavior but preserves backwards compatibility
 			//See: https://issuetracker.springsource.com/browse/STS-3405
 
+	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN = true;
+	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE = true;
+	public static final String JAR_REMAP_GRADLE_TO_MAVEN = GradlePreferences.class.getName()+".JAR_REMAP_GRADLE_TO_MAVEN";
+	public static final String JAR_REMAP_GRADLE_TO_GRADLE = GradlePreferences.class.getName()+".JAR_REMAP_GRADLE_TO_GRADLE";
+	
 	private static URI builtInDistribution = null;
 
 	private RegexpListDeploymentExclusions cachedExclusions;
@@ -349,4 +355,22 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	public void setExportDependencies(boolean e) {
 		put(EXPORT_DEPENDENCIES, e);
 	}
+	
+	public boolean getRemapJarsToMavenProjects() {
+		return get(JAR_REMAP_GRADLE_TO_MAVEN, DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN);
+	}
+	
+	public void setRemapJarsToMavenProjects(boolean enable) {
+		put(JAR_REMAP_GRADLE_TO_MAVEN, enable);
+	}
+	
+	public boolean getRemapJarsToGradleProjects() {
+		return get(JAR_REMAP_GRADLE_TO_GRADLE, DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE);
+	}
+	
+	public void setRemapJarsToGradleProjects(boolean enable) {
+		put(JAR_REMAP_GRADLE_TO_GRADLE, enable);
+	}
+
+	
 }

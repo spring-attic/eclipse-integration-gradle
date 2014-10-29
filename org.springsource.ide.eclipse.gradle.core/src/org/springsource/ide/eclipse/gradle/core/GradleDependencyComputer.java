@@ -126,14 +126,14 @@ public class GradleDependencyComputer {
 				IPath jarPath = new Path(file.getAbsolutePath()); 
 				if (jarPath.lastSegment()!=null && jarPath.lastSegment().endsWith(".jar")) {
 					boolean remapped = false;
-					if (project.getProjectPreferences().getRemapJarsToMavenProjects()) {	
+					if (GradleCore.getInstance().getPreferences().getRemapJarsToMavenProjects()) {	
 						IProject projectDep = M2EUtils.getMavenProject(gEntry);
 						if (projectDep!=null) {
 							addProjectDependency(projectDep, export);
 							remapped = true;
 						}
 					}
-					if (!remapped && project.getProjectPreferences().getRemapJarsToGradleProjects()) {
+					if (!remapped && GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects()) {
 						IProject projectDep = GradleCore.getGradleProject(gEntry, new NullProgressMonitor());
 						if (projectDep!=null) {
 							addProjectDependency(projectDep, export);

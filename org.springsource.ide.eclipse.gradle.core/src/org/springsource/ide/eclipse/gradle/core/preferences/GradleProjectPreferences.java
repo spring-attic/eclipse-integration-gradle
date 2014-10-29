@@ -39,12 +39,8 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	private static final String LINKED_RESOURCES_PREF = "org.springsource.ide.eclipse.gradle.linkedresources";
 	private static final String ROOT_LOCATION_PREF = "org.springsource.ide.eclipse.gradle.rootprojectloc";
 	private static final String ENABLE_CLASSPATH_SORTING = "org.springsource.ide.eclipse.gradle.classpath.enableSorting";
-	public static final String JAR_REMAP_GRADLE_TO_MAVEN = "org.springsource.ide.eclipse.gradle.classpath.jar.remap.gradle.to.maven";
-	public static final String JAR_REMAP_GRADLE_TO_GRADLE = "org.springsource.ide.eclipse.gradle.classpath.jar.remap.gradle.to.gradle";
 	
 	public static final boolean DEFAULT_ENABLE_CLASSPATH_SORTING = true; 
-	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN = true;
-	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE = true;
 	
 	/**
 	 * Get preferences associated with this project.
@@ -100,44 +96,6 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 		}
 	}
 	
-	public boolean getRemapJarsToMavenProjects() {
-		try {
-			GradleProjectPreferences rootPrefs = getRootProjectPreferences();
-			return rootPrefs.get(JAR_REMAP_GRADLE_TO_MAVEN, DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN);
-		} catch (FastOperationFailedException e) {
-			GradleCore.log(e); 
-			return DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN;
-		}
-	}
-	
-	public void setRemapJarsToMavenProjects(boolean enable) {
-		try {
-			GradleProjectPreferences rootPrefs = getRootProjectPreferences();
-			rootPrefs.put(JAR_REMAP_GRADLE_TO_MAVEN, enable);
-		} catch (FastOperationFailedException e) {
-			GradleCore.log(e); 
-		}
-	}
-	
-	public boolean getRemapJarsToGradleProjects() {
-		try {
-			GradleProjectPreferences rootPrefs = getRootProjectPreferences();
-			return rootPrefs.get(JAR_REMAP_GRADLE_TO_GRADLE, DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE);
-		} catch (FastOperationFailedException e) {
-			GradleCore.log(e); 
-			return DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE;
-		}
-	}
-	
-	public void setRemapJarsToGradleProjects(boolean enable) {
-		try {
-			GradleProjectPreferences rootPrefs = getRootProjectPreferences();
-			rootPrefs.put(JAR_REMAP_GRADLE_TO_GRADLE, enable);
-		} catch (FastOperationFailedException e) {
-			GradleCore.log(e); 
-		}
-	}
-
 	public File getJavaHome() {
 		//Presently this preference can not be specified on projects so we just use the
 		//global preference to determine it.

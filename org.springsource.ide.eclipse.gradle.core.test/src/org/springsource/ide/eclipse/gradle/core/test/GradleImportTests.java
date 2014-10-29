@@ -1221,7 +1221,7 @@ public class GradleImportTests extends GradleTest {
 			assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", jp);
 			assertClasspathProjectEntry(mvnProject, jp);
 	
-			GradleCore.create(gradleProject).getProjectPreferences().setRemapJarsToMavenProjects(false);
+			GradleCore.getInstance().getPreferences().setRemapJarsToMavenProjects(false);
 			refreshDependencies(gradleProject);
 			assertNoClasspathProjectEntry(mvnProject, jp);
 			assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
@@ -1249,12 +1249,12 @@ public class GradleImportTests extends GradleTest {
 		GradleProject lib = GradleCore.create(getProject("my-lib"));
 
 		//Initially, remapping should be enabled:
-		assertTrue(app.getProjectPreferences().getRemapJarsToGradleProjects());
+		assertTrue(GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects());
 		assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
 		assertClasspathProjectEntry(lib.getProject(), app.getJavaProject());
 		
 		//Disable mapping and check whether changes are made to classpath accordingly:
-		app.getProjectPreferences().setRemapJarsToGradleProjects(false);
+		GradleCore.getInstance().getPreferences().setRemapJarsToGradleProjects(false);
 		refreshDependencies(app.getProject());
 		assertNoClasspathProjectEntry(libProject, app.getJavaProject());
 		assertClasspathJarEntry("my-lib-1.0.jar", app);

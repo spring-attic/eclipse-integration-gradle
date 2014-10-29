@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 import org.springsource.ide.eclipse.gradle.core.validators.CompositeValidator;
@@ -36,6 +37,9 @@ public class DependencyManagementSection extends PrefsPageSection {
 	Text autoRefreshDelayText;
 	Button enableAutoRefreshButton;
 
+	private Button enableJarToMvnProjectMappingButton;
+	private Button enableJarToGradleProjectMappingButton;
+	
 	private Button exportDependencies;
 	
 	public DependencyManagementSection(GradlePreferencesPage owner) {
@@ -47,6 +51,11 @@ public class DependencyManagementSection extends PrefsPageSection {
 		setEnableAutoRefresh(getEnableAutoRefreshInPage());
 		setAutoRefreshDelay(getAutoRefreshDelayInPage());
 		setExportDependencies(getExportDependenciesInPage());
+		if (enableJarToMvnProjectMappingButton!=null) {
+			//This can be null if M2E is not installed. In that case the option is not supported and the UI widgetry for it is not created.
+			setRemapJarsToMavenProjects(enableJarToMvnProjectMappingButton.getSelection());
+		}
+		setRemapJarsToGradleProjects(enableJarToGradleProjectMappingButton.getSelection());
 		return true;
 	}
 
@@ -55,8 +64,9 @@ public class DependencyManagementSection extends PrefsPageSection {
 		setEnableAutoRefreshInPage(GradlePreferences.DEFAULT_AUTO_REFRESH_DEPENDENCIES);
 		setAutoRefreshDelayInPage(GradlePreferences.DEFAULT_AUTO_REFRESH_DELAY);
 		setExportDependenciesInPage(GradlePreferences.DEFAULT_EXPORT_DEPENDENCIES);
-		// TODO Auto-generated method stub
-
+		
+		setRemapJarsToMavenProjectsInPage(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN);
+		setRemapJarsToGradleProjectsInPage(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE);
 	}
 
 	@Override
@@ -108,6 +118,21 @@ public class DependencyManagementSection extends PrefsPageSection {
 		
 		setAutoRefreshDelayInPage(getAutoRefreshDelay());
 		enableDisableWidgets();
+		
+        enableJarToMvnProjectMappingButton = new Button(composite, SWT.CHECK);
+        enableJarToMvnProjectMappingButton.setText("Remap Jars to maven projects (requires Gradle 1.1 and m2e)");
+        enableJarToMvnProjectMappingButton.setToolTipText("Try to replace jars in Gradle Dependencies by dependencies to maven projects in the workspace.");
+        enableJarToMvnProjectMappingButton.setSelection(GradleCore.getInstance().getPreferences().getRemapJarsToMavenProjects());
+        if (!M2EUtils.isInstalled()) {
+        	enableJarToMvnProjectMappingButton.setEnabled(false);
+        }
+        span2.applyTo(enableJarToMvnProjectMappingButton);
+        
+        enableJarToGradleProjectMappingButton = new Button(composite, SWT.CHECK);
+        enableJarToGradleProjectMappingButton.setText("Remap Jars to Gradle Projects (requires Gradle 1.12 or later)");
+        enableJarToGradleProjectMappingButton.setToolTipText("Try to replace jars in Gradle Dependencies by dependencies to Gradle projects in the workspace.");
+        enableJarToGradleProjectMappingButton.setSelection(GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects());
+		span2.applyTo(enableJarToGradleProjectMappingButton);
 	}
 
 	private void enableDisableWidgets() {
@@ -155,6 +180,14 @@ public class DependencyManagementSection extends PrefsPageSection {
 	private void setExportDependenciesInPage(boolean enable) {
 		exportDependencies.setSelection(enable);
 	}
+	
+	private void setRemapJarsToMavenProjectsInPage(boolean enable) {
+		enableJarToMvnProjectMappingButton.setSelection(enable);
+	}
+
+	private void setRemapJarsToGradleProjectsInPage(boolean enable) {
+		enableJarToGradleProjectMappingButton.setSelection(enable);
+	}
 
 	///////////// preferences getters and setters /////////////////////////////////
 
@@ -180,6 +213,14 @@ public class DependencyManagementSection extends PrefsPageSection {
 
 	private void setAutoRefreshDelay(int v) {
 		GradleCore.getInstance().getPreferences().setAutoRefreshDelay(v);
+	}
+
+	private void setRemapJarsToMavenProjects(boolean v) {
+		GradleCore.getInstance().getPreferences().setRemapJarsToMavenProjects(v);
+	}
+	
+	private void setRemapJarsToGradleProjects(boolean v) {
+		GradleCore.getInstance().getPreferences().setRemapJarsToGradleProjects(v);
 	}
 
 
