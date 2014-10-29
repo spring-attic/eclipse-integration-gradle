@@ -344,8 +344,10 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	public void setPersistedEntries(IClasspathEntry[] persistedEntries) {
 		this.persistedEntries = persistedEntries;
 		IProject eclipseProject = project.getProject();
-		GradleSaveParticipant store = GradleSaveParticipant.getInstance();
-		store.put(eclipseProject, GRADLE_CLASSPATHCONTAINER_KEY, encode(persistedEntries));
+		if (eclipseProject!=null) { // prpject was probably deleted, so no eclipse project associated anymore
+			GradleSaveParticipant store = GradleSaveParticipant.getInstance();
+			store.put(eclipseProject, GRADLE_CLASSPATHCONTAINER_KEY, encode(persistedEntries));
+		}
 	}
 
 	private IClasspathEntry[] getPersistedEntries() {
