@@ -34,4 +34,6 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
     DomainObjectSet<ExternalDependency> getClasspath();
 
     ExternalDependency getExternalEquivalent();
+
+    boolean hasPlugin(Class<?> type);
 }

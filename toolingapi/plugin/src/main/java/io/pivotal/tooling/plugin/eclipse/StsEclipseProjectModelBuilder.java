@@ -1,6 +1,7 @@
 package io.pivotal.tooling.plugin.eclipse;
 
 import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
@@ -157,7 +158,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         DefaultStsEclipseProject eclipseProject = new DefaultStsEclipseProject(
                 eclipseModelBuilder.buildAll(HierarchicalEclipseProject.class.getName(), project),
                 rootGradleProject.findByPath(project.getPath()), externalDependencies, children,
-                externalEquivalent);
+                externalEquivalent, plugins(project));
 
         for (DefaultStsEclipseProject child : children)
             child.setParent(eclipseProject);
@@ -166,5 +167,13 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
             result = eclipseProject;
 
         return eclipseProject;
+    }
+
+    private static List<String> plugins(Project project) {
+        List<String> plugins = new ArrayList<String>();
+        for(Plugin plugin : project.getPlugins())
+            plugins.add(plugin.getClass().getName());
+
+        return plugins;
     }
 }

@@ -1,54 +1,88 @@
 import io.pivotal.tooling.model.eclipse.StsEclipseProject
+import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ModelBuilder
+import org.gradle.tooling.ProjectConnection
+import spock.lang.Shared
 import spock.lang.Specification
 
 class StsEclipseProjectSpec extends Specification {
-    def 'all binary transitive dependencies are discovered'() {
-        setup:
+    @Shared StsEclipseProject root
+    @Shared ProjectConnection connection
+
+    def setupSpec() {
         def connector = GradleConnector.newConnector()
 
         connector.forProjectDirectory(new File(getClass().getResource('.').toURI()))
-        def connection = connector.connect()
-
-        // Publish a binary form of both 'a' and 'b' to Maven Local
-        connection.newBuild().forTasks("publish").run();
+        connection = connector.connect()
 
         ModelBuilder<StsEclipseProject> customModelBuilder = connection.model(StsEclipseProject.class)
         customModelBuilder.setJvmArguments(
                 "-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + new File('repo').getAbsolutePath(),
                 "-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration"
-            )
+        )
         customModelBuilder.withArguments("--init-script", new File(getClass().getResource('init.gradle').toURI()).absolutePath)
 
+        root = customModelBuilder.get()
+    }
+
+    def 'the root project contains a fully resolved hierarchy of all child projects'() {
         when:
-        StsEclipseProject model = customModelBuilder.get()
+        def a = project('a')
+        def b = project('b')
 
         then:
-        model.gradleProject.name == 'test'
-        model.children.collect { it.gradleProject.name }.sort() == ['a','b']
-        model.classpath.empty
+        root.gradleProject.name == 'test'
+        root.children.collect { it.gradleProject.name }.sort() == ['a','b']
+        root.classpath.empty
 
+        a.parent == root
+        b.parent == root
+    }
+
+    def 'all binary transitive dependencies are discovered'() {
         when:
-        def a = model.children.find { it.gradleProject.name == 'a' }
+        def a = project('a')
+        def b = project('b')
 
         then:
         a.children.size() == 0
-        a.parent == model
         a.classpath.size() == 7 // 1 first order dependency and 6 transitives through project reference 'b'
         a.classpath.collect { it.gradleModuleVersion.name }.contains('guava') // our first order dep
-        a.externalEquivalent?.getFile()?.name == 'a-1.0.jar'
-        a.externalEquivalent?.getSource()?.name == 'a-1.0-sources.jar'
-
-        when:
-        def b = model.children.find { it.gradleProject.name == 'b' }
 
         then:
         b.children.size() == 0
-        b.parent == model
         b.classpath.size() == 6 // 1 first order dependency and 5 transitives through 'jackson-dataformat-xml'
         b.classpath.collect { it.gradleModuleVersion.name }.contains('jackson-dataformat-xml')
+    }
+
+    def 'external equivalents of project references are discoverable'() {
+        when:
+        // Publish a binary form of both 'a' and 'b' to Maven Local
+        connection.newBuild().forTasks("publish").run()
+        def a = project('a')
+        def b = project('b')
+
+        then:
+        a.externalEquivalent?.getFile()?.name == 'a-1.0.jar'
+        a.externalEquivalent?.getSource()?.name == 'a-1.0-sources.jar'
         b.externalEquivalent?.getFile()?.name == 'b-1.0.jar'
         b.externalEquivalent?.getSource()?.name == 'b-1.0-sources.jar'
     }
+
+    def 'can determine if a project has a particular plugin applied'() {
+        when:
+        def a = project('a')
+        def b = project('b')
+
+        then:
+        a.hasPlugin(JavaPlugin)
+        a.hasPlugin(MavenPublishPlugin)
+        b.hasPlugin(JavaPlugin)
+        b.hasPlugin(MavenPublishPlugin)
+        !root.hasPlugin(JavaPlugin)
+    }
+
+    def project(String name) { root.children.find { it.gradleProject.name == name } }
 }
