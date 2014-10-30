@@ -1,6 +1,7 @@
 apply plugin: 'java'
 
 repositories {
+    mavenLocal() // helps with offline integration testing (assuming you've got a populated maven central repo)
     mavenCentral()
 }
 

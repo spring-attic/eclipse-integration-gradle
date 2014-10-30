@@ -4,10 +4,22 @@ def gradleApiVersion = '2.1'
 subprojects {
 	apply plugin: 'java'
 	
+	sourceCompatibility = '1.6'
+	targetCompatibility = '1.6'
+	
     group = 'io.pivotal.gradle.eclipse.toolingapi'
     version = '1.0'
 
 	repositories {
 		mavenCentral()
+		maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
 	}
+	
+	task sourceJar(type: Jar) {
+		from sourceSets.main.allJava
+	}
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.1'
 }

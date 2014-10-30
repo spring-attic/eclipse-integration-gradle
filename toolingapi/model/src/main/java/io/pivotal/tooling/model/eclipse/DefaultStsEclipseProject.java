@@ -2,7 +2,6 @@ package io.pivotal.tooling.model.eclipse;
 
 import org.gradle.plugins.ide.internal.tooling.eclipse.*;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
-import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 
 import java.io.File;
 import java.io.Serializable;
@@ -10,25 +9,33 @@ import java.util.Collection;
 import java.util.List;
 
 public class DefaultStsEclipseProject implements Serializable {
-    DefaultGradleProject<?> gradleProject;
-    DefaultEclipseProject hierarchicalEclipseProject;
-    List<DefaultEclipseExternalDependency> classpath;
+    private DefaultGradleProject<?> gradleProject;
+    private DefaultEclipseProject hierarchicalEclipseProject;
+    private List<DefaultEclipseExternalDependency> classpath;
+    private DefaultStsEclipseProject parent;
+    private List<DefaultStsEclipseProject> children;
 
     public DefaultStsEclipseProject(DefaultEclipseProject hierarchicalEclipseProject,
                                     DefaultGradleProject<?> gradleProject,
-                                    List<DefaultEclipseExternalDependency> classpath) {
+                                    List<DefaultEclipseExternalDependency> classpath,
+                                    List<DefaultStsEclipseProject> children) {
         this.hierarchicalEclipseProject = hierarchicalEclipseProject;
         this.gradleProject = gradleProject;
         this.classpath = classpath;
+        this.children = children;
     }
 
     public Collection<DefaultEclipseExternalDependency> getClasspath() { return classpath; }
 
     public DefaultGradleProject<?> getGradleProject() { return gradleProject; }
 
-    public DefaultEclipseProject getParent() { return hierarchicalEclipseProject.getParent(); }
+    public DefaultStsEclipseProject getParent() {
+        return parent;
+    }
 
-    public List<DefaultEclipseProject> getChildren() { return hierarchicalEclipseProject.getChildren(); }
+    public List<DefaultStsEclipseProject> getChildren() {
+        return children;
+    }
 
     public Iterable<? extends DefaultEclipseProjectDependency> getProjectDependencies() {
         return hierarchicalEclipseProject.getProjectDependencies();
@@ -44,5 +51,9 @@ public class DefaultStsEclipseProject implements Serializable {
 
     public Iterable<? extends DefaultEclipseLinkedResource> getLinkedResources() {
         return hierarchicalEclipseProject.getLinkedResources();
+    }
+
+    public void setParent(DefaultStsEclipseProject parent) {
+        this.parent = parent;
     }
 }

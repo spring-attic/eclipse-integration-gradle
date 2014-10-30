@@ -1,4 +1,31 @@
 apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = '1.6'
+targetCompatibility = '1.6'
+
+publishing {
+	repositories {
+		maven {
+			// for integration test runs
+			url "$rootProject.projectDir/repo"
+		}
+		maven {
+			// for consumption by Eclipse tooling
+			url "$rootProject.projectDir/../org.springsource.ide.eclipse.gradle.toolingapi/toolingCustomModel/repo"
+		}
+	}
+
+	publications {
+		maven(MavenPublication) {
+			from components.java
+
+			artifact sourceJar {
+				classifier 'sources'
+			}
+		}
+	}
+}
 
 dependencies {
 	compile gradleApi()

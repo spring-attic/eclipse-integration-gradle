@@ -1,14 +1,6 @@
 apply plugin: 'maven-publish'
 def gradleApiVersion = '2.1'
 
-task sourceJar(type: Jar) {
-	from sourceSets.main.allJava
-}
-
-repositories {
-	maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
-}
-
 publishing {
 	repositories {
 		maven {
@@ -17,7 +9,7 @@ publishing {
 		}
 		maven {
 			// for consumption by Eclipse tooling
-			url "$rootProject.projectDir/../org.springsource.ide.eclipse.gradle.toolingapi/toolingCustomModel"
+			url "$rootProject.projectDir/../org.springsource.ide.eclipse.gradle.toolingapi/toolingCustomModel/repo"
 		}
 	}
 
@@ -33,5 +25,7 @@ publishing {
 }
 
 dependencies {
-	compile "org.gradle:gradle-tooling-api:${gradleApiVersion}"
+    compile gradleApi()
+//	compile "org.gradle:gradle-tooling-api:${gradleApiVersion}"
+//    compile "org.gradle:gradle-ide:${gradleApiVersion}"
 }

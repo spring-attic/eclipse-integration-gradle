@@ -5,18 +5,38 @@ import spock.lang.Specification
 
 class StsEclipseProjectSpec extends Specification {
     def 'all binary transitive dependencies are discovered'() {
-        when:
+        setup:
         def connector = GradleConnector.newConnector()
-        connector.forProjectDirectory(new File(getClass().getResource('a').toURI()))
+        connector.forProjectDirectory(new File(getClass().getResource('.').toURI()))
         def connection = connector.connect()
 
         ModelBuilder<StsEclipseProject> customModelBuilder = connection.model(StsEclipseProject.class)
         customModelBuilder.withArguments("--init-script", new File(getClass().getResource('init.gradle').toURI()).absolutePath)
+
+        when:
         StsEclipseProject model = customModelBuilder.get()
 
         then:
-        model.classpath.size() == 3
-        model.classpath.collect { it.gradleModuleVersion.name }.sort() == ['commons-logging', 'guava', 'spring-core']
-        model.gradleProject.name == 'a'
+        model.gradleProject.name == 'test'
+        model.children.collect { it.gradleProject.name }.sort() == ['a','b']
+        model.classpath.empty
+
+        when:
+        def a = model.children.find { it.gradleProject.name == 'a' }
+
+        then:
+        a.children.size() == 0
+        a.parent == model
+        a.classpath.size() == 7 // 1 first order dependency and 6 transitives through project reference 'b'
+        a.classpath.collect { it.gradleModuleVersion.name }.contains('guava') // our first order dep
+
+        when:
+        def b = model.children.find { it.gradleProject.name == 'b' }
+
+        then:
+        b.children.size() == 0
+        b.parent == model
+        b.classpath.size() == 6 // 1 first order dependency and 5 transitives through 'jackson-dataformat-xml'
+        b.classpath.collect { it.gradleModuleVersion.name }.contains('jackson-dataformat-xml')
     }
 }

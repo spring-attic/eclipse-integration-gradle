@@ -1,6 +1,7 @@
 package io.pivotal.tooling.model.eclipse;
 
 import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
@@ -9,6 +10,16 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface StsEclipseProject extends HierarchicalEclipseProject {
+    /**
+     * {@inheritDoc}
+     */
+    StsEclipseProject getParent();
+
+    /**
+     * {@inheritDoc}
+     */
+    DomainObjectSet<? extends StsEclipseProject> getChildren();
+
     /**
      * The gradle project that is associated with this project.
      * Typically, a single Eclipse project corresponds to a single gradle project.
