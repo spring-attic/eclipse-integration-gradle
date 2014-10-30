@@ -317,7 +317,8 @@ public class GradleTasksView extends ViewPart {
 		projectSelector.updateProjects();
 		GradleProject project = projectSelector.getProject();
 		if (project!=null) {
-			project.refreshSpecificModel(BuildInvocations.class);
+			project.invalidateGradleModel();
+			project.getSpecificModel(BuildInvocations.class);
 			viewer.refresh();
 		}
 	}

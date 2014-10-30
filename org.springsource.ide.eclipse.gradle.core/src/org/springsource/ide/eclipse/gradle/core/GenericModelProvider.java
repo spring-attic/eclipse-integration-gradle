@@ -153,9 +153,7 @@ public class GenericModelProvider<T> {
 				}
 
 			});
-			System.out.println("START!!!");
 			T model = builder.get();  // blocks until the model is available
-			System.out.println("END!!!");
 			return model;
 		} catch (GradleConnectionException e) {
 			throw e;

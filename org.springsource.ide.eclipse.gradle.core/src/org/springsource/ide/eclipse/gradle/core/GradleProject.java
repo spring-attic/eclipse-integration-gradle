@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.core.resources.IFile;
@@ -111,8 +110,9 @@ public class GradleProject {
 
 	private GradleModelListeners modelListeners = new GradleModelListeners();
 	
-	private final ReentrantLock SPECIFIC_MODEL_LOCK = new ReentrantLock(); 
-	private Map<Class<?>, Object> modelProviderMap = new ConcurrentHashMap<Class<?>, Object>();
+	private final ReentrantLock SPECIFIC_MODEL_LOCK = new ReentrantLock();
+	private Map<Class<?>, Job> modelFetchingJobsCache = new HashMap<Class<?>, Job>();
+	private Map<Class<?>, Object> modelProviderMap = new HashMap<Class<?>, Object>();
 
 	private Job modelUpdateJob;
 
@@ -471,7 +471,7 @@ public class GradleProject {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T getSpecificModel(Class<T> type) throws FastOperationFailedException {
+	public <T> T getSpecificModel(Class<T> type) {
 		SPECIFIC_MODEL_LOCK.lock();
 		try {
 			GenericModelProvider<T> modelProvider = (GenericModelProvider<T>) modelProviderMap.get(type);
@@ -482,13 +482,16 @@ public class GradleProject {
 			T model = modelProvider.getCached();
 			final GenericModelProvider<T> provider = modelProvider;
 			if (model == null) {
-				JobUtil.schedule(new GradleRunnable("Obtaining Gradle model: " + type.getName()) {
-					
-					@Override
-					public void doit(IProgressMonitor mon) throws Exception {
-						provider.get(mon);
-					}
-				});
+				Job job = modelFetchingJobsCache.get(type);
+				if (job == null) {
+					modelFetchingJobsCache.put(type, JobUtil.schedule(new GradleRunnable("Obtaining Gradle model: " + type.getName()) {
+						
+						@Override
+						public void doit(IProgressMonitor mon) throws Exception {
+							provider.get(mon);
+						}
+					}));
+				}
 			}
 			return model;
 		} finally {
@@ -514,6 +517,7 @@ public class GradleProject {
 		SPECIFIC_MODEL_LOCK.lock();
 		try {
 			modelProviderMap.remove(type);
+			modelFetchingJobsCache.remove(type);
 		} finally {
 			SPECIFIC_MODEL_LOCK.unlock();
 		}
@@ -678,6 +682,7 @@ public class GradleProject {
 		}
 		SPECIFIC_MODEL_LOCK.lock();
 		modelProviderMap.clear();
+		modelFetchingJobsCache.clear();
 		SPECIFIC_MODEL_LOCK.unlock();
 	}
 
