@@ -11,7 +11,9 @@ import org.gradle.api.artifacts.result.ComponentArtifactsResult;
 import org.gradle.api.artifacts.result.DependencyResult;
 import org.gradle.api.artifacts.result.ResolvedDependencyResult;
 import org.gradle.api.internal.artifacts.DefaultModuleVersionIdentifier;
+import org.gradle.api.internal.artifacts.component.DefaultModuleComponentIdentifier;
 import org.gradle.api.internal.artifacts.component.DefaultModuleComponentSelector;
+import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency;
 import org.gradle.api.internal.artifacts.result.DefaultResolvedArtifactResult;
 import org.gradle.api.specs.Specs;
 import org.gradle.language.base.artifact.SourcesArtifact;
@@ -72,7 +74,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         for (ComponentIdentifier binaryDependency : binaryDependencies)
             binaryDependenciesAsStrings.add(binaryDependency.toString());
 
-        Set<ComponentArtifactsResult> binaryComponents = project.getDependencies().createArtifactResolutionQuery()
+        Set<ComponentArtifactsResult> artifactsResults = project.getDependencies().createArtifactResolutionQuery()
                 .forComponents(binaryDependencies)
                 .withArtifacts(JvmLibrary.class, SourcesArtifact.class, JavadocArtifact.class)
                 .execute()
@@ -88,13 +90,13 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
             }
         }
 
-        for (ComponentArtifactsResult binaryDependency : binaryComponents) {
-            DefaultStsEclipseExternalDependency externalDependency = externalDependenciesById.get(binaryDependency.getId().toString());
-            for (ArtifactResult sourcesResult : binaryDependency.getArtifacts(SourcesArtifact.class)) {
+        for (ComponentArtifactsResult artifactResult : artifactsResults) {
+            DefaultStsEclipseExternalDependency externalDependency = externalDependenciesById.get(artifactResult.getId().toString());
+            for (ArtifactResult sourcesResult : artifactResult.getArtifacts(SourcesArtifact.class)) {
                 if(sourcesResult instanceof DefaultResolvedArtifactResult)
                     externalDependency.setSource(((DefaultResolvedArtifactResult) sourcesResult).getFile());
             }
-            for (ArtifactResult javadocResult : binaryDependency.getArtifacts(JavadocArtifact.class)) {
+            for (ArtifactResult javadocResult : artifactResult.getArtifacts(JavadocArtifact.class)) {
                 if(javadocResult instanceof DefaultResolvedArtifactResult)
                     externalDependency.setJavadoc(((DefaultResolvedArtifactResult) javadocResult).getFile());
             }
@@ -104,16 +106,58 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         return new ArrayList<DefaultStsEclipseExternalDependency>(externalDependenciesById.values());
     }
 
+    private static DefaultStsEclipseExternalDependency resolveExternalDependencyEquivalent(Project project) {
+        String group = project.getGroup().toString(), name = project.getName();
+
+        EclipseToolingModelPluginExtension ext = (EclipseToolingModelPluginExtension) project.getExtensions().getByName("eclipseToolingModel");
+
+        Configuration projectExternal = project.getConfigurations().create("projectExternal");
+        projectExternal.getDependencies().add(new DefaultExternalModuleDependency(group,
+                name, ext.getEquivalentBinaryVersion()).setTransitive(false));
+
+        DefaultStsEclipseExternalDependency externalDependency = new DefaultStsEclipseExternalDependency();
+
+        for (ResolvedArtifact resolvedArtifact : projectExternal.getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL)) {
+            externalDependency.setModuleVersion(new DefaultModuleVersionIdentifier(group, name,
+                    resolvedArtifact.getModuleVersion().getId().getVersion()));
+            externalDependency.setFile(resolvedArtifact.getFile());
+        }
+
+        if(externalDependency.getFile() == null)
+            return null; // unable to find a binary equivalent for this project
+
+        Set<ComponentArtifactsResult> artifactsResults = project.getDependencies().createArtifactResolutionQuery()
+                .forComponents(new DefaultModuleComponentIdentifier(group, name, externalDependency.getGradleModuleVersion().getVersion()))
+                .withArtifacts(JvmLibrary.class, SourcesArtifact.class, JavadocArtifact.class)
+                .execute()
+                .getResolvedComponents();
+
+        for (ComponentArtifactsResult artifactResult : artifactsResults) {
+            for (ArtifactResult sourcesResult : artifactResult.getArtifacts(SourcesArtifact.class)) {
+                if(sourcesResult instanceof DefaultResolvedArtifactResult)
+                    externalDependency.setSource(((DefaultResolvedArtifactResult) sourcesResult).getFile());
+            }
+            for (ArtifactResult javadocResult : artifactResult.getArtifacts(JavadocArtifact.class)) {
+                if(javadocResult instanceof DefaultResolvedArtifactResult)
+                    externalDependency.setJavadoc(((DefaultResolvedArtifactResult) javadocResult).getFile());
+            }
+        }
+
+        return externalDependency;
+    }
+
     private DefaultStsEclipseProject buildHierarchy(Project project) {
         List<DefaultStsEclipseProject> children = new ArrayList<DefaultStsEclipseProject>();
         for (Project child : project.getChildProjects().values())
             children.add(buildHierarchy(child));
 
+        DefaultStsEclipseExternalDependency externalEquivalent = resolveExternalDependencyEquivalent(project);
         List<DefaultStsEclipseExternalDependency> externalDependencies = buildExternalDependencies(project);
 
         DefaultStsEclipseProject eclipseProject = new DefaultStsEclipseProject(
                 eclipseModelBuilder.buildAll(HierarchicalEclipseProject.class.getName(), project),
-                rootGradleProject.findByPath(project.getPath()), externalDependencies, children);
+                rootGradleProject.findByPath(project.getPath()), externalDependencies, children,
+                externalEquivalent);
 
         for (DefaultStsEclipseProject child : children)
             child.setParent(eclipseProject);

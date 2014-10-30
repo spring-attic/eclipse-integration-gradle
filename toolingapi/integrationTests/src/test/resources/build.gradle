@@ -1,0 +1,30 @@
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    group = 'io.pivotal.gradle.eclipse.toolingapi.integrationTests'
+    version = '1.0'
+
+    repositories {
+        mavenLocal() // helps with offline integration testing (assuming you've got a populated maven central repo)
+        mavenCentral()
+    }
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allJava
+    }
+
+    publishing {
+        repositories { mavenLocal() }
+
+        publications {
+            maven(MavenPublication) {
+                from components.java
+
+                artifact sourceJar {
+                    classifier 'sources'
+                }
+            }
+        }
+    }
+}

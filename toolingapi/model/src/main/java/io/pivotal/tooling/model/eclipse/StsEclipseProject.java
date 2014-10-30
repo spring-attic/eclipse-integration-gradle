@@ -3,10 +3,7 @@ package io.pivotal.tooling.model.eclipse;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleProject;
-import org.gradle.tooling.model.ProjectDependency;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
-
-import java.util.Map;
 
 public interface StsEclipseProject extends HierarchicalEclipseProject {
     /**
@@ -36,5 +33,5 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
      */
     DomainObjectSet<ExternalDependency> getClasspath();
 
-    Map<ProjectDependency, ExternalDependency> getExternalEquivalents(String versionMatcher);
+    ExternalDependency getExternalEquivalent();
 }

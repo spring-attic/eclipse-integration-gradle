@@ -329,6 +329,10 @@ public class GradleProject {
 			
 			List<String> jvmArguments = new ArrayList<String>();
 			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + getRepo().getAbsolutePath());
+			
+			// TODO allow the binary version to be controlled via a workspace level property
+			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration");
+			
 			if(projectPrefs.getJVMArgs() != null)
 				jvmArguments.addAll(Arrays.asList(projectPrefs.getJVMArgs()));
 			

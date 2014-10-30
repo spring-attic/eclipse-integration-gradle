@@ -1,16 +1,15 @@
 package io.pivotal.tooling.plugin.eclipse;
 
-import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseLinkedResource;
-import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProject;
-import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProjectDependency;
-import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseSourceDirectory;
+import org.gradle.plugins.ide.internal.tooling.eclipse.*;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
+import org.gradle.tooling.model.ExternalDependency;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
 public class DefaultStsEclipseProject implements Serializable {
+    private DefaultStsEclipseExternalDependency externalEquivalent;
     private DefaultGradleProject<?> gradleProject;
     private DefaultEclipseProject hierarchicalEclipseProject;
     private List<DefaultStsEclipseExternalDependency> classpath;
@@ -20,11 +19,13 @@ public class DefaultStsEclipseProject implements Serializable {
     public DefaultStsEclipseProject(DefaultEclipseProject hierarchicalEclipseProject,
                                     DefaultGradleProject<?> gradleProject,
                                     List<DefaultStsEclipseExternalDependency> classpath,
-                                    List<DefaultStsEclipseProject> children) {
+                                    List<DefaultStsEclipseProject> children,
+                                    DefaultStsEclipseExternalDependency externalEquivalent) {
         this.hierarchicalEclipseProject = hierarchicalEclipseProject;
         this.gradleProject = gradleProject;
         this.classpath = classpath;
         this.children = children;
+        this.externalEquivalent = externalEquivalent;
     }
 
     public List<DefaultStsEclipseExternalDependency> getClasspath() { return classpath; }
@@ -58,4 +59,6 @@ public class DefaultStsEclipseProject implements Serializable {
     public void setParent(DefaultStsEclipseProject parent) {
         this.parent = parent;
     }
+
+    public DefaultStsEclipseExternalDependency getExternalEquivalent() { return externalEquivalent; }
 }

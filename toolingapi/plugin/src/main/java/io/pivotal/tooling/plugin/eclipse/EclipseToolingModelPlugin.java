@@ -16,6 +16,7 @@ class EclipseToolingModelPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
+        project.getExtensions().create("eclipseToolingModel", EclipseToolingModelPluginExtension.class);
         registry.register(new StsEclipseProjectModelBuilder());
     }
 }
