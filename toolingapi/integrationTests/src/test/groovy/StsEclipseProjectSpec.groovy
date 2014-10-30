@@ -27,6 +27,17 @@ class StsEclipseProjectSpec extends Specification {
         root = customModelBuilder.get()
     }
 
+    def 'each project contains a pointer to the root project'() {
+        when:
+        def a = project('a')
+        def b = project('b')
+
+        then:
+        a.root == root
+        b.root == root
+        root.root == root
+    }
+
     def 'the root project contains a fully resolved hierarchy of all child projects'() {
         when:
         def a = project('a')
@@ -69,6 +80,14 @@ class StsEclipseProjectSpec extends Specification {
         a.externalEquivalent?.getSource()?.name == 'a-1.0-sources.jar'
         b.externalEquivalent?.getFile()?.name == 'b-1.0.jar'
         b.externalEquivalent?.getSource()?.name == 'b-1.0-sources.jar'
+    }
+
+    def 'project dependencies contain a reference to their project\'s gradle module version'() {
+        when:
+        def a = project('a')
+
+        then:
+        a.projectDependencies[0].gradleModuleVersion.name == 'b'
     }
 
     def 'can determine if a project has a particular plugin applied'() {

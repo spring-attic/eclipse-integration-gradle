@@ -17,6 +17,11 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
     DomainObjectSet<? extends StsEclipseProject> getChildren();
 
     /**
+     * {@inheritDoc}
+     */
+    DomainObjectSet<? extends StsEclipseProjectDependency> getProjectDependencies();
+
+    /**
      * The gradle project that is associated with this project.
      * Typically, a single Eclipse project corresponds to a single gradle project.
      * <p>
@@ -27,13 +32,20 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
     GradleProject getGradleProject();
 
     /**
-     * Returns the external dependencies which make up the classpath of this project.
+     * @return the external dependencies which make up the classpath of this project.
      * The set includes ALL binary transitive dependencies, including those that are derived from
      * project dependencies.
      */
     DomainObjectSet<ExternalDependency> getClasspath();
 
+    /**
+     *
+     * @return a binary artifact that is representative of the project reference.  The version matcher
+     * used to select a binary artifact is governed by <code>eclipseToolingModel { equivalentBinaryVersion = '...' }</code>
+     */
     ExternalDependency getExternalEquivalent();
 
     boolean hasPlugin(Class<?> type);
+
+    StsEclipseProject getRoot();
 }

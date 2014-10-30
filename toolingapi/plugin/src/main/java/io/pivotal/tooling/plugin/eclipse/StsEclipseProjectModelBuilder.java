@@ -21,21 +21,27 @@ import org.gradle.language.base.artifact.SourcesArtifact;
 import org.gradle.language.java.artifact.JavadocArtifact;
 import org.gradle.plugins.ide.internal.tooling.EclipseModelBuilder;
 import org.gradle.plugins.ide.internal.tooling.GradleProjectBuilder;
+import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProject;
+import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProjectDependency;
 import org.gradle.runtime.jvm.JvmLibrary;
+import org.gradle.tooling.internal.gradle.DefaultGradleModuleVersion;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
+import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.gradle.tooling.provider.model.ToolingModelBuilder;
 
 import java.util.*;
 
 class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
-    private DefaultStsEclipseProject result;
+    private DefaultStsEclipseProject result, root;
     private Project currentProject;
 
     private GradleProjectBuilder gradleProjectBuilder = new GradleProjectBuilder();
     private DefaultGradleProject rootGradleProject;
 
     private EclipseModelBuilder eclipseModelBuilder = new EclipseModelBuilder(gradleProjectBuilder);
+
+    private Map<String, GradleModuleVersion> moduleVersionByProjectName = new HashMap<String, GradleModuleVersion>();
 
     @Override
     public boolean canBuild(String modelName) {
@@ -46,7 +52,8 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     public Object buildAll(String modelName, Project project) {
         currentProject = project;
         rootGradleProject = gradleProjectBuilder.buildAll(project);
-        buildHierarchy(project);
+        buildHierarchy(project.getRootProject());
+        buildProjectDependencies(root);
         return result;
     }
 
@@ -148,17 +155,28 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     }
 
     private DefaultStsEclipseProject buildHierarchy(Project project) {
+        DefaultStsEclipseProject eclipseProject = new DefaultStsEclipseProject();
+
+        if (project == project.getRootProject())
+            root = eclipseProject;
+
         List<DefaultStsEclipseProject> children = new ArrayList<DefaultStsEclipseProject>();
         for (Project child : project.getChildProjects().values())
             children.add(buildHierarchy(child));
 
-        DefaultStsEclipseExternalDependency externalEquivalent = resolveExternalDependencyEquivalent(project);
-        List<DefaultStsEclipseExternalDependency> externalDependencies = buildExternalDependencies(project);
+        moduleVersionByProjectName.put(project.getName(), new DefaultGradleModuleVersion(new DefaultModuleVersionIdentifier(project.getGroup().toString(),
+                project.getName(), project.getVersion().toString())));
 
-        DefaultStsEclipseProject eclipseProject = new DefaultStsEclipseProject(
-                eclipseModelBuilder.buildAll(HierarchicalEclipseProject.class.getName(), project),
-                rootGradleProject.findByPath(project.getPath()), externalDependencies, children,
-                externalEquivalent, plugins(project));
+        DefaultEclipseProject defaultEclipseProject = eclipseModelBuilder.buildAll(HierarchicalEclipseProject.class.getName(), project);
+
+        eclipseProject
+                .setHierarchicalEclipseProject(defaultEclipseProject)
+                .setGradleProject(rootGradleProject.findByPath(project.getPath()))
+                .setChildren(children)
+                .setExternalEquivalent(resolveExternalDependencyEquivalent(project))
+                .setClasspath(buildExternalDependencies(project))
+                .setPlugins(plugins(project))
+                .setRoot(root);
 
         for (DefaultStsEclipseProject child : children)
             child.setParent(eclipseProject);
@@ -169,11 +187,23 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         return eclipseProject;
     }
 
+    private void buildProjectDependencies(DefaultStsEclipseProject eclipseProject) {
+        List<DefaultStsEclipseProjectDependency> projectDependencies = new ArrayList<DefaultStsEclipseProjectDependency>();
+        for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
+            projectDependencies.add(new DefaultStsEclipseProjectDependency(projectDependency,
+                    moduleVersionByProjectName.get(projectDependency.getTargetProject().getName())));
+        }
+
+        eclipseProject.setProjectDependencies(projectDependencies);
+
+        for (DefaultStsEclipseProject child : eclipseProject.getChildren())
+            buildProjectDependencies(child);
+    }
+
     private static List<String> plugins(Project project) {
         List<String> plugins = new ArrayList<String>();
         for(Plugin plugin : project.getPlugins())
             plugins.add(plugin.getClass().getName());
-
         return plugins;
     }
 }

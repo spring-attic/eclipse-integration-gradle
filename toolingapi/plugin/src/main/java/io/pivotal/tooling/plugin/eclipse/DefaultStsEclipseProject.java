@@ -2,7 +2,6 @@ package io.pivotal.tooling.plugin.eclipse;
 
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseLinkedResource;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProject;
-import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProjectDependency;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseSourceDirectory;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
 
@@ -18,20 +17,8 @@ public class DefaultStsEclipseProject implements Serializable {
     private DefaultStsEclipseProject parent;
     private List<DefaultStsEclipseProject> children;
     private List<String> plugins;
-
-    public DefaultStsEclipseProject(DefaultEclipseProject hierarchicalEclipseProject,
-                                    DefaultGradleProject<?> gradleProject,
-                                    List<DefaultStsEclipseExternalDependency> classpath,
-                                    List<DefaultStsEclipseProject> children,
-                                    DefaultStsEclipseExternalDependency externalEquivalent,
-                                    List<String> plugins) {
-        this.hierarchicalEclipseProject = hierarchicalEclipseProject;
-        this.gradleProject = gradleProject;
-        this.classpath = classpath;
-        this.children = children;
-        this.externalEquivalent = externalEquivalent;
-        this.plugins = plugins;
-    }
+    private List<DefaultStsEclipseProjectDependency> projectDependencies;
+    private DefaultStsEclipseProject root;
 
     public List<DefaultStsEclipseExternalDependency> getClasspath() { return classpath; }
 
@@ -45,9 +32,7 @@ public class DefaultStsEclipseProject implements Serializable {
         return children;
     }
 
-    public Iterable<? extends DefaultEclipseProjectDependency> getProjectDependencies() {
-        return hierarchicalEclipseProject.getProjectDependencies();
-    }
+    public List<DefaultStsEclipseProjectDependency> getProjectDependencies() { return projectDependencies; }
 
     public Iterable<? extends DefaultEclipseSourceDirectory> getSourceDirectories() {
         return hierarchicalEclipseProject.getSourceDirectories();
@@ -68,4 +53,48 @@ public class DefaultStsEclipseProject implements Serializable {
     public DefaultStsEclipseExternalDependency getExternalEquivalent() { return externalEquivalent; }
 
     public boolean hasPlugin(Class<?> pluginClass) { return plugins.contains(pluginClass.getName()); }
+
+    public DefaultStsEclipseProject getRoot() { return root; }
+
+    public DefaultEclipseProject getHierarchicalEclipseProject() { return hierarchicalEclipseProject; }
+
+    public DefaultStsEclipseProject setExternalEquivalent(DefaultStsEclipseExternalDependency externalEquivalent) {
+        this.externalEquivalent = externalEquivalent;
+        return this;
+    }
+
+    public DefaultStsEclipseProject setGradleProject(DefaultGradleProject<?> gradleProject) {
+        this.gradleProject = gradleProject;
+        return this;
+    }
+
+    public DefaultStsEclipseProject setHierarchicalEclipseProject(DefaultEclipseProject hierarchicalEclipseProject) {
+        this.hierarchicalEclipseProject = hierarchicalEclipseProject;
+        return this;
+    }
+
+    public DefaultStsEclipseProject setClasspath(List<DefaultStsEclipseExternalDependency> classpath) {
+        this.classpath = classpath;
+        return this;
+    }
+
+    public DefaultStsEclipseProject setChildren(List<DefaultStsEclipseProject> children) {
+        this.children = children;
+        return this;
+    }
+
+    public DefaultStsEclipseProject setPlugins(List<String> plugins) {
+        this.plugins = plugins;
+        return this;
+    }
+
+    public DefaultStsEclipseProject setProjectDependencies(List<DefaultStsEclipseProjectDependency> projectDependencies) {
+        this.projectDependencies = projectDependencies;
+        return this;
+    }
+
+    public DefaultStsEclipseProject setRoot(DefaultStsEclipseProject root) {
+        this.root = root;
+        return this;
+    }
 }
