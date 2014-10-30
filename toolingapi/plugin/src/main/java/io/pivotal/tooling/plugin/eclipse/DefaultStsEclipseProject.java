@@ -1,23 +1,25 @@
-package io.pivotal.tooling.model.eclipse;
+package io.pivotal.tooling.plugin.eclipse;
 
-import org.gradle.plugins.ide.internal.tooling.eclipse.*;
+import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseLinkedResource;
+import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProject;
+import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProjectDependency;
+import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseSourceDirectory;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 
 public class DefaultStsEclipseProject implements Serializable {
     private DefaultGradleProject<?> gradleProject;
     private DefaultEclipseProject hierarchicalEclipseProject;
-    private List<DefaultEclipseExternalDependency> classpath;
+    private List<DefaultStsEclipseExternalDependency> classpath;
     private DefaultStsEclipseProject parent;
     private List<DefaultStsEclipseProject> children;
 
     public DefaultStsEclipseProject(DefaultEclipseProject hierarchicalEclipseProject,
                                     DefaultGradleProject<?> gradleProject,
-                                    List<DefaultEclipseExternalDependency> classpath,
+                                    List<DefaultStsEclipseExternalDependency> classpath,
                                     List<DefaultStsEclipseProject> children) {
         this.hierarchicalEclipseProject = hierarchicalEclipseProject;
         this.gradleProject = gradleProject;
@@ -25,7 +27,7 @@ public class DefaultStsEclipseProject implements Serializable {
         this.children = children;
     }
 
-    public Collection<DefaultEclipseExternalDependency> getClasspath() { return classpath; }
+    public List<DefaultStsEclipseExternalDependency> getClasspath() { return classpath; }
 
     public DefaultGradleProject<?> getGradleProject() { return gradleProject; }
 

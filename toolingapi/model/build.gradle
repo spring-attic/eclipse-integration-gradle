@@ -25,7 +25,5 @@ publishing {
 }
 
 dependencies {
-    compile gradleApi()
-//	compile "org.gradle:gradle-tooling-api:${gradleApiVersion}"
-//    compile "org.gradle:gradle-ide:${gradleApiVersion}"
+	compile "org.gradle:gradle-tooling-api:${gradleApiVersion}"
 }

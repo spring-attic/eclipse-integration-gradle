@@ -4,6 +4,7 @@ initscript {
             url new File('repo').toURI().toURL()
         }
         mavenCentral()
+        maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
     }
 
     dependencies {

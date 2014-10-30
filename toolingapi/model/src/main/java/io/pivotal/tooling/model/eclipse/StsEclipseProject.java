@@ -1,9 +1,9 @@
 package io.pivotal.tooling.model.eclipse;
 
-import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleProject;
+import org.gradle.tooling.model.ProjectDependency;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 
 import java.util.Collection;

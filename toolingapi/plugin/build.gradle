@@ -1,8 +1,4 @@
-apply plugin: 'groovy'
 apply plugin: 'maven-publish'
-
-sourceCompatibility = '1.6'
-targetCompatibility = '1.6'
 
 publishing {
 	repositories {
@@ -30,5 +26,4 @@ publishing {
 dependencies {
 	compile gradleApi()
     compile project(':model')
-    compile 'org.codehaus.groovy:groovy-all:2.3.3'
 }
