@@ -20,7 +20,9 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
+import org.gradle.tooling.model.Launchable;
 import org.gradle.tooling.model.Task;
+import org.gradle.tooling.model.TaskSelector;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.ui.GradleUI;
 import org.springsource.ide.eclipse.gradle.ui.util.GradleLabelProvider;
@@ -44,10 +46,15 @@ public class TaskLabelProvider extends GradleLabelProvider
 	private Font taskNameFont = null;
 	
 	public Image getColumnImage(Object element, int columnIndex) {
-		if (element instanceof EclipseProject) {
-			return projectLabelProvider.getColumnImage(element, columnIndex);
-		} else if (element instanceof Task) {
-			return columnIndex==0? GradleUI.getDefault().getImageRegistry().get(GradleUI.IMAGE_TARGET) : null;
+		if (columnIndex == 0) {
+			if (element instanceof EclipseProject) {
+				return projectLabelProvider.getColumnImage(element, columnIndex);
+			} else if (element instanceof Launchable) {
+				Launchable task = (Launchable) element;
+				return task.isPublic() ? GradleUI.getDefault().getImageRegistry()
+						.get(GradleUI.IMAGE_PUBLIC_TASK) : GradleUI.getDefault()
+						.getImageRegistry().get(GradleUI.IMAGE_INTERNAL_TASK);
+			}
 		}
 		return null;
 	}
@@ -55,17 +62,23 @@ public class TaskLabelProvider extends GradleLabelProvider
 	public String getColumnText(Object element, int columnIndex) {
 		if (element instanceof EclipseProject) {
 			return projectLabelProvider.getColumnText(element, columnIndex);
-		} else if (element instanceof Task) {
-			return getColumnText((Task)element, columnIndex);
+		} else if (element instanceof Launchable) {
+			return getColumnText((Launchable)element, columnIndex);
 		} else {
 			return element.toString();
 		}
 	}
 	
-	private String getColumnText(Task element, int columnIndex) {
+	private String getColumnText(Launchable element, int columnIndex) {
 		switch (columnIndex) {
 		case 0:
-			return element.getName();
+			if (element instanceof Task) {
+				return ((Task)element).getName();
+			} else if (element instanceof TaskSelector) {
+				return ((TaskSelector)element).getName();
+			} else {
+				return element.getDisplayName();
+			}
 		case 1:
 			return element.getDescription();
 		default: //There should really only be 2 columns but ...

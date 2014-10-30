@@ -45,6 +45,8 @@ public class GenericModelProvider<T> {
 	
 	private Class<T> type;
 	private GradleProject project;
+	private T cached = null;
+	private Object cacheLock = new Object();
 	
 	private JoinableContinuation<T> model = null;
 
@@ -60,6 +62,12 @@ public class GenericModelProvider<T> {
 			mon.done();
 		}
 	}
+	
+	public T getCached() {
+		synchronized (cacheLock) {
+			return cached;
+		}
+	}
 
 	private synchronized Joinable<T> ensureModel(IProgressMonitor mon) throws Exception {
 		mon.beginTask(jobName(project, type), 10);
@@ -72,10 +80,16 @@ public class GenericModelProvider<T> {
 			}
 			//We only get here if we created the 'model promise' so its up to us to build it.
 			try {
-				model.apply(buildModel(project, type, new SubProgressMonitor(mon, 9)));
+				T result = buildModel(project, type, new SubProgressMonitor(mon, 9));
+				synchronized (cacheLock) {
+					cached = result;
+				}
+				model.apply(result);
+				project.notifyModelListeners(result);
 			} catch (Throwable e) {
 				model.error(e);
 			}
+			
 			return model;
 		} finally {
 			mon.done();
@@ -139,7 +153,9 @@ public class GenericModelProvider<T> {
 				}
 
 			});
+			System.out.println("START!!!");
 			T model = builder.get();  // blocks until the model is available
+			System.out.println("END!!!");
 			return model;
 		} catch (GradleConnectionException e) {
 			throw e;

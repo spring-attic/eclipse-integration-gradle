@@ -57,6 +57,7 @@ public class GradleProjectIndex {
 	};
 	
 	private boolean initialized = false;
+	private org.springsource.ide.eclipse.gradle.core.GradleProject ideProject = null;
 	private EclipseProject project = null;
 	private Map<String, GradleTask> aggregateTasks = Collections.emptyMap();
 	private List<GradleTask> sortedAggregateTasks = Collections.emptyList();
@@ -67,33 +68,45 @@ public class GradleProjectIndex {
 	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private Future<?> indexRequest = null;
 	
+	private final IGradleModelListener MODEL_LISTENER = new IGradleModelListener() {
+		@Override
+		public void modelChanged(
+				org.springsource.ide.eclipse.gradle.core.GradleProject project, Object model) {
+			try {
+				if (model instanceof EclipseProject) {
+					initializeIndexRequest((EclipseProject) model);
+				}
+			} catch (Exception e) {
+				// ignore
+			}
+		}				
+	};
+	
 	public GradleProjectIndex() {
 		super();
 		this.executor = Executors.newFixedThreadPool(1);
 	}
 	
 	public void dispose() {
+		if (ideProject != null) {
+			ideProject.removeModelListener(MODEL_LISTENER);
+		}
 		this.executor.shutdownNow();
 	}
 	
 	public void setProject(org.springsource.ide.eclipse.gradle.core.GradleProject project) {
 		try {
+			if (ideProject != null) {
+				ideProject.removeModelListener(MODEL_LISTENER);
+			}
 			resetIndex();
 			if (project != null) {
-				initializeIndexRequest(project.requestGradleModel());
+				ideProject = project;
+				ideProject.addModelListener(MODEL_LISTENER);
+				initializeIndexRequest(ideProject.requestGradleModel());
 			}
 		} catch (FastOperationFailedException e) {
-			project.addModelListener(new IGradleModelListener() {
-				@Override
-				public void modelChanged(
-						org.springsource.ide.eclipse.gradle.core.GradleProject project) {
-					try {
-						initializeIndexRequest(project.getGradleModel());
-					} catch (Exception e) {
-						// ignore
-					}
-				}				
-			});
+			// ignore
 		} catch (CoreException e) {
 			// ignore
 		}

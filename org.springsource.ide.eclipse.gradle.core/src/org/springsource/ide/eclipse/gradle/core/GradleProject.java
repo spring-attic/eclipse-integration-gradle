@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -101,12 +103,6 @@ public class GradleProject {
 	private GroupedModelProvider modelProvider = null;
 	
 	/**
-	 * The model provider is reponsible for obtaining and cahching models of type {@link ProjectPublications}
-	 * from the tooling api.
-	 */
-	private GenericModelProvider<ProjectPublications> publicationsModelProvider;
-	
-	/**
 	 * The class path container for this project is created lazily.
 	 */
 	private GradleClassPathContainer classPathContainer = null;
@@ -114,6 +110,9 @@ public class GradleProject {
 	private IProject cachedProject;
 
 	private GradleModelListeners modelListeners = new GradleModelListeners();
+	
+	private final ReentrantLock SPECIFIC_MODEL_LOCK = new ReentrantLock(); 
+	private Map<Class<?>, Object> modelProviderMap = new ConcurrentHashMap<Class<?>, Object>();
 
 	private Job modelUpdateJob;
 
@@ -471,17 +470,79 @@ public class GradleProject {
 		return getGradleModel(EclipseProject.class);
 	}
 	
-	public ProjectPublications getPublications(IProgressMonitor mon) throws Exception {
-		synchronized (this) {
-			if (publicationsModelProvider==null) {
-				publicationsModelProvider = new GenericModelProvider<ProjectPublications>(this, ProjectPublications.class);
+	@SuppressWarnings("unchecked")
+	public <T> T getSpecificModel(Class<T> type) throws FastOperationFailedException {
+		SPECIFIC_MODEL_LOCK.lock();
+		try {
+			GenericModelProvider<T> modelProvider = (GenericModelProvider<T>) modelProviderMap.get(type);
+			if (modelProvider == null) {
+				modelProvider = new GenericModelProvider<T>(this, type);
+				modelProviderMap.put(type, modelProvider);
 			}
+			T model = modelProvider.getCached();
+			final GenericModelProvider<T> provider = modelProvider;
+			if (model == null) {
+				JobUtil.schedule(new GradleRunnable("Obtaining Gradle model: " + type.getName()) {
+					
+					@Override
+					public void doit(IProgressMonitor mon) throws Exception {
+						provider.get(mon);
+					}
+				});
+			}
+			return model;
+		} finally {
+			SPECIFIC_MODEL_LOCK.unlock();
 		}
-		return publicationsModelProvider.get(mon);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getSpecificModel(Class<T> type, IProgressMonitor mon)
+			throws Exception {
+		SPECIFIC_MODEL_LOCK.lock();
+		GenericModelProvider<T> modelProvider = (GenericModelProvider<T>) modelProviderMap
+				.get(type);
+		if (modelProvider == null) {
+			modelProvider = new GenericModelProvider<T>(this, type);
+			modelProviderMap.put(type, modelProvider);
+		}
+		SPECIFIC_MODEL_LOCK.unlock();
+		return modelProvider.get(mon);
+	}
+	
+	public <T> void invalidateSpecificModel(Class<T> type) {
+		SPECIFIC_MODEL_LOCK.lock();
+		try {
+			modelProviderMap.remove(type);
+		} finally {
+			SPECIFIC_MODEL_LOCK.unlock();
+		}
+	}
+	
+	public <T> void refreshSpecificModel(Class<T> type) {
+		SPECIFIC_MODEL_LOCK.lock();
+		try {
+			invalidateSpecificModel(type);
+			final GenericModelProvider<T> modelProvider = new GenericModelProvider<T>(this, type);
+			modelProviderMap.put(type, modelProvider);
+			JobUtil.schedule(new GradleRunnable("Obtaining Gradle model: " + type.getName()) {
+				
+				@Override
+				public void doit(IProgressMonitor mon) throws Exception {
+					modelProvider.get(mon);
+				}
+			});
+		} finally {
+			SPECIFIC_MODEL_LOCK.unlock();
+		}
+	}
+	
+	public ProjectPublications getPublications(IProgressMonitor mon) throws Exception {
+		return getSpecificModel(ProjectPublications.class, mon);
 	}
 	
 	public <T extends HierarchicalEclipseProject> T getGradleModel(Class<T> type) throws FastOperationFailedException, CoreException {
-		GradleModelProvider provider = getModelProvider();
+		GroupedModelProvider provider = getModelProvider();
 		T model = provider.getCachedModel(this, type);
 		if (model==null) {
 			throw ExceptionUtil.coreException("Could not get a Gradle model for '"+this.getDisplayName()+"'. " +
@@ -569,7 +630,7 @@ public class GradleProject {
 		monitor.beginTask("Get model for '"+getDisplayName()+"'", 2);
 		try {
 			//1:
-			GradleModelProvider provider = getModelProvider(type, new SubProgressMonitor(monitor, 1));
+			GroupedModelProvider provider = getModelProvider(type, new SubProgressMonitor(monitor, 1));
 			
 			//2:
 			while (true) {
@@ -615,7 +676,9 @@ public class GradleProject {
 		if (provider!=null) {
 			provider.invalidate();
 		}
-		publicationsModelProvider = null;
+		SPECIFIC_MODEL_LOCK.lock();
+		modelProviderMap.clear();
+		SPECIFIC_MODEL_LOCK.unlock();
 	}
 
 	/**
@@ -717,12 +780,12 @@ public class GradleProject {
 //		}
 //	}
 
-	void notifyModelListeners(HierarchicalEclipseProject newModel) {
+	void notifyModelListeners(Object newModel) {
 		IGradleModelListener[] ls = modelListeners.toArray();
 		for (IGradleModelListener l : ls) {
 			//Iterate over local copy of listeners array to avoid concurrent modification exception (without needing to place
 			//this code in synch block.
-			l.modelChanged(this);
+			l.modelChanged(this, newModel);
 		}
 	}
 	

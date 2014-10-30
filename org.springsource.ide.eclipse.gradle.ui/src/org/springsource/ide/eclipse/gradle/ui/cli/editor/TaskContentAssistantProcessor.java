@@ -118,7 +118,7 @@ public class TaskContentAssistantProcessor implements IContentAssistProcessor {
 			proposals.add(new TaskCompletionProposal(offset - prefix.length(),
 					offset, task.getName(), displayString, task
 							.getDescription(), GradleUI.getDefault()
-							.getImageRegistry().get(GradleUI.IMAGE_TARGET)));
+							.getImageRegistry().get(GradleUI.IMAGE_PUBLIC_TASK)));
         }		
 	}
 	
@@ -133,7 +133,7 @@ public class TaskContentAssistantProcessor implements IContentAssistProcessor {
 			proposals.add(new TaskCompletionProposal(offset - (prefix.length() - 1 - prefix.lastIndexOf(Project.PATH_SEPARATOR)),
 					offset, task.getName(), displayString, task
 							.getDescription(), GradleUI.getDefault()
-							.getImageRegistry().get(GradleUI.IMAGE_TARGET)));
+							.getImageRegistry().get(GradleUI.IMAGE_PUBLIC_TASK)));
         }		
 	}
 	

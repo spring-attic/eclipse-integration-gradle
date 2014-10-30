@@ -23,5 +23,5 @@ public interface IGradleModelListener {
 	 * Gets called when the model for a given project is changed. Note that the oldModel and new model could be instances
 	 * of EclipseProject which is a subtype of HierarchicalEclipseProject.
 	 */
-	public void modelChanged(GradleProject project);
+	public void modelChanged(GradleProject project, Object model);
 }

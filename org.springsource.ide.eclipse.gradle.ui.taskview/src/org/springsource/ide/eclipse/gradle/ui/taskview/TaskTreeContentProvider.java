@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.gradle.tooling.model.GradleTask;
-import org.gradle.tooling.model.eclipse.EclipseProject;
-import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.gradle.tooling.model.DomainObjectSet;
+import org.gradle.tooling.model.Launchable;
+import org.gradle.tooling.model.gradle.BuildInvocations;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 
 /**
  * Content provider for displaying tasks tree
@@ -40,6 +41,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 	private TreeViewer viewer;
 	private GradleProject currentProject;
 	private boolean isLocalTasks;
+	private boolean isHideInternalTasks;
 	
 	public TaskTreeContentProvider(TreeViewer viewer) {
 		this.viewer = viewer;
@@ -59,8 +61,8 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 	}
 	
 	private IGradleModelListener modelListener = new IGradleModelListener() {
-		public void modelChanged(final GradleProject p) {
-			if (currentProject==p) {
+		public void modelChanged(final GradleProject p, Object model) {
+			if (currentProject==p && model instanceof BuildInvocations) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						if (viewer!=null) {
@@ -83,42 +85,49 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 	}
 
 	private void setProject(GradleProject project) {
-		if (currentProject!=project) {
-			GradleProject oldProject = currentProject;
+		if (currentProject != project) {
 			currentProject = project;
-			if (oldProject!=null) {
-				oldProject.removeModelListener(modelListener);
-			}
-			if (project!=null) {
-				project.addModelListener(modelListener);
-			}
+			currentProject.addModelListener(modelListener);
+			currentProject.refreshSpecificModel(BuildInvocations.class);
 		}
 	}
 
 	public Object[] getElements(Object inputElement) {
-		GradleProject root = (GradleProject) inputElement;
-		if (root==null) {
+		GradleProject project = (GradleProject) inputElement;
+		if (project == null) {
 			return NO_ELEMENTS;
 		} else {
 			try {
-				GradleTask[] gradleTasks = getGradleTasks(root.requestGradleModel());
-				return gradleTasks;
-			} catch (FastOperationFailedException e) {
-				return new Object[] {"model not yet available"};
-			} catch (CoreException e) {
-				GradleCore.log(e);
-				return new Object[] {"ERROR: "+e.getMessage()+"", "See error log for details"};
+				BuildInvocations model = project.getSpecificModel(BuildInvocations.class);
+				if (model != null) {
+					DomainObjectSet<? extends Launchable> tasks = isLocalTasks
+							? model.getTasks()
+							: model.getTaskSelectors();
+					if (isHideInternalTasks) {
+						List<Launchable> result = new ArrayList<Launchable>(
+								tasks.size());
+						for (Launchable task : tasks) {
+							if (task.isPublic()) {
+								result.add(task);
+							}
+						}
+						return result.toArray(new Launchable[result.size()]);
+					} else {
+						return tasks.toArray(new Launchable[tasks.size()]);
+					}
+				}
+			} catch (Exception e) {
+				GradleTasksViewPlugin
+						.getDefault()
+						.getLog()
+						.log(new Status(IStatus.ERROR,
+								GradleTasksViewPlugin.PLUGIN_ID,
+								"Cannot fetch BuildInvocationsModel", e));
 			}
+			return new Object[0];
 		}
 	}
 	
-	private GradleTask[] getGradleTasks(EclipseProject project) {
-		Collection<? extends GradleTask> tasksCollection = isLocalTasks
-				? GradleProject.getTasks(project)
-				: GradleProject.getAggregateTasks(project).values();
-		return tasksCollection.toArray(new GradleTask[tasksCollection.size()]);
-	}
-
 	public Object[] getChildren(Object parentElement) {
 		return NO_ELEMENTS;
 	}
@@ -133,6 +142,10 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 
 	public void setLocalTasks(boolean isLocalTasks) {
 		this.isLocalTasks = isLocalTasks;
+	}
+	
+	public void setHideInternalTasks(boolean isHideInternalTasks) {
+		this.isHideInternalTasks = isHideInternalTasks;
 	}
 
 }

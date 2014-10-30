@@ -40,14 +40,16 @@ public class GradleProjectTest extends GradleTest {
 			this.project = gradleProject;
 		}
 
-		public void modelChanged(GradleProject project) {
-			assertEquals(this.project, project);
-			try {
-				receivedModel = project.getSkeletalGradleModel();
-			} catch (Exception e) {
-				throw new Error(e);
+		public void modelChanged(GradleProject project, Object model) {
+			if (model instanceof HierarchicalEclipseProject) {
+				assertEquals(this.project, project);
+				try {
+					receivedModel = (HierarchicalEclipseProject) model;
+				} catch (Exception e) {
+					throw new Error(e);
+				}
+				notifyCount++;
 			}
-			notifyCount++;
 		}
 
 		public void checkExpected(Class<? extends HierarchicalEclipseProject> expectModelType, int expectCount) {
