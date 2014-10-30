@@ -6,7 +6,6 @@ import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.ProjectDependency;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 
-import java.util.Collection;
 import java.util.Map;
 
 public interface StsEclipseProject extends HierarchicalEclipseProject {
@@ -35,7 +34,7 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
      * The set includes ALL binary transitive dependencies, including those that are derived from
      * project dependencies.
      */
-    Collection<ExternalDependency> getClasspath();
+    DomainObjectSet<ExternalDependency> getClasspath();
 
     Map<ProjectDependency, ExternalDependency> getExternalEquivalents(String versionMatcher);
 }

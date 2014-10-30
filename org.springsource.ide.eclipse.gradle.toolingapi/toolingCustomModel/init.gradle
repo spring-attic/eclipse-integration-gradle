@@ -4,6 +4,7 @@ initscript {
 			url System.getProperty('org.springsource.ide.eclipse.gradle.toolingApiRepo')
 		}
 		mavenCentral()
+		maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
 	}
 
 	dependencies {
