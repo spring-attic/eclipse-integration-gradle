@@ -12,7 +12,6 @@ package org.springsource.ide.eclipse.gradle.ui.launch;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.springsource.ide.eclipse.gradle.core.util.expression.LiveExpression;
 import org.springsource.ide.eclipse.gradle.core.validators.ValidationResult;

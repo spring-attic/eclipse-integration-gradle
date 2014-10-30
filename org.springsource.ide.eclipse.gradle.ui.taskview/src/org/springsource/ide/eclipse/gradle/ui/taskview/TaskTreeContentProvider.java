@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import java.util.Collection;
 
 import org.eclipse.core.runtime.Assert;
@@ -21,7 +23,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.gradle.tooling.model.GradleTask;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
@@ -112,7 +113,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 		}
 	}
 	
-	private GradleTask[] getGradleTasks(EclipseProject project) {
+	private GradleTask[] getGradleTasks(StsEclipseProject project) {
 		Collection<? extends GradleTask> tasksCollection = isLocalTasks
 				? GradleProject.getTasks(project)
 				: GradleProject.getAggregateTasks(project).values();

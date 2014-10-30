@@ -248,6 +248,7 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	 * @return list of Gradle path strings identifying a set/list of tasks that are selected for execution 
 	 * (by the user, doesn't include taks executed automatically because of dependencies).
 	 */
+	@SuppressWarnings("unchecked")
 	public static String getTasks(ILaunchConfiguration conf) {
 		String tasksText = DEFAULT_TASK_TEXT;
 		try {
@@ -279,6 +280,7 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 		conf.setAttribute(TASK_TEXT, sb.toString());
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static List<String> getTasksList(ILaunchConfiguration conf) {
 		String tasksText = DEFAULT_TASK_TEXT;
 		try {

@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
-import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -143,10 +142,8 @@ public class GradleSaveParticipant implements ISaveParticipant {
 			IWorkspace ws = ResourcesPlugin.getWorkspace();
 			instance = new GradleSaveParticipant();
 			try {
-				ISavedState savedState = ws.addSaveParticipant(GradleCore.PLUGIN_ID, instance);
-//				if (savedState!=null) { //Seems savedState is awlays null so don't check it.
-					instance.restore();
-//				}
+				ws.addSaveParticipant(GradleCore.PLUGIN_ID, instance);
+				instance.restore();
 			} catch (CoreException e) {
 				GradleCore.log(e);
 			}

@@ -34,7 +34,6 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.util.JavaRuntimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wtp.DeploymentExclusions;
 import org.springsource.ide.eclipse.gradle.core.wtp.RegexpListDeploymentExclusions;

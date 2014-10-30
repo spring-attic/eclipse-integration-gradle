@@ -13,8 +13,6 @@ package org.springsource.ide.eclipse.gradle.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springsource.ide.eclipse.gradle.core.GradleCore;
-
 public class GradleArgumentsPreferencesPage extends PreferencePageWithSections {
 
 	public GradleArgumentsPreferencesPage() {

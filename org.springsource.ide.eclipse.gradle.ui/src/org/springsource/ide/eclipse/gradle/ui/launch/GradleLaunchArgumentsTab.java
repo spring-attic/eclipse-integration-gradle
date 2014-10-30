@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Image;
  * A launch configuration tab that displays and edits program arguments,
  * and VM arguments for the Gradle task launch UI.
  */
+@SuppressWarnings("restriction")
 public class GradleLaunchArgumentsTab extends LaunchTabWithSections {
 	
 	protected List<LaunchTabSection> createSections() {
@@ -41,10 +42,8 @@ public class GradleLaunchArgumentsTab extends LaunchTabWithSections {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getImage()
 	 */
-	@SuppressWarnings("restriction")
 	public Image getImage() {
 		return JavaDebugImages.get(JavaDebugImages.IMG_VIEW_ARGUMENTS_TAB);
 	}	
-	
 }
 

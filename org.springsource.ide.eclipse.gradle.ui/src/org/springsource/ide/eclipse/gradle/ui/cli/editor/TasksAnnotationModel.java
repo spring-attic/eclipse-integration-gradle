@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.cli.editor;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -24,7 +26,6 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 
 /**
@@ -93,7 +94,7 @@ public class TasksAnnotationModel extends AnnotationModel {
 	}
 
 	private void updateAnnotations() {
-		EclipseProject project = index.getProject();
+		StsEclipseProject project = index.getProject();
 		if (project == null) {
 			if (index.isInitialized()) {
 				scheduleUpdate();

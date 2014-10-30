@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.util;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,7 +28,6 @@ import org.gradle.api.Project;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.GradleTask;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 
@@ -57,7 +58,7 @@ public class GradleProjectIndex {
 	};
 	
 	private boolean initialized = false;
-	private EclipseProject project = null;
+	private StsEclipseProject project = null;
 	private Map<String, GradleTask> aggregateTasks = Collections.emptyMap();
 	private List<GradleTask> sortedAggregateTasks = Collections.emptyList();
 	private List<GradleProject> sortedProjects = Collections.emptyList();
@@ -99,7 +100,7 @@ public class GradleProjectIndex {
 		}
 	}
 	
-	private void initializeIndexRequest(final EclipseProject project) {
+	private void initializeIndexRequest(final StsEclipseProject project) {
 		if (indexRequest != null && !indexRequest.isDone()) {
 			indexRequest.cancel(true);
 		}
@@ -126,7 +127,7 @@ public class GradleProjectIndex {
 		}
 	}
 	
-	private void initializeIndex(EclipseProject project) {
+	private void initializeIndex(StsEclipseProject project) {
 		lock.writeLock().lock();
 		try {
 			this.project = project;
@@ -149,9 +150,9 @@ public class GradleProjectIndex {
 		}
 	}
 	
-	private static void collectAggregateTasks(EclipseProject model, Map<String, GradleTask> tasksMap, List<GradleProject> sortedProjects) {
-		DomainObjectSet<? extends EclipseProject> projects = model.getChildren();
-		for (EclipseProject p : projects) {
+	private static void collectAggregateTasks(StsEclipseProject model, Map<String, GradleTask> tasksMap, List<GradleProject> sortedProjects) {
+		DomainObjectSet<? extends StsEclipseProject> projects = model.getChildren();
+		for (StsEclipseProject p : projects) {
 			collectAggregateTasks(p, tasksMap, sortedProjects);
 		}
 		GradleProject project = model.getGradleProject();
@@ -171,7 +172,7 @@ public class GradleProjectIndex {
 		}
 	}
 	
-	public EclipseProject getProject() {
+	public StsEclipseProject getProject() {
 		lock.readLock().lock();
 		try {
 			return project;

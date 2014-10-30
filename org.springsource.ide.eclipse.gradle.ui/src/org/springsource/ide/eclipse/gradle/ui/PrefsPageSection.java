@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui;
 
-import org.eclipse.swt.widgets.Composite;
 import org.springsource.ide.eclipse.gradle.ui.util.PageSection;
 
 

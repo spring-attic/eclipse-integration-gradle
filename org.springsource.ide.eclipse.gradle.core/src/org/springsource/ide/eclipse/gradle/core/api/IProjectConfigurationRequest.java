@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.api;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import org.eclipse.core.resources.IProject;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 
 /**
  * Request for configuring a project. Allows client s to access Gradle and Eclipse model of the project 
@@ -21,7 +22,7 @@ import org.gradle.tooling.model.eclipse.EclipseProject;
  */
 public interface IProjectConfigurationRequest {
 	
-	EclipseProject getGradleModel();
+	StsEclipseProject getGradleModel();
 	
 	IProject getProject();
 

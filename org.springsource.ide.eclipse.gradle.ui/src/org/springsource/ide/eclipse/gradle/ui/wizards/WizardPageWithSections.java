@@ -24,7 +24,6 @@ import org.springsource.ide.eclipse.gradle.core.util.expression.ValueListener;
 import org.springsource.ide.eclipse.gradle.core.validators.CompositeValidator;
 import org.springsource.ide.eclipse.gradle.core.validators.ValidationResult;
 import org.springsource.ide.eclipse.gradle.ui.IPageWithSections;
-import org.springsource.ide.eclipse.gradle.ui.PrefsPageSection;
 import org.springsource.ide.eclipse.gradle.ui.util.PageSection;
 
 

@@ -43,13 +43,13 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
  */
 public abstract class GradleModelProvider {
 	
-	private static final boolean DEBUG = false;
+//	private static final boolean DEBUG = false;
 
-	private static void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
-		}
-	}
+//	private static void debug(String string) {
+//		if (DEBUG) {
+//			System.out.println(string);
+//		}
+//	}
 
 	/**
 	 * This indicates the type of models currently contained in the model cache. Set to null

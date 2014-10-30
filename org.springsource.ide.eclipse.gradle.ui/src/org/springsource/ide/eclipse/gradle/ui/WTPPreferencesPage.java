@@ -56,7 +56,6 @@ public class WTPPreferencesPage extends PreferencePage implements IWorkbenchPref
 
 	@Override
 	protected Control createContents(Composite parent) {
-        GridDataFactory grabHorizontal = GridDataFactory.fillDefaults().grab(true, false);
         GridDataFactory grabBoth = GridDataFactory.fillDefaults().grab(true, true);
 		
 		Composite page = new Composite(parent, SWT.NONE);

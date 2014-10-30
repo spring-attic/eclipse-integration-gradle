@@ -19,6 +19,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 /**
  * @author Kris De Volder
  */
+@SuppressWarnings("restriction")
 public class RefreshAction extends Action {
 	
 	private GradleTasksView owner;
@@ -26,7 +27,6 @@ public class RefreshAction extends Action {
 	/**
 	 * Constructs a new action.
 	 */
-	@SuppressWarnings("restriction")
 	public RefreshAction(GradleTasksView owner) {
 		super("Refresh");
 		setDescription("Refresh Tasks");

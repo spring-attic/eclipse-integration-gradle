@@ -113,8 +113,6 @@ public class GradleProject {
 	 */
 	private GenericModelProvider<ProjectPublications> publicationsModelProvider;
 	
-	private GenericModelProvider<StsEclipseProject> stsEclipseModelProvider;
-	
 	/**
 	 * The class path container for this project is created lazily.
 	 */
@@ -529,19 +527,10 @@ public class GradleProject {
 		return null; 
 	}
 
-	public EclipseProject getGradleModel() throws FastOperationFailedException, CoreException {
-		return getGradleModel(EclipseProject.class);
+	public StsEclipseProject getGradleModel() throws FastOperationFailedException, CoreException {
+		return getGradleModel(StsEclipseProject.class);
 	}
-	
-	public StsEclipseProject getStsGradleModel(IProgressMonitor mon) throws Exception {
-		synchronized (this) {
-			if (stsEclipseModelProvider==null) {
-				stsEclipseModelProvider = new GenericModelProvider<StsEclipseProject>(this, StsEclipseProject.class);
-			}
-		}
-		return stsEclipseModelProvider.get(mon);
-	}
-	
+		
 	public ProjectPublications getPublications(IProgressMonitor mon) throws Exception {
 		synchronized (this) {
 			if (publicationsModelProvider==null) {
@@ -596,7 +585,7 @@ public class GradleProject {
 	 * {@link IGradleModelListener}.
 	 * @throws CoreException 
 	 */
-	public EclipseProject requestGradleModel() throws FastOperationFailedException, CoreException {
+	public StsEclipseProject requestGradleModel() throws FastOperationFailedException, CoreException {
 		try {
 			return getGradleModel();
 		} catch (FastOperationFailedException e) {
@@ -656,8 +645,8 @@ public class GradleProject {
 		}
 	}
 		
-	public EclipseProject getGradleModel(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-		return getGradleModel(EclipseProject.class, monitor);
+	public StsEclipseProject getGradleModel(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+		return getGradleModel(StsEclipseProject.class, monitor);
 	}
 	
 	public HierarchicalEclipseProject getSkeletalGradleModel() throws FastOperationFailedException, CoreException {
@@ -686,7 +675,6 @@ public class GradleProject {
 		if (provider!=null) {
 			provider.invalidate();
 		}
-		stsEclipseModelProvider = null;
 		publicationsModelProvider = null;
 	}
 
@@ -800,9 +788,9 @@ public class GradleProject {
 	
 //	private boolean isLessDetailed(HierarchicalEclipseProject lessModel, HierarchicalEclipseProject moreModel) {
 //		if (lessModel instanceof HierarchicalEclipseProject) {
-//			return moreModel instanceof EclipseProject;
+//			return moreModel instanceof StsEclipseProject;
 //		}
-//		//If we get here, lessModel can only be a EclipseProject, so it can't be less detailed than any other model
+//		//If we get here, lessModel can only be a StsEclipseProject, so it can't be less detailed than any other model
 //		return false;
 //	}
 
@@ -830,12 +818,12 @@ public class GradleProject {
 //		System.out.println("<<<<<<<< dependencies for "+getName()+"<<<<<<<<<<<<<<");
 //	}
 //
-//	private static void printDependencyGraph(int i, EclipseProject project) {
+//	private static void printDependencyGraph(int i, StsEclipseProject project) {
 //		for (int j = 0; j < i; j++) {
 //			System.out.print("  ");
 //		}
 //		System.out.println(GradleImportOperation.getDefaultEclipseName(project));
-//		for (EclipseProjectDependency dep : project.getProjectDependencies().getAll()) {
+//		for (StsEclipseProjectDependency dep : project.getProjectDependencies().getAll()) {
 //			printDependencyGraph(i+1, dep.getTargetProject());
 //		}
 //	}
@@ -879,7 +867,7 @@ public class GradleProject {
 	public DomainObjectSet<? extends GradleTask> getTasks(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		monitor.beginTask("Retrieve tasks for "+getDisplayName(), 1);
 		try {
-			EclipseProject model = getGradleModel(new SubProgressMonitor(monitor, 1));
+			StsEclipseProject model = getGradleModel(new SubProgressMonitor(monitor, 1));
 			return GradleProject.getTasks(model);
 		} finally {
 			monitor.done();
@@ -890,7 +878,7 @@ public class GradleProject {
 	 * @return a set of "task path" strings obtained from this project and all subprojects.
 	 */
 	public Set<String> getAllTasks() throws FastOperationFailedException, CoreException {
-		EclipseProject model = getGradleModel();
+		StsEclipseProject model = getGradleModel();
 		return getAllTasks(model);
 	}
 
@@ -898,41 +886,41 @@ public class GradleProject {
 	 * @return a set of "task path" strings obtained from this project and all subprojects.
 	 */
 	public Set<String> getAllTasks(IProgressMonitor mon) throws OperationCanceledException, CoreException {
-		EclipseProject model = getGradleModel(mon);
+		StsEclipseProject model = getGradleModel(mon);
 		return getAllTasks(model);
 	}
 	
-	private static Set<String> getAllTasks(EclipseProject model) {
+	private static Set<String> getAllTasks(StsEclipseProject model) {
 		Set<String> result = new HashSet<String>();
 		collectAllTasks(model, result);
 		return result;
 	}
 
-	private static void collectAllTasks(EclipseProject model, Set<String> result) {
+	private static void collectAllTasks(StsEclipseProject model, Set<String> result) {
 		DomainObjectSet<? extends GradleTask> tasks = getTasks(model);
 		for (GradleTask t : tasks) {
 			result.add(t.getPath());
 		}
-		DomainObjectSet<? extends EclipseProject> projects = model.getChildren();
-		for (EclipseProject p : projects) {
+		DomainObjectSet<? extends StsEclipseProject> projects = model.getChildren();
+		for (StsEclipseProject p : projects) {
 			collectAllTasks(p, result);
 		}
 	}
 
-	public static DomainObjectSet<? extends GradleTask> getTasks(EclipseProject model) {
+	public static DomainObjectSet<? extends GradleTask> getTasks(StsEclipseProject model) {
 		return model.getGradleProject().getTasks();
 //		return model.getTasks();
 	}
 	
-	public static Map<String, GradleTask> getAggregateTasks(EclipseProject model) {
+	public static Map<String, GradleTask> getAggregateTasks(StsEclipseProject model) {
 		Map<String, GradleTask> tasksMap = new HashMap<String, GradleTask>();
 		collectAggregateTasks(model, tasksMap);
 		return tasksMap;
 	}
 	
-	private static void collectAggregateTasks(EclipseProject model, Map<String, GradleTask> tasksMap) {
-		DomainObjectSet<? extends EclipseProject> projects = model.getChildren();
-		for (EclipseProject p : projects) {
+	private static void collectAggregateTasks(StsEclipseProject model, Map<String, GradleTask> tasksMap) {
+		DomainObjectSet<? extends StsEclipseProject> projects = model.getChildren();
+		for (StsEclipseProject p : projects) {
 			collectAggregateTasks(p, tasksMap);
 		}
 		DomainObjectSet<? extends GradleTask> tasks = getTasks(model);

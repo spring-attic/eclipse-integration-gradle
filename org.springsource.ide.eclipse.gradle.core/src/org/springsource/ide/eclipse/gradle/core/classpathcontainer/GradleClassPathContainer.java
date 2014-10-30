@@ -152,7 +152,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		GradleDependencyComputer dependencyComputer = project.getDependencyComputer();
 		debug("getClassPathEntries called");
 		try {
-			StsEclipseProject gradleModel = project.getStsGradleModel(new NullProgressMonitor());
+			StsEclipseProject gradleModel = project.getGradleModel();
 			if (gradleModel!=null) {
 				if (oldModel==gradleModel) {
 					IClasspathEntry[] persisted = getPersistedEntries();
@@ -166,8 +166,10 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 					oldModel = gradleModel;
 					return entries;
 			}
-		} catch (Exception e) {
+		} catch (CoreException e) {
 			GradleCore.log(e);
+		} catch (FastOperationFailedException e) {
+			debug("Failed to quickly get Gradle model");
 		}
 		//We reach here if we could not quickly get the container contents from Gradle we have one more thing to try
 		IClasspathEntry[] persistedEntries = getPersistedEntries();

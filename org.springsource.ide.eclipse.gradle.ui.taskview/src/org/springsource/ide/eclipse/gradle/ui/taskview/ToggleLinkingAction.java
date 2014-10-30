@@ -11,8 +11,6 @@
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jface.action.Action;
 
 /**
  * @author Kris De Volder
