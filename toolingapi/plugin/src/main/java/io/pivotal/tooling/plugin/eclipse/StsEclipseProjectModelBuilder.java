@@ -19,6 +19,8 @@ import org.gradle.api.internal.artifacts.result.DefaultResolvedArtifactResult;
 import org.gradle.api.specs.Specs;
 import org.gradle.language.base.artifact.SourcesArtifact;
 import org.gradle.language.java.artifact.JavadocArtifact;
+import org.gradle.plugins.ide.eclipse.model.EclipseClasspath;
+import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.internal.tooling.EclipseModelBuilder;
 import org.gradle.plugins.ide.internal.tooling.GradleProjectBuilder;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProject;
@@ -33,6 +35,8 @@ import org.gradle.tooling.provider.model.ToolingModelBuilder;
 import java.util.*;
 
 class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
+    private static final String PROJECT_EXTERNAL_CONF = "projectExternal";
+
     private DefaultStsEclipseProject result, root;
     private Project currentProject;
 
@@ -72,41 +76,51 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
         Map<String, DefaultStsEclipseExternalDependency> externalDependenciesById = new HashMap<String, DefaultStsEclipseExternalDependency>();
 
-        List<ComponentIdentifier> binaryDependencies = new ArrayList<ComponentIdentifier>();
-        for (DependencyResult dep : project.getConfigurations().getByName("compile").getIncoming().getResolutionResult().getAllDependencies()) {
-            if(dep instanceof ResolvedDependencyResult && dep.getRequested() instanceof DefaultModuleComponentSelector)
-                binaryDependencies.add(((ResolvedDependencyResult) dep).getSelected().getId());
-        }
+        EclipseModel eclipseModel = project.getExtensions().getByType(EclipseModel.class);
 
-        List<String> binaryDependenciesAsStrings = new ArrayList<String>();
-        for (ComponentIdentifier binaryDependency : binaryDependencies)
-            binaryDependenciesAsStrings.add(binaryDependency.toString());
+        for (Configuration conf : eclipseModel.getClasspath().getPlusConfigurations()) {
+            List<ComponentIdentifier> binaryDependencies = new ArrayList<ComponentIdentifier>();
+            for (DependencyResult dep : conf.getIncoming().getResolutionResult().getAllDependencies()) {
+                if (dep instanceof ResolvedDependencyResult && dep.getRequested() instanceof DefaultModuleComponentSelector)
+                    binaryDependencies.add(((ResolvedDependencyResult) dep).getSelected().getId());
+            }
 
-        Set<ComponentArtifactsResult> artifactsResults = project.getDependencies().createArtifactResolutionQuery()
-                .forComponents(binaryDependencies)
-                .withArtifacts(JvmLibrary.class, SourcesArtifact.class, JavadocArtifact.class)
-                .execute()
-                .getResolvedComponents();
+            List<String> binaryDependenciesAsStrings = new ArrayList<String>();
+            for (ComponentIdentifier binaryDependency : binaryDependencies)
+                binaryDependenciesAsStrings.add(binaryDependency.toString());
 
-        for (ResolvedArtifact artifact : project.getConfigurations().getByName("compile").getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL)) {
-            ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
+            Set<ComponentArtifactsResult> artifactsResults = project.getDependencies().createArtifactResolutionQuery()
+                    .forComponents(binaryDependencies)
+                    .withArtifacts(JvmLibrary.class, SourcesArtifact.class, JavadocArtifact.class)
+                    .execute()
+                    .getResolvedComponents();
 
-            if(binaryDependenciesAsStrings.contains(id.toString())) {
-                externalDependenciesById.put(id.toString(), new DefaultStsEclipseExternalDependency()
-                        .setFile(artifact.getFile())
-                        .setModuleVersion(new DefaultModuleVersionIdentifier(id.getGroup(), id.getName(), id.getVersion())));
+            for (ResolvedArtifact artifact : conf.getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL)) {
+                ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
+
+                if (binaryDependenciesAsStrings.contains(id.toString())) {
+                    externalDependenciesById.put(id.toString(), new DefaultStsEclipseExternalDependency()
+                            .setFile(artifact.getFile())
+                            .setModuleVersion(new DefaultModuleVersionIdentifier(id.getGroup(), id.getName(), id.getVersion())));
+                }
+            }
+
+            for (ComponentArtifactsResult artifactResult : artifactsResults) {
+                DefaultStsEclipseExternalDependency externalDependency = externalDependenciesById.get(artifactResult.getId().toString());
+                for (ArtifactResult sourcesResult : artifactResult.getArtifacts(SourcesArtifact.class)) {
+                    if (sourcesResult instanceof DefaultResolvedArtifactResult)
+                        externalDependency.setSource(((DefaultResolvedArtifactResult) sourcesResult).getFile());
+                }
+                for (ArtifactResult javadocResult : artifactResult.getArtifacts(JavadocArtifact.class)) {
+                    if (javadocResult instanceof DefaultResolvedArtifactResult)
+                        externalDependency.setJavadoc(((DefaultResolvedArtifactResult) javadocResult).getFile());
+                }
             }
         }
 
-        for (ComponentArtifactsResult artifactResult : artifactsResults) {
-            DefaultStsEclipseExternalDependency externalDependency = externalDependenciesById.get(artifactResult.getId().toString());
-            for (ArtifactResult sourcesResult : artifactResult.getArtifacts(SourcesArtifact.class)) {
-                if(sourcesResult instanceof DefaultResolvedArtifactResult)
-                    externalDependency.setSource(((DefaultResolvedArtifactResult) sourcesResult).getFile());
-            }
-            for (ArtifactResult javadocResult : artifactResult.getArtifacts(JavadocArtifact.class)) {
-                if(javadocResult instanceof DefaultResolvedArtifactResult)
-                    externalDependency.setJavadoc(((DefaultResolvedArtifactResult) javadocResult).getFile());
+        for(Configuration conf: eclipseModel.getClasspath().getMinusConfigurations()) {
+            for (ResolvedArtifact artifact : conf.getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL)) {
+                externalDependenciesById.remove(artifact.getModuleVersion().getId().toString());
             }
         }
 
@@ -119,7 +133,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
         EclipseToolingModelPluginExtension ext = (EclipseToolingModelPluginExtension) project.getExtensions().getByName("eclipseToolingModel");
 
-        Configuration projectExternal = project.getConfigurations().create("projectExternal");
+        Configuration projectExternal = project.getConfigurations().create(PROJECT_EXTERNAL_CONF);
         projectExternal.getDependencies().add(new DefaultExternalModuleDependency(group,
                 name, ext.getEquivalentBinaryVersion()).setTransitive(false));
 

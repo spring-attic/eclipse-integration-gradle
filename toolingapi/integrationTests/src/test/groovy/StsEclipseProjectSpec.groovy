@@ -38,6 +38,14 @@ class StsEclipseProjectSpec extends Specification {
         root.root == root
     }
 
+    def 'a project that does not have the java plugin applied has an empty classpath'() {
+        when:
+        root // only root's subprojects have the java plugin applied
+
+        then:
+        root.classpath.empty
+    }
+
     def 'the root project contains a fully resolved hierarchy of all child projects'() {
         when:
         def a = project('a')
@@ -45,8 +53,7 @@ class StsEclipseProjectSpec extends Specification {
 
         then:
         root.gradleProject.name == 'test'
-        root.children.collect { it.gradleProject.name }.sort() == ['a','b']
-        root.classpath.empty
+        root.children.collect { it.gradleProject.name }.sort() == ['a','b','minus','plus']
 
         a.parent == root
         b.parent == root
@@ -64,7 +71,7 @@ class StsEclipseProjectSpec extends Specification {
 
         then:
         b.children.size() == 0
-        b.classpath.size() == 6 // 1 first order dependency and 5 transitives through 'jackson-dataformat-xml'
+        b.classpath.size() == 8 // 1 first order dependency and 7 transitives through 'jackson-dataformat-xml' (including one test dep)
         b.classpath.collect { it.gradleModuleVersion.name }.contains('jackson-dataformat-xml')
     }
 
@@ -101,6 +108,23 @@ class StsEclipseProjectSpec extends Specification {
         b.hasPlugin(JavaPlugin)
         b.hasPlugin(MavenPublishPlugin)
         !root.hasPlugin(JavaPlugin)
+    }
+
+    def 'minusConfigurations results in resolution of all configurations except for those specified'() {
+        when:
+        def minus = project('minus')
+
+        then:
+        minus.classpath.size() == 2
+        minus.classpath.collect { it.gradleModuleVersion.name }.sort() == ['hamcrest-core','junit']
+    }
+
+    def 'plusConfigurations results in resolution of additional configurations'() {
+        when:
+        def plus = project('plus')
+
+        then:
+        plus.classpath.size() == 2
     }
 
     def project(String name) { root.children.find { it.gradleProject.name == name } }

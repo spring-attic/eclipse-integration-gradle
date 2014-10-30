@@ -1,1 +1,1 @@
-include 'a', 'b'
+include 'a', 'b', 'minus', 'plus'

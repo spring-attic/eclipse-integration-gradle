@@ -1,0 +1,14 @@
+apply plugin: 'eclipse'
+
+configurations { myconf }
+
+eclipse {
+    classpath {
+        plusConfigurations = [configurations.myconf, configurations.testRuntime]
+    }
+}
+
+dependencies {
+    compile 'com.google.guava:guava:18.0'
+    myconf 'commons-logging:commons-logging:1.1.3'
+}

@@ -1,0 +1,12 @@
+apply plugin: 'eclipse'
+
+eclipse {
+    classpath {
+        minusConfigurations = [configurations.compile]
+    }
+}
+
+dependencies {
+    compile 'com.google.guava:guava:18.0'
+    testCompile 'junit:junit:4.+'
+}

@@ -1,3 +1,4 @@
 dependencies {
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.4.1'
+    testCompile 'junit:junit:4.+'
 }
