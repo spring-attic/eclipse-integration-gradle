@@ -336,9 +336,9 @@ public abstract class GradleTest extends TestCase {
 	public static File extractJavaSample(final String projectName)
 			throws IOException, Exception, URISyntaxException {
 		final File targetLocation = new File(TestUtils.createTempDirectory(), projectName);
-		DownloadManager.getDefault().doWithDownload(new URI("http://services.gradle.org/distributions/gradle-1.0-all.zip"), new DownloadRequestor() {
+		DownloadManager.getDefault().doWithDownload(new URI("http://services.gradle.org/distributions/gradle-2.1-all.zip"), new DownloadRequestor() {
 			public void exec(File downloadedFile) throws Exception {
-				ZipFileUtil.unzip(downloadedFile.toURI().toURL(), targetLocation, "gradle-1.0/samples/java/"+projectName);
+				ZipFileUtil.unzip(downloadedFile.toURI().toURL(), targetLocation, "gradle-2.1/samples/java/"+projectName);
 			}
 		});
 		return targetLocation;

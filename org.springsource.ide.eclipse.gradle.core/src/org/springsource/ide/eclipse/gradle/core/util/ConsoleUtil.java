@@ -66,18 +66,15 @@ public class ConsoleUtil {
 	private static final int MAX_SIZE = 5;
 
 	public static Color getOutputColor() {
-		return new Color(Display.getCurrent(), 0, 0, 0);
-//		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_OUT_COLOR);
+		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_OUT_COLOR);
 	}
 	
 	public static Color getErrorColor() {
-		return new Color(Display.getCurrent(), 255, 0, 0);
-//		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_ERR_COLOR);
+		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_ERR_COLOR);
 	}
 	
 	public static Color getInputColor() {
-		return new Color(Display.getCurrent(), 0, 0, 0);
-//		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_IN_COLOR);
+		return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CONSOLE_SYS_IN_COLOR);
 	}
 	
 	private static LinkedList<IOConsole> history = new LinkedList<IOConsole>();

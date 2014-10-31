@@ -48,7 +48,6 @@ import org.gradle.tooling.LongRunningOperation;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.GradleTask;
 import org.gradle.tooling.model.eclipse.EclipseLinkedResource;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.EclipseSourceDirectory;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
@@ -102,7 +101,7 @@ public class GradleProject {
 	
 	/**
 	 * The model provider is reponsible for obtaining and cahching models from the tooling API for
-	 * models of type {@link HierarchicalEclipseProject} and {@link EclipseProject}
+	 * models of type {@link HierarchicalEclipseProject} and {@link StsEclipseProject}
 	 */
 	private GroupedModelProvider modelProvider = null;
 	

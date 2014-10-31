@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -37,7 +39,7 @@ import org.springsource.ide.eclipse.gradle.core.util.JoinableContinuation;
  * An object that is responsible of obtaining a 'model' from Gradle for a given project. 
  * It is generic in the sense that it can be used to build models of different types.
  * <p>
- * Use this provider to build models of types other than {@link HierarchicalEclipseProject} and {@link EclipseProject}.
+ * Use this provider to build models of types other than {@link HierarchicalEclipseProject} and {@link StsEclipseProject}.
  * For those model types use the old {@link GradleModelProvider} and {@link GroupedModelProvider} classes which
  * have been optimized to build models more efficiently for groups of related projects.
  */
