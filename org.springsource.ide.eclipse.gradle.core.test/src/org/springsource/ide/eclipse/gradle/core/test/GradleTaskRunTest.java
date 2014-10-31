@@ -27,6 +27,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix.MakeTypeAbstractOperation;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
@@ -683,22 +684,29 @@ public class GradleTaskRunTest extends GradleTest {
 		class Result {
 			int minorVersion;
 			Throwable error;
-			public Result(int mv) {
-				minorVersion = mv;
+			private int majorVersion;
+			public Result(int majorVersion, int minorVersion) {
+				this.majorVersion = majorVersion;
+				this.minorVersion = minorVersion;
 			}
 			@Override
 			public String toString() {
-				return "Release 1."+minorVersion+" = "+ ((error==null) ? "OK" : ExceptionUtil.getMessage(error));
+				return "Release "+majorVersion+"."+minorVersion+" = "+ ((error==null) ? "OK" : ExceptionUtil.getMessage(error));
 			}
 		}
-		int lo = 0; int hi = 5;
-		Result[] results = new Result[hi-lo+1];
+		String[] versions = {  
+				"1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "1.10", "1.11", "1.12",
+				"2.0", "2.1"
+		};
+		Result[] results = new Result[versions.length];
 		boolean failed = false;
 		for (int i = 0; i < results.length; i++) {
-			int minorVersion = lo+i;
-			results[i] = new Result(minorVersion);
+			String[] parts = versions[i].split("\\.");
+			int majorVersion = Integer.parseInt(parts[0]);
+			int minorVersion = Integer.parseInt(parts[1]);
+			results[i] = new Result(majorVersion, minorVersion);
 			try {
-				doSimpleTaskWithRelease(minorVersion);
+				doSimpleTaskWithRelease(majorVersion, minorVersion);
 			} catch (Throwable e) {
 				failed = true;
 				e.printStackTrace();
@@ -714,8 +722,7 @@ public class GradleTaskRunTest extends GradleTest {
 		}
 	}
 	
-	public void doSimpleTaskWithRelease(int minorVersion) throws Exception {
-		int majorVersion = 1;
+	public void doSimpleTaskWithRelease(int majorVersion, int minorVersion) throws Exception {
 		GradleCore.getInstance().getPreferences().setDistribution(Distributions.releaseURI(majorVersion, minorVersion));
 
 		String name = "releaseTest"+majorVersion+"_"+minorVersion;
