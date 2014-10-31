@@ -29,7 +29,6 @@
 							<!-- Not really sure why, but default tasks don't get executed automatically when
 							  called through maven. So we have to pass default tasks explicitly as arguments-->
 							<arguments>
-							   <argument>publish</argument>
 							   <argument>updateLibs:updateLibs</argument>
 							</arguments>
 							<outputFile>${basedir}/gradle.out</outputFile>
