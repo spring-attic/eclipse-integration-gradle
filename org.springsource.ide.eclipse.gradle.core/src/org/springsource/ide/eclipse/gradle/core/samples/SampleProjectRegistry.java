@@ -75,7 +75,7 @@ public class SampleProjectRegistry {
 	private URI distribution;
 	{
 		try {
-			distribution = new URI("http://services.gradle.org/distributions/gradle-1.0-rc-2-all.zip");
+			distribution = new URI("http://services.gradle.org/distributions/gradle-2.1-all.zip");
 		} catch (URISyntaxException e) {
 			throw new Error(e);
 		}
