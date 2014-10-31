@@ -24,8 +24,10 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<workingDirectory>${basedir}</workingDirectory>
+							<workingDirectory>${basedir}/../toolingapi</workingDirectory>
 							<executable>${basedir}/../toolingapi/gradlew</executable>
+							<arguments>
+							</arguments>
 							<outputFile>${basedir}/gradle.out</outputFile>
 						</configuration>
 					</execution>
