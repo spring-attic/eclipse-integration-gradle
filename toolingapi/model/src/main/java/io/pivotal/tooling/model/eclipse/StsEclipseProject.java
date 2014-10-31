@@ -2,8 +2,10 @@ package io.pivotal.tooling.model.eclipse;
 
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.ExternalDependency;
+import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
+import org.gradle.tooling.model.gradle.GradlePublication;
 
 public interface StsEclipseProject extends HierarchicalEclipseProject {
     /**
@@ -36,7 +38,7 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
      * The set includes ALL binary transitive dependencies, including those that are derived from
      * project dependencies.
      */
-    DomainObjectSet<ExternalDependency> getClasspath();
+    DomainObjectSet<? extends ExternalDependency> getClasspath();
 
     /**
      *
@@ -44,6 +46,8 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
      * used to select a binary artifact is governed by <code>eclipseToolingModel { equivalentBinaryVersion = '...' }</code>
      */
     ExternalDependency getExternalEquivalent();
+
+    DomainObjectSet<? extends GradleModuleVersion> getPublications();
 
     boolean hasPlugin(Class<?> type);
 

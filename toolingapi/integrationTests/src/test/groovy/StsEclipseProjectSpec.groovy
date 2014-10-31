@@ -127,5 +127,13 @@ class StsEclipseProjectSpec extends Specification {
         plus.classpath.size() == 2
     }
 
+    def 'project has a list of publications'() {
+        when:
+        def a = project('a')
+
+        then:
+        a.publications.collect { it.name } == ['a']
+    }
+
     def project(String name) { root.children.find { it.gradleProject.name == name } }
 }

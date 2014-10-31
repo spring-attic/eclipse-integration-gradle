@@ -15,11 +15,12 @@ import org.gradle.api.internal.artifacts.DefaultModuleVersionIdentifier;
 import org.gradle.api.internal.artifacts.component.DefaultModuleComponentIdentifier;
 import org.gradle.api.internal.artifacts.component.DefaultModuleComponentSelector;
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency;
+import org.gradle.api.internal.artifacts.ivyservice.projectmodule.ProjectPublication;
+import org.gradle.api.internal.artifacts.ivyservice.projectmodule.ProjectPublicationRegistry;
 import org.gradle.api.internal.artifacts.result.DefaultResolvedArtifactResult;
 import org.gradle.api.specs.Specs;
 import org.gradle.language.base.artifact.SourcesArtifact;
 import org.gradle.language.java.artifact.JavadocArtifact;
-import org.gradle.plugins.ide.eclipse.model.EclipseClasspath;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.internal.tooling.EclipseModelBuilder;
 import org.gradle.plugins.ide.internal.tooling.GradleProjectBuilder;
@@ -42,10 +43,15 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
     private GradleProjectBuilder gradleProjectBuilder = new GradleProjectBuilder();
     private DefaultGradleProject rootGradleProject;
+    private ProjectPublicationRegistry publicationRegistry;
 
     private EclipseModelBuilder eclipseModelBuilder = new EclipseModelBuilder(gradleProjectBuilder);
 
     private Map<String, GradleModuleVersion> moduleVersionByProjectName = new HashMap<String, GradleModuleVersion>();
+
+    public StsEclipseProjectModelBuilder(ProjectPublicationRegistry publicationRegistry) {
+        this.publicationRegistry = publicationRegistry;
+    }
 
     @Override
     public boolean canBuild(String modelName) {
@@ -183,6 +189,10 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
         DefaultEclipseProject defaultEclipseProject = eclipseModelBuilder.buildAll(HierarchicalEclipseProject.class.getName(), project);
 
+        List<DefaultGradleModuleVersion> publications = new ArrayList<DefaultGradleModuleVersion>();
+        for (ProjectPublication publication : publicationRegistry.getPublications(project.getPath()))
+            publications.add(new DefaultGradleModuleVersion(publication.getId()));
+
         eclipseProject
                 .setHierarchicalEclipseProject(defaultEclipseProject)
                 .setGradleProject(rootGradleProject.findByPath(project.getPath()))
@@ -190,7 +200,8 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
                 .setExternalEquivalent(resolveExternalDependencyEquivalent(project))
                 .setClasspath(buildExternalDependencies(project))
                 .setPlugins(plugins(project))
-                .setRoot(root);
+                .setRoot(root)
+                .setPublications(publications);
 
         for (DefaultStsEclipseProject child : children)
             child.setParent(eclipseProject);

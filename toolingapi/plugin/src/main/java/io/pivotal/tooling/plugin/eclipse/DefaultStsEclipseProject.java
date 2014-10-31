@@ -3,6 +3,7 @@ package io.pivotal.tooling.plugin.eclipse;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseLinkedResource;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProject;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseSourceDirectory;
+import org.gradle.tooling.internal.gradle.DefaultGradleModuleVersion;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
 
 import java.io.File;
@@ -19,6 +20,7 @@ public class DefaultStsEclipseProject implements Serializable {
     private List<String> plugins;
     private List<DefaultStsEclipseProjectDependency> projectDependencies;
     private DefaultStsEclipseProject root;
+    private List<DefaultGradleModuleVersion> publications;
 
     public List<DefaultStsEclipseExternalDependency> getClasspath() { return classpath; }
 
@@ -55,6 +57,8 @@ public class DefaultStsEclipseProject implements Serializable {
     public boolean hasPlugin(Class<?> pluginClass) { return plugins.contains(pluginClass.getName()); }
 
     public DefaultStsEclipseProject getRoot() { return root; }
+
+    public List<DefaultGradleModuleVersion> getPublications() { return publications; }
 
     public DefaultEclipseProject getHierarchicalEclipseProject() { return hierarchicalEclipseProject; }
 
@@ -95,6 +99,11 @@ public class DefaultStsEclipseProject implements Serializable {
 
     public DefaultStsEclipseProject setRoot(DefaultStsEclipseProject root) {
         this.root = root;
+        return this;
+    }
+
+    public DefaultStsEclipseProject setPublications(List<DefaultGradleModuleVersion> publications) {
+        this.publications = publications;
         return this;
     }
 }
