@@ -227,7 +227,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	
 	public boolean isInitialized() {
 		try {
-			project.getGradleModel(EclipseProject.class);
+			project.getGradleModel(StsEclipseProject.class);
 			return true;
 		} catch (FastOperationFailedException e) {
 		} catch (CoreException e) {

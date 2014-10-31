@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.test;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.gradle.tooling.model.eclipse.EclipseProject;
@@ -119,7 +121,7 @@ public class GradleProjectTest extends GradleTest {
 		//Forcing more detailed model should cause another round of update events.
 		projects[2].getGradleModel(new NullProgressMonitor()); 
 		for (TestProjectListener listener : listeners) {
-			listener.checkExpected(EclipseProject.class, 2);
+			listener.checkExpected(StsEclipseProject.class, 2);
 		}
 		
 	}

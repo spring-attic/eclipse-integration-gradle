@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
+import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -44,7 +46,7 @@ public class TaskLabelProvider extends GradleLabelProvider
 	private Font taskNameFont = null;
 	
 	public Image getColumnImage(Object element, int columnIndex) {
-		if (element instanceof EclipseProject) {
+		if (element instanceof StsEclipseProject) {
 			return projectLabelProvider.getColumnImage(element, columnIndex);
 		} else if (element instanceof Task) {
 			return columnIndex==0? GradleUI.getDefault().getImageRegistry().get(GradleUI.IMAGE_TARGET) : null;
@@ -53,7 +55,7 @@ public class TaskLabelProvider extends GradleLabelProvider
 	}
 
 	public String getColumnText(Object element, int columnIndex) {
-		if (element instanceof EclipseProject) {
+		if (element instanceof StsEclipseProject) {
 			return projectLabelProvider.getColumnText(element, columnIndex);
 		} else if (element instanceof Task) {
 			return getColumnText((Task)element, columnIndex);
