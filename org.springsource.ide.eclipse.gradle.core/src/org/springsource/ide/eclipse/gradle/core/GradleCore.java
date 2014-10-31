@@ -24,18 +24,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
-import org.gradle.tooling.model.gradle.GradlePublication;
-import org.gradle.tooling.model.gradle.ProjectPublications;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleAPIProperties;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -216,16 +214,16 @@ public class GradleCore extends Plugin {
 			for (GradleProject gp : projects) {
 				IProject p = gp.getProject();
 				if (p!=null) { //only projects that exist in the workspace are interesting.
-					ProjectPublications publications = gp.getPublications(new SubProgressMonitor(mon, 1));
-					for (GradlePublication pub : publications.getPublications()) {
-						if (matches(pub.getId(), gEntry.getGradleModuleVersion())) {
+					for (GradleModuleVersion pub : gp.getGradleModel().getPublications()) {
+						if (matches(pub, gEntry.getGradleModuleVersion()))
 							return p;
-						}
 					}
 					mon.worked(1);
 				}
 			}
-		} catch (Throwable e) {
+		} catch (CoreException e) {
+			GradleCore.log(e);
+		} catch (FastOperationFailedException e) {
 			GradleCore.log(e);
 		} finally {
 			mon.done();

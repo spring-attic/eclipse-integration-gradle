@@ -52,7 +52,6 @@ import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.EclipseSourceDirectory;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
-import org.gradle.tooling.model.gradle.ProjectPublications;
 import org.osgi.framework.Bundle;
 import org.springsource.ide.eclipse.gradle.core.GradleModelProvider.GroupedModelProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
@@ -106,12 +105,6 @@ public class GradleProject {
 	 * models of type {@link HierarchicalEclipseProject} and {@link EclipseProject}
 	 */
 	private GroupedModelProvider modelProvider = null;
-	
-	/**
-	 * The model provider is reponsible for obtaining and cahching models of type {@link ProjectPublications}
-	 * from the tooling api.
-	 */
-	private GenericModelProvider<ProjectPublications> publicationsModelProvider;
 	
 	/**
 	 * The class path container for this project is created lazily.
@@ -531,15 +524,6 @@ public class GradleProject {
 		return getGradleModel(StsEclipseProject.class);
 	}
 		
-	public ProjectPublications getPublications(IProgressMonitor mon) throws Exception {
-		synchronized (this) {
-			if (publicationsModelProvider==null) {
-				publicationsModelProvider = new GenericModelProvider<ProjectPublications>(this, ProjectPublications.class);
-			}
-		}
-		return publicationsModelProvider.get(mon);
-	}
-	
 	public <T extends HierarchicalEclipseProject> T getGradleModel(Class<T> type) throws FastOperationFailedException, CoreException {
 		GradleModelProvider provider = getModelProvider();
 		T model = provider.getCachedModel(this, type);
@@ -672,10 +656,8 @@ public class GradleProject {
 
 	public void invalidateGradleModel() {
 		GradleModelProvider provider = modelProvider;
-		if (provider!=null) {
+		if (provider!=null)
 			provider.invalidate();
-		}
-		publicationsModelProvider = null;
 	}
 
 	/**
