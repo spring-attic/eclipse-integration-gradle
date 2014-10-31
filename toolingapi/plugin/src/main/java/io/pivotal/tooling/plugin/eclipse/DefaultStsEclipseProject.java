@@ -11,6 +11,8 @@ import java.io.Serializable;
 import java.util.List;
 
 public class DefaultStsEclipseProject implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
     private DefaultGradleProject<?> gradleProject;
     private DefaultEclipseProject hierarchicalEclipseProject;
     private List<DefaultStsEclipseExternalDependency> classpath;

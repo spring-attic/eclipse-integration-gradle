@@ -1,4 +1,4 @@
-defaultTasks 'publish', 'updateLibs:updateLibs'
+defaultTasks 'updateLibs:updateLibs'
 
 subprojects {
 	apply plugin: 'java'

@@ -7,7 +7,9 @@ import org.gradle.tooling.model.GradleModuleVersion;
 import java.io.Serializable;
 
 public class DefaultStsEclipseProjectDependency implements Serializable {
-    private DefaultEclipseProjectDependency eclipseProjectDependency;
+	private static final long serialVersionUID = 1L;
+	
+	private DefaultEclipseProjectDependency eclipseProjectDependency;
     private GradleModuleVersion gradleModuleVersion;
     private DefaultStsEclipseExternalDependency externalEquivalent;
 

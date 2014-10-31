@@ -1,6 +1,14 @@
 package io.pivotal.tooling.plugin.eclipse;
 
 import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -29,12 +37,9 @@ import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProjectDepe
 import org.gradle.runtime.jvm.JvmLibrary;
 import org.gradle.tooling.internal.gradle.DefaultGradleModuleVersion;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
-import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.gradle.tooling.provider.model.ToolingModelBuilder;
-
-import java.util.*;
 
 class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     private static final String PROJECT_EXTERNAL_CONF = "projectExternal";
@@ -43,7 +48,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     private Project currentProject;
 
     private GradleProjectBuilder gradleProjectBuilder = new GradleProjectBuilder();
-    private DefaultGradleProject rootGradleProject;
+    private DefaultGradleProject<?> rootGradleProject;
     private ProjectPublicationRegistry publicationRegistry;
 
     private EclipseModelBuilder eclipseModelBuilder = new EclipseModelBuilder(gradleProjectBuilder);
@@ -74,7 +79,8 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
      * @return - A list of all binary dependencies, including transitives of both
      * binary dependencies and project dependencies
      */
-    private List<DefaultStsEclipseExternalDependency> buildExternalDependencies(Project project) {
+    @SuppressWarnings("unchecked")
+	private List<DefaultStsEclipseExternalDependency> buildExternalDependencies(Project project) {
         boolean hasCompile = false;
         for(Configuration conf : project.getConfigurations())
             if(conf.getName().equals("compile"))
@@ -156,7 +162,8 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         if(externalDependency.getFile() == null)
             return; // unable to find a binary equivalent for this project
 
-        Set<ComponentArtifactsResult> artifactsResults = project.getDependencies().createArtifactResolutionQuery()
+        @SuppressWarnings("unchecked")
+		Set<ComponentArtifactsResult> artifactsResults = project.getDependencies().createArtifactResolutionQuery()
                 .forComponents(new DefaultModuleComponentIdentifier(group, name, externalDependency.getGradleModuleVersion().getVersion()))
                 .withArtifacts(JvmLibrary.class, SourcesArtifact.class, JavadocArtifact.class)
                 .execute()
@@ -235,7 +242,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
     private static List<String> plugins(Project project) {
         List<String> plugins = new ArrayList<String>();
-        for(Plugin plugin : project.getPlugins())
+        for(Plugin<?> plugin : project.getPlugins())
             plugins.add(plugin.getClass().getName());
         return plugins;
     }

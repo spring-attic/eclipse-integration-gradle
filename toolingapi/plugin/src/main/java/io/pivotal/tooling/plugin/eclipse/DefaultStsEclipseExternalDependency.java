@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.Serializable;
 
 public class DefaultStsEclipseExternalDependency implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
     private File file;
     private File javadoc;
     private File source;
