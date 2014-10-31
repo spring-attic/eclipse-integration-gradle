@@ -720,7 +720,7 @@ public class GradleProject {
 
 	/**
 	 * Get the IProject in the workspace corresponding to this GradleProject. If a corresponding project
-	 * doesn't exist in the workspace this methhod returns null.
+	 * doesn't exist in the workspace this method returns null.
 	 */
 	public IProject getProject() {
 		//TODO: This cached doesn't work well if correct value for getProject is null. But this is tricky,

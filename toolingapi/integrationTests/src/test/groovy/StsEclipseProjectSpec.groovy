@@ -19,8 +19,7 @@ class StsEclipseProjectSpec extends Specification {
 
         ModelBuilder<StsEclipseProject> customModelBuilder = connection.model(StsEclipseProject.class)
         customModelBuilder.setJvmArguments(
-                "-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + new File('../org.springsource.ide.eclipse.gradle.toolingapi/toolingCustomModel/repo').getAbsolutePath(),
-//                "-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + new File('repo').getAbsolutePath(),
+                "-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + new File('../org.springsource.ide.eclipse.gradle.toolingapi/lib').getAbsolutePath(),
                 "-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration"
         )
         customModelBuilder.withArguments("--init-script", new File(getClass().getResource('init.gradle').toURI()).absolutePath)
@@ -81,13 +80,12 @@ class StsEclipseProjectSpec extends Specification {
         // Publish a binary form of both 'a' and 'b' to Maven Local
         connection.newBuild().forTasks("publish").run()
         def a = project('a')
-        def b = project('b')
+
+        def depWithExternalEquivalent = a.projectDependencies[0].externalEquivalent
 
         then:
-        a.externalEquivalent?.getFile()?.name == 'a-1.0.jar'
-        a.externalEquivalent?.getSource()?.name == 'a-1.0-sources.jar'
-        b.externalEquivalent?.getFile()?.name == 'b-1.0.jar'
-        b.externalEquivalent?.getSource()?.name == 'b-1.0-sources.jar'
+        depWithExternalEquivalent.file.name == 'b-1.0.jar'
+        depWithExternalEquivalent.source.name == 'b-1.0-sources.jar'
     }
 
     def 'project dependencies contain a reference to their project\'s gradle module version'() {

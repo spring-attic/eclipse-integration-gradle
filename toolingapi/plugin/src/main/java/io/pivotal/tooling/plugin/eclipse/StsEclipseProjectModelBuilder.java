@@ -29,6 +29,7 @@ import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProjectDepe
 import org.gradle.runtime.jvm.JvmLibrary;
 import org.gradle.tooling.internal.gradle.DefaultGradleModuleVersion;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
+import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.gradle.tooling.provider.model.ToolingModelBuilder;
@@ -48,6 +49,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     private EclipseModelBuilder eclipseModelBuilder = new EclipseModelBuilder(gradleProjectBuilder);
 
     private Map<String, GradleModuleVersion> moduleVersionByProjectName = new HashMap<String, GradleModuleVersion>();
+    private Map<String, DefaultStsEclipseExternalDependency> externalEquivalentByProjectName = new HashMap<String, DefaultStsEclipseExternalDependency>();
 
     public StsEclipseProjectModelBuilder(ProjectPublicationRegistry publicationRegistry) {
         this.publicationRegistry = publicationRegistry;
@@ -72,7 +74,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
      * @return - A list of all binary dependencies, including transitives of both
      * binary dependencies and project dependencies
      */
-    private static List<DefaultStsEclipseExternalDependency> buildExternalDependencies(Project project) {
+    private List<DefaultStsEclipseExternalDependency> buildExternalDependencies(Project project) {
         boolean hasCompile = false;
         for(Configuration conf : project.getConfigurations())
             if(conf.getName().equals("compile"))
@@ -134,7 +136,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         return new ArrayList<DefaultStsEclipseExternalDependency>(externalDependenciesById.values());
     }
 
-    private static DefaultStsEclipseExternalDependency resolveExternalDependencyEquivalent(Project project) {
+    private void resolveExternalDependencyEquivalent(Project project) {
         String group = project.getGroup().toString(), name = project.getName();
 
         EclipseToolingModelPluginExtension ext = (EclipseToolingModelPluginExtension) project.getExtensions().getByName("eclipseToolingModel");
@@ -152,7 +154,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         }
 
         if(externalDependency.getFile() == null)
-            return null; // unable to find a binary equivalent for this project
+            return; // unable to find a binary equivalent for this project
 
         Set<ComponentArtifactsResult> artifactsResults = project.getDependencies().createArtifactResolutionQuery()
                 .forComponents(new DefaultModuleComponentIdentifier(group, name, externalDependency.getGradleModuleVersion().getVersion()))
@@ -171,7 +173,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
             }
         }
 
-        return externalDependency;
+        externalEquivalentByProjectName.put(project.getName(), externalDependency);
     }
 
     private DefaultStsEclipseProject buildHierarchy(Project project) {
@@ -186,6 +188,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
         moduleVersionByProjectName.put(project.getName(), new DefaultGradleModuleVersion(new DefaultModuleVersionIdentifier(project.getGroup().toString(),
                 project.getName(), project.getVersion().toString())));
+        resolveExternalDependencyEquivalent(project);
 
         DefaultEclipseProject defaultEclipseProject = eclipseModelBuilder.buildAll(HierarchicalEclipseProject.class.getName(), project);
 
@@ -197,7 +200,6 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
                 .setHierarchicalEclipseProject(defaultEclipseProject)
                 .setGradleProject(rootGradleProject.findByPath(project.getPath()))
                 .setChildren(children)
-                .setExternalEquivalent(resolveExternalDependencyEquivalent(project))
                 .setClasspath(buildExternalDependencies(project))
                 .setPlugins(plugins(project))
                 .setRoot(root)
@@ -215,8 +217,14 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     private void buildProjectDependencies(DefaultStsEclipseProject eclipseProject) {
         List<DefaultStsEclipseProjectDependency> projectDependencies = new ArrayList<DefaultStsEclipseProjectDependency>();
         for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
-            projectDependencies.add(new DefaultStsEclipseProjectDependency(projectDependency,
-                    moduleVersionByProjectName.get(projectDependency.getTargetProject().getName())));
+            String targetName = projectDependency.getTargetProject().getName();
+            projectDependencies.add(
+                new DefaultStsEclipseProjectDependency(
+                    projectDependency,
+                    moduleVersionByProjectName.get(targetName),
+                    externalEquivalentByProjectName.get(targetName)
+                )
+            );
         }
 
         eclipseProject.setProjectDependencies(projectDependencies);

@@ -11,6 +11,7 @@
 package org.springsource.ide.eclipse.gradle.core;
 
 import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+import io.pivotal.tooling.model.eclipse.StsEclipseProjectDependency;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.gradle.tooling.model.ExternalDependency;
-import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.MarkerMaker;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
@@ -175,8 +175,15 @@ public class GradleDependencyComputer {
 				}
 			}
 			
-			for (EclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
-				addProjectDependency(GradleCore.create(dep.getTargetProject()).getProject(), export);
+			for (StsEclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
+				IProject project = GradleCore.create(dep.getTargetProject()).getProject();
+				if(project != null && project.isOpen())
+					addProjectDependency(project, export);
+				else {
+					// replace the project dependency with a binary build of the project
+					ExternalDependency external = dep.getExternalEquivalent();
+					addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
+				}
 			}
 			
 			return classpath;

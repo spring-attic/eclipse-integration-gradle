@@ -9,10 +9,12 @@ import java.io.Serializable;
 public class DefaultStsEclipseProjectDependency implements Serializable {
     private DefaultEclipseProjectDependency eclipseProjectDependency;
     private GradleModuleVersion gradleModuleVersion;
+    private DefaultStsEclipseExternalDependency externalEquivalent;
 
-    public DefaultStsEclipseProjectDependency(DefaultEclipseProjectDependency projectDependency, GradleModuleVersion gradleModuleVersion) {
+    public DefaultStsEclipseProjectDependency(DefaultEclipseProjectDependency projectDependency, GradleModuleVersion gradleModuleVersion, DefaultStsEclipseExternalDependency externalEquivalent) {
         this.eclipseProjectDependency = projectDependency;
         this.gradleModuleVersion = gradleModuleVersion;
+        this.externalEquivalent = externalEquivalent;
     }
 
     public GradleModuleVersion getGradleModuleVersion() {
@@ -26,4 +28,6 @@ public class DefaultStsEclipseProjectDependency implements Serializable {
     public String getPath() {
         return eclipseProjectDependency.getPath();
     }
+
+    public DefaultStsEclipseExternalDependency getExternalEquivalent() { return externalEquivalent; }
 }

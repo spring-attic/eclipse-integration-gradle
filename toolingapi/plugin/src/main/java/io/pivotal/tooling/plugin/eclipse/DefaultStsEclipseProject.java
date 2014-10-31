@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.util.List;
 
 public class DefaultStsEclipseProject implements Serializable {
-    private DefaultStsEclipseExternalDependency externalEquivalent;
     private DefaultGradleProject<?> gradleProject;
     private DefaultEclipseProject hierarchicalEclipseProject;
     private List<DefaultStsEclipseExternalDependency> classpath;
@@ -52,8 +51,6 @@ public class DefaultStsEclipseProject implements Serializable {
         this.parent = parent;
     }
 
-    public DefaultStsEclipseExternalDependency getExternalEquivalent() { return externalEquivalent; }
-
     public boolean hasPlugin(Class<?> pluginClass) { return plugins.contains(pluginClass.getName()); }
 
     public DefaultStsEclipseProject getRoot() { return root; }
@@ -61,11 +58,6 @@ public class DefaultStsEclipseProject implements Serializable {
     public List<DefaultGradleModuleVersion> getPublications() { return publications; }
 
     public DefaultEclipseProject getHierarchicalEclipseProject() { return hierarchicalEclipseProject; }
-
-    public DefaultStsEclipseProject setExternalEquivalent(DefaultStsEclipseExternalDependency externalEquivalent) {
-        this.externalEquivalent = externalEquivalent;
-        return this;
-    }
 
     public DefaultStsEclipseProject setGradleProject(DefaultGradleProject<?> gradleProject) {
         this.gradleProject = gradleProject;

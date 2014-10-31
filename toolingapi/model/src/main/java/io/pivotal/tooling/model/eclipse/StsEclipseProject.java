@@ -5,7 +5,6 @@ import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
-import org.gradle.tooling.model.gradle.GradlePublication;
 
 public interface StsEclipseProject extends HierarchicalEclipseProject {
     /**
@@ -39,13 +38,6 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
      * project dependencies.
      */
     DomainObjectSet<? extends ExternalDependency> getClasspath();
-
-    /**
-     *
-     * @return a binary artifact that is representative of the project reference.  The version matcher
-     * used to select a binary artifact is governed by <code>eclipseToolingModel { equivalentBinaryVersion = '...' }</code>
-     */
-    ExternalDependency getExternalEquivalent();
 
     DomainObjectSet<? extends GradleModuleVersion> getPublications();
 
