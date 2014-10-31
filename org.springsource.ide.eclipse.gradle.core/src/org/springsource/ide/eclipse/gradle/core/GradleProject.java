@@ -354,7 +354,7 @@ public class GradleProject {
 		try {
 			File bundleFile = FileLocator.getBundleFile(bundle);
 			if (bundleFile != null && bundleFile.exists() && bundleFile.isDirectory()) {
-				File repository = new File(bundleFile, "toolingCustomModel/repo");
+				File repository = new File(bundleFile, "lib");
 				if (repository.exists()) {
 					return repository;
 				} else {

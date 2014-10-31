@@ -1,16 +1,8 @@
 apply plugin: 'maven-publish'
-def gradleApiVersion = '2.1'
 
 publishing {
 	repositories {
-		maven {
-			// for integration test runs
-			url "$rootProject.projectDir/repo"
-		}
-		maven {
-			// for consumption by Eclipse tooling
-			url "$rootProject.projectDir/../org.springsource.ide.eclipse.gradle.toolingapi/toolingCustomModel/repo"
-		}
+		maven { url "$rootProject.projectDir/repo" }
 	}
 
 	publications {
@@ -25,5 +17,5 @@ publishing {
 }
 
 dependencies {
-	compile "org.gradle:gradle-tooling-api:${gradleApiVersion}"
+	compile "org.gradle:gradle-tooling-api:$project.gradleApiVersion"
 }

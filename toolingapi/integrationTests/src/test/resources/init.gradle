@@ -1,14 +1,15 @@
 initscript {
     repositories {
-        maven { 
-            url System.getProperty('org.springsource.ide.eclipse.gradle.toolingApiRepo')
+        flatDir {
+            dir System.getProperty('org.springsource.ide.eclipse.gradle.toolingApiRepo')
         }
-        mavenCentral()
-        maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
     }
 
     dependencies {
         classpath 'io.pivotal.gradle.eclipse.toolingapi:plugin:1.0'
+        classpath ':model:1.0'
+        classpath 'org.gradle:gradle-tooling-api:2.1'
+        classpath 'org.slf4j:slf4j-api:1.7.5'
     }
 }
 

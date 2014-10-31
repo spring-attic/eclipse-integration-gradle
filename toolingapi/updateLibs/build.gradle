@@ -20,31 +20,35 @@
  */
 
 def bundleDir = file('../../org.springsource.ide.eclipse.gradle.toolingapi')
-def gradleApiVersion = '2.1'
 
-repositories {
-	mavenCentral()
-	maven { url "http://repo.gradle.org/gradle/libs-releases" }
+configurations {
+    eclipseBundle
+    eclipseBundleSource
 }
-
-configurations { compileSource }
 
 dependencies {
 	[
-		"org.gradle:gradle-core:$gradleApiVersion",
-		"org.gradle:gradle-tooling-api:$gradleApiVersion",
-		"org.gradle:gradle-wrapper:$gradleApiVersion",
+		"org.gradle:gradle-core:$project.gradleApiVersion",
+		"org.gradle:gradle-tooling-api:$project.gradleApiVersion",
+		"org.gradle:gradle-wrapper:$project.gradleApiVersion",
 		'org.slf4j:slf4j-simple:1.7.5',
 		'commons-collections:commons-collections:3.2.1'
 	].each { dep ->
-		compile dep
-		compileSource "$dep:sources"
+        eclipseBundle dep
+        eclipseBundleSource "$dep:sources"
 	}
-	
-	compile project (':model')
+
+    eclipseBundle project (':model')
+    eclipseBundle project (':plugin'), { transitive = false }
 }
 
-task updateLibs(dependsOn: ['copyLibs', 'updateEmbeddedLibsProperties', 'updateManifest']) { }
+task updateLibs(dependsOn: [
+    ':model:publish',
+    ':plugin:publish',
+    'copyLibs',
+    'updateEmbeddedLibsProperties',
+    'updateManifest'
+])
 
 task copyLibs(type: Copy) {
 	def libDir = new File("$bundleDir/lib")
@@ -54,14 +58,14 @@ task copyLibs(type: Copy) {
 		}
 	}
 	into libDir
-	from configurations.compile
-	from configurations.compileSource
+	from configurations.eclipseBundle
+	from configurations.eclipseBundleSource
 }
 
 task updateEmbeddedLibsProperties << {
-	configurations.compile.resolvedConfiguration.resolvedArtifacts.inject(new Properties()) { props, res ->
-		props.setProperty("${res.file.name}-name", res.moduleVersion.id.name)
-		props.setProperty("${res.file.name}-version", res.moduleVersion.id.version)
+	configurations.eclipseBundle.resolvedConfiguration.resolvedArtifacts.inject(new Properties()) { props, res ->
+        props.setProperty("${res.file.name}-name", res.moduleVersion.id.name)
+        props.setProperty("${res.file.name}-version", res.moduleVersion.id.version)
 		props
 	}.store(
 		new File("$bundleDir/embedded-libs.properties").newWriter(),
@@ -76,9 +80,12 @@ task updateManifest << {
 	manifest.withPrintWriter { out ->
 		// copy file up to line with 'Bundle-ClassPath'
 		lines.takeWhile { !it.startsWith('Bundle-ClassPath') }.each { out.println(it) }
-		
+
+        // the plugin jar is only needed by the Gradle daemon, not the Eclipse runtime
 		out.println 'Bundle-ClassPath: .,'
-		out.println configurations.compile.findAll { it.name.endsWith('.jar') }.collect { " lib/$it.name" }.join(',\n')
+		out.println configurations.eclipseBundle
+                .findAll { it.name.endsWith('.jar') && !it.name.startsWith('plugin-') }
+                .collect { " lib/$it.name" }.join(',\n')
 
 		// copy rest of file beginning with 'Export-Package'
 		lines.dropWhile { !it.startsWith('Export-Package') }.each { out.println(it) }

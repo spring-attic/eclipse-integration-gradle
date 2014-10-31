@@ -1,5 +1,4 @@
 defaultTasks 'publish', 'updateLibs:updateLibs'
-def gradleApiVersion = '2.1'
 
 subprojects {
 	apply plugin: 'java'
@@ -10,7 +9,12 @@ subprojects {
     group = 'io.pivotal.gradle.eclipse.toolingapi'
     version = '1.0'
 
-	repositories {
+    repositories {
+        maven {
+            // for integration test runs and intermediate publishing
+            url "$projectDir/repo"
+        }
+        mavenLocal()
 		mavenCentral()
 		maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
 	}
@@ -21,5 +25,5 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '2.1'
+	gradleVersion = project.gradleApiVersion
 }

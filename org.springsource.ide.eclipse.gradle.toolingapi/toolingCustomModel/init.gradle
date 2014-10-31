@@ -1,17 +1,20 @@
 initscript {
 	repositories {
-		maven {
-			url System.getProperty('org.springsource.ide.eclipse.gradle.toolingApiRepo')
+		flatDir {
+			dir System.getProperty('org.springsource.ide.eclipse.gradle.toolingApiRepo')
 		}
-		mavenCentral()
-		maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
 	}
 
 	dependencies {
-		classpath 'io.pivotal.gradle.eclipse.toolingapi:plugin:1.0'
+		classpath ':plugin:1.0'
+        classpath ':model:1.0'
 	}
 }
 
 allprojects {
    apply plugin: io.pivotal.tooling.plugin.eclipse.EclipseToolingModelPlugin
+   
+   eclipseToolingModel {
+	   equivalentBinaryVersion = System.getProperty('org.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion')
+   }
 }
