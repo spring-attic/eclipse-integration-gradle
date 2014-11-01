@@ -134,5 +134,13 @@ class StsEclipseProjectSpec extends Specification {
         a.publications.collect { it.name } == ['a']
     }
 
+    def 'project has a name'() {
+        when:
+        def a = project('a')
+
+        then:
+        a.getName() == 'a'
+    }
+
     def project(String name) { root.children.find { it.gradleProject.name == name } }
 }

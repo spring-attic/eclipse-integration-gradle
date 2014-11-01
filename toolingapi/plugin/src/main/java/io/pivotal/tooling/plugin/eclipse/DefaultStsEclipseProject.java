@@ -23,6 +23,8 @@ public class DefaultStsEclipseProject implements Serializable {
     private DefaultStsEclipseProject root;
     private List<DefaultGradleModuleVersion> publications;
 
+    public String getName() { return gradleProject.getName(); }
+
     public List<DefaultStsEclipseExternalDependency> getClasspath() { return classpath; }
 
     public DefaultGradleProject<?> getGradleProject() { return gradleProject; }
