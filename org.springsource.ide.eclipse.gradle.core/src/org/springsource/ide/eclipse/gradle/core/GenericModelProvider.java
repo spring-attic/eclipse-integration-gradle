@@ -23,7 +23,6 @@ import org.gradle.tooling.ProgressEvent;
 import org.gradle.tooling.ProgressListener;
 import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.internal.consumer.CancellationTokenInternal;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleModelProvider.GroupedModelProvider;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
@@ -37,7 +36,7 @@ import org.springsource.ide.eclipse.gradle.core.util.JoinableContinuation;
  * An object that is responsible of obtaining a 'model' from Gradle for a given project. 
  * It is generic in the sense that it can be used to build models of different types.
  * <p>
- * Use this provider to build models of types other than {@link HierarchicalEclipseProject} and {@link EclipseProject}.
+ * Use this provider to build models of types other than {@link HierarchicalEclipseProject} and subtypes.
  * For those model types use the old {@link GradleModelProvider} and {@link GroupedModelProvider} classes which
  * have been optimized to build models more efficiently for groups of related projects.
  */
