@@ -124,12 +124,17 @@ public class ExceptionUtil {
 	public static final IStatus OK_STATUS = status(IStatus.OK, "");
 
 	public static boolean isCancelation(Throwable e) {
-		if (e instanceof OperationCanceledException) {
-			return true;
-		} else if (e instanceof CoreException) {
+		if (e instanceof CoreException) {
 			return ((CoreException) e).getStatus().getSeverity()==IStatus.CANCEL;
 		}
-		return false;
+		Throwable cause = getDeepestCause(e);
+		return cause instanceof OperationCanceledException 
+// Warning: these instanceof test don't work, some classloader identity thing?
+//			|| cause instanceof org.gradle.api.BuildCancelledException 
+//			|| cause instanceof org.gradle.tooling.BuildCancelledException
+// so test based on classname:
+			|| cause.getClass().getSimpleName().equals("BuildCancelledException")
+			|| cause instanceof InterruptedException;
 	}
 	
 }

@@ -15,6 +15,8 @@ import java.io.File;
 import junit.framework.TestSuite;
 
 import org.apache.commons.io.FileUtils;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.DefaultModelBuilder;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.test.DefaultModelBuilderTest;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.test.GradleModelManagerTest;
 import org.springsource.ide.eclipse.gradle.core.test.util.GroovySanityTest;
 import org.springsource.ide.eclipse.gradle.core.test.util.ManagedTestSuite;
@@ -40,6 +42,7 @@ public class AllGradleCoreTests extends ManagedTestSuite {
 		
 		TestSuite suite = new ManagedTestSuite(AllGradleCoreTests.class.getName());
 		suite.addTestSuite(GroovySanityTest.class);
+		suite.addTestSuite(DefaultModelBuilderTest.class);
 		suite.addTestSuite(GradleModelManagerTest.class);
 		suite.addTestSuite(GradleRefreshPreferencesTest.class);
 		suite.addTestSuite(ArrayEncoderTest.class);

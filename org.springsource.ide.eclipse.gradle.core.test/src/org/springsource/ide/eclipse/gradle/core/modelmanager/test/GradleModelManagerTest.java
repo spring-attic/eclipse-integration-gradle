@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.tests.builder.GetResourcesTests;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.UnsupportedMethodException;
@@ -491,7 +492,7 @@ public class GradleModelManagerTest extends GradleTest {
 		}
 	}
 	
-	//TODO: check that build can be canceled via progress monitor.
+	//TODO: check that build can be canceled by canceling its job.
 	//TODO: check that canceled build do not get cached as permanent failures
 	
 	//TODO: when project hierarchy changes model manager recovers (i.e. can associate projects with new 'root' without 
@@ -512,15 +513,15 @@ public class GradleModelManagerTest extends GradleTest {
 		GradleRunnable modelRequest = new GradleRunnable("Build model ["+type.getSimpleName()+"] for "+project.getDisplayName()) {
 			@Override
 			public void doit(IProgressMonitor mon) throws Exception {
-				promise.setMonitor(mon);
 				try {
+					promise.started();
 					promise.apply(mgr.getModel(project, type, mon));
 				} catch (Throwable e) {
 					promise.error(e);
 				}
 			}
 		};
-		JobUtil.schedule(JobUtil.NO_RULE, modelRequest);
+		promise.setJob(JobUtil.schedule(JobUtil.NO_RULE, modelRequest));
 		return promise;
 	}
 
@@ -884,27 +885,36 @@ public class GradleModelManagerTest extends GradleTest {
 		}
 	}
 
-	public class ModelPromise<T> extends JoinableContinuation<T> {
+	public static class ModelPromise<T> extends JoinableContinuation<T> {
 		
-		private IProgressMonitor monitor = null;
+		private Job job = null; //job that is or will be executing the build.
 		private boolean canceled = false;
+		private boolean started;
 
 		public ModelPromise() {
 		}
 		
-		public void setMonitor(IProgressMonitor mon) {
-			this.monitor = mon;
+		public void setJob(Job job) {
+			this.job = job;
 			if (canceled) {
-				monitor.setCanceled(true);
+				job.cancel();
 			}
 		}
 
 		public void cancel() {
-			if (monitor!=null) {
-				monitor.setCanceled(true);
-			} else {
-				this.canceled = true;
+			synchronized (this) {
+				if (!started) {
+					//If job wasn't started yet then it won't produce any result when canceled so
+					// we must raise produce the cancel exception ourselves.
+					error(ExceptionUtil.coreException(new OperationCanceledException("Build canceled")));
+				}
 			}
+			this.canceled = true;
+			job.cancel();
+		}
+
+		public void started() {
+			started = true;
 		}
 	}
 

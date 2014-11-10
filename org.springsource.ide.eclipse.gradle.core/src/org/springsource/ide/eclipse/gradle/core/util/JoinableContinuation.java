@@ -73,12 +73,22 @@ public class JoinableContinuation<T> extends Continuation<T> implements Joinable
 	}
 
 	private synchronized void setError(Throwable e) {
+		if (isDone()) {
+			return;
+		}
 		isThrow = true;
 		thrw = e;
 		notifyAll();
 	}
 
+	private boolean isDone() {
+		return isValue || isThrow; 
+	}
+
 	private synchronized void setValue(T value) {
+		if (isDone()) {
+			return;
+		}
 		isValue = true;
 		this.value = value;
 		notifyAll();
