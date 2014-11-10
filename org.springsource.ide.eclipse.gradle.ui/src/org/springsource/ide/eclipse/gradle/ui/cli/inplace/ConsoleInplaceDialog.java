@@ -147,6 +147,8 @@ public class ConsoleInplaceDialog {
 	
 	private static final String STORE_PINNED_STATE = "pinned";
 	
+	private static final String STORE_PROJECT = "project";
+	
 	private GradleProjectIndex index = new GradleProjectIndex();
 
 	/**
@@ -161,7 +163,7 @@ public class ConsoleInplaceDialog {
 
 	private Font statusTextFont;
 
-	private static IProject selectedProject; 
+	private IProject selectedProject = null; 
 	  // Static is ok: only one instance exists.
 	  // make static to remember last selection for new dialog
 
@@ -248,6 +250,7 @@ public class ConsoleInplaceDialog {
 		setInfoSystemColor();
 		addListenersToShell();
 		initializeBounds();
+		restoreProject();
 	}
 
     private void createShell() {
@@ -905,6 +908,7 @@ public class ConsoleInplaceDialog {
 	 */
 	public void close() {
 		storeBounds();
+		storeProject();
 		toolBar = null;
 		viewMenuManager = null;
 	}
@@ -927,6 +931,18 @@ public class ConsoleInplaceDialog {
 			dialogShell = null;
 			parentShell = null;
 			composite = null;
+		}
+	}
+	
+	private void storeProject() {
+		if (selectedProject != null) {
+			getDialogSettings().put(STORE_PROJECT, selectedProject.getName());
+		}
+	}
+	
+	private void restoreProject() {
+		if (selectedProject == null) {
+			setSelectedProject(getDialogSettings().get(STORE_PROJECT));
 		}
 	}
 

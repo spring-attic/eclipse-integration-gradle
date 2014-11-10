@@ -582,7 +582,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(name);
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 	
@@ -597,7 +597,7 @@ public class GradleImportTests extends GradleTest {
 		
 		assertProjects(name);
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 		assertTrue("Dependency management should be enabled", gp.isDependencyManaged());
 		
 		RefreshAllActionCore.callOn(Arrays.asList(gp.getProject())).join();
@@ -605,7 +605,7 @@ public class GradleImportTests extends GradleTest {
 		//Project should basically still be the same:
 		assertProjects(name);
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 		assertTrue("Dependency management should be enabled", gp.isDependencyManaged());
 
 		//Now try disabling dep management...
@@ -617,7 +617,7 @@ public class GradleImportTests extends GradleTest {
 		// still be there.
 		assertProjects(name);
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 		assertFalse("Dependency management should be disabled", gp.isDependencyManaged());
 
 	}
@@ -672,7 +672,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects("quickstart");
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 		
 		assertNoRawLibraryEntries(project);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
@@ -719,7 +719,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(name);
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 	
