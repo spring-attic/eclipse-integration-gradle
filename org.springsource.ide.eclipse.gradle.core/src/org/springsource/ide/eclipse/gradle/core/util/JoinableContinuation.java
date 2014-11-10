@@ -67,6 +67,10 @@ public class JoinableContinuation<T> extends Continuation<T> implements Joinable
 		super.error(e);
 		setError(e);
 	}
+	
+	public boolean isError() {
+		return isThrow;
+	}
 
 	private synchronized void setError(Throwable e) {
 		isThrow = true;

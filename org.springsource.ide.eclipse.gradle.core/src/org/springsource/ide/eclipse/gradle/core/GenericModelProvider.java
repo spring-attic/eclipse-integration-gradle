@@ -42,6 +42,8 @@ import org.springsource.ide.eclipse.gradle.core.util.JoinableContinuation;
  */
 public class GenericModelProvider<T> {
 	
+	//TODO: remove this, should be replaced by SingleModelProvider
+	
 	private Class<T> type;
 	private GradleProject project;
 	

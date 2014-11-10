@@ -91,7 +91,7 @@ public class ExceptionUtil {
 	}
 
 	public static IStatus status(Throwable e) {
-		return status(IStatus.ERROR, e);
+		return status(isCancelation(e)?IStatus.CANCEL:IStatus.ERROR, e);
 	}
 	
 	public static IStatus status(int severity, Throwable e) {
@@ -123,5 +123,13 @@ public class ExceptionUtil {
 
 	public static final IStatus OK_STATUS = status(IStatus.OK, "");
 
+	public static boolean isCancelation(Throwable e) {
+		if (e instanceof OperationCanceledException) {
+			return true;
+		} else if (e instanceof CoreException) {
+			return ((CoreException) e).getStatus().getSeverity()==IStatus.CANCEL;
+		}
+		return false;
+	}
 	
 }

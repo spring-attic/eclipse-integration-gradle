@@ -1041,5 +1041,4 @@ public class GradleProject {
 		return null;
 	}
 
-
 }

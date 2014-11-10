@@ -225,6 +225,30 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 		return deflt;
 	}
 
+	public void put(String key, File[] files) {
+		if (files!=null) {
+			String[] encoded = new String[files.length];
+			for (int i = 0; i < encoded.length; i++) {
+				encoded[i] = encodeFile(files[i]);
+			}
+		} else {
+			putStrings(key, (String[])null);
+		}
+	}
+	
+	
+	public File[] get(String key, File[] deflt) {
+		String[] encoded = getStrings(key, null);
+		if (encoded!=null) {
+			File[] files = new File[encoded.length];
+			for (int i = 0; i < encoded.length; i++) {
+				files[i] = decodeFile(encoded[i]);
+			}
+			return files;
+		}
+		return deflt;
+	}
+
 	/**
 	 * Decode a file from a String that representation. The representation may be a relative path starting
 	 * at the project these prefs are associated with.
