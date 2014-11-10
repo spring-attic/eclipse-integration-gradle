@@ -115,7 +115,10 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 	public <T> Collection<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type) {
 		GradleProject root = focusProject.getRootProjectMaybe();
 		if (root!=null) {
-			return Arrays.asList(getBuildFamily(root));
+			GradleProject[] members = getBuildFamily(root);
+			if (members!=null) {
+				return Arrays.asList(members);
+			}
 		}
 		return null;
 	}
