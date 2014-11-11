@@ -640,7 +640,9 @@ public class GradleImportWizardPageOne extends WizardPage {
 		if (historySet.size()>=MAX_ROOT_FOLDER_HISTORY) {
 			historySet.remove(history[0]);
 		}
-		historySet.add(rootFolderText.getText());
+		String selectedFolder = rootFolderText.getText();
+		historySet.remove(selectedFolder);
+		historySet.add(selectedFolder);
 		GradleCore.getInstance().getPreferences().putStrings(ROOT_FOLDER_HISTORY_KEY, historySet.toArray(new String[historySet.size()]));
 	}
 
