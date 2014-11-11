@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.gradle.jarjar.com.google.common.collect.Iterables;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
@@ -451,7 +452,7 @@ public class GradleImportWizardPageOne extends WizardPage {
         String[] rootFolderHistory = getRootFolderHistory();
         if (rootFolderHistory.length>0) {
         	rootFolderText.setItems(rootFolderHistory);
-        	rootFolderText.select(rootFolderHistory.length-1);
+        	rootFolderText.select(0);
         }
         
         rootFolderText.addModifyListener(new ModifyListener() {
@@ -635,15 +636,14 @@ public class GradleImportWizardPageOne extends WizardPage {
 	 * Ensure that the current contents of the root folder text box is added to the history.
 	 */
 	private void addRootFolderToHistory() {
-		String[] history = getRootFolderHistory();
-		LinkedHashSet<String> historySet = new LinkedHashSet<String>(Arrays.asList(history));
-		if (historySet.size()>=MAX_ROOT_FOLDER_HISTORY) {
-			historySet.remove(history[0]);
-		}
+		String[] historyArray = getRootFolderHistory();
+		ArrayList<String> history = new ArrayList<String>(Arrays.asList(historyArray));
 		String selectedFolder = rootFolderText.getText();
-		historySet.remove(selectedFolder);
-		historySet.add(selectedFolder);
-		GradleCore.getInstance().getPreferences().putStrings(ROOT_FOLDER_HISTORY_KEY, historySet.toArray(new String[historySet.size()]));
+		history.remove(selectedFolder);
+		history.add(0, selectedFolder);
+		int lastIndex = history.size()>=MAX_ROOT_FOLDER_HISTORY ? history.size()-1 : history.size();
+		List<String> lengthAdjustedHistory = history.subList(0, lastIndex);
+		GradleCore.getInstance().getPreferences().putStrings(ROOT_FOLDER_HISTORY_KEY, lengthAdjustedHistory.toArray(new String[0]));
 	}
 
 	/**
