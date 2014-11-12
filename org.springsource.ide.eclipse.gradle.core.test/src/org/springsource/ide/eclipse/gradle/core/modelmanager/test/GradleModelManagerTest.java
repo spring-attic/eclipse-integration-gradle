@@ -36,7 +36,6 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.AbstractModelBuilder;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
-import org.springsource.ide.eclipse.gradle.core.modelmanager.ModelPromise;
 import org.springsource.ide.eclipse.gradle.core.test.GradleTest;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -341,13 +340,8 @@ public class GradleModelManagerTest extends GradleTest {
 	/**
 	 * Variant of previous test, with a 'cold' start. I.e. without information about build families.
 	 * Note that this can be made to work, but only by locking the whole world during such builds.
-	 * <p>
-	 * This test is DISABLED and it is not passing. This is on purpose the case is or should be
-	 * rare in practice singe build families are defined at the first chance and persisted in
-	 * project preferences. If users import project with the import wizard they can not hit this
-	 * case (unless they delete or loose project preferences somehow). 
 	 */
-	public void DISABLED_testSimultaneousGroupedBuildRequestsColdStart() throws Exception {
+	public void testSimultaneousGroupedBuildRequestsColdStart() throws Exception {
 		GradleProject animal = project("animal");
 		builder.setBuildDuration(1000);
 		
@@ -614,18 +608,19 @@ public class GradleModelManagerTest extends GradleTest {
 	 */
 	public <T> ModelPromise<T> getModelPromise(final GradleProject project, final Class<T> type) {
 		final ModelPromise<T> promise = new ModelPromise<T>();
-		GradleRunnable modelRequest = new GradleRunnable("Build model ["+type.getSimpleName()+"] for "+project.getDisplayName()) {
+		final Job[] job = new Job[1];
+		job[0] = new GradleRunnable("Build model ["+type.getSimpleName()+"] for "+project.getDisplayName()) {
 			@Override
 			public void doit(IProgressMonitor mon) throws Exception {
 				try {
-					promise.setMonitor(mon);
+					promise.setJob(job[0]);
 					promise.apply(mgr.getModel(project, type, mon));
 				} catch (Throwable e) {
 					promise.error(e);
 				}
 			}
-		};
-		JobUtil.schedule(JobUtil.NO_RULE, modelRequest);
+		}.asJob();
+		job[0].schedule();
 		return promise;
 	}
 

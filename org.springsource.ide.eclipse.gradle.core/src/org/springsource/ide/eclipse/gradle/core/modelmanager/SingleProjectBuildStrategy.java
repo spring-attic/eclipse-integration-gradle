@@ -26,7 +26,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
  */
 public class SingleProjectBuildStrategy extends BuildStrategy {
 
-	public SingleProjectBuildStrategy(BuildScheduler builder) {
+	public SingleProjectBuildStrategy(ModelBuilder builder) {
 		super(builder);
 	}
 

@@ -14,12 +14,12 @@ import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.BuildResult;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.DefaultModelBuilder;
-import org.springsource.ide.eclipse.gradle.core.modelmanager.ModelPromise;
 import org.springsource.ide.eclipse.gradle.core.test.GradleTest;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
@@ -78,18 +78,19 @@ public class DefaultModelBuilderTest extends GradleTest {
 	
 	public <T> ModelPromise<T> getModelPromise(final GradleProject project, final Class<T> type) {
 		final ModelPromise<T> promise = new ModelPromise<T>();
-		GradleRunnable modelRequest = new GradleRunnable("Build model ["+type.getSimpleName()+"] for "+project.getDisplayName()) {
+		final Job[] job = new Job[1];
+		job[0] = new GradleRunnable("Build model ["+type.getSimpleName()+"] for "+project.getDisplayName()) {
 			@Override
 			public void doit(IProgressMonitor mon) throws Exception {
-				promise.setMonitor(mon);
+				promise.setJob(job[0]);
 				try {
 					promise.apply(builder.buildModel(project, type, mon).get());
 				} catch (Throwable e) {
 					promise.error(e);
 				}
 			}
-		};
-//		promise.setJob(JobUtil.schedule(JobUtil.NO_RULE, modelRequest));
+		}.asJob();
+		job[0].schedule();
 		return promise;
 	}
 	

@@ -31,9 +31,9 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
  */
 public abstract class BuildStrategy {
 
-	protected final BuildScheduler builder;
+	protected final ModelBuilder builder;
 
-	public BuildStrategy(BuildScheduler builder) {
+	public BuildStrategy(ModelBuilder builder) {
 		this.builder = builder;
 	}
 	
@@ -46,9 +46,6 @@ public abstract class BuildStrategy {
 	 * at least one element with the BuildResult for the focus project in element at position 0.
 	 * <p>
 	 * Additional results may be provided as elements at position 1 and up.
-	 * 
-	 * TODO: I don't really want to force the returned models all to be of type T but can't make
-	 * Java type checker happy otherwise.
 	 */
 	public abstract <T> List<ProjectBuildResult<T>> buildModels(GradleProject focusProject, Class<T> type, IProgressMonitor mon) throws CoreException;
 	

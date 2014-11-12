@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,11 +33,10 @@ public class GradleModelManager {
 
 	private ModelBuilder builder;
 	private Map<GradleProject, GradleProjectModelManager> managers;
-	private BuildScheduler scheduler;
+	private Map<Class<?>, LockManager> lockManagers = null; // lock managers, per model type.
 	
 	public GradleModelManager(ModelBuilder builder) {
 		this.builder = builder;
-		this.scheduler = new BuildScheduler(builder);
 	}
 	
 	/**
@@ -56,7 +58,6 @@ public class GradleModelManager {
 	 */
 	public synchronized void invalidate() {
 		managers = null;
-		scheduler.invalidate();
 	}
 	
 	private synchronized GradleProjectModelManager getManager(GradleProject project) {
@@ -82,9 +83,9 @@ public class GradleModelManager {
 	 */
 	public <T> BuildStrategy getBuildStrategy(GradleProject project, Class<T> type) {
 		if (HierarchicalEclipseProject.class.isAssignableFrom(type)) {
-			return new HierarchicalProjectBuildStrategy(scheduler);
+			return new HierarchicalProjectBuildStrategy(builder);
 		}
-		return new SingleProjectBuildStrategy(scheduler);
+		return new SingleProjectBuildStrategy(builder);
 	}
 	
 	/**
@@ -99,16 +100,34 @@ public class GradleModelManager {
 		}
 	}
 
-//	public Lock lockFamily(Collection<GradleProject> predictedFamily) {
-//		Set<String> keys = new HashSet<String>();
-//		for (GradleProject project : predictedFamily) {
-//			keys.add(project.getLocation().toString());
-//		}
-//		return lockManager.lock(keys);
-//	}
-//
-//	public Lock lockAll() {
-//		return lockManager.lockAll();
-//	}
+	/**
+	 * Synchronization helper to make requests for models in the same project family sequential.
+	 */
+	Lock lockFamily(Class<?> type, Collection<GradleProject> predictedFamily) {
+		LockManager lockManager = getLockManager(type);
+		Set<String> keys = new HashSet<String>();
+		for (GradleProject project : predictedFamily) {
+			keys.add(project.getLocation().toString()+"::"+type.getName());
+		}
+		return lockManager.lock(keys);
+	}
+
+	private synchronized LockManager getLockManager(Class<?> type) {
+		LockManager manager = null;
+		if (lockManagers==null) {
+			lockManagers = new HashMap<Class<?>, LockManager>();
+		} else {
+			manager = lockManagers.get(type);
+		}
+		if (manager==null) {
+			manager = new LockManager();
+			lockManagers.put(type, manager);
+		}
+		return manager;
+	}
+
+	Lock lockAll(Class<?> type) {
+		return getLockManager(type).lockAll();
+	}
 
 }

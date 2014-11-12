@@ -11,7 +11,6 @@
 package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +89,8 @@ public class GradleProjectModelManager {
 	
 	public <T> T getModel(Class<T> type, IProgressMonitor mon) throws CoreException {
 		BuildStrategy buildStrategy = mgr.getBuildStrategy(project, type);
-//		Collection<GradleProject> predictedFamily = buildStrategy.predictBuildFamily(project, type);
-//		Lock lock = predictedFamily==null?mgr.lockAll():mgr.lockFamily(predictedFamily);
+		Collection<GradleProject> predictedFamily = buildStrategy.predictBuildFamily(project, type);
+		Lock lock = predictedFamily==null?mgr.lockAll(type):mgr.lockFamily(type, predictedFamily);
 		mon.beginTask("Fetch model of type "+type.getSimpleName()+" for project "+project.getDisplayName(), 10);
 		try {
 			synchronized (this) {
@@ -119,7 +118,7 @@ public class GradleProjectModelManager {
 			return (T) primaryResult.getResult().get();
 		} finally {
 			mon.done();
-//			lock.release();
+			lock.release();
 		}
 	}
 
