@@ -157,7 +157,7 @@ public class GenericModelProvider<T> {
 		}
 	}
 
-	private static <T> String jobName(GradleProject project,
+	public static <T> String jobName(GradleProject project,
 			Class<T> requiredType) {
 		return "Build '"+requiredType.getSimpleName()+"' model for '"+project.getDisplayName();
 	}

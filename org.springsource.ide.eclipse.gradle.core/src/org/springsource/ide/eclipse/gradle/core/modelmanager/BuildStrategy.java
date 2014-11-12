@@ -31,9 +31,9 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
  */
 public abstract class BuildStrategy {
 
-	protected final ModelBuilder builder;
+	protected final BuildScheduler builder;
 
-	public BuildStrategy(ModelBuilder builder) {
+	public BuildStrategy(BuildScheduler builder) {
 		this.builder = builder;
 	}
 	

@@ -19,7 +19,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.BuildResult;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.DefaultModelBuilder;
-import org.springsource.ide.eclipse.gradle.core.modelmanager.test.GradleModelManagerTest.ModelPromise;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.ModelPromise;
 import org.springsource.ide.eclipse.gradle.core.test.GradleTest;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
@@ -81,7 +81,7 @@ public class DefaultModelBuilderTest extends GradleTest {
 		GradleRunnable modelRequest = new GradleRunnable("Build model ["+type.getSimpleName()+"] for "+project.getDisplayName()) {
 			@Override
 			public void doit(IProgressMonitor mon) throws Exception {
-				promise.started();
+				promise.setMonitor(mon);
 				try {
 					promise.apply(builder.buildModel(project, type, mon).get());
 				} catch (Throwable e) {
@@ -89,7 +89,7 @@ public class DefaultModelBuilderTest extends GradleTest {
 				}
 			}
 		};
-		promise.setJob(JobUtil.schedule(JobUtil.NO_RULE, modelRequest));
+//		promise.setJob(JobUtil.schedule(JobUtil.NO_RULE, modelRequest));
 		return promise;
 	}
 	

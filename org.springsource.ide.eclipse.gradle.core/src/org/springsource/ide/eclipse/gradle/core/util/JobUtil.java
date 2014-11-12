@@ -136,7 +136,7 @@ public class JobUtil {
 	
 	public static void checkCanceled(IProgressMonitor monitor) throws OperationCanceledException {
 		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
+			throw new OperationCanceledException("Operation Canceled");
 		}
 	}
 

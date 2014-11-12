@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2014 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,9 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,10 +30,11 @@ public class GradleModelManager {
 
 	private ModelBuilder builder;
 	private Map<GradleProject, GradleProjectModelManager> managers;
-	private LockManager lockManager = new LockManager();
+	private BuildScheduler scheduler;
 	
 	public GradleModelManager(ModelBuilder builder) {
 		this.builder = builder;
+		this.scheduler = new BuildScheduler(builder);
 	}
 	
 	/**
@@ -59,6 +56,7 @@ public class GradleModelManager {
 	 */
 	public synchronized void invalidate() {
 		managers = null;
+		scheduler.invalidate();
 	}
 	
 	private synchronized GradleProjectModelManager getManager(GradleProject project) {
@@ -84,9 +82,9 @@ public class GradleModelManager {
 	 */
 	public <T> BuildStrategy getBuildStrategy(GradleProject project, Class<T> type) {
 		if (HierarchicalEclipseProject.class.isAssignableFrom(type)) {
-			return new HierarchicalProjectBuildStrategy(builder);
+			return new HierarchicalProjectBuildStrategy(scheduler);
 		}
-		return new SingleProjectBuildStrategy(builder);
+		return new SingleProjectBuildStrategy(scheduler);
 	}
 	
 	/**
@@ -95,20 +93,22 @@ public class GradleModelManager {
 	 */
 	synchronized <T> void addToCache(List<ProjectBuildResult<T>> buildResults) {
 		for (ProjectBuildResult<?> buildResult : buildResults) {
-			getManager(buildResult.getProject()).addToCache(buildResult.getResult());
+			if (!buildResult.isCancelation()) {
+				getManager(buildResult.getProject()).addToCache(buildResult.getResult());
+			}
 		}
 	}
 
-	public Lock lockFamily(Collection<GradleProject> predictedFamily) {
-		Set<String> keys = new HashSet<String>();
-		for (GradleProject project : predictedFamily) {
-			keys.add(project.getLocation().toString());
-		}
-		return lockManager.lock(keys);
-	}
-
-	public Lock lockAll() {
-		return lockManager.lockAll();
-	}
+//	public Lock lockFamily(Collection<GradleProject> predictedFamily) {
+//		Set<String> keys = new HashSet<String>();
+//		for (GradleProject project : predictedFamily) {
+//			keys.add(project.getLocation().toString());
+//		}
+//		return lockManager.lock(keys);
+//	}
+//
+//	public Lock lockAll() {
+//		return lockManager.lockAll();
+//	}
 
 }

@@ -95,10 +95,7 @@ public class ExceptionUtil {
 	}
 	
 	public static IStatus status(int severity, Throwable e) {
-		if (e instanceof OperationCanceledException 
-		||  e instanceof InterruptedException) {
-			return Status.CANCEL_STATUS;
-		} if (e instanceof CoreException) {
+		if (e instanceof CoreException) {
 			IStatus status = ((CoreException) e).getStatus();
 			if (status!=null && status.getSeverity()==severity) {
 				Throwable ee = status.getException();

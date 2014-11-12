@@ -11,6 +11,7 @@
 package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * GradleProject paired with a BuildResult.
@@ -37,6 +38,10 @@ public class ProjectBuildResult<T> {
 
 	public GradleProject getProject() {
 		return project;
+	}
+
+	public boolean isCancelation() {
+		return result.isFailed() && ExceptionUtil.isCancelation(result.getError());
 	}
 	
 	

@@ -13,6 +13,7 @@ package org.springsource.ide.eclipse.gradle.core.modelmanager;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.JoinableContinuation;
 
 /**
  * 
@@ -40,6 +41,15 @@ public class BuildResult<T> {
 		this.type = type;
 		this.model = model;
 		this.error = error;
+	}
+
+	public static <T> BuildResult<T> fromPromise(Class<T> type, JoinableContinuation<T> promise) {
+		//TODO: For efficiency sake, try to avoid throwing and then catching the exception.
+		try {
+			return new BuildResult<T>(type, promise.join());
+		} catch (Throwable e) {
+			return new BuildResult<T>(type, e);
+		}
 	}
 
 	public Class<T> getType() {
@@ -99,5 +109,13 @@ public class BuildResult<T> {
 			return (BuildResult<S>)this;
 		}
 		return new BuildResult<S>(type, (S)model, error);
+	}
+	
+	public void sendTo(JoinableContinuation<T> promise) {
+		if (isFailed()) {
+			promise.error(error);
+		} else {
+			promise.apply(model);
+		}
 	}
 }

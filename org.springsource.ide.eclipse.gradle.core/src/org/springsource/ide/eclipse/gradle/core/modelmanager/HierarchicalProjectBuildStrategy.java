@@ -48,7 +48,7 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 	 */
 	private static final String BUILD_FAMILY_PROP = "build.family."+HierarchicalEclipseProject.class.getName();
 	
-	public HierarchicalProjectBuildStrategy(ModelBuilder builder) {
+	public HierarchicalProjectBuildStrategy(BuildScheduler builder) {
 		super(builder);
 	}
 
