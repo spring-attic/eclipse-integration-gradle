@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/test/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER" exported="true"/>
+	<classpathentry sourcepath="/Users/aboyko/gradle-1.10/caches/modules-2/files-2.1/junit/junit/4.8.2/cccca612a66b8387c399be31d69daf000de2ac9e/junit-4.8.2-sources.jar" kind="lib" path="/Users/aboyko/gradle-1.10/caches/modules-2/files-2.1/junit/junit/4.8.2/c94f54227b08100974c36170dcb53329435fe5ad/junit-4.8.2.jar" exported="true"/>
+</classpath>

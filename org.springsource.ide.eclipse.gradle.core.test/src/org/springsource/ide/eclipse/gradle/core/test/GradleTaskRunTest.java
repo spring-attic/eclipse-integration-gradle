@@ -12,14 +12,17 @@ package org.springsource.ide.eclipse.gradle.core.test;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
@@ -27,6 +30,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
+import org.gradle.tooling.model.GradleTask;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
@@ -751,5 +755,36 @@ public class GradleTaskRunTest extends GradleTest {
 			assertTrue("Expected task is missing "+expectedTask, actualTasks.contains(expectedTask));
 		}
 	}
+	
+	public void testSTS3953_FlatLayoutMultiProject() throws Exception {
+		File testProj = getTestProjectCopy("sts3953/FlatMulti", Platform.getLocation().toFile());
+		getTestProjectCopy("sts3953/my-lib", Platform.getLocation().toFile());
+		getTestProjectCopy("sts3953/product", Platform.getLocation().toFile());
+		importTestProject(testProj);
+		
+		assertProjects(new String[] {
+			"FlatMulti",
+			"my-lib",
+			"product"
+		});
+		
+		GradleProject project = GradleCore.getGradleProject(ResourcesPlugin.getWorkspace().getRoot().getProject("product"));
+		Map<String, GradleTask> tasks = GradleProject.getAggregateTasks(project.getGradleModel(new NullProgressMonitor()));
+		assertTrue(tasks.containsKey("hello"));
+
+		ILaunchConfigurationWorkingCopy launchConf = (ILaunchConfigurationWorkingCopy) GradleLaunchConfigurationDelegate.createDefault(project, false);
+		GradleLaunchConfigurationDelegate.setTasks(launchConf, Arrays.asList(":product:hello"));
+		GradleProcess process = LaunchUtil.synchLaunch(launchConf);
+		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
+		assertContains("BUILD SUCCESSFUL", output);
+		assertContains("Hello from product", output);
+
+		GradleLaunchConfigurationDelegate.setTasks(launchConf, Arrays.asList("hello"));
+		process = LaunchUtil.synchLaunch(launchConf);
+		output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
+		assertContains("BUILD SUCCESSFUL", output);
+		assertContains("Hello from product", output);
+	}
+
 
 }

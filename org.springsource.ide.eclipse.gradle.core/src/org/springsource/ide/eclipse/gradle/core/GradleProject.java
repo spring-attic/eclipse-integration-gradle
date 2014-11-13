@@ -321,7 +321,7 @@ public class GradleProject {
 			if (jvmArgs!=null) {
 				gradleOp.setJvmArguments(jvmArgs);
 			}
-			String[] pgmArgs = projectPrefs.getProgramArgs();
+			String[] pgmArgs = calculateProgramArgs();
 			if (pgmArgs!=null) {
 				gradleOp.withArguments(pgmArgs);
 			}
@@ -336,6 +336,57 @@ public class GradleProject {
 		}
 	}
 	
+	/**
+	 * Calculates parameters for the Gradle operation. Main purpose incorporate
+	 * settings file parameter if it's not there for the flat layout
+	 * multi-project model building or task execution.
+	 * 
+	 * @return parameters as array of strings
+	 * @throws FastOperationFailedException
+	 */
+	private String[] calculateProgramArgs() throws FastOperationFailedException {
+		GradleProjectPreferences projectPrefs = getProjectPreferences();
+		IPath location = getProject().getLocation();
+		String[] pgmArgs = projectPrefs.getProgramArgs();
+		GradleProject rootProject = getRootProject();
+		/*
+		 * Check if there is a settings file available
+		 */
+		if (rootProject != this
+				&& !location.append(Path.SEPARATOR + "settings.gradle")
+						.toFile().exists()
+				&& !location.removeLastSegments(1)
+						.append(Path.SEPARATOR + "settings.gradle")
+						.toFile().exists()) {
+			boolean addedSettingsFileArgument = false;
+			if (pgmArgs != null) {
+				for (int i = 0; !addedSettingsFileArgument
+						&& i < pgmArgs.length; i++) {
+					String arg = pgmArgs[i].trim();
+					if (arg.startsWith("-c")
+							|| arg.startsWith("--settings-file")) {
+						addedSettingsFileArgument = true;
+					}
+				}
+			}
+			if (!addedSettingsFileArgument) {
+				ArrayList<String> newArgs = new ArrayList<String>(
+						pgmArgs == null ? 1 : pgmArgs.length + 1);
+				if (pgmArgs != null) {
+					for (String arg : pgmArgs) {
+						newArgs.add(arg);
+					}
+				}
+				newArgs.add("-c"
+						+ rootProject.getProject().getLocation()
+								.append(Path.SEPARATOR + "settings.gradle")
+								.makeRelativeTo(location).toString());
+				pgmArgs = newArgs.toArray(new String[newArgs.size()]);
+			}
+		}
+		return pgmArgs;
+	}
+
 	/**
 	 * Gets the import preferences for a given project... 
 	 * @return

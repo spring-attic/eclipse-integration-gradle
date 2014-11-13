@@ -1,0 +1,7 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<testsuite name="org.gradle.PersonTest" tests="1" failures="0" errors="0" timestamp="2014-08-14T15:27:31" hostname="X1070335" time="0.032">
+  <properties/>
+  <testcase name="canConstructAPersonWithAName" classname="org.gradle.PersonTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
