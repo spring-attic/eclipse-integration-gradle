@@ -368,7 +368,7 @@ public class GradleProject {
 				File settingsFile = new File(rootProject.getLocation(), "settings.gradle");
 				if (settingsFile.exists()) {
 					ArrayList<String> newArgs = new ArrayList<String>(
-							pgmArgs == null ? 1 : pgmArgs.length + 2);
+							pgmArgs == null ? 2 : pgmArgs.length + 2);
 					if (pgmArgs != null) {
 						for (String arg : pgmArgs) {
 							newArgs.add(arg);
