@@ -137,7 +137,7 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 		Properties props = getProperties();
 		boolean changed = false;
 		if (value==null) {
-			if (props.contains(key)) {
+			if (props.containsKey(key)) {
 				props.remove(key);
 				changed = true;
 			}
@@ -150,7 +150,7 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 		if (changed) {
 			try {
 				flush();
-			} catch (IOException e) {
+			} catch (Throwable e) {
 				GradleCore.log(e);
 			}
 		}

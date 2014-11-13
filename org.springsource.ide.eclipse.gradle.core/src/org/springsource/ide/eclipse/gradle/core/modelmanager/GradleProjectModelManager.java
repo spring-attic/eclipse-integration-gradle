@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
@@ -86,8 +87,31 @@ public class GradleProjectModelManager {
 		}
 		return null;
 	}
-	
+
 	public <T> T getModel(Class<T> type, IProgressMonitor mon) throws CoreException {
+		mon.beginTask("Fetch model of type "+type.getSimpleName()+" for project "+project.getDisplayName(), 10);
+		try {
+			try {
+				return getModelInternal(type, new SubProgressMonitor(mon, 9));
+			} catch (InconsistenProjectHierarchyException e) {
+				//This exception indicates a failure to produce model for the focus project caused
+				//by inaccurate build family info.
+				//The build strategy is supposed to update its family prediction info when this happens,
+				//so grant one retry attempt to allow builder strategy to recover from this misprediction.
+				if (mgr.SLEEP_BETWEEN_RETRIES>0) {
+					try {
+						Thread.sleep(mgr.SLEEP_BETWEEN_RETRIES);
+					} catch (InterruptedException e1) {
+					}
+				}
+				return getModelInternal(type, mon);
+			}
+		} finally {
+			mon.done();
+		}
+	}
+	
+	private <T> T getModelInternal(Class<T> type, IProgressMonitor mon) throws CoreException {
 		BuildStrategy buildStrategy = mgr.getBuildStrategy(project, type);
 		Collection<GradleProject> predictedFamily = buildStrategy.predictBuildFamily(project, type);
 		Lock lock = predictedFamily==null?mgr.lockAll(type):mgr.lockFamily(type, predictedFamily);
@@ -111,15 +135,24 @@ public class GradleProjectModelManager {
 			//If we get here we need to attempt to build the model. 
 			//Take care to keep build outside of any synchronized blocks!
 			List<ProjectBuildResult<T>> buildResults = buildStrategy.buildModels(project, type, new SubProgressMonitor(mon, 8));
-			
-			ProjectBuildResult<T> primaryResult = buildResults.get(0);
-			Assert.isTrue(primaryResult.getProject().equals(project));
 			mgr.addToCache(buildResults);
-			return (T) primaryResult.getResult().get();
+			ProjectBuildResult<T> primaryResult = getFirst(buildResults);
+			if (primaryResult!=null && primaryResult.getProject().equals(project)) {
+				return (T) primaryResult.getResult().get();
+			} else {
+				throw ExceptionUtil.inconsistentProjectHierachy(project);
+			}
 		} finally {
 			mon.done();
 			lock.release();
 		}
+	}
+	
+	private static <T> T getFirst(List<T> elements) {
+		if (elements!=null && !elements.isEmpty()) {
+			return elements.get(0);
+		}
+		return null;
 	}
 
 	public synchronized void addToCache(BuildResult<?> result) {

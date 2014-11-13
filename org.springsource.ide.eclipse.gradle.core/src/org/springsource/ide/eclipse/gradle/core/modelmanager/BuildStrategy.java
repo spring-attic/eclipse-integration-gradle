@@ -42,8 +42,12 @@ public abstract class BuildStrategy {
 	}
 	
 	/**
-	 * Request to build a model for a given focusProject and type. The implementor should return a List of
-	 * at least one element with the BuildResult for the focus project in element at position 0.
+	 * Request to build a model for a given focusProject and type. It is the responsibility of the
+	 * be incorrect, the implementor should return a List of at least one element with the BuildResult for the 
+	 * focus project in element at position 0.
+	 * <p>
+	 * If the family prediction was inaccurate, then it is possible the build result does not contain a model
+	 * for the focus project. 
 	 * <p>
 	 * Additional results may be provided as elements at position 1 and up.
 	 */

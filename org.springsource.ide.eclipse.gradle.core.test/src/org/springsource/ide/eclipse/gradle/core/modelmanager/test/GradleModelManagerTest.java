@@ -21,9 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.internal.codeassist.ThrownExceptionFinder;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.UnsupportedMethodException;
 import org.gradle.tooling.model.eclipse.EclipseLinkedResource;
@@ -593,6 +591,155 @@ public class GradleModelManagerTest extends GradleTest {
 		}
 	}
 	
+	/**
+	 * Test that Grouped model provider is able to cope with misprediction of 
+	 * build family. (I.e. when user changes their build scripts in such a way
+	 * that project hierachy changes... then predicted family will be incorrect
+	 * as it is going to still be based on the old project hierarchy.
+	 * <p>
+	 * In such cases we will allow for sub-optimal build scheduling so that
+	 * maybe too many builds will occur, but no exceptions such as 'InconsistentProjectHierarchy'
+	 * should be propagated to model requestors.
+	 */
+	public void testChangingProjectHierarchy() throws Exception {
+		//Ensure that we have family info for all projects.
+		List<GradleProject> projects = testProjects();
+		for (GradleProject p : projects) {
+			mgr.getModel(p, FooHierarchyModel.class, new NullProgressMonitor());
+		}
+		
+		assertEquals(2, builder.totalBuilds());
+		builder.reset();
+		mgr.invalidate();
+		
+		//From now on birds are people rather than animals
+		changeParent(project("animal/bird"), project("people"));
+		
+		//The most likely thing to break is building model for a 'focus project' that has
+		// moved to another family... because the wrong family model will be built for it
+		// and then the build strategy won't produce the focus project's model in that build.
+		
+		FooHierarchyModel model = mgr.getModel(project("animal/bird/penguin"), FooHierarchyModel.class, new NullProgressMonitor());
+		assertEquals("Foo(penguin)", model.getFoo());
+		model = mgr.getModel(project("animal/bird"), FooHierarchyModel.class);
+		assertEquals(project("people"), GradleCore.create(model.getParent())); //birds are now people... right?
+		
+		assertEquals(2, builder.totalBuilds());
+		//1: unnecesary build caused by misprediction:
+		assertEquals(1, builder.count(project("animal"), FooHierarchyModel.class));
+		//2: recovery build done without informaton about root, so builds via focus project itself.
+		assertEquals(1, builder.count(project("animal/bird/penguin"), FooHierarchyModel.class)); //one recoverbuild not via focus project lacking
+
+		builder.reset();
+		mgr.invalidate();
+		
+		//Test that family info for all projects has now been recovered (should be because both families have been
+		// built since the change).
+		
+		for (GradleProject p : projects) {
+			model = mgr.getModel(p, FooHierarchyModel.class, new NullProgressMonitor());
+			assertEquals("Foo("+p.getLocation().getName()+")", model.getFoo());
+		}
+
+		assertEquals(2, builder.totalBuilds());
+		assertEquals(1, builder.count(project("animal"), FooHierarchyModel.class));
+		assertEquals(1, builder.count(project("people"), FooHierarchyModel.class));
+		
+	}
+	
+	public void testChangingProjectHierarchyConccurrent() throws Exception {
+		
+		List<GradleProject> projects = testProjects();
+		for (GradleProject p : projects) {
+			mgr.getModel(p, FooHierarchyModel.class, new NullProgressMonitor());
+		}
+		
+		assertEquals(2, builder.totalBuilds());
+		builder.reset();
+		mgr.invalidate();
+		
+		//From now on birds are people rather than animals
+		changeParent(project("animal/bird"), project("people"));
+		
+		ArrayList<ModelPromise<FooHierarchyModel>> promises = new ArrayList<ModelPromise<FooHierarchyModel>>();
+		for (GradleProject p : projects) {
+			promises.add(getModelPromise(p, FooHierarchyModel.class));
+		}
+		
+		for (ModelPromise<FooHierarchyModel> promise : promises) {
+			promise.join();
+		}
+		
+		//This will fail on and off, because a race condition can cause extraneous builds
+		// But I think it should be avoidable if we more eagerly flush out known, incorrect
+		// family data from project preferences.
+		assertEquals(2, builder.totalBuilds());
+
+		builder.dump();
+	}
+	
+	/**
+	 * Test that explicitly asks for models in a 'bad' order which triggers an extraneous
+	 * build in buggy implementation of grouped model builder.
+	 */
+	public void testChangingProjectHierarchyBadSequence() throws Exception {
+		List<GradleProject> projects = testProjects();
+		for (GradleProject p : projects) {
+			mgr.getModel(p, FooHierarchyModel.class, new NullProgressMonitor());
+		}
+		
+		assertEquals(2, builder.totalBuilds());
+		builder.reset();
+		mgr.invalidate();
+		
+		//From now on birds are people rather than animals
+		changeParent(project("animal/bird"), project("people"));
+		
+		// sequence of model requests case which exposes a bug in how
+		// inaccurate family info is corrected (if this test passes, then
+		// the bug is fixed :-)
+		
+		ArrayList<ModelPromise<FooHierarchyModel>> promises = new ArrayList<ModelPromise<FooHierarchyModel>>();
+		
+		// To reliably cause the bad sequencing we need builds to slow enough 
+		builder.setBuildDuration(1000);
+		promises.add(getModelPromise(project("animal/bird"), FooHierarchyModel.class));
+		Thread.sleep(100); 
+		// "animal" build should now be underway. But it won't produce 'bird' model.
+
+		//These builds will be blocked until 'bird' build completes. Then they too will fail
+		// with inconsistent project hierarchy exception, UNLESS their memmbership infos are
+		// flushed properly by the failed animal build
+		promises.add(getModelPromise(project("animal/bird/penguin"), FooHierarchyModel.class));
+		promises.add(getModelPromise(project("animal/bird/swallow"), FooHierarchyModel.class));
+		
+		// At time around 1000ms the bird build finishes but has InconsistentProjectHierarchy.
+		// It will retry... at the same time penguin and swallow unblock and will try to build.
+		// Race condition: 
+		//   - if 'penguin' or 'swallow' win, then extraneous builds result (in bug case)
+		//   - If bird wins => ok.
+		
+		mgr.sleepBetweenRetries(100); //Causes birds retry to be slow so it will loose the race.
+
+		
+		//Can't make this test fail reliably it passes sometimes but fails often enough.
+		
+		for (ModelPromise<FooHierarchyModel> promise : promises) {
+			promise.join();
+		}
+		
+		builder.dump();
+		
+		assertEquals(2, builder.totalBuilds());
+	}
+	
+	//TODO: concurrent builds in hiearchy changed scenario. Should revert back to very conservative 'lock the world' 
+	//   strategy and not run lots of builds.
+	
+	//TODO: effects of project deletion on grouped model builds?
+	
+	//TODO: effects of project addition ?
+	
 	//TODO: when project hierarchy changes model manager recovers (i.e. can associate projects with new 'root' without 
 	//  throwing 'InconsistentProjectHierarchyException'.
 	//TODO: case where rootproject of a hierarchy changes since last succesful build.
@@ -602,6 +749,33 @@ public class GradleModelManagerTest extends GradleTest {
 	/////////////////////////////////////////////////////////////////////
 	
 	// no tests below this line, this is all the scaffolding to make the tests work.
+
+	private File PROJECT_FOLDER;
+	
+	/**
+	 * Test data that generates the mock projects in a hierarchy.
+	 */
+	private static String[] TEST_PROJECT_FOLDERS = {
+			"animal/mamal/cow",
+			"animal/mamal/dog",
+			"animal/bird/swallow",
+			"animal/bird/penguin",
+			"people/john",
+			"people/mary",
+			"people/jeff"
+	};
+	
+	/**
+	 * Move a given project to a different parent in the project hierarchy.
+	 */
+	private void changeParent(GradleProject project, GradleProject parent) {
+		parentOverrides.put(project.getLocation(), parent.getLocation());
+	}
+
+	/**
+	 * Keeps track of 'moved' projects in the hierarchy.
+	 */
+	private Map<File, File> parentOverrides = new HashMap<File,File>();
 	
 	/**
 	 * Request an asynchronously built model, returns a 'promise' of the model.
@@ -623,21 +797,6 @@ public class GradleModelManagerTest extends GradleTest {
 		job[0].schedule();
 		return promise;
 	}
-
-	private File PROJECT_FOLDER;
-	
-	/**
-	 * Test data that generates the mock projects in a hierarchy.
-	 */
-	private static String[] TEST_PROJECT_FOLDERS = {
-			"animal/mamal/cow",
-			"animal/mamal/dog",
-			"animal/bird/swallow",
-			"animal/bird/penguin",
-			"people/john",
-			"people/mary",
-			"people/jeff"
-	};
 
 	@Override
 	protected void setUp() throws Exception {
@@ -735,7 +894,10 @@ public class GradleModelManagerTest extends GradleTest {
 
 		@Override
 		public HierarchicalEclipseProject getParent() {
-			File parentLoc = loc.getParentFile();
+			File parentLoc = parentOverrides.get(loc);
+			if (parentLoc==null) {
+				parentLoc = loc.getParentFile();
+			}
 			if (parentLoc.equals(PROJECT_FOLDER)) {
 				return null;
 			}
@@ -747,6 +909,17 @@ public class GradleModelManagerTest extends GradleTest {
 			ArrayList<HierarchicalEclipseProject> children = new ArrayList<HierarchicalEclipseProject>();
 			for (File childLoc : loc.listFiles()) {
 				if (childLoc.isDirectory() && !childLoc.getName().startsWith(".")) {
+					File changedParent = parentOverrides.get(childLoc);
+					if (changedParent==null) { //Exclude children that where moved out of me
+						children.add(create(childLoc));
+					}
+				}
+			}
+			//Add children that were moved into me
+			for (Entry<File, File> e : parentOverrides.entrySet()) {
+				File parentLoc = e.getValue();
+				File childLoc = e.getKey();
+				if (parentLoc.equals(loc)) {
 					children.add(create(childLoc));
 				}
 			}

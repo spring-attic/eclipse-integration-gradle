@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * Build strategy specific for subtypes of HierarchicalEclipseProject. 
@@ -55,33 +57,39 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 	@Override
 	public <T> List<ProjectBuildResult<T>> buildModels(GradleProject focusProject, Class<T> type, IProgressMonitor mon) throws CoreException {
 		GradleProject rootProject = focusProject.getRootProjectMaybe();
-		GradleProject referenceProject = rootProject==null ? focusProject : rootProject; //Try to use rootProject as 'reference project' if possible.
+		GradleProject[] buildFamily = null;
+		if (rootProject!=null) {
+			buildFamily = getBuildFamily(rootProject, focusProject);
+		}
+		//Warning, because we are 'lazy' root project isn't cleared for all 'orphaned' family members. So check buildFamily 
+		// to ensure we are not trying to build an orphan.
+		GradleProject referenceProject = buildFamily==null ? focusProject : rootProject; //Try to use rootProject as 'reference project' if possible.
 		BuildResult<? extends HierarchicalEclipseProject> referenceModel = buildReferenceModel(referenceProject, type, mon);
 		if (referenceModel.isSucceeded()) {
 			Walk walk = new Walk(referenceModel.getModel());
 			ArrayList<ProjectBuildResult<T>> models = new ArrayList<ProjectBuildResult<T>>(walk.cache.size());
-			models.add(new ProjectBuildResult<T>(focusProject, new BuildResult<T>(type, cast(type, walk.cache.get(focusProject)))));
+			HierarchicalEclipseProject focusModel = walk.cache.get(focusProject);
+			if (focusModel!=null) {
+				models.add(new ProjectBuildResult<T>(focusProject, new BuildResult<T>(type, cast(type, focusModel))));
+			}
 			for (Entry<GradleProject, HierarchicalEclipseProject> e : walk.cache.entrySet()) {
 				GradleProject project = e.getKey();
-				project.getProjectPreferences().setRootProjectLocation(walk.rootProject.getLocation());
+				setRootProject(project, walk.rootProject);
 				if (project!=focusProject) {
 					models.add(new ProjectBuildResult<T>(project, new BuildResult<T>(type, cast(type, e.getValue()))));
 				}
 			}
-			//most likely walk.rootProject should end up being the same as are original rootProject unless it was null.
-			//TODO: case where old rootproject is not the same as new one? How can this happen, what do we do about it?
 			setBuildFamily(walk.rootProject, walk.cache.keySet());
-			
-			//TODO: what if we are not a member of the build family just created? 
-			// This means we are no longer a part of this hierachy (must mean hierachy changed since last build. 
-			
+			if (focusModel==null) {
+				//We are not a member of this family anymore, reflect that by erasing root project info 
+				setRootProject(focusProject, null);
+			}
 			return models;
 		} else { //FAILED 
 			List<ProjectBuildResult<T>> results = new ArrayList<ProjectBuildResult<T>>();
 			results.add(new ProjectBuildResult<T>(focusProject, referenceModel.cast(type))); //focus project always first!
 			//Try to use persisted 'build family' to mark other family members as failed.
 			if (rootProject!=null) {
-				GradleProject[] buildFamily = getBuildFamily(rootProject);
 				if (buildFamily!=null) {
 					for (GradleProject familyMember : buildFamily) {
 						if (focusProject!=familyMember) {
@@ -94,19 +102,37 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 		}
 	}
 
+	private static void setRootProject(GradleProject project, GradleProject rootProject) {
+		if (rootProject!=null) {
+			project.getProjectPreferences().setRootProjectLocation(rootProject.getLocation());
+		} else {
+			project.getProjectPreferences().setRootProjectLocation(null);
+			Assert.isTrue(project.getRootProjectMaybe()==null);
+		}
+	}
+
 	/**
 	 * Get our 'build family'. This is set of projects that we where built-with together on the last succesfull
 	 * build. This info is always stored and retreived from the rootProject. So if rootProject is not known then
 	 * build family can not be determined.
 	 */
-	private GradleProject[] getBuildFamily(GradleProject rootProject) {
+	private GradleProject[] getBuildFamily(GradleProject rootProject, GradleProject focusProject) {
 		File[] memberLocs = rootProject.getProjectPreferences().get(BUILD_FAMILY_PROP, (File[])null);
 		if (memberLocs!=null) {
+			boolean valid = false;
 			GradleProject[] members = new GradleProject[memberLocs.length];
 			for (int i = 0; i < members.length; i++) {
 				members[i] = GradleCore.create(memberLocs[i]);
+				if (members[i]==focusProject) {
+					valid = true;
+				}
 			}
-			return members;
+			if (valid) {
+				return members;
+			} else {
+				// focus project is no longer a member of this family. Treat this case 
+				// similarly as a 'cold start' case where family is unknown.
+			}
 		}
 		return null;
 	}
@@ -115,7 +141,7 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 	public <T> Collection<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type) {
 		GradleProject root = focusProject.getRootProjectMaybe();
 		if (root!=null) {
-			GradleProject[] members = getBuildFamily(root);
+			GradleProject[] members = getBuildFamily(root, focusProject);
 			if (members!=null) {
 				return Arrays.asList(members);
 			}
