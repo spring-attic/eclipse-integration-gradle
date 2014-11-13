@@ -346,42 +346,38 @@ public class GradleProject {
 	 */
 	private String[] calculateProgramArgs() throws FastOperationFailedException {
 		GradleProjectPreferences projectPrefs = getProjectPreferences();
-		IPath location = getProject().getLocation();
 		String[] pgmArgs = projectPrefs.getProgramArgs();
 		GradleProject rootProject = getRootProject();
 		/*
 		 * Check if there is a settings file available
 		 */
 		if (rootProject != this
-				&& !location.append(Path.SEPARATOR + "settings.gradle")
-						.toFile().exists()
-				&& !location.removeLastSegments(1)
-						.append(Path.SEPARATOR + "settings.gradle")
-						.toFile().exists()) {
+				&& !new File(getLocation(), "settings.gradle").exists()
+				&& !new File(getLocation().getParent(), "settings.gradle").exists()) {
 			boolean addedSettingsFileArgument = false;
 			if (pgmArgs != null) {
 				for (int i = 0; !addedSettingsFileArgument
 						&& i < pgmArgs.length; i++) {
 					String arg = pgmArgs[i].trim();
-					if (arg.startsWith("-c")
-							|| arg.startsWith("--settings-file")) {
+					if ("-c".equals(arg) || "--settings-file".equals(arg)) {
 						addedSettingsFileArgument = true;
 					}
 				}
 			}
 			if (!addedSettingsFileArgument) {
-				ArrayList<String> newArgs = new ArrayList<String>(
-						pgmArgs == null ? 1 : pgmArgs.length + 1);
-				if (pgmArgs != null) {
-					for (String arg : pgmArgs) {
-						newArgs.add(arg);
+				File settingsFile = new File(rootProject.getLocation(), "settings.gradle");
+				if (settingsFile.exists()) {
+					ArrayList<String> newArgs = new ArrayList<String>(
+							pgmArgs == null ? 1 : pgmArgs.length + 2);
+					if (pgmArgs != null) {
+						for (String arg : pgmArgs) {
+							newArgs.add(arg);
+						}
 					}
+					newArgs.add("-c");
+					newArgs.add(settingsFile.toString());
+					pgmArgs = newArgs.toArray(new String[newArgs.size()]);
 				}
-				newArgs.add("-c"
-						+ rootProject.getProject().getLocation()
-								.append(Path.SEPARATOR + "settings.gradle")
-								.makeRelativeTo(location).toString());
-				pgmArgs = newArgs.toArray(new String[newArgs.size()]);
 			}
 		}
 		return pgmArgs;
