@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 
 /**
@@ -129,5 +130,22 @@ public class GradleModelManager {
 	Lock lockAll(Class<?> type) {
 		return getLockManager(type).lockAll();
 	}
+	
+	///////////// test-only related code below ///////////////////////////////////////////////////
+
+	/**
+	 * When set to a positive value, this causes thread to sleep for some duration
+	 * after {@link InconsistenProjectHierarchyException} is caught, before retrying.
+	 * <p>
+	 * This is meant for testing purposes to force certain outcomes of race conditions
+	 * and make certain bugs reliably reproducible. 
+	 * <p>
+	 * DO NOT use this in non-test context, there is no good reason to add this delay.
+	 */
+	public void sleepBetweenRetries(int duration) {
+		this.SLEEP_BETWEEN_RETRIES = duration;
+	}
+	
+	protected int SLEEP_BETWEEN_RETRIES = 0;
 
 }
