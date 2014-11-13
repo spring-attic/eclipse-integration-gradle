@@ -86,9 +86,13 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 
 	private void setProject(GradleProject project) {
 		if (currentProject != project) {
+			if (currentProject != null) {
+				currentProject.removeModelListener(modelListener);
+			}
 			currentProject = project;
-			currentProject.addModelListener(modelListener);
-			currentProject.refreshSpecificModel(BuildInvocations.class);
+			if (currentProject != null) {
+				currentProject.addModelListener(modelListener);
+			}
 		}
 	}
 
