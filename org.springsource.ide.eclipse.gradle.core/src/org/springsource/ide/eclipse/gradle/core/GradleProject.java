@@ -360,7 +360,7 @@ public class GradleProject {
 			if (rootProject != null) {
 				if (rootProject != project
 						&& !new File(project.getLocation(), GRADLE_SETTINGS_FILE).exists()
-						&& !project.getLocation().getPath().startsWith(rootProject.getLocation().getPath())) {
+						&& !new Path(project.getLocation().getPath()).isPrefixOf(new Path(rootProject.getLocation().getPath()))) {
 					boolean addedSettingsFileArgument = false;
 					if (pgmArgs != null) {
 						for (int i = 0; !addedSettingsFileArgument
