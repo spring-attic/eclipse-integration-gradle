@@ -424,13 +424,7 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			String[] programArgs = getProgramArgumentsArray(conf);
 			if (programArgs!=null) {
 				GradleProject project = getProject(conf);
-				String args[] = programArgs;
-				try {
-					args = project.calculateProgramArgs(programArgs);
-				} catch (FastOperationFailedException e) {
-					// ignore
-				}
-				gradleOp.withArguments(args);
+				gradleOp.withArguments(project == null ? programArgs : project.calculateProgramArgs(programArgs));
 			}
 		}
 	}

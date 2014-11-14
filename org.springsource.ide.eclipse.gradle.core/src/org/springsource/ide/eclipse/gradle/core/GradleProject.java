@@ -344,39 +344,43 @@ public class GradleProject {
 	 * @return parameters as array of strings
 	 * @throws FastOperationFailedException
 	 */
-	final public String[] calculateProgramArgs(String[] pgmArgs) throws FastOperationFailedException {
-		GradleProject rootProject = getRootProject();
-		/*
-		 * Check if there is a settings file available
-		 */
-		if (rootProject != this
-				&& !new File(getLocation(), "settings.gradle").exists()
-				&& !new File(getLocation().getParent(), "settings.gradle").exists()) {
-			boolean addedSettingsFileArgument = false;
-			if (pgmArgs != null) {
-				for (int i = 0; !addedSettingsFileArgument
-						&& i < pgmArgs.length; i++) {
-					String arg = pgmArgs[i].trim();
-					if ("-c".equals(arg) || "--settings-file".equals(arg)) {
-						addedSettingsFileArgument = true;
-					}
-				}
-			}
-			if (!addedSettingsFileArgument) {
-				File settingsFile = new File(rootProject.getLocation(), "settings.gradle");
-				if (settingsFile.exists()) {
-					ArrayList<String> newArgs = new ArrayList<String>(
-							pgmArgs == null ? 2 : pgmArgs.length + 2);
-					if (pgmArgs != null) {
-						for (String arg : pgmArgs) {
-							newArgs.add(arg);
+	final public String[] calculateProgramArgs(String[] pgmArgs) {
+		try {
+			GradleProject rootProject = getRootProject();
+			/*
+			 * Check if there is a settings file available
+			 */
+			if (rootProject != this
+					&& !new File(getLocation(), "settings.gradle").exists()
+					&& !new File(getLocation().getParent(), "settings.gradle").exists()) {
+				boolean addedSettingsFileArgument = false;
+				if (pgmArgs != null) {
+					for (int i = 0; !addedSettingsFileArgument
+							&& i < pgmArgs.length; i++) {
+						String arg = pgmArgs[i].trim();
+						if ("-c".equals(arg) || "--settings-file".equals(arg)) {
+							addedSettingsFileArgument = true;
 						}
 					}
-					newArgs.add("-c");
-					newArgs.add(settingsFile.toString());
-					pgmArgs = newArgs.toArray(new String[newArgs.size()]);
+				}
+				if (!addedSettingsFileArgument) {
+					File settingsFile = new File(rootProject.getLocation(), "settings.gradle");
+					if (settingsFile.exists()) {
+						ArrayList<String> newArgs = new ArrayList<String>(
+								pgmArgs == null ? 2 : pgmArgs.length + 2);
+						if (pgmArgs != null) {
+							for (String arg : pgmArgs) {
+								newArgs.add(arg);
+							}
+						}
+						newArgs.add("-c");
+						newArgs.add(settingsFile.toString());
+						pgmArgs = newArgs.toArray(new String[newArgs.size()]);
+					}
 				}
 			}
+		} catch (FastOperationFailedException e) {
+			GradleCore.log(e);
 		}
 		return pgmArgs;
 	}
