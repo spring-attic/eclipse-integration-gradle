@@ -321,7 +321,7 @@ public class GradleProject {
 			if (jvmArgs!=null) {
 				gradleOp.setJvmArguments(jvmArgs);
 			}
-			String[] pgmArgs = projectPrefs.getProgramArgs();
+			String[] pgmArgs = calculateProgramArgs(projectPrefs.getProgramArgs(), this);
 			if (pgmArgs!=null) {
 				gradleOp.withArguments(pgmArgs);
 			}
@@ -336,6 +336,60 @@ public class GradleProject {
 		}
 	}
 	
+	/**
+	 * Calculates parameters for the Gradle operation. Main purpose incorporate
+	 * settings file parameter if it's not there for the flat layout
+	 * multi-project model building or task execution.
+	 * 
+	 * @return parameters as array of strings
+	 * @throws FastOperationFailedException
+	 */
+	final public static String[] calculateProgramArgs(String[] pgmArgs, GradleProject project) {
+		if (project != null) {
+			try {
+				GradleProject rootProject = project.getRootProject();
+				/*
+				 * Check if there is a settings file available
+				 */
+				if (rootProject != project
+						&& !new File(project.getLocation(), "settings.gradle").exists()
+						&& !new File(project.getLocation().getParent(), "settings.gradle").exists()) {
+					boolean addedSettingsFileArgument = false;
+					if (pgmArgs != null) {
+						for (int i = 0; !addedSettingsFileArgument
+								&& i < pgmArgs.length; i++) {
+							String arg = pgmArgs[i].trim();
+							if ("-c".equals(arg) || "--settings-file".equals(arg)) {
+								addedSettingsFileArgument = true;
+							}
+						}
+					}
+					if (!addedSettingsFileArgument) {
+						File settingsFile = new File(rootProject.getLocation(), "settings.gradle");
+						if (settingsFile.exists()) {
+							ArrayList<String> newArgs = new ArrayList<String>(
+									pgmArgs == null ? 2 : pgmArgs.length + 2);
+							if (pgmArgs != null) {
+								for (String arg : pgmArgs) {
+									newArgs.add(arg);
+								}
+							}
+							newArgs.add("-c");
+							newArgs.add(settingsFile.toString());
+							pgmArgs = newArgs.toArray(new String[newArgs.size()]);
+						}
+					}
+				}
+			} catch (FastOperationFailedException e) {
+				/*
+				 * TODO: evaluate whether ignore or log this exception. It occurs every  time new Gradle project is created.
+				 */
+				GradleCore.log(e);
+			}
+		}
+		return pgmArgs;
+	}
+
 	/**
 	 * Gets the import preferences for a given project... 
 	 * @return
