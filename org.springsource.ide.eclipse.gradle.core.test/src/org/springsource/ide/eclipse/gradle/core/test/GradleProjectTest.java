@@ -45,7 +45,7 @@ public class GradleProjectTest extends GradleTest {
 				T model) {
 			assertEquals(this.project, project);
 			try {
-				receivedModel = project.getSkeletalGradleModel();
+				receivedModel = (HierarchicalEclipseProject) model;
 			} catch (Exception e) {
 				throw new Error(e);
 			}
@@ -54,12 +54,12 @@ public class GradleProjectTest extends GradleTest {
 
 		public void checkExpected(Class<? extends HierarchicalEclipseProject> expectModelType, int expectCount) {
 			assertEquals(expectCount, notifyCount);
-			assertTrue(expectModelType.isAssignableFrom(receivedModel.getClass()));
+			assertTrue(expectModelType.getSimpleName()+" is not assignable from "+ receivedModel.getClass().getSimpleName() ,
+					expectModelType.isAssignableFrom(receivedModel.getClass()));
 		}
 	}
 
 	public void testProjectModelListener() throws Exception {
-		//TODO: model manager, this tests behavior is not compaptible with new model listeners.
 		String[] projectNames = {
 				"multiproject",
 				"api",
@@ -92,16 +92,17 @@ public class GradleProjectTest extends GradleTest {
 		//After projects where build by Eclipse, we expect all projects to have full models
 		for (GradleProject project : projects) {
 			try {
-				project.getGradleModel(); //no Fast
+				project.getGradleModel(); //no FastOperationFailedException
 			} catch (FastOperationFailedException e) {
 				fail("Project "+project+" doesn't have a model");
 			}
 		}
 		
 		//Invalidate the models
-		projects[0].invalidateGradleModel();
+		for (GradleProject project : projects) {
+			project.invalidateGradleModel();
+		}
 		
-		//With Group model provider, invalidating one project should invalidate all
 		for (GradleProject project : projects) {
 			try {
 				project.getSkeletalGradleModel();
