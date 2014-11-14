@@ -381,6 +381,9 @@ public class GradleProject {
 					}
 				}
 			} catch (FastOperationFailedException e) {
+				/*
+				 * TODO: evaluate whether ignore or log this exception. It occurs every  time new Gradle project is created.
+				 */
 				GradleCore.log(e);
 			}
 		}
