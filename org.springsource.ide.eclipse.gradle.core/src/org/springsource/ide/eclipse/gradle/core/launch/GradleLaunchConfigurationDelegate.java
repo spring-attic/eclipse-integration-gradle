@@ -423,8 +423,7 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			}
 			String[] programArgs = getProgramArgumentsArray(conf);
 			if (programArgs!=null) {
-				GradleProject project = getProject(conf);
-				gradleOp.withArguments(project == null ? programArgs : project.calculateProgramArgs(programArgs));
+				gradleOp.withArguments(GradleProject.calculateProgramArgs(programArgs, getProject(conf)));
 			}
 		}
 	}
