@@ -90,7 +90,7 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 	}
 	
 	@Override
-	public String get(String name, String deflt) {
+	public synchronized String get(String name, String deflt) {
 		Properties props = getProperties();
 		if (props.containsKey(name)) {
 			return props.getProperty(name);
@@ -133,7 +133,7 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 	}
 
 	@Override
-	public void put(String key, String value) {
+	public synchronized void put(String key, String value) {
 		Properties props = getProperties();
 		boolean changed = false;
 		if (value==null) {
