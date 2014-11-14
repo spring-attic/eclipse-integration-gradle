@@ -784,6 +784,12 @@ public class GradleTaskRunTest extends GradleTest {
 		output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
 		assertContains("BUILD SUCCESSFUL", output);
 		assertContains("Hello from product", output);
+		
+		GradleLaunchConfigurationDelegate.setProgramArguments(launchConf, "--continue");
+		process = LaunchUtil.synchLaunch(launchConf);
+		output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
+		assertContains("BUILD SUCCESSFUL", output);
+		assertContains("Hello from product", output);
 	}
 
 

@@ -32,6 +32,7 @@ import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.gradle.tooling.LongRunningOperation;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.IJavaHomePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ArgumentsParser;
@@ -422,7 +423,14 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			}
 			String[] programArgs = getProgramArgumentsArray(conf);
 			if (programArgs!=null) {
-				gradleOp.withArguments(programArgs);
+				GradleProject project = getProject(conf);
+				String args[] = programArgs;
+				try {
+					args = project.calculateProgramArgs(programArgs);
+				} catch (FastOperationFailedException e) {
+					// ignore
+				}
+				gradleOp.withArguments(args);
 			}
 		}
 	}

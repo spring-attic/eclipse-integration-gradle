@@ -321,7 +321,7 @@ public class GradleProject {
 			if (jvmArgs!=null) {
 				gradleOp.setJvmArguments(jvmArgs);
 			}
-			String[] pgmArgs = calculateProgramArgs();
+			String[] pgmArgs = calculateProgramArgs(projectPrefs.getProgramArgs());
 			if (pgmArgs!=null) {
 				gradleOp.withArguments(pgmArgs);
 			}
@@ -344,9 +344,7 @@ public class GradleProject {
 	 * @return parameters as array of strings
 	 * @throws FastOperationFailedException
 	 */
-	private String[] calculateProgramArgs() throws FastOperationFailedException {
-		GradleProjectPreferences projectPrefs = getProjectPreferences();
-		String[] pgmArgs = projectPrefs.getProgramArgs();
+	final public String[] calculateProgramArgs(String[] pgmArgs) throws FastOperationFailedException {
 		GradleProject rootProject = getRootProject();
 		/*
 		 * Check if there is a settings file available
