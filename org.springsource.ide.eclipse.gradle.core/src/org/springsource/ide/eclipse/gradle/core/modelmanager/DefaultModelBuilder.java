@@ -12,7 +12,6 @@ package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springsource.ide.eclipse.gradle.core.GenericModelProvider;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 
 /**
@@ -21,10 +20,14 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
  * @author Kris De Volder
  */
 public class DefaultModelBuilder extends AbstractModelBuilder {
-
+	
 	@Override
 	public <T> T doBuild(GradleProject project, Class<T> type, IProgressMonitor mon) throws CoreException {
-		return GenericModelProvider.buildModel(project, type, mon);
+		return ToolinApiUtils.buildModel(project, type, mon);
+	}
+	
+	public static <T> String jobName(GradleProject project, Class<T> requiredType) {
+		return "Build '"+requiredType.getSimpleName()+"' model for '"+project.getDisplayName();
 	}
 
 }

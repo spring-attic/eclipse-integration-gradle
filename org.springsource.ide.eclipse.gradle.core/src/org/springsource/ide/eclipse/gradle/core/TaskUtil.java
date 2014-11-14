@@ -29,6 +29,7 @@ import org.gradle.tooling.internal.consumer.CancellationTokenInternal;
 import org.gradle.tooling.model.Task;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.ToolinApiUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil.Console;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -63,7 +64,7 @@ public class TaskUtil {
 			try {
 //				project = project.getRootProject(); //Workaround for bug http://issues.gradle.org/browse/GRADLE-1765
 				// is ok to go via root, since task path strings are 'absolute' anyway.
-				ProjectConnection conn = GradleModelProvider.getGradleConnector(project, new SubProgressMonitor(mon, 5));
+				ProjectConnection conn = ToolinApiUtils.getGradleConnector(project, new SubProgressMonitor(mon, 5));
 				//cumulative work: 10%
 
 				build = conn.newBuild();

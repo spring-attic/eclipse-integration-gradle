@@ -24,8 +24,8 @@ import org.gradle.tooling.model.GradleTask;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 
 /**
  * Content provider for displaying tasks tree
@@ -59,7 +59,9 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 	}
 	
 	private IGradleModelListener modelListener = new IGradleModelListener() {
-		public void modelChanged(final GradleProject p) {
+		@Override
+		public <T> void modelChanged(GradleProject p, Class<T> type,
+				T model) {
 			if (currentProject==p) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {

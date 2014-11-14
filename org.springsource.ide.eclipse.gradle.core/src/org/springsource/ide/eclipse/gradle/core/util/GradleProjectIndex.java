@@ -27,8 +27,8 @@ import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.GradleTask;
 import org.gradle.tooling.model.eclipse.EclipseProject;
-import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 
 /**
  * Naive tasks index implementation based on the root project
@@ -85,8 +85,7 @@ public class GradleProjectIndex {
 		} catch (FastOperationFailedException e) {
 			project.addModelListener(new IGradleModelListener() {
 				@Override
-				public void modelChanged(
-						org.springsource.ide.eclipse.gradle.core.GradleProject project) {
+				public <T> void modelChanged(org.springsource.ide.eclipse.gradle.core.GradleProject project, Class<T> type, T model) {
 					try {
 						initializeIndexRequest(project.getGradleModel());
 					} catch (Exception e) {

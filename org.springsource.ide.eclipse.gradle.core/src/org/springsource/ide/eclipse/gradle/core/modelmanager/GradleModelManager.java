@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
+import java.security.spec.MGF1ParameterSpec;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,20 +37,10 @@ public class GradleModelManager {
 	private ModelBuilder builder;
 	private Map<GradleProject, GradleProjectModelManager> managers;
 	private Map<Class<?>, LockManager> lockManagers = null; // lock managers, per model type.
-	private Map<ModelKey,ListenerList> listeners;
+	private Map<GradleProject,ListenerList> listeners;
 	
 	public GradleModelManager(ModelBuilder builder) {
 		this.builder = builder;
-	}
-	
-	/**
-	 * Create default model manager configuration as used in the 'production' version of the
-	 * tools. 
-	 */
-	public GradleModelManager() {
-		this(
-				new DefaultModelBuilder()
-		);
 	}
 	
 	public <T> T getModel(GradleProject project, Class<T> type) throws CoreException, FastOperationFailedException {
@@ -61,6 +52,13 @@ public class GradleModelManager {
 	 */
 	public synchronized void invalidate() {
 		managers = null;
+	}
+	
+	/**
+	 * Clears out models of all types for a given project.
+	 */
+	public synchronized void invalidate(GradleProject gradleProject) {
+		managers.remove(gradleProject);
 	}
 	
 	private synchronized GradleProjectModelManager getManager(GradleProject project) {
@@ -113,11 +111,11 @@ public class GradleModelManager {
 		}
 	}
 	
-	private synchronized ListenerList listeners(GradleProject project, Class<?> type) {
-		ModelKey key = new ModelKey(type, project);
+	private synchronized ListenerList listeners(GradleProject project) {
+		GradleProject key = project;
 		if (listeners==null) {
 			//Since keys are class objects can use IdentityHashMap
-			listeners = new HashMap<ModelKey, ListenerList>();
+			listeners = new HashMap<GradleProject, ListenerList>();
 		}
 		ListenerList llist = listeners.get(key);
 		if (llist==null) {
@@ -126,9 +124,9 @@ public class GradleModelManager {
 		return llist;
 	}
 	
-	private synchronized ListenerList listenersMaybe(GradleProject project, Class<?> type) {
+	private synchronized ListenerList listenersMaybe(GradleProject project) {
 		if (listeners!=null) {
-			ListenerList llist = listeners.get(new ModelKey(type,project));
+			ListenerList llist = listeners.get(project);
 			if (llist!=null) {
 				return llist;
 			}
@@ -137,7 +135,7 @@ public class GradleModelManager {
 	}
 	
 	private <T> void notifyListeners(GradleProject project, Class<T> type, T model) {
-		ListenerList llist = listenersMaybe(project, type);
+		ListenerList llist = listenersMaybe(project);
 		if (llist!=null) {
 			for (Object l : llist.getListeners()) {
 				((IGradleModelListener)l).modelChanged(project, type, model);
@@ -145,12 +143,12 @@ public class GradleModelManager {
 		}
 	}
 	
-	public <T> void addListener(GradleProject project, Class<T> type, IGradleModelListener listener) {
-		listeners(project, type).add(listener);
+	public <T> void addListener(GradleProject project, IGradleModelListener listener) {
+		listeners(project).add(listener);
 	}
 	
-	public <T> void removeListener(GradleProject project, Class<T> type, IGradleModelListener listener) {
-		ListenerList llist = listenersMaybe(project, type);
+	public <T> void removeListener(GradleProject project, IGradleModelListener listener) {
+		ListenerList llist = listenersMaybe(project);
 		if (llist!=null) {
 			llist.remove(listener);
 		}
@@ -203,5 +201,6 @@ public class GradleModelManager {
 	}
 	
 	protected int SLEEP_BETWEEN_RETRIES = 0;
+
 
 }

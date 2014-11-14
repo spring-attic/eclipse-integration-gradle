@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.model.locator.ModelLocator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -48,13 +49,14 @@ import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.EclipseSourceDirectory;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.gradle.tooling.model.gradle.ProjectPublications;
-import org.springsource.ide.eclipse.gradle.core.GradleModelProvider.GroupedModelProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClasspathContainerInitializer;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
@@ -94,17 +96,7 @@ public class GradleProject {
 	 */
 	private File location;
 	
-	/**
-	 * The model provider is reponsible for obtaining and cahching models from the tooling API for
-	 * models of type {@link HierarchicalEclipseProject} and {@link EclipseProject}
-	 */
-	private GroupedModelProvider modelProvider = null;
-	
-	/**
-	 * The model provider is reponsible for obtaining and cahching models of type {@link ProjectPublications}
-	 * from the tooling api.
-	 */
-	private GenericModelProvider<ProjectPublications> publicationsModelProvider;
+	private GradleModelManager mgr;
 	
 	/**
 	 * The class path container for this project is created lazily.
@@ -112,8 +104,6 @@ public class GradleProject {
 	private GradleClassPathContainer classPathContainer = null;
 
 	private IProject cachedProject;
-
-	private GradleModelListeners modelListeners = new GradleModelListeners();
 
 	private Job modelUpdateJob;
 
@@ -124,12 +114,14 @@ public class GradleProject {
 
 	private GradleDependencyComputer dependencyComputer;
 
-	public GradleProject(File canonicalFile) {
+	public GradleProject(File canonicalFile, GradleModelManager mgr) {
+		Assert.isLegal(mgr!=null, "GradleModelManager must not be null");
 		Assert.isLegal(canonicalFile!=null, "Project location must not be null");
 		Assert.isLegal(canonicalFile.exists(), "Project location doesn't exist: "+canonicalFile);
 		Assert.isLegal(canonicalFile.isAbsolute(), "Project location must be absolute: "+canonicalFile);
 		Assert.isLegal(canonicalFile.isDirectory(), "Project location must be a directory: "+canonicalFile);
 		this.location = canonicalFile;
+		this.mgr = mgr;
 	}
 	
 	/**
@@ -522,54 +514,16 @@ public class GradleProject {
 	}
 
 	public EclipseProject getGradleModel() throws FastOperationFailedException, CoreException {
-		return getGradleModel(EclipseProject.class);
+		return mgr.getModel(this, EclipseProject.class);
 	}
 	
 	public ProjectPublications getPublications(IProgressMonitor mon) throws Exception {
-		synchronized (this) {
-			if (publicationsModelProvider==null) {
-				publicationsModelProvider = new GenericModelProvider<ProjectPublications>(this, ProjectPublications.class);
-			}
-		}
-		return publicationsModelProvider.get(mon);
+		return mgr.getModel(this,ProjectPublications.class, mon);
 	}
 	
 	public <T extends HierarchicalEclipseProject> T getGradleModel(Class<T> type) throws FastOperationFailedException, CoreException {
-		GradleModelProvider provider = getModelProvider();
-		T model = provider.getCachedModel(this, type);
-		if (model==null) {
-			throw ExceptionUtil.coreException("Could not get a Gradle model for '"+this.getDisplayName()+"'. " +
-					"This may be because the Gradle project hierarchy changed after the project was imported.");
-		} else {
-			return model;
-		}
+		return mgr.getModel(this, type);
 	}
-
-	GroupedModelProvider getModelProvider() throws FastOperationFailedException {
-		if (modelProvider==null) {
-			GradleProject root = getRootProject();
-			if (root==this) {
-				modelProvider = GradleModelProvider.create(this);
-			} else {
-				modelProvider = root.getModelProvider();
-			}
-		}
-		return modelProvider;
-	}
-
-	GroupedModelProvider getModelProvider(Class<? extends HierarchicalEclipseProject> typeHint, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-		monitor.beginTask("Get model provider for '"+getDisplayName()+"'", 1);
-		try {
-			return getModelProvider();
-		} catch (FastOperationFailedException e) {
-			GroupedModelProvider provider = GradleModelProvider.create(this);
-			provider.ensureModels(typeHint, new SubProgressMonitor(monitor, 1));
-			return provider;
-		} finally {
-			monitor.done();
-		}
-	}
-
 	
 	/**
 	 * This is similar to getGradleModel except that when it fails to return a model right away,
@@ -591,7 +545,7 @@ public class GradleProject {
 	private synchronized void scheduleModelUpdate() {
 		if (modelUpdateJob==null) {
 			//If not null, another request for the same model is already active so no need to schedule again.
-			modelUpdateJob = JobUtil.schedule(new GradleRunnable("Build Gradle Model for "+getDisplayName()) {
+			modelUpdateJob = JobUtil.schedule(JobUtil.NO_RULE, new GradleRunnable("Build Gradle Model for "+getDisplayName()) {
 				@Override
 				public void doit(IProgressMonitor mon) throws Exception {
 					try {
@@ -608,47 +562,16 @@ public class GradleProject {
 		modelUpdateJob = null;
 	}
 
-	/**
-	 * Fetch gradle model of given type, take whatever time necessary to build the model if a model
-	 * isn't yet available.
-	 * <p>
-	 * This method is written in such a way that it only holds thread scynh locks for short time (while
-	 * it is trying initially to fetch model with the fast operation. If fast operation fails, the lock
-	 * is release and a model update request is started. While this request is active, we should not
-	 * hold the thread synch lock, since that will block concurrent 'fast' operations from returning quickly.
-	 * @throws  
-	 */
-	private <T extends HierarchicalEclipseProject> T getGradleModel(Class<T> type, IProgressMonitor monitor) 
-	throws OperationCanceledException, CoreException {
-		monitor.beginTask("Get model for '"+getDisplayName()+"'", 2);
-		try {
-			//1:
-			GradleModelProvider provider = getModelProvider(type, new SubProgressMonitor(monitor, 1));
-			
-			//2:
-			while (true) {
-				provider.ensureModels(type, new SubProgressMonitor(monitor, 1));
-				try {
-					return provider.getCachedModel(this, type);
-				} catch (FastOperationFailedException e) {
-					//Small chance that cache became invalidated before we could fetch model
-				}
-			}
-		} finally {
-			monitor.done();
-		}
-	}
-		
 	public EclipseProject getGradleModel(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-		return getGradleModel(EclipseProject.class, monitor);
+		return mgr.getModel(this, EclipseProject.class, monitor);
 	}
 	
 	public HierarchicalEclipseProject getSkeletalGradleModel() throws FastOperationFailedException, CoreException {
-		return getGradleModel(HierarchicalEclipseProject.class);
+		return mgr.getModel(this, HierarchicalEclipseProject.class);
 	}
 	
 	public HierarchicalEclipseProject getSkeletalGradleModel(IProgressMonitor monitor) throws OperationCanceledException, CoreException {
-		return getGradleModel(HierarchicalEclipseProject.class, monitor);
+		return mgr.getModel(this, HierarchicalEclipseProject.class, monitor);
 	}
 	
 	/**
@@ -665,11 +588,10 @@ public class GradleProject {
 	}
 
 	public void invalidateGradleModel() {
-		GradleModelProvider provider = modelProvider;
-		if (provider!=null) {
-			provider.invalidate();
-		}
-		publicationsModelProvider = null;
+		//TODO model manager: the old behavior invalidated whole project family by invalidating grouped model provider. 
+		// Here it only flushes models for this project and not any of its family members.
+		//Is this a problem?
+		mgr.invalidate(this);
 	}
 
 	/**
@@ -751,43 +673,6 @@ public class GradleProject {
 		return null;
 	}
 
-//	/**
-//	 * Set the cached GradleModel for this project. If the overWrite flag is set to true, then the model will
-//	 * be replaced no matter what. If the overwrite flag is not set, then we will only overwrite the existing model
-//	 * if the newly provided model is more detailed than what we currently have.
-//	 */
-//	public synchronized void setGradleModel(HierarchicalEclipseProject model, boolean overwrite) {
-//		if (overwrite) {
-//			internalSetModel(model);
-//		} else {
-//			//Be careful not to loose info by replacing our model with a less detailed model!
-//			if (this.gradleModel==null) {
-//				internalSetModel(model);
-//			} else if (isLessDetailed(model, this.gradleModel)) {
-//				//Don't replace the old model with a less detailed one.
-//			} else {
-//				internalSetModel(model);
-//			}
-//		}
-//	}
-
-	void notifyModelListeners(HierarchicalEclipseProject newModel) {
-		IGradleModelListener[] ls = modelListeners.toArray();
-		for (IGradleModelListener l : ls) {
-			//Iterate over local copy of listeners array to avoid concurrent modification exception (without needing to place
-			//this code in synch block.
-			l.modelChanged(this);
-		}
-	}
-	
-//	private boolean isLessDetailed(HierarchicalEclipseProject lessModel, HierarchicalEclipseProject moreModel) {
-//		if (lessModel instanceof HierarchicalEclipseProject) {
-//			return moreModel instanceof EclipseProject;
-//		}
-//		//If we get here, lessModel can only be a EclipseProject, so it can't be less detailed than any other model
-//		return false;
-//	}
-
 	@Override
 	public String toString() {
 		IProject project = getProject();
@@ -848,11 +733,11 @@ public class GradleProject {
 	}
 
 	public void removeModelListener(IGradleModelListener listener) {
-		modelListeners.remove(listener);
+		mgr.removeListener(this, listener);
 	}
 
-	public void addModelListener(IGradleModelListener modelListener) {
-		modelListeners.add(modelListener);
+	public void addModelListener(IGradleModelListener listener) {
+		mgr.addListener(this, listener);
 	}
 
 	/**
@@ -994,16 +879,9 @@ public class GradleProject {
 				return GradleCore.create(rootLocation);
 			}
 		}
-		//No project prefs, or broken prefs... Try the cached modelProvider... 
-		GroupedModelProvider provider = modelProvider; 
-		if (provider != null) {
-			GradleProject rootProject = provider.getRootProject();
-			if (prefs!=null) {
-				//Repair project prefs
-				prefs.setRootProjectLocation(rootProject.getLocation());
-			}
-			return rootProject;
-		}
+		//No project prefs, or broken prefs... 
+		//TODO: model manager, should we see if there's any HierarchicalExclipseProjectModel in the cache that might give us this info?
+		//  probably not, since info is set as soon as possible by model manager so if its not there... 
 		throw new FastOperationFailedException("GradleProject '"+getDisplayName()+"' neither has model provider nor a persisted root project location");
 	}
 
@@ -1018,18 +896,8 @@ public class GradleProject {
 		}
 	}
 
-	public void setModelProvider(GroupedModelProvider provider) {
-		if (this.modelProvider!=provider) {
-			this.modelProvider = provider;
-			GradleProjectPreferences prefs = getProjectPreferences();
-			if (prefs!=null) {
-				//Setting the root project location will ensure we can create the model provider after workspace is restarted
-				prefs.setRootProjectLocation(provider.getRootProject().getLocation());
-			}
-		}
-	}
-
 	public boolean isAtLeastM4() throws FastOperationFailedException, CoreException {
+		//TODO: remove this stuff? Who still cares about 1.0.M4 ???
 		HierarchicalEclipseProject model = getSkeletalGradleModel();
 		try {
 			model.getLinkedResources();

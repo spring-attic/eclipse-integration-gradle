@@ -36,6 +36,9 @@ import org.gradle.tooling.model.gradle.ProjectPublications;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.DefaultModelBuilder;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.ModelBuilder;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleAPIProperties;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -57,7 +60,9 @@ public class GradleCore extends Plugin {
 
 	private static GradleCore instance;
 
-	private static GradleProjectManager projectManager = new GradleProjectManager();
+	private static ModelBuilder modelBuilder = new DefaultModelBuilder();
+	private static GradleModelManager modelManager = new GradleModelManager(modelBuilder);
+	private static GradleProjectManager projectManager = new GradleProjectManager(modelManager);
 
 	private GradlePreferences gradlePreferences = null;
 

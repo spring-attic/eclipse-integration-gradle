@@ -774,7 +774,7 @@ public class GradleModelManagerTest extends GradleTest {
 			for (Class<?> type : types) {
 				Expector listener = new Expector(project, type, 1);
 				expectors.add(listener);
-				mgr.addListener(project, type, listener);
+				mgr.addListener(project, listener);
 			}
 		}
 		
@@ -807,7 +807,7 @@ public class GradleModelManagerTest extends GradleTest {
 		for (Expector expector : expectors) {
 			if (removableListener(expector.expectProject, expector.expectType)) {
 				System.out.println("Remove listener: "+expector);
-				mgr.removeListener(expector.expectProject, expector.expectType, expector);
+				mgr.removeListener(expector.expectProject, expector);
 				expector.reset(0); //shouldn't get any more events for removed listeners
 			} else {
 				expector.reset(); // other listeners should get same events as before
@@ -859,11 +859,11 @@ public class GradleModelManagerTest extends GradleTest {
 			System.out.println("Attaching listeners...");
 			
 			Expector expector = new Expector(project("animal/bird"), FooModel.class, 1);
-			mgr.addListener(expector.expectProject, expector.expectType, expector);
+			mgr.addListener(expector.expectProject, expector);
 			expectors.add(expector);
 			
 			expector = new Expector(project("people/mary"), BarModel.class, 1);
-			mgr.addListener(expector.expectProject, expector.expectType, expector);
+			mgr.addListener(expector.expectProject, expector);
 			expectors.add(expector);
 		}
 		
@@ -891,7 +891,7 @@ public class GradleModelManagerTest extends GradleTest {
 		for (Expector expector : expectors) {
 			if (expector.expectType==FooModel.class) {
 				System.out.println("Remove listener: "+expector);
-				mgr.removeListener(expector.expectProject, expector.expectType, expector);
+				mgr.removeListener(expector.expectProject, expector);
 				expector.reset(0); //shouldn't get any more events for removed listeners
 			} else {
 				expector.reset(); // other listeners should get same events as before
@@ -926,8 +926,8 @@ public class GradleModelManagerTest extends GradleTest {
 		Expector expectSuccess = new Expector(project("animal/bird/swallow"), FooModel.class, 1);
 		Expector expectFailure = new Expector(project("animal/bird/penguin"), FooModel.class, 0); //Failures don't produce model change events
 
-		mgr.addListener(expectSuccess.expectProject, expectSuccess.expectType, expectSuccess);
-		mgr.addListener(expectFailure.expectProject, expectFailure.expectType, expectFailure);
+		mgr.addListener(expectSuccess.expectProject, expectSuccess);
+		mgr.addListener(expectFailure.expectProject, expectFailure);
 
 		try {
 			mgr.getModel(project("animal/bird/penguin"), FooModel.class, new NullProgressMonitor());
@@ -939,8 +939,10 @@ public class GradleModelManagerTest extends GradleTest {
 		
 		mgr.getModel(project("animal/bird/swallow"), FooModel.class, new NullProgressMonitor());
 		mgr.getModel(project("animal/bird/swallow"), BarModel.class, new NullProgressMonitor());
-		
 	}
+	
+	//TODO: if make 'slow request' which starts a build, then a concurrent fast request...
+	// the fast request should fail fast and not block during the build.
 		
 	//TODO: effects of project deletion on grouped model builds?
 	
@@ -1173,7 +1175,6 @@ public class GradleModelManagerTest extends GradleTest {
 	public class VanillaHierarchyModel extends MockHierarchyModel {
 		public VanillaHierarchyModel(File loc) {
 			super(loc);
-			// TODO Auto-generated constructor stub
 		}
 
 		@Override
@@ -1401,7 +1402,9 @@ public class GradleModelManagerTest extends GradleTest {
 				error("Unexpected project: "+project.getDisplayName());
 			}
 			if (expectType!=null && !expectType.equals(type)) {
-				error("Unexpected type: "+type.getSimpleName());
+				//Not an error, listeners are attached per-project, not per-type. So we will get events for
+				// other types and should just ignore those events.
+				return;
 			}
 			if (!type.isAssignableFrom(model.getClass())) {
 				error("Bad model: "+model);

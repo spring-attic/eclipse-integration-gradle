@@ -16,8 +16,8 @@ import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 
 
 /**
@@ -39,8 +39,10 @@ public class GradleProjectTest extends GradleTest {
 		public TestProjectListener(GradleProject gradleProject) {
 			this.project = gradleProject;
 		}
-
-		public void modelChanged(GradleProject project) {
+		
+		@Override
+		public <T> void modelChanged(GradleProject project, Class<T> type,
+				T model) {
 			assertEquals(this.project, project);
 			try {
 				receivedModel = project.getSkeletalGradleModel();
@@ -54,10 +56,10 @@ public class GradleProjectTest extends GradleTest {
 			assertEquals(expectCount, notifyCount);
 			assertTrue(expectModelType.isAssignableFrom(receivedModel.getClass()));
 		}
-
 	}
 
 	public void testProjectModelListener() throws Exception {
+		//TODO: model manager, this tests behavior is not compaptible with new model listeners.
 		String[] projectNames = {
 				"multiproject",
 				"api",
@@ -123,24 +125,5 @@ public class GradleProjectTest extends GradleTest {
 		}
 		
 	}
-
-	
-// Test below removed because we are no longer trying to leep stuff working with pre 1.0 milestones now.
-	
-//	public void testIsAtLeastM4() throws Exception {
-//		GradleCore.getInstance().getPreferences().setDistribution(Distributions.M3_URI);
-//		IJavaProject jProj = GradleTaskRunTest.simpleProject("testIsAtLeastM4", "apply plugin: 'java'");
-//		GradleProject project = GradleCore.create(jProj);
-//		project.getSkeletalGradleModel(new NullProgressMonitor()); //Ensure we have a model before proceeding
-//		assertFalse(project.isAtLeastM4());
-//		
-//		GradleCore.getInstance().getPreferences().setDistribution(Distributions.M4_URI);
-//		project.invalidateGradleModel();
-//		
-//		project.getSkeletalGradleModel(new NullProgressMonitor()); //Ensure we have a model before proceeding
-//		assertTrue(project.isAtLeastM4());
-//		
-//	}
-	
 
 }
