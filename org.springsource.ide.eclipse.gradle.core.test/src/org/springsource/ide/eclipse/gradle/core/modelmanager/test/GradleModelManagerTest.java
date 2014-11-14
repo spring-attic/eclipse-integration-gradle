@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import junit.framework.AssertionFailedError;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,7 +35,9 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.AbstractModelBuilder;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.BuildResult;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.test.GradleTest;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -367,7 +371,7 @@ public class GradleModelManagerTest extends GradleTest {
 	
 	/**
 	 * When many request for a different models in a hierarchy come in quick succession 
-	 * only one model should get built also in the FAILURE.
+	 * only one model should get built also in the FAILURE case.
 	 */
 	public void testSimultaneousGroupedBuildRequestsFailure() throws Exception { 
 		
@@ -670,9 +674,10 @@ public class GradleModelManagerTest extends GradleTest {
 			promise.join();
 		}
 		
-		//This will fail on and off, because a race condition can cause extraneous builds
-		// But I think it should be avoidable if we more eagerly flush out known, incorrect
-		// family data from project preferences.
+		//This next condition is 'tricky'. In current implementation, based on how
+		// it works one can reason out that all scenarios including recovery / repair of
+		// broken family data will still only build each model once, even in the misprediction
+		// case.
 		assertEquals(2, builder.totalBuilds());
 
 		builder.dump();
@@ -719,10 +724,7 @@ public class GradleModelManagerTest extends GradleTest {
 		//   - if 'penguin' or 'swallow' win, then extraneous builds result (in bug case)
 		//   - If bird wins => ok.
 		
-		mgr.sleepBetweenRetries(100); //Causes birds retry to be slow so it will loose the race.
-
-		
-		//Can't make this test fail reliably it passes sometimes but fails often enough.
+		mgr.sleepBetweenRetries(100); //Causes bird retry to be slow so it will loose the race.
 		
 		for (ModelPromise<FooHierarchyModel> promise : promises) {
 			promise.join();
@@ -733,19 +735,217 @@ public class GradleModelManagerTest extends GradleTest {
 		assertEquals(2, builder.totalBuilds());
 	}
 	
-	//TODO: concurrent builds in hiearchy changed scenario. Should revert back to very conservative 'lock the world' 
-	//   strategy and not run lots of builds.
+	public void testChangingProjectHierachyOrphansMarkedOnNextBuild() throws Exception {
+		List<GradleProject> projects = testProjects();
+		for (GradleProject p : projects) {
+			mgr.getModel(p, FooHierarchyModel.class, new NullProgressMonitor());
+		}
+		
+		assertEquals(2, builder.totalBuilds());
+		builder.reset();
+		mgr.invalidate();
+		
+		//From now on birds are people rather than animals
+		changeParent(project("animal/bird"), project("people"));
+		
+		//If a 'animal' model is built...
+		mgr.getModel(project("animal"), FooHierarchyModel.class, new NullProgressMonitor());
+		//.. then 'birds' should become marked as as orphans
+		assertNull(project("animal/bird").getRootProjectMaybe());
+		assertNull(project("animal/bird/penguin").getRootProjectMaybe());
+		assertNull(project("animal/bird/swallow").getRootProjectMaybe());
+	}
 	
+	public void testModelListenersAll() throws Exception {
+		Class<?>[] types = {
+				FooModel.class,
+				FooHierarchyModel.class,
+				BarModel.class
+		};
+		
+		System.out.println("==== testModelListeners ====");
+		
+		List<GradleProject> projects = testProjects();
+		List<ModelPromise<?>> promises = new ArrayList<ModelPromise<?>>();
+		List<Expector> expectors = new ArrayList<Expector>();
+		
+		System.out.println("Attaching listeners...");
+		for (GradleProject project : projects) {
+			for (Class<?> type : types) {
+				Expector listener = new Expector(project, type, 1);
+				expectors.add(listener);
+				mgr.addListener(project, type, listener);
+			}
+		}
+		
+		System.out.println("Building models....");
+		for (GradleProject project : projects) {
+			for (Class<?> type : types) {
+				promises.add(getModelPromise(project, type));
+			}
+		}
+		for (ModelPromise<?> promise : promises) {
+			promise.join();
+		}
+
+		builder.reset();
+		mgr.invalidate(); //include this in expectations, we do not
+		                  // expect clearing caches to update listeners (listeners only get
+						  // called when actual models are added to the cache.
+		
+		System.out.println("Checking expectations...");
+		for (Expector expector : expectors) {
+			expector.assertExpectations();
+		}
+		
+		//Remove some listeners and check that they behave as expected if
+		// we do more model builds.
+	
+		System.out.println("==== testModelListeners phase 2 ====");
+		
+		System.out.println("Remove some listeners...");
+		for (Expector expector : expectors) {
+			if (removableListener(expector.expectProject, expector.expectType)) {
+				System.out.println("Remove listener: "+expector);
+				mgr.removeListener(expector.expectProject, expector.expectType, expector);
+				expector.reset(0); //shouldn't get any more events for removed listeners
+			} else {
+				expector.reset(); // other listeners should get same events as before
+			}
+		}
+		
+		System.out.println("Rebuilding models...");
+		promises = new ArrayList<ModelPromise<?>>();
+		for (GradleProject project : projects) {
+			for (Class<?> type : types) {
+				promises.add(getModelPromise(project, type));
+			}
+		}
+		for (ModelPromise<?> promise : promises) {
+			promise.join();
+		}
+
+		System.out.println("Checking expectations...");
+		for (Expector expector : expectors) {
+			expector.assertExpectations();
+		}
+		
+	}
+	
+	/**
+	 * Somewhat arbitrary criteria to pick some listeners to remove in the
+	 * preceding test.
+	 */
+	private boolean removableListener(GradleProject p, Class<?> type) {
+		return p.getLocation().getName().contains("a") && type==FooModel.class;
+	}
+	
+	
+	
+	public void testModelListenersSparse() throws Exception {
+		Class<?>[] types = {
+				FooModel.class,
+				FooHierarchyModel.class,
+				BarModel.class
+		};
+		
+		System.out.println("==== testModelListenersSparse ====");
+		
+		List<GradleProject> projects = testProjects();
+		List<ModelPromise<?>> promises = new ArrayList<ModelPromise<?>>();
+		List<Expector> expectors = new ArrayList<Expector>();
+				
+		{
+			System.out.println("Attaching listeners...");
+			
+			Expector expector = new Expector(project("animal/bird"), FooModel.class, 1);
+			mgr.addListener(expector.expectProject, expector.expectType, expector);
+			expectors.add(expector);
+			
+			expector = new Expector(project("people/mary"), BarModel.class, 1);
+			mgr.addListener(expector.expectProject, expector.expectType, expector);
+			expectors.add(expector);
+		}
+		
+		System.out.println("Building models....");
+		for (GradleProject project : projects) {
+			for (Class<?> type : types) {
+				promises.add(getModelPromise(project, type));
+			}
+		}
+		for (ModelPromise<?> promise : promises) {
+			promise.join();
+		}
+		
+		System.out.println("Checking expectations...");
+		for (Expector expector : expectors) {
+			expector.assertExpectations();
+		}
+		
+		//Remove some listeners and check that they behave as expected if
+		// we do more model builds.
+	
+		System.out.println("==== testModelListeners phase 2 ====");
+		
+		System.out.println("Remove some listeners...");
+		for (Expector expector : expectors) {
+			if (expector.expectType==FooModel.class) {
+				System.out.println("Remove listener: "+expector);
+				mgr.removeListener(expector.expectProject, expector.expectType, expector);
+				expector.reset(0); //shouldn't get any more events for removed listeners
+			} else {
+				expector.reset(); // other listeners should get same events as before
+			}
+		}
+		
+		System.out.println("Rebuilding models...");
+		
+		builder.reset();
+		mgr.invalidate(); 
+		
+		promises = new ArrayList<ModelPromise<?>>();
+		for (GradleProject project : projects) {
+			for (Class<?> type : types) {
+				promises.add(getModelPromise(project, type));
+			}
+		}
+		for (ModelPromise<?> promise : promises) {
+			promise.join();
+		}
+
+		System.out.println("Checking expectations...");
+		for (Expector expector : expectors) {
+			expector.assertExpectations();
+		}
+		
+	}
+	
+	public void testListenersFailure() throws Exception {
+		builder.addError(FooModel.class, project("animal/bird/penguin"), new BadProjectException("Penguin can't fly"));
+		
+		Expector expectSuccess = new Expector(project("animal/bird/swallow"), FooModel.class, 1);
+		Expector expectFailure = new Expector(project("animal/bird/penguin"), FooModel.class, 0); //Failures don't produce model change events
+
+		mgr.addListener(expectSuccess.expectProject, expectSuccess.expectType, expectSuccess);
+		mgr.addListener(expectFailure.expectProject, expectFailure.expectType, expectFailure);
+
+		try {
+			mgr.getModel(project("animal/bird/penguin"), FooModel.class, new NullProgressMonitor());
+			fail("Should have failed");
+		} catch (Throwable e) {
+			assertEquals("Penguin can't fly", ExceptionUtil.getDeepestCause(e).getMessage());
+		}
+		mgr.getModel(project("animal/bird/penguin"), BarModel.class, new NullProgressMonitor());
+		
+		mgr.getModel(project("animal/bird/swallow"), FooModel.class, new NullProgressMonitor());
+		mgr.getModel(project("animal/bird/swallow"), BarModel.class, new NullProgressMonitor());
+		
+	}
+		
 	//TODO: effects of project deletion on grouped model builds?
 	
-	//TODO: effects of project addition ?
-	
-	//TODO: when project hierarchy changes model manager recovers (i.e. can associate projects with new 'root' without 
-	//  throwing 'InconsistentProjectHierarchyException'.
-	//TODO: case where rootproject of a hierarchy changes since last succesful build.
-	
-	//TODO: test model listeners.
-	
+	//TODO: effects of project addition on grouped model builds?
+			
 	/////////////////////////////////////////////////////////////////////
 	
 	// no tests below this line, this is all the scaffolding to make the tests work.
@@ -1156,6 +1356,83 @@ public class GradleModelManagerTest extends GradleTest {
 			super(string);
 		}
 	}
+
+	/**
+	 * Listener for testing, it 'expects' a certain number of events and keeps
+	 * track of whether its expectations are met. At the end of the test
+	 * sequence the test should call 'assertExpectations' to verify whether
+	 * the expectations are met at that point in time.
+	 */
+	private static class Expector implements IGradleModelListener {
+
+		final private Class<?> expectType;
+		private int expectCount;
+		final private GradleProject expectProject;
+		
+		public Expector(GradleProject expectProject, Class<?> expectType, int expectCount) {
+			super();
+			this.expectProject = expectProject;
+			this.expectType = expectType;
+			this.expectCount = expectCount;
+		}
+
+		public void reset(int newExpectCount) {
+			this.expectCount = newExpectCount;
+			reset();
+		}
+
+		/**
+		 * Reset so we can verify the same expectations all over again.
+		 */
+		public void reset() {
+			actualCount = 0;
+		}
+
+		//Counts number of times listener is called
+		private int actualCount = 0;
+		
+		//Things that can be checked right away will result in message being built up in here.
+		private StringBuilder errors = null; 
+		
+		@Override
+		public synchronized <T> void modelChanged(GradleProject project, Class<T> type, T model) {
+			System.out.println("modelChange: "+project.getLocation().getName() + "  "+type.getSimpleName());
+			if (expectProject!=null && project!=expectProject) {
+				error("Unexpected project: "+project.getDisplayName());
+			}
+			if (expectType!=null && !expectType.equals(type)) {
+				error("Unexpected type: "+type.getSimpleName());
+			}
+			if (!type.isAssignableFrom(model.getClass())) {
+				error("Bad model: "+model);
+			}
+			actualCount++;
+		}
+
+		private synchronized void error(String string) {
+			if (errors==null) {
+				errors = new StringBuilder();
+			}
+			errors.append(string);
+			errors.append("\n");
+		}
+		
+		public void assertExpectations() throws AssertionFailedError {
+			String me = "Listener ["+expectProject.getLocation().getName()+", "+expectType.getSimpleName()+"]";
+			if (errors!=null) {
+				fail(me+":\n"+errors);
+			}
+			assertEquals(me+" calls",
+					expectCount, actualCount);
+		}
+		
+		@Override
+		public String toString() {
+			return "[" + expectProject.getLocation().getName()+", "+expectType.getSimpleName()+"]";
+		}
+		
+	}
+
 
 	
 }

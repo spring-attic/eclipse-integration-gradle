@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ListenerList;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
@@ -35,6 +36,7 @@ public class GradleModelManager {
 	private ModelBuilder builder;
 	private Map<GradleProject, GradleProjectModelManager> managers;
 	private Map<Class<?>, LockManager> lockManagers = null; // lock managers, per model type.
+	private Map<ModelKey,ListenerList> listeners;
 	
 	public GradleModelManager(ModelBuilder builder) {
 		this.builder = builder;
@@ -93,11 +95,64 @@ public class GradleModelManager {
 	 * Add new build results to the model cache, overwriting any buildresults that are
 	 * already stored at the same coordinates.
 	 */
-	synchronized <T> void addToCache(List<ProjectBuildResult<T>> buildResults) {
-		for (ProjectBuildResult<?> buildResult : buildResults) {
-			if (!buildResult.isCancelation()) {
-				getManager(buildResult.getProject()).addToCache(buildResult.getResult());
+	<T> void addToCache(List<ProjectBuildResult<T>> buildResults) {
+		synchronized (this) {
+			for (ProjectBuildResult<?> buildResult : buildResults) {
+				if (!buildResult.isCancelation()) {
+					getManager(buildResult.getProject()).addToCache(buildResult.getResult());
+				}
 			}
+		}
+		//We take care to notify listeners outside synch blocks for less chance of deadlocking
+		// There's really no need for the notifications to be sent while holding locks on
+		// the cache
+		for (ProjectBuildResult<T> buildResult : buildResults) {
+			if (!buildResult.isFailure()) {
+				notifyListeners(buildResult.getProject(), buildResult.getResult().getType(), buildResult.getResult().getModel());
+			}
+		}
+	}
+	
+	private synchronized ListenerList listeners(GradleProject project, Class<?> type) {
+		ModelKey key = new ModelKey(type, project);
+		if (listeners==null) {
+			//Since keys are class objects can use IdentityHashMap
+			listeners = new HashMap<ModelKey, ListenerList>();
+		}
+		ListenerList llist = listeners.get(key);
+		if (llist==null) {
+			listeners.put(key, llist = new ListenerList(ListenerList.IDENTITY));
+		}
+		return llist;
+	}
+	
+	private synchronized ListenerList listenersMaybe(GradleProject project, Class<?> type) {
+		if (listeners!=null) {
+			ListenerList llist = listeners.get(new ModelKey(type,project));
+			if (llist!=null) {
+				return llist;
+			}
+		}
+		return null;
+	}
+	
+	private <T> void notifyListeners(GradleProject project, Class<T> type, T model) {
+		ListenerList llist = listenersMaybe(project, type);
+		if (llist!=null) {
+			for (Object l : llist.getListeners()) {
+				((IGradleModelListener)l).modelChanged(project, type, model);
+			}
+		}
+	}
+	
+	public <T> void addListener(GradleProject project, Class<T> type, IGradleModelListener listener) {
+		listeners(project, type).add(listener);
+	}
+	
+	public <T> void removeListener(GradleProject project, Class<T> type, IGradleModelListener listener) {
+		ListenerList llist = listenersMaybe(project, type);
+		if (llist!=null) {
+			llist.remove(listener);
 		}
 	}
 
@@ -130,6 +185,7 @@ public class GradleModelManager {
 	Lock lockAll(Class<?> type) {
 		return getLockManager(type).lockAll();
 	}
+	
 	
 	///////////// test-only related code below ///////////////////////////////////////////////////
 

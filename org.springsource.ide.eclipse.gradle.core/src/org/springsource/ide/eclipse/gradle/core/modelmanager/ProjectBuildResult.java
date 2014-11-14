@@ -43,6 +43,10 @@ public class ProjectBuildResult<T> {
 	public boolean isCancelation() {
 		return result.isFailed() && ExceptionUtil.isCancelation(result.getError());
 	}
+
+	public boolean isFailure() {
+		return result.isFailed();
+	}
 	
 	
 

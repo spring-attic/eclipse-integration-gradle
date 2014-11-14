@@ -12,17 +12,20 @@ package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation.ExistingProjectException;
 
 /**
  * Model cache manager for a single GradleProject
@@ -155,11 +158,12 @@ public class GradleProjectModelManager {
 		return null;
 	}
 
-	public synchronized void addToCache(BuildResult<?> result) {
+	synchronized void addToCache(BuildResult<?> result) {
 		if (cache==null) {
 			cache = new HashMap<Class<?>, BuildResult<?>>();
 		}
 		cache.put(result.getType(), result);
 	}
+
 	
 }

@@ -43,15 +43,6 @@ public class BuildResult<T> {
 		this.error = error;
 	}
 
-	public static <T> BuildResult<T> fromPromise(Class<T> type, JoinableContinuation<T> promise) {
-		//TODO: For efficiency sake, try to avoid throwing and then catching the exception.
-		try {
-			return new BuildResult<T>(type, promise.join());
-		} catch (Throwable e) {
-			return new BuildResult<T>(type, e);
-		}
-	}
-
 	public Class<T> getType() {
 		return type;
 	}
