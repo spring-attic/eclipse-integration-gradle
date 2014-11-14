@@ -82,6 +82,11 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 public class GradleProject {
 	
 	public static boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	
+	private static final String GRADLE_SETTINGS_FILE = "settings.gradle";
+	private static final String ARG_SETTINGS_FILE_1 = "-c";
+	private static final String ARG_SETTINGS_FILE_2 = "--settings-file";
+	
 	private void debug(String msg) {
 		if (DEBUG) {
 			System.out.println(this+": "+msg);
@@ -342,30 +347,32 @@ public class GradleProject {
 	 * multi-project model building or task execution.
 	 * 
 	 * @return parameters as array of strings
-	 * @throws FastOperationFailedException
 	 */
 	final public static String[] calculateProgramArgs(String[] pgmArgs, GradleProject project) {
 		if (project != null) {
-			try {
-				GradleProject rootProject = project.getRootProject();
-				/*
-				 * Check if there is a settings file available
-				 */
+				GradleProject rootProject = project.getRootProjectMaybe();
+			/*
+			 * Check if the project is a sub-project in a flat multi-project
+			 * layout. if there is no settings file provided with the current
+			 * arguments add the settings file from the root project if it
+			 * exists to CLI arguments
+			 */
+			if (rootProject != null) {
 				if (rootProject != project
-						&& !new File(project.getLocation(), "settings.gradle").exists()
-						&& !new File(project.getLocation().getParent(), "settings.gradle").exists()) {
+						&& !new File(project.getLocation(), GRADLE_SETTINGS_FILE).exists()
+						&& !new Path(project.getLocation().getPath()).isPrefixOf(new Path(rootProject.getLocation().getPath()))) {
 					boolean addedSettingsFileArgument = false;
 					if (pgmArgs != null) {
 						for (int i = 0; !addedSettingsFileArgument
 								&& i < pgmArgs.length; i++) {
 							String arg = pgmArgs[i].trim();
-							if ("-c".equals(arg) || "--settings-file".equals(arg)) {
+							if (ARG_SETTINGS_FILE_1.equals(arg) || ARG_SETTINGS_FILE_2.equals(arg)) {
 								addedSettingsFileArgument = true;
 							}
 						}
 					}
 					if (!addedSettingsFileArgument) {
-						File settingsFile = new File(rootProject.getLocation(), "settings.gradle");
+						File settingsFile = new File(rootProject.getLocation(), GRADLE_SETTINGS_FILE);
 						if (settingsFile.exists()) {
 							ArrayList<String> newArgs = new ArrayList<String>(
 									pgmArgs == null ? 2 : pgmArgs.length + 2);
@@ -374,17 +381,12 @@ public class GradleProject {
 									newArgs.add(arg);
 								}
 							}
-							newArgs.add("-c");
+							newArgs.add(ARG_SETTINGS_FILE_1);
 							newArgs.add(settingsFile.toString());
 							pgmArgs = newArgs.toArray(new String[newArgs.size()]);
 						}
 					}
 				}
-			} catch (FastOperationFailedException e) {
-				/*
-				 * TODO: evaluate whether ignore or log this exception. It occurs every  time new Gradle project is created.
-				 */
-				GradleCore.log(e);
 			}
 		}
 		return pgmArgs;
