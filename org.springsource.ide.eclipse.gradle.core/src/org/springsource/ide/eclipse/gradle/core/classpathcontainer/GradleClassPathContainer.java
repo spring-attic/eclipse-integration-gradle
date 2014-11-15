@@ -91,7 +91,8 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	private EclipseProject oldModel = null;
 	private IClasspathEntry[] persistedEntries;
 	private IRefreshListener refreshListener;
-	private ProjectOpenCloseListener openCloseListener;
+	
+	private static ProjectOpenCloseListener openCloseListener;
 	
 	public void addRefreshListener(IRefreshListener l) {
 		Assert.isLegal(refreshListener==null);
@@ -185,17 +186,53 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 * and update remapped jars in classpath container
 	 * 
 	 */
-	private void ensureOpenCloseListener() {
+	private static synchronized void ensureOpenCloseListener() {
 		if (openCloseListener==null) {
 			openCloseListener = new ProjectOpenCloseListener() {
+				
+				private Job qrJob = null;
+				
 				@Override
 				public void projectOpened(IProject project) {
 					quickRefreshAllContainers();
+					System.out.println("OPENED: "+project.getName());
 				}
 				
 				@Override
 				public void projectClosed(IProject project) {
+					System.out.println("CLOSED: "+project.getName());
 					quickRefreshAllContainers();
+				}
+				
+				/**
+				 * Refresh classpath entries in all containers in the workspace quickly (i.e. without invalidating
+				 * the cached gradle models and rebuilding them). This is useful when the entries need to be
+				 * recomputed because a project was opened / closed and so jar -> gradle or 
+				 */
+				private synchronized void quickRefreshAllContainers() {
+					System.out.println("quickRefreshAllContainers");
+					final Collection<GradleProject> projects = GradleCore.getGradleProjects();
+					if (!projects.isEmpty()) {
+						if (qrJob==null) {
+							qrJob = new GradleRunnable("Refresh Gradle classpath containers") {
+								@Override
+								public void doit(IProgressMonitor mon) throws Exception {
+									mon.beginTask("Refresh Gradle Classpath Containers", projects.size());
+									for (GradleProject p : projects) {
+										GradleClassPathContainer classpath = p.getClassPathcontainer();
+										if (classpath!=null) {
+											mon.subTask("Refresh "+p.getName());
+											classpath.clearPersistedEntries();
+											classpath.notifyJDT();
+										}
+										mon.worked(1);
+									}
+								}
+							}.asJob();
+							qrJob.setRule(JobUtil.buildRule());
+						}
+						qrJob.schedule(100); //Slight delay for 'bursty' sets of change events.
+					}
 				}
 			};
 			GradleCore.getInstance().addOpenCloseListener(openCloseListener);
@@ -270,33 +307,6 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		}
 	}
 
-
-	/**
-	 * Refresh classpath entries in all containers in the workspace quickly (i.e. without invalidating
-	 * the cached gradle models and rebuilding them). This is useful when the entries need to be
-	 * recomputed because a project was opened / closed and so jar -> gradle or 
-	 */
-	private void quickRefreshAllContainers() {
-		//TODO mechanism to avoid repeatedly scheduling many of these jobs in parallel.
-		final Collection<GradleProject> projects = GradleCore.getGradleProjects();
-		if (!projects.isEmpty()) {
-			JobUtil.schedule(new GradleRunnable("Refresh Gradle classpath containers") {
-				@Override
-				public void doit(IProgressMonitor mon) throws Exception {
-					mon.beginTask("Refresh Gradle Classpath Containers", projects.size());
-					for (GradleProject p : projects) {
-						GradleClassPathContainer classpath = p.getClassPathcontainer();
-						if (classpath!=null) {
-							mon.subTask("Refresh "+p.getName());
-							clearPersistedEntries();
-							notifyJDT();
-						}
-						mon.worked(1);
-					}
-				}
-			});
-		}
-	}
 	
 	@Override
 	public String toString() {
