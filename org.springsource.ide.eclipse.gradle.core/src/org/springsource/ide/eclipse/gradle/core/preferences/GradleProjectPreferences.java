@@ -32,7 +32,7 @@ import org.springsource.ide.eclipse.gradle.core.util.ResourceListEncoder;
 public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	
 	private void debug(String string) {
-//		System.out.println(string);
+		System.out.println(string);
 	}
 
 	private static final String LINKED_RESOURCES_PREF = "org.springsource.ide.eclipse.gradle.linkedresources";
