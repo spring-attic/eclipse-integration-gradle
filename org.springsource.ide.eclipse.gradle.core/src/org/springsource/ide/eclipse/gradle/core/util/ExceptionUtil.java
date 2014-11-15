@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.gradle.tooling.BuildException;
+import org.gradle.tooling.provider.model.UnknownModelException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
@@ -132,6 +133,12 @@ public class ExceptionUtil {
 // so test based on classname:
 			|| cause.getClass().getSimpleName().equals("BuildCancelledException")
 			|| cause instanceof InterruptedException;
+	}
+
+	public static boolean isUnknownModelException(Throwable e) {
+		// org.gradle.tooling.provider.model.UnknownModelException
+		// org.gradle.tooling.UnknownModelException
+		return ExceptionUtil.getDeepestCause(e).getClass().getSimpleName().equals("UnknownModelException");
 	}
 	
 }

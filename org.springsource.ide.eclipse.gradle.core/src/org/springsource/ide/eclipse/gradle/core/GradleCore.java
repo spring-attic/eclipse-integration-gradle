@@ -63,13 +63,11 @@ public class GradleCore extends Plugin {
 	private static ModelBuilder modelBuilder = new DefaultModelBuilder();
 	private static GradleModelManager modelManager = new GradleModelManager(modelBuilder);
 	private static GradleProjectManager projectManager = new GradleProjectManager(modelManager);
-
-	private GradlePreferences gradlePreferences = null;
-
-	private GradleAPIProperties properties;
 	
+	private GradlePreferences gradlePreferences = null;
+	private GradleAPIProperties properties;
 	private ProjectOpenCloseListenerManager openCloseListeners = null;
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -231,7 +229,11 @@ public class GradleCore extends Plugin {
 				}
 			}
 		} catch (Throwable e) {
-			GradleCore.log(e);
+			if (ExceptionUtil.isUnknownModelException(e)) {
+				//Ignore, it means this feature is not supported on older version of gradle.
+			} else {
+				GradleCore.log(e);
+			}
 		} finally {
 			mon.done();
 		}

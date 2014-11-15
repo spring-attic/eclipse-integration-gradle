@@ -45,7 +45,9 @@ public class GradleProjectTest extends GradleTest {
 				T model) {
 			assertEquals(this.project, project);
 			try {
-				receivedModel = (HierarchicalEclipseProject) model;
+				if (HierarchicalEclipseProject.class.isAssignableFrom(type)) {
+					receivedModel = (HierarchicalEclipseProject) model;
+				}
 			} catch (Exception e) {
 				throw new Error(e);
 			}

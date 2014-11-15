@@ -786,7 +786,6 @@ public class GradleImportTests extends GradleTest {
 			actualRootLocation = project.getRootProject().getLocation();
 			assertEquals("Root associated with "+project, rootLocation, actualRootLocation);
 			
-			//File actualRootLocation = project.getRootProject().getLocation();
 		}
 	}
 	

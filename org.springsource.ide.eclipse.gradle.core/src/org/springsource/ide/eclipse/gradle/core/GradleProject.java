@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.maven.model.locator.ModelLocator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -60,7 +59,6 @@ import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListene
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.IllegalClassPathEntryException;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
@@ -373,10 +371,7 @@ public class GradleProject {
 					}
 				}
 			} catch (FastOperationFailedException e) {
-				/*
-				 * TODO: evaluate whether ignore or log this exception. It occurs every  time new Gradle project is created.
-				 */
-				GradleCore.log(e);
+				//GradleCore.log(e);
 			}
 		}
 		return pgmArgs;
@@ -517,7 +512,7 @@ public class GradleProject {
 		return mgr.getModel(this, EclipseProject.class);
 	}
 	
-	public ProjectPublications getPublications(IProgressMonitor mon) throws Exception {
+	public ProjectPublications getPublications(IProgressMonitor mon) throws CoreException {
 		return mgr.getModel(this,ProjectPublications.class, mon);
 	}
 	
@@ -602,7 +597,7 @@ public class GradleProject {
 	 */
 	public void convertToGradleProject(IProjectMapper projectMapping, ErrorHandler eh, IProgressMonitor monitor) {
 		debug("convertToGradleProject called");
-		monitor.beginTask("Convert to Gradle project", 8);
+		monitor.beginTask("Convert to Gradle project", 7);
 		try {
 			//1: natures
 			NatureUtils.ensure(getProject(), new SubProgressMonitor(monitor, 1), 
@@ -622,27 +617,30 @@ public class GradleProject {
 			debug("refreshed source folders");
 			
 			//4: Force root project cache to be set
-			try {
-				getRootProject();
-				debug("root project cached");
-			} catch (FastOperationFailedException e) {
-				debug("FAILED to cache root project: " + e.getMessage());
-				
-				 //Shouldn't happen... because by now, there should already be gradle model available
-				throw ExceptionUtil.coreException(e);
-			} finally {
-				monitor.worked(1);
-			}
+//Removed calling getRootProject doesn't force anything into the cache. 
+// model builds do that now. It should not be possible to get this far in here without 
+// a model, and if there's a model then rootProject should be set.
+//			try {
+//				getRootProject();
+//				debug("root project cached");
+//			} catch (FastOperationFailedException e) {
+//				debug("FAILED to cache root project: " + e.getMessage());
+//				
+//				 //Shouldn't happen... because by now, there should already be gradle model available
+//				throw ExceptionUtil.coreException(e);
+//			} finally {
+//				monitor.worked(1);
+//			}
 			
-			//5: Enable DSL support
+			//4: Enable DSL support
 			DSLDSupport.maybeAdd(this, eh, new SubProgressMonitor(monitor, 1));
 			debug("DSLDSupport maybe added");
 			
-			//6: Add classpath container
+			//5: Add classpath container
 			GradleClassPathContainer.addTo(getJavaProject(), new SubProgressMonitor(monitor, 1));
 			debug("Classpath container added");
 
-			//7: Add WTP fixups
+			//6: Add WTP fixups
 			WTPUtil.addWebLibraries(this);
 			monitor.worked(1);
 		} catch (CoreException e) {
@@ -879,10 +877,20 @@ public class GradleProject {
 				return GradleCore.create(rootLocation);
 			}
 		}
-		//No project prefs, or broken prefs... 
-		//TODO: model manager, should we see if there's any HierarchicalExclipseProjectModel in the cache that might give us this info?
-		//  probably not, since info is set as soon as possible by model manager so if its not there... 
-		throw new FastOperationFailedException("GradleProject '"+getDisplayName()+"' neither has model provider nor a persisted root project location");
+		//Sometimes the prefs get damaged because somebody deleted them... or whatever.
+		// Try to recover if we have cached models.
+		try {
+			HierarchicalEclipseProject root = getGradleModel(HierarchicalEclipseProject.class);
+			HierarchicalEclipseProject parent;
+			while ((parent=root.getParent())!=null) {
+				root = parent;
+			}
+			prefs.setRootProjectLocation(root.getProjectDirectory());
+			return GradleCore.create(root);
+		} catch (Throwable e) {
+			//ignore recovery attempt failures.
+		}
+		throw new FastOperationFailedException("GradleProject '"+getDisplayName()+"' does not have a persisted root project location or model that allows computing it");
 	}
 
 	/**

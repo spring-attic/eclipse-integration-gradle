@@ -56,7 +56,7 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 
 	@Override
 	public <T> List<ProjectBuildResult<T>> buildModels(GradleProject focusProject, Class<T> type, IProgressMonitor mon) throws CoreException {
-		GradleProject rootProject = focusProject.getRootProjectMaybe();
+		GradleProject rootProject = getRootProject(focusProject);
 		GradleProject[] buildFamily = null;
 		if (rootProject!=null) {
 			buildFamily = getBuildFamily(rootProject);
@@ -105,6 +105,17 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 		}
 	}
 
+	private static GradleProject getRootProject(GradleProject project) {
+		//Note: it is important to use this method rather than the similar one that is
+		// defined on GradleProject because that one has some funky recovery logic for
+		// when someone deleted the prefs files. This creates some bad recursion.
+		File loc = project.getProjectPreferences().getRootProjectLocation();
+		if (loc!=null && loc.exists()) {
+			return GradleCore.create(loc);
+		}
+		return null;
+	}
+	
 	private static void setRootProject(GradleProject project, GradleProject rootProject) {
 		if (rootProject!=null) {
 			project.getProjectPreferences().setRootProjectLocation(rootProject.getLocation());
@@ -132,7 +143,7 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 	
 	@Override
 	public <T> Collection<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type) {
-		GradleProject root = focusProject.getRootProjectMaybe();
+		GradleProject root = getRootProject(focusProject);
 		if (root!=null) {
 			GradleProject[] members = getBuildFamily(root);
 			if (members!=null) {
