@@ -38,13 +38,13 @@ public class BusyStatus {
 	
 	public synchronized void start() {
 		busyCount++;
-		System.out.println("BusyStatus ++ "+busyCount);
+//		System.out.println("BusyStatus ++ "+busyCount);
 	}
 	
 	public synchronized void stop() {
 		Assert.isLegal(busyCount>0);
 		busyCount--;
-		System.out.println("BusyStatus -- "+busyCount);
+//		System.out.println("BusyStatus -- "+busyCount);
 		notify();
 	}
 	

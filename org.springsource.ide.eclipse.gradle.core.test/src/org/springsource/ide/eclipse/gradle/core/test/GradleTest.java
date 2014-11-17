@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.codeassist.ThrownExceptionFinder;
 import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
@@ -105,6 +104,8 @@ public abstract class GradleTest extends TestCase {
 		} finally {
 			Job.getJobManager().endRule(buildRule);
 		}
+		GradleCore.getInstance().getPreferences().setRemapJarsToGradleProjects(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE);
+		GradleCore.getInstance().getPreferences().setRemapJarsToMavenProjects(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN);
 	}
 
 	public static void deleteAllProjects() throws CoreException {
@@ -139,7 +140,7 @@ public abstract class GradleTest extends TestCase {
 					ACondition.assertJobManagerIdle();
 					return true;
 				}
-			}.waitFor(180000);
+			}.waitFor(120000);
 		} catch (Throwable e) {
 			//Print this as interesting information about the jobs that keep on chugging away...
 			//but do not let this cause test failures.
@@ -277,9 +278,7 @@ public abstract class GradleTest extends TestCase {
 	/**
 	 * Imports a test project and all its subprojects into the workspace.
 	 */
-	public static void importTestProject(String projectName, boolean copyToWorkspace) throws IOException,
-			NameClashException, CoreException, ExistingProjectException,
-			MissingProjectDependencyException {
+	public static void importTestProject(String projectName, boolean copyToWorkspace) throws Exception {
 		File parentFolder = null;
 		if (copyToWorkspace) {
 			parentFolder = Platform.getLocation().toFile();
@@ -390,11 +389,17 @@ public abstract class GradleTest extends TestCase {
 		}
 	}
 
-	public static void importTestProject(File testProj)
-			throws NameClashException, CoreException, ExistingProjectException,
-			MissingProjectDependencyException {
-		importTestProjectOperation(testProj)
-			.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+	public static void importTestProject(final File testProj)
+			throws Exception {
+		JobUtil.withRule(JobUtil.buildRule(), new NullProgressMonitor(), 1, new GradleRunnable("Import "+testProj) {
+
+			@Override
+			public void doit(IProgressMonitor mon) throws Exception {
+				importTestProjectOperation(testProj)
+					.perform(defaultTestErrorHandler(), new NullProgressMonitor());
+			}
+			
+		});
 	}
 
 	public static GradleImportOperation importTestProjectOperation(File testProj)

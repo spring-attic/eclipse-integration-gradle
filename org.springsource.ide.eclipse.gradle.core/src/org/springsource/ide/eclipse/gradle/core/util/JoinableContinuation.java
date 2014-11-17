@@ -71,7 +71,7 @@ public class JoinableContinuation<T> extends Continuation<T> implements Joinable
 	 */
 	@Override
 	public void error(Throwable e) {
-		super.error(e);
+		//super.error(e); logs to error log, suppress this.
 		setError(e);
 	}
 	

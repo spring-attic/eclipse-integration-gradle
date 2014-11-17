@@ -42,7 +42,7 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 @SuppressWarnings("restriction")
 public class GradleDependencyComputer {
 
-	public static boolean DEBUG = (""+Platform.getLocation()).equals("/tmp/testws");
+	public static boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	
 	public void debug(String msg) {
 		if (DEBUG) {

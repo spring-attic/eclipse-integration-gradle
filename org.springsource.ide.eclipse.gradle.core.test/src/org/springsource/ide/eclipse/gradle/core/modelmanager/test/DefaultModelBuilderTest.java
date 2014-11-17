@@ -12,6 +12,7 @@ package org.springsource.ide.eclipse.gradle.core.modelmanager.test;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -71,11 +72,23 @@ public class DefaultModelBuilderTest extends GradleTest {
 			fail("Build should have been canceled");
 		} catch (Throwable e) {
 			e.printStackTrace();
-			assertTrue(""+e, ExceptionUtil.isCancelation(e));
+			assertCancelation(e);
 		}
 	}
 	
 	
+	private void assertCancelation(Throwable e) {
+		if (ExceptionUtil.isCancelation(e)) {
+			return;
+		}
+		StringBuilder msg = new StringBuilder("==== not a cancelation exception ?? ===\n");
+		msg.append("class = "+e.getClass().getName()+"\n");
+		if (e instanceof CoreException) {
+			msg.append("severity = "+((CoreException)e).getStatus().getSeverity()+"\n");
+		}
+		msg.append("deepestCause = "+ExceptionUtil.getDeepestCause(e)+"\n");
+	}
+
 	public <T> ModelPromise<T> getModelPromise(final GradleProject project, final Class<T> type) {
 		final ModelPromise<T> promise = new ModelPromise<T>();
 		final Job[] job = new Job[1];

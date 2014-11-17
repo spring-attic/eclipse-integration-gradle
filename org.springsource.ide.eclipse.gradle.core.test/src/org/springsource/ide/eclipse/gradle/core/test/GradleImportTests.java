@@ -1257,32 +1257,46 @@ public class GradleImportTests extends GradleTest {
 		refreshDependencies(app.getProject());
 		assertNoClasspathProjectEntry(libProject, app.getJavaProject());
 		assertClasspathJarEntry("my-lib-1.0.jar", app);
-		
 	}
 	
 	public void testRemapJarToGradleOpenCloseListener() throws Exception {
+		System.out.println("==== starting: testRemapJarToGradleOpenCloseListener ===");
 		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
 		 // test projects. Will be cleaned up (deleted)
 		 // by setup of next test.
+		System.out.println("project 'repos' created");
 		
+		
+		System.out.println("import 'my-lib' project...");
 		importTestProject("sts2834/my-lib", true);
 		final IProject libProject = getProject("my-lib");
 		assertProjects("repos", "my-lib");
+		System.out.println("import 'my-lib' project OK");
 		
+		System.out.println("publish 'my-lib' jar to repos...");
 		GradleProcess process = LaunchUtil.launchTasks(GradleCore.create(libProject), ":uploadArchives");
 		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
 		assertContains("BUILD SUCCESSFUL", output);
-
+		System.out.println("publish 'my-lib' jar to repos OK");
+		
+		
+		System.out.println("import 'my-app' project...");
 		importTestProject("sts2834/my-app", true);
-		assertProjects("repos", "my-lib", "my-app");
+		System.out.println("import 'my-app' OK");
+		
 		final GradleProject app = GradleCore.create(getProject("my-app"));
-		GradleProject lib = GradleCore.create(getProject("my-lib"));
+		final GradleProject lib = GradleCore.create(getProject("my-lib"));
+		
+		System.out.println("Checking projects...");
+		assertProjects("repos", "my-lib", "my-app");
 
 		//Initially, remapping should be enabled:
 		assertTrue(GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects());
 		assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
 		assertClasspathProjectEntry(lib.getProject(), app.getJavaProject());
+		System.out.println("Checking projects OK");
 		
+		System.out.println("Closing 'my-lib'");
 		libProject.close(new NullProgressMonitor());
 		new ACondition("Project remapped to jar") {
 			public boolean test() throws Exception {
@@ -1290,7 +1304,8 @@ public class GradleImportTests extends GradleTest {
 				assertClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
 				return true;
 			}
-		}.waitFor(4000);
+		}
+		.waitFor(12000);
 		
 		libProject.open(new NullProgressMonitor());
 		new ACondition("Jar remapped to project") {
@@ -1299,7 +1314,7 @@ public class GradleImportTests extends GradleTest {
 				assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
 				return true;
 			}
-		}.waitFor(4000);
+		}.waitFor(12000);
 	}
 	
 	private void createGeneralProject(String name) throws CoreException {
