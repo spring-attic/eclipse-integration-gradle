@@ -261,4 +261,20 @@ public class GradleCore extends Plugin {
 		openCloseListeners.add(l);
 	}
 
+	public synchronized void removeOpenCloseListener(ProjectOpenCloseListener l) {
+		if (openCloseListeners!=null) {
+			openCloseListeners.remove(l);
+		}
+	}
+
+	/**
+	 * Mainly here for testing purposes. (so we can test that removing listeners actually works).
+	 */
+	public int countOpenCloseListeners() {
+		if (openCloseListeners!=null) { 
+			return openCloseListeners.countListeners();
+		} 
+		return 0;
+	}
+
 }

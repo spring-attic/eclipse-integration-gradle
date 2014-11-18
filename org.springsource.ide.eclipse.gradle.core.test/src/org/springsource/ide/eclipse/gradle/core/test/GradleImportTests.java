@@ -19,6 +19,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
+import junit.framework.AssertionFailedError;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.ICommand;
@@ -47,6 +50,7 @@ import org.springsource.ide.eclipse.gradle.core.ClassPath;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.ProjectOpenCloseListener;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
@@ -69,6 +73,7 @@ import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
 import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
@@ -1290,11 +1295,34 @@ public class GradleImportTests extends GradleTest {
 				}
 			}.waitFor(4000);
 			
+			int openCloseListeners = GradleCore.getInstance().countOpenCloseListeners();
+			assertTrue(openCloseListeners>0); //Should have at least one (the one for jar remapping).
+			assertEquals(openCloseListeners, M2EUtils.countOpenCloseListeners());
+			
+			GradleCore.getInstance().getPreferences().setJarRemappingOnOpenClose(false);
+			assertEquals(openCloseListeners-1, GradleCore.getInstance().countOpenCloseListeners());
+			assertEquals(openCloseListeners-1, M2EUtils.countOpenCloseListeners());
+			
+			mvnProject.close(new NullProgressMonitor());
+			try { 
+				new ACondition("Mvn project remapped to Jar") {
+					@Override
+					public boolean test() throws Exception {
+						assertNoClasspathProjectEntry(mvnProject, gradleProject.getJavaProject());
+						assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", gradleProject.getJavaProject());
+						return true;
+					}
+				}.waitFor(4000);
+				fail("Remapping should fail because open close listener is disabled");
+			} catch (Throwable e) {
+				assertEquals("Found 'P/myLib'", ExceptionUtil.getDeepestCause(e).getMessage());
+			}
+			
 		} finally {
 			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
 		}
 	}
-
+	
 	public void testSTS2834RemapJarToGradleProject() throws Exception {
 		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
 									 // test projects. Will be cleaned up (deleted)
@@ -1381,6 +1409,32 @@ public class GradleImportTests extends GradleTest {
 				return true;
 			}
 		}.waitFor(4000);
+		
+		int openCloseListeners = GradleCore.getInstance().countOpenCloseListeners();
+		assertTrue(openCloseListeners>0); //Should have at least one (the one for jar remapping).
+		assertEquals(openCloseListeners, M2EUtils.countOpenCloseListeners());
+		
+		GradleCore.getInstance().getPreferences().setJarRemappingOnOpenClose(false);
+		assertEquals(openCloseListeners-1, GradleCore.getInstance().countOpenCloseListeners());
+		assertEquals(openCloseListeners-1, M2EUtils.countOpenCloseListeners());
+
+		System.out.println("Closing 'my-lib'");
+		libProject.close(new NullProgressMonitor());
+
+		try { 
+			new ACondition("Project remapped to jar") {
+				public boolean test() throws Exception {
+					assertNoClasspathProjectEntry(libProject, app.getJavaProject());
+					assertClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
+					return true;
+				}
+			}
+			.waitFor(4000);
+			fail("Remapping should fail because open close listener is disabled");
+		} catch (Throwable e) {
+			assertEquals("Found 'P/my-lib'", ExceptionUtil.getDeepestCause(e).getMessage());
+		}
+		
 	}
 	
 	private void createGeneralProject(String name) throws CoreException {
