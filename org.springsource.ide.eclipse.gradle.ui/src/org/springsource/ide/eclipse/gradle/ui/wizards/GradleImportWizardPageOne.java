@@ -442,6 +442,7 @@ public class GradleImportWizardPageOne extends WizardPage {
         	public void widgetSelected(SelectionEvent e) {
     			File rf = getRootFolder();
     			if (rf!=null && rf.exists()) {
+    				addRootFolderToHistory();
     				populateProjectTree(rf);
     			}
         	}
@@ -623,7 +624,6 @@ public class GradleImportWizardPageOne extends WizardPage {
 	 * Called by our wizard when its about to finish (i.e. user has pressed finish button).
 	 */
 	public void wizardAboutToFinish() {
-		addRootFolderToHistory();
 		HierarchicalEclipseProject project = getRootProject();
 		if (project!=null) {
 			defaultsSetter.saveDefaults(GradleCore.create(project));
