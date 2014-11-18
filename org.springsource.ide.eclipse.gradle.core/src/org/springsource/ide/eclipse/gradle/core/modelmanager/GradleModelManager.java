@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
-import java.security.spec.MGF1ParameterSpec;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,7 +57,9 @@ public class GradleModelManager {
 	 * Clears out models of all types for a given project.
 	 */
 	public synchronized void invalidate(GradleProject gradleProject) {
-		managers.remove(gradleProject);
+		if (managers!=null) {
+			managers.remove(gradleProject);
+		}
 	}
 	
 	private synchronized GradleProjectModelManager getManager(GradleProject project) {
