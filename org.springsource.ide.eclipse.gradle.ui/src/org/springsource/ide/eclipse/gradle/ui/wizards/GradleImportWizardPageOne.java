@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -45,7 +44,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.gradle.jarjar.com.google.common.collect.Iterables;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
@@ -57,8 +55,8 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
-import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation.MissingProjectDependencyException;
+import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper;
 import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper.NameClashException;
 import org.springsource.ide.eclipse.gradle.ui.util.UIJobUtil;
 
