@@ -786,7 +786,6 @@ public class GradleImportTests extends GradleTest {
 			actualRootLocation = project.getRootProject().getLocation();
 			assertEquals("Root associated with "+project, rootLocation, actualRootLocation);
 			
-			//File actualRootLocation = project.getRootProject().getLocation();
 		}
 	}
 	
@@ -1229,6 +1228,72 @@ public class GradleImportTests extends GradleTest {
 			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
 		}
 	}
+	
+	public void testRemapJarToMavenOpenCloseListener() throws Exception {
+		System.out.println("==== starting: testRemapJarToMavenOpenCloseListener ===");
+		String userHome = System.getProperty("user.home");
+		String restoreJvmArgs = GradleCore.getInstance().getPreferences().getJVMArguments();
+		try {
+			
+			String home = System.getenv("HOME");
+			System.out.println("HOME = "+home);
+			System.out.println("user.home = "+System.getProperty("user.home"));
+			System.out.println("maven.repo.local = "+System.getProperty("maven.repo.local"));
+			
+			final IProject mvnProject = importEclipseProject("sts2405/myLib");
+			String mvnLocalRepo = userHome +"/.m2/repository";
+			assertNoErrors(mvnProject, true);
+			new ExternalCommand(
+				"which", "mvn"	
+			).exec(mvnProject.getLocation().toFile());
+//			new ExternalCommand(
+//				"env"	
+//			).exec(mvnProject.getLocation().toFile());
+			String mavenLocalProp = "-Dmaven.repo.local="+mvnLocalRepo;
+			new MavenCommand(
+					"mvn", mavenLocalProp, "install"
+			).exec(mvnProject.getLocation().toFile());
+	
+			//Note: Gradle does not obey system property 'maven.repo.local'. The build script must 
+			//read it and use it somehow for it to have an effect.
+			GradleCore.getInstance().getPreferences().setJVMArguments(mavenLocalProp);
+			
+			
+			importTestProject("sts2405/main");
+			final GradleProject gradleProject = getGradleProject("main");
+			assertNoErrors(gradleProject.getProject(), true);
+			
+			/// the actual test begins here, stuff above is setting up the test projects.
+			//////////////////////////////////////////////////////////////////////////////
+			
+			assertTrue(GradleCore.getInstance().getPreferences().getRemapJarsToMavenProjects());
+			assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", gradleProject.getJavaProject());
+			assertClasspathProjectEntry(mvnProject, gradleProject.getJavaProject());
+			
+			mvnProject.close(new NullProgressMonitor());
+			new ACondition("Mvn project remapped to Jar") {
+				@Override
+				public boolean test() throws Exception {
+					assertNoClasspathProjectEntry(mvnProject, gradleProject.getJavaProject());
+					assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", gradleProject.getJavaProject());
+					return true;
+				}
+			}.waitFor(4000);
+			
+			mvnProject.open(new NullProgressMonitor());
+			new ACondition("Mvn project remapped to Jar") {
+				@Override
+				public boolean test() throws Exception {
+					assertClasspathProjectEntry(mvnProject, gradleProject.getJavaProject());
+					assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", gradleProject.getJavaProject());
+					return true;
+				}
+			}.waitFor(4000);
+			
+		} finally {
+			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
+		}
+	}
 
 	public void testSTS2834RemapJarToGradleProject() throws Exception {
 		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
@@ -1258,32 +1323,46 @@ public class GradleImportTests extends GradleTest {
 		refreshDependencies(app.getProject());
 		assertNoClasspathProjectEntry(libProject, app.getJavaProject());
 		assertClasspathJarEntry("my-lib-1.0.jar", app);
-		
 	}
 	
 	public void testRemapJarToGradleOpenCloseListener() throws Exception {
+		System.out.println("==== starting: testRemapJarToGradleOpenCloseListener ===");
 		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
 		 // test projects. Will be cleaned up (deleted)
 		 // by setup of next test.
+		System.out.println("project 'repos' created");
 		
+		
+		System.out.println("import 'my-lib' project...");
 		importTestProject("sts2834/my-lib", true);
 		final IProject libProject = getProject("my-lib");
 		assertProjects("repos", "my-lib");
+		System.out.println("import 'my-lib' project OK");
 		
+		System.out.println("publish 'my-lib' jar to repos...");
 		GradleProcess process = LaunchUtil.launchTasks(GradleCore.create(libProject), ":uploadArchives");
 		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
 		assertContains("BUILD SUCCESSFUL", output);
-
+		System.out.println("publish 'my-lib' jar to repos OK");
+		
+		
+		System.out.println("import 'my-app' project...");
 		importTestProject("sts2834/my-app", true);
-		assertProjects("repos", "my-lib", "my-app");
+		System.out.println("import 'my-app' OK");
+		
 		final GradleProject app = GradleCore.create(getProject("my-app"));
-		GradleProject lib = GradleCore.create(getProject("my-lib"));
+		final GradleProject lib = GradleCore.create(getProject("my-lib"));
+		
+		System.out.println("Checking projects...");
+		assertProjects("repos", "my-lib", "my-app");
 
 		//Initially, remapping should be enabled:
 		assertTrue(GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects());
 		assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
 		assertClasspathProjectEntry(lib.getProject(), app.getJavaProject());
+		System.out.println("Checking projects OK");
 		
+		System.out.println("Closing 'my-lib'");
 		libProject.close(new NullProgressMonitor());
 		new ACondition("Project remapped to jar") {
 			public boolean test() throws Exception {
@@ -1291,7 +1370,8 @@ public class GradleImportTests extends GradleTest {
 				assertClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
 				return true;
 			}
-		}.waitFor(4000);
+		}
+		.waitFor(4000);
 		
 		libProject.open(new NullProgressMonitor());
 		new ACondition("Jar remapped to project") {

@@ -24,8 +24,12 @@ public abstract class AbstractGradlePreferences {
 	}
 
 	public void putStrings(String key, String[] strings) {
-		String encoded = ArrayEncoder.encode(strings);
-		put(key, encoded);
+		if (strings!=null) {
+			String encoded = ArrayEncoder.encode(strings);
+			put(key, encoded);
+		} else {
+			put(key, null);
+		}
 	}
 	
 	public void put(String key, boolean enabled) {

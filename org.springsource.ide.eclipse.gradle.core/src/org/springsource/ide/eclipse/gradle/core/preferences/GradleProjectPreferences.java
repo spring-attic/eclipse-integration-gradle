@@ -21,7 +21,6 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperation
 import org.springsource.ide.eclipse.gradle.core.util.ArgumentsParser;
 import org.springsource.ide.eclipse.gradle.core.util.ResourceListEncoder;
 
-
 /**
  * Various project specific preferences.
  * <p>
@@ -33,7 +32,7 @@ import org.springsource.ide.eclipse.gradle.core.util.ResourceListEncoder;
 public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	
 	private void debug(String string) {
-//		System.out.println(string);
+		System.out.println(string);
 	}
 
 	private static final String LINKED_RESOURCES_PREF = "org.springsource.ide.eclipse.gradle.linkedresources";
@@ -73,13 +72,13 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	public File getRootProjectLocation() {
 		return get(ROOT_LOCATION_PREF, (File)null);
 	}
-	
+		
 	/**
 	 * @return Whether classpath entry sorting is enabled. This preference is shared by all projects in a project hierarchy.
 	 */
 	public boolean getEnableClasspathEntrySorting() {
 		try {
-			GradleProjectPreferences rootPrefs = getRootProjectPreferences();
+			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
 			return rootPrefs.get(ENABLE_CLASSPATH_SORTING, DEFAULT_ENABLE_CLASSPATH_SORTING);
 		} catch (FastOperationFailedException e) {
 			GradleCore.log(e); 
@@ -89,7 +88,7 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	
 	public void setEnableClasspatEntrySorting(boolean enable) {
 		try {
-			GradleProjectPreferences rootPrefs = getRootProjectPreferences();
+			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
 			rootPrefs.put(ENABLE_CLASSPATH_SORTING, enable);
 		} catch (FastOperationFailedException e) {
 			GradleCore.log(e); 

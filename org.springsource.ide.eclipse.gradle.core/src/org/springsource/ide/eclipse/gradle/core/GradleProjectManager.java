@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
 
 /**
  * An instance of this class is responsible for managing the creation of GradleProject instances.
@@ -32,6 +33,11 @@ public class GradleProjectManager {
 	 * of the projects folder location in the file system.
 	 */
 	private Map<String, GradleProject> gradleProjects = new HashMap<String, GradleProject>();
+	private GradleModelManager modelManager;
+	
+	public GradleProjectManager(GradleModelManager mgr) {
+		this.modelManager = mgr;
+	}
 
 //	/**
 //	 * Get the GradleProject instance associated with a given IProject instance. Forces the creation
@@ -57,7 +63,7 @@ public class GradleProjectManager {
 		File canonicalFile = toCanonicalFile(location);
 		GradleProject project = get(canonicalFile);
 		if (project==null) {
-			project = new GradleProject(canonicalFile);
+			project = new GradleProject(canonicalFile, modelManager);
 			gradleProjects.put(canonicalFile.getPath(), project);
 		}
 		return project;

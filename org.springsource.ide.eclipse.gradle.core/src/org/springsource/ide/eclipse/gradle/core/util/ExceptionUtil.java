@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.gradle.tooling.BuildException;
+import org.gradle.tooling.provider.model.UnknownModelException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
@@ -91,14 +92,11 @@ public class ExceptionUtil {
 	}
 
 	public static IStatus status(Throwable e) {
-		return status(IStatus.ERROR, e);
+		return status(isCancelation(e)?IStatus.CANCEL:IStatus.ERROR, e);
 	}
 	
 	public static IStatus status(int severity, Throwable e) {
-		if (e instanceof OperationCanceledException 
-		||  e instanceof InterruptedException) {
-			return Status.CANCEL_STATUS;
-		} if (e instanceof CoreException) {
+		if (e instanceof CoreException) {
 			IStatus status = ((CoreException) e).getStatus();
 			if (status!=null && status.getSeverity()==severity) {
 				Throwable ee = status.getException();
@@ -123,5 +121,24 @@ public class ExceptionUtil {
 
 	public static final IStatus OK_STATUS = status(IStatus.OK, "");
 
+	public static boolean isCancelation(Throwable e) {
+		if (e instanceof CoreException) {
+			return ((CoreException) e).getStatus().getSeverity()==IStatus.CANCEL;
+		}
+		Throwable cause = getDeepestCause(e);
+		return cause instanceof OperationCanceledException 
+// Warning: these instanceof test don't work, some classloader identity thing?
+//			|| cause instanceof org.gradle.api.BuildCancelledException 
+//			|| cause instanceof org.gradle.tooling.BuildCancelledException
+// so test based on classname:
+			|| cause.getClass().getSimpleName().equals("BuildCancelledException")
+			|| cause instanceof InterruptedException;
+	}
+
+	public static boolean isUnknownModelException(Throwable e) {
+		// org.gradle.tooling.provider.model.UnknownModelException
+		// org.gradle.tooling.UnknownModelException
+		return ExceptionUtil.getDeepestCause(e).getClass().getSimpleName().equals("UnknownModelException");
+	}
 	
 }

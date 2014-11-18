@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -41,7 +42,7 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 @SuppressWarnings("restriction")
 public class GradleDependencyComputer {
 
-	public static boolean DEBUG = (""+Platform.getLocation()).equals("/tmp/testws");
+	public static boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	
 	public void debug(String msg) {
 		if (DEBUG) {
@@ -128,7 +129,7 @@ public class GradleDependencyComputer {
 					boolean remapped = false;
 					if (GradleCore.getInstance().getPreferences().getRemapJarsToMavenProjects()) {	
 						IProject projectDep = M2EUtils.getMavenProject(gEntry);
-						if (projectDep!=null) {
+						if (projectDep!=null && projectDep.isAccessible()) {
 							addProjectDependency(projectDep, export);
 							remapped = true;
 						}
@@ -175,7 +176,13 @@ public class GradleDependencyComputer {
 			}
 			
 			for (EclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
-				addProjectDependency(GradleCore.create(dep.getTargetProject()).getProject(), export);
+				GradleProject projectDependency = GradleCore.create(dep.getTargetProject());
+				IProject projectInWorkspace = projectDependency.getProject();
+				if (projectInWorkspace!=null) {
+					addProjectDependency(projectInWorkspace, export);
+				} else {
+					markers.reportError("Project dependency not in the workspace: "+projectDependency.getDisplayName());
+				}
 			}
 			
 			return classpath;
@@ -185,6 +192,7 @@ public class GradleDependencyComputer {
 	}
 
 	private void addProjectDependency(IProject projectDep, boolean export) {
+		Assert.isNotNull(projectDep);
 		classpath.add(JavaCore.newProjectEntry(projectDep.getFullPath(), export));
 	}
 

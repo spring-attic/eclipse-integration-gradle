@@ -52,6 +52,7 @@ import org.gradle.tooling.model.Task;
 import org.gradle.tooling.model.TaskSelector;
 import org.gradle.tooling.model.gradle.BuildInvocations;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
@@ -318,7 +319,7 @@ public class GradleTasksView extends ViewPart {
 		GradleProject project = projectSelector.getProject();
 		if (project!=null) {
 			project.invalidateGradleModel();
-			project.getSpecificModel(BuildInvocations.class);
+			project.getModelOfType(BuildInvocations.class);
 			viewer.refresh();
 		}
 	}

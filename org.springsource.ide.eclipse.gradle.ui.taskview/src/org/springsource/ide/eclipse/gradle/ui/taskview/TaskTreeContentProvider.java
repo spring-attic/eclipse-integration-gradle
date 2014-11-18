@@ -26,7 +26,7 @@ import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.Launchable;
 import org.gradle.tooling.model.gradle.BuildInvocations;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.IGradleModelListener;
+import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 
 /**
  * Content provider for displaying tasks tree
@@ -61,7 +61,9 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 	}
 	
 	private IGradleModelListener modelListener = new IGradleModelListener() {
-		public void modelChanged(final GradleProject p, Object model) {
+		@Override
+		public <T> void modelChanged(GradleProject p, Class<T> type,
+				T model) {
 			if (currentProject==p && model instanceof BuildInvocations) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
@@ -102,7 +104,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 			return NO_ELEMENTS;
 		} else {
 			try {
-				BuildInvocations model = project.getSpecificModel(BuildInvocations.class);
+				BuildInvocations model = project.getModelOfType(BuildInvocations.class);
 				if (model != null) {
 					DomainObjectSet<? extends Launchable> tasks = isLocalTasks
 							? model.getTasks()

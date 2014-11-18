@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal Software, Inc.
+ * Copyright (c) 2012 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,94 +8,41 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springsource.ide.eclipse.gradle.core;
+package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.gradle.tooling.CancellationToken;
 import org.gradle.tooling.GradleConnectionException;
+import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ModelBuilder;
 import org.gradle.tooling.ProgressEvent;
 import org.gradle.tooling.ProgressListener;
 import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.internal.consumer.CancellationTokenInternal;
-import org.gradle.tooling.model.eclipse.EclipseProject;
-import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
-import org.springsource.ide.eclipse.gradle.core.GradleModelProvider.GroupedModelProvider;
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.SystemPropertyCleaner;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ConsoleUtil.Console;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleOpearionProgressMonitor;
-import org.springsource.ide.eclipse.gradle.core.util.Joinable;
-import org.springsource.ide.eclipse.gradle.core.util.JoinableContinuation;
 
-/**
- * An object that is responsible of obtaining a 'model' from Gradle for a given project. 
- * It is generic in the sense that it can be used to build models of different types.
- * <p>
- * Use this provider to build models of types other than {@link HierarchicalEclipseProject} and {@link EclipseProject}.
- * For those model types use the old {@link GradleModelProvider} and {@link GroupedModelProvider} classes which
- * have been optimized to build models more efficiently for groups of related projects.
- */
-public class GenericModelProvider<T> {
+public class ToolinApiUtils {
 	
-	private Class<T> type;
-	private GradleProject project;
-	private T cached = null;
-	private Object cacheLock = new Object();
-	
-	private JoinableContinuation<T> model = null;
+	private static final boolean DEBUG = false;
 
-	public GenericModelProvider(GradleProject project, Class<T> type) {
-		this.project = project;
-		this.type = type;
-	}
-	
-	public T get(IProgressMonitor mon) throws Exception {
-		try {
-			return ensureModel(mon).join();
-		} finally {
-			mon.done();
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
 		}
 	}
 	
-	public T getCached() {
-		synchronized (cacheLock) {
-			return cached;
-		}
-	}
-
-	private synchronized Joinable<T> ensureModel(IProgressMonitor mon) throws Exception {
-		mon.beginTask(jobName(project, type), 10);
-		try {
-			synchronized (this) {
-				if (model!=null) {
-					return model;
-				} 
-				model = new JoinableContinuation<T>();
-			}
-			//We only get here if we created the 'model promise' so its up to us to build it.
-			try {
-				T result = buildModel(project, type, new SubProgressMonitor(mon, 9));
-				synchronized (cacheLock) {
-					cached = result;
-				}
-				model.apply(result);
-				project.notifyModelListeners(result);
-			} catch (Throwable e) {
-				model.error(e);
-			}
-			
-			return model;
-		} finally {
-			mon.done();
-		}
-	}
-
 	public static <T> T buildModel(GradleProject project, Class<T> requiredType, final IProgressMonitor monitor) throws CoreException {
 		final String jobName = jobName(project, requiredType);
 		SystemPropertyCleaner.clean();
@@ -105,7 +52,7 @@ public class GenericModelProvider<T> {
 		ProjectConnection connection = null;
 		final Console console = ConsoleUtil.getConsole("Building Gradle Model '"+projectLoc+"'");
 		try {
-			connection = GradleModelProvider.getGradleConnector(project, new SubProgressMonitor(monitor, 100));
+			connection = getGradleConnector(project, new SubProgressMonitor(monitor, 100));
 
 			// Load the Eclipse model for the project
 			monitor.subTask("Loading model");
@@ -169,19 +116,78 @@ public class GenericModelProvider<T> {
 			}
 		}
 	}
-
-	private static <T> String jobName(GradleProject project,
-			Class<T> requiredType) {
-		return "Build '"+requiredType.getSimpleName()+"' model for '"+project.getDisplayName();
+	
+	private static URI getDistributionPref() {
+		return GradleCore.getInstance().getPreferences().getDistribution();
 	}
 	
-	private static final boolean DEBUG = false;
-
-	private static void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
+	private static ProjectConnection getGradleConnector(File projectLoc, URI distributionPref, File gradleUserHomePref, IProgressMonitor monitor) {
+		monitor.beginTask("Connection to Gradle", 1);
+		try {
+			GradleConnector connector = GradleConnector.newConnector();
+			if (gradleUserHomePref!=null) {
+				connector.useGradleUserHomeDir(gradleUserHomePref);
+			}
+			// Configure the connector and create the connection
+			if (distributionPref!=null) {
+				boolean distroSet = false;
+				if ("file".equals(distributionPref.getScheme())) {
+					File maybeFolder = new File(distributionPref);
+					if (maybeFolder.isDirectory()) {
+						connector.useInstallation(maybeFolder);
+						distroSet = true;
+					}
+				}
+				if (!distroSet) {
+					connector.useDistribution(distributionPref);
+				}
+			}
+			monitor.subTask("Creating connector"); 
+			connector.forProjectDirectory(projectLoc);
+			return connector.connect();
+		} finally {
+			monitor.done();
 		}
 	}
 	
+	/**
+	 * Tries to connect to gradle, using the distrubution set by the preferences page. If this fails and the prefs page wasn't
+	 * actually set, then we try to fall back on the distribution zip that's packaged up into the core plugin.
+	 */
+	public static ProjectConnection getGradleConnector(GradleProject project, IProgressMonitor monitor) throws CoreException {
+		monitor.beginTask("Connecting to Gradle", 1);
+		File projectLoc = project.getLocation();
+		try {
+			ProjectConnection connection;
+			URI distribution = getDistributionPref();
+			File gradleUserHome = getGradleUserHomePref();
+			try {
+				connection = getGradleConnector(projectLoc, distribution, gradleUserHome, new SubProgressMonitor(monitor, 1));
+				return connection;
+			} catch (Exception e) {
+//				if (distribution==null) {
+//					//Try find built-in distribution instead.
+//					distribution = FallBackDistributionCore.getFallBackDistribution(projectLoc, e);
+//					if (distribution!=null) {
+//						connection = getGradleConnector(projectLoc, distribution, new SubProgressMonitor(monitor, 1));
+//						return connection;
+//					}
+//				}
+				throw e;
+			}
+		} catch (Exception e) {
+			throw ExceptionUtil.coreException(e);
+		} finally {
+			monitor.done();
+		}
+	}
+	
+	private static File getGradleUserHomePref() {
+		return GradleCore.getInstance().getPreferences().getGradleUserHome();
+	}
+	
+	public static <T> String jobName(GradleProject project, Class<T> requiredType) {
+		return "Build '"+requiredType.getSimpleName()+"' model for '"+project.getDisplayName();
+	}
 	
 }
