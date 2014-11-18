@@ -35,7 +35,6 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.AbstractModelBuilder;
-import org.springsource.ide.eclipse.gradle.core.modelmanager.BuildResult;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.test.GradleTest;
@@ -75,6 +74,22 @@ public class GradleModelManagerTest extends GradleTest {
 		//Check build counts should only be one, for the first slow request.
 		assertEquals(1, builder.count(project, FooModel.class));
 		assertEquals(1, builder.totalBuilds());
+	}
+	
+	public void testInvalidateForProject() throws Exception {
+		GradleProject animal = project("animal");
+		mgr.invalidate(animal); //invalidate should do nothing rather than throw NPE
+		
+		FooHierarchyModel model = mgr.getModel(animal, FooHierarchyModel.class, new NullProgressMonitor());
+		assertNotNull(model.getFoo());
+		
+		mgr.invalidate(animal);
+		try {
+			mgr.getModel(animal, FooHierarchyModel.class);
+			fail("Should have thrown FastOperationFailedException");
+		} catch (FastOperationFailedException e) {
+			//ok!
+		}
 	}
 		
 	public void testFailuresCached() throws Exception {
