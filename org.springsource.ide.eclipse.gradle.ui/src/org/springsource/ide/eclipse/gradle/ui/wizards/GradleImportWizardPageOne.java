@@ -641,7 +641,7 @@ public class GradleImportWizardPageOne extends WizardPage {
 		String selectedFolder = rootFolderText.getText();
 		history.remove(selectedFolder);
 		history.add(0, selectedFolder);
-		int lastIndex = history.size()>=MAX_ROOT_FOLDER_HISTORY ? history.size()-1 : history.size();
+		int lastIndex = history.size()>=MAX_ROOT_FOLDER_HISTORY ? MAX_ROOT_FOLDER_HISTORY-1 : history.size();
 		List<String> lengthAdjustedHistory = history.subList(0, lastIndex);
 		GradleCore.getInstance().getPreferences().putStrings(ROOT_FOLDER_HISTORY_KEY, lengthAdjustedHistory.toArray(new String[0]));
 	}
