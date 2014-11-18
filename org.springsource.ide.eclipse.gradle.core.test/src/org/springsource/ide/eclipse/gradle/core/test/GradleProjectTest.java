@@ -51,6 +51,7 @@ public class GradleProjectTest extends GradleTest {
 			} catch (Exception e) {
 				throw new Error(e);
 			}
+			notifyCount++;
 		}
 
 		public void checkExpected(Class<? extends HierarchicalEclipseProject> expectModelType, int expectCount) {
