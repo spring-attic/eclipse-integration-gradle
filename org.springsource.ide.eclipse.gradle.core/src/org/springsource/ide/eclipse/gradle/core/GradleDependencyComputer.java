@@ -129,7 +129,7 @@ public class GradleDependencyComputer {
 					boolean remapped = false;
 					if (GradleCore.getInstance().getPreferences().getRemapJarsToMavenProjects()) {	
 						IProject projectDep = M2EUtils.getMavenProject(gEntry);
-						if (projectDep!=null) {
+						if (projectDep!=null && projectDep.isAccessible()) {
 							addProjectDependency(projectDep, export);
 							remapped = true;
 						}

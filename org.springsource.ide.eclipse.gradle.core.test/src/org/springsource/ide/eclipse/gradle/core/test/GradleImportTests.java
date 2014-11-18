@@ -1228,6 +1228,72 @@ public class GradleImportTests extends GradleTest {
 			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
 		}
 	}
+	
+	public void testRemapJarToMavenOpenCloseListener() throws Exception {
+		System.out.println("==== starting: testRemapJarToMavenOpenCloseListener ===");
+		String userHome = System.getProperty("user.home");
+		String restoreJvmArgs = GradleCore.getInstance().getPreferences().getJVMArguments();
+		try {
+			
+			String home = System.getenv("HOME");
+			System.out.println("HOME = "+home);
+			System.out.println("user.home = "+System.getProperty("user.home"));
+			System.out.println("maven.repo.local = "+System.getProperty("maven.repo.local"));
+			
+			final IProject mvnProject = importEclipseProject("sts2405/myLib");
+			String mvnLocalRepo = userHome +"/.m2/repository";
+			assertNoErrors(mvnProject, true);
+			new ExternalCommand(
+				"which", "mvn"	
+			).exec(mvnProject.getLocation().toFile());
+//			new ExternalCommand(
+//				"env"	
+//			).exec(mvnProject.getLocation().toFile());
+			String mavenLocalProp = "-Dmaven.repo.local="+mvnLocalRepo;
+			new MavenCommand(
+					"mvn", mavenLocalProp, "install"
+			).exec(mvnProject.getLocation().toFile());
+	
+			//Note: Gradle does not obey system property 'maven.repo.local'. The build script must 
+			//read it and use it somehow for it to have an effect.
+			GradleCore.getInstance().getPreferences().setJVMArguments(mavenLocalProp);
+			
+			
+			importTestProject("sts2405/main");
+			final GradleProject gradleProject = getGradleProject("main");
+			assertNoErrors(gradleProject.getProject(), true);
+			
+			/// the actual test begins here, stuff above is setting up the test projects.
+			//////////////////////////////////////////////////////////////////////////////
+			
+			assertTrue(GradleCore.getInstance().getPreferences().getRemapJarsToMavenProjects());
+			assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", gradleProject.getJavaProject());
+			assertClasspathProjectEntry(mvnProject, gradleProject.getJavaProject());
+			
+			mvnProject.close(new NullProgressMonitor());
+			new ACondition("Mvn project remapped to Jar") {
+				@Override
+				public boolean test() throws Exception {
+					assertNoClasspathProjectEntry(mvnProject, gradleProject.getJavaProject());
+					assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", gradleProject.getJavaProject());
+					return true;
+				}
+			}.waitFor(4000);
+			
+			mvnProject.open(new NullProgressMonitor());
+			new ACondition("Mvn project remapped to Jar") {
+				@Override
+				public boolean test() throws Exception {
+					assertClasspathProjectEntry(mvnProject, gradleProject.getJavaProject());
+					assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", gradleProject.getJavaProject());
+					return true;
+				}
+			}.waitFor(4000);
+			
+		} finally {
+			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
+		}
+	}
 
 	public void testSTS2834RemapJarToGradleProject() throws Exception {
 		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
@@ -1305,7 +1371,7 @@ public class GradleImportTests extends GradleTest {
 				return true;
 			}
 		}
-		.waitFor(12000);
+		.waitFor(4000);
 		
 		libProject.open(new NullProgressMonitor());
 		new ACondition("Jar remapped to project") {
@@ -1314,7 +1380,7 @@ public class GradleImportTests extends GradleTest {
 				assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
 				return true;
 			}
-		}.waitFor(12000);
+		}.waitFor(4000);
 	}
 	
 	private void createGeneralProject(String name) throws CoreException {

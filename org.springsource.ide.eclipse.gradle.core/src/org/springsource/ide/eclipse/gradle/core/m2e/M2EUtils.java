@@ -1,24 +1,29 @@
 package org.springsource.ide.eclipse.gradle.core.m2e;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.project.registry.MavenProjectManager;
+import org.eclipse.m2e.core.project.IMavenProjectChangedListener;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.UnsupportedMethodException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.ProjectOpenCloseListener;
 
 @SuppressWarnings("restriction")
 public class M2EUtils {
 
 	public interface IM2EUtils {
 		IProject getMavenProject(ExternalDependency dep);
-
 		boolean isInstalled();
+		void addMavenOpenCloseListener(ProjectOpenCloseListener openCloseListener);
 	}
 
 	public static class DefaultImplementation implements IM2EUtils {
+		
 		public IProject getMavenProject(String groupId, String artifactId, String version) {
 			MavenProjectManager mvnProjects = MavenPluginActivator.getDefault().getMavenProjectManager();
 			IMavenProjectFacade mvnProject = mvnProjects.getMavenProject(groupId, artifactId, version);
@@ -50,6 +55,28 @@ public class M2EUtils {
 			//The fact that we are using this implementation implies that M2E is installed.
 			return true;
 		}
+
+		@Override
+		public void addMavenOpenCloseListener(final ProjectOpenCloseListener openCloseListener) {
+			MavenProjectManager mvnProjects = MavenPluginActivator.getDefault().getMavenProjectManager();
+			IMavenProjectChangedListener adapter = new IMavenProjectChangedListener() {
+				public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
+					for (MavenProjectChangedEvent e : events) {
+						switch (e.getKind()) {
+						case MavenProjectChangedEvent.KIND_ADDED:
+							openCloseListener.projectOpened(e.getMavenProject().getProject());
+							break;
+						case MavenProjectChangedEvent.KIND_REMOVED:
+							openCloseListener.projectClosed(e.getOldMavenProject().getProject());
+							break;
+						default:
+							break;
+						}
+					}
+				}
+			};
+			mvnProjects.addMavenProjectChangedListener(adapter);
+		}
 	}
 
 	/**
@@ -63,6 +90,9 @@ public class M2EUtils {
 
 		public boolean isInstalled() {
 			return false;
+		}
+
+		public void addMavenOpenCloseListener(ProjectOpenCloseListener openCloseListener) {
 		}
 	}
 
@@ -94,6 +124,10 @@ public class M2EUtils {
 
 	public static boolean isInstalled() {
 		return implementation().isInstalled();
+	}
+
+	public static void addMavenProjectListener(ProjectOpenCloseListener openCloseListener) {
+		implementation().addMavenOpenCloseListener(openCloseListener);
 	}
 	
 }

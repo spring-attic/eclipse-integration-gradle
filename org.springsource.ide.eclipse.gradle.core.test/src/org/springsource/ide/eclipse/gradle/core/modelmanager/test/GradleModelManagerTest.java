@@ -652,7 +652,7 @@ public class GradleModelManagerTest extends GradleTest {
 	}
 	
 	public void testChangingProjectHierarchyConccurrent() throws Exception {
-		
+		System.out.println("==== testChangingProjectHierarchyConccurrent ====");
 		List<GradleProject> projects = testProjects();
 		for (GradleProject p : projects) {
 			mgr.getModel(p, FooHierarchyModel.class, new NullProgressMonitor());
@@ -678,9 +678,10 @@ public class GradleModelManagerTest extends GradleTest {
 		// it works one can reason out that all scenarios including recovery / repair of
 		// broken family data will still only build each model once, even in the misprediction
 		// case.
+		
+		builder.dump();
 		assertEquals(2, builder.totalBuilds());
 
-		builder.dump();
 	}
 	
 	/**
