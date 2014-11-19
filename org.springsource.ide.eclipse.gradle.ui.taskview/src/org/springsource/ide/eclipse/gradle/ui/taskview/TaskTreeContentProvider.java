@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -22,13 +24,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.gradle.tooling.model.GradleTask;
+import org.gradle.tooling.model.UnsupportedMethodException;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.gradle.BuildInvocations;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
-import org.springsource.ide.eclipse.gradle.core.util.ProjectTasksVisibility;
 
 /**
  * Content provider for displaying tasks tree
@@ -166,12 +168,29 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 		try {
 			EclipseProject eclipseProjectModel = project.getGradleModel();
 			BuildInvocations buildInvocationsModel = project.getModelOfType(BuildInvocations.class);
-			ProjectTasksVisibility tasksVisibility = new ProjectTasksVisibility(buildInvocationsModel);
+			ProjectTasksVisibility tasksVisibility = null;
+			try {
+				tasksVisibility = new ProjectTasksVisibility(buildInvocationsModel);
+			} catch (UnsupportedMethodException e) {
+				/*
+				 * Make all tasks public if Gradle runtime does for the project does not support visibility feature
+				 */
+				GradleTasksViewPlugin
+						.getDefault()
+						.getLog()
+						.log(new Status(
+								IStatus.WARNING,
+								GradleTasksViewPlugin.PLUGIN_ID,
+								"All tasks for project '"
+										+ project.getName()
+										+ "' will be shown as public because it uses old version of Gradle",
+								e));
+			}
 			List<GradleTask> tasksCollection = new ArrayList<GradleTask>(Math.max(buildInvocationsModel.getTasks().size(), buildInvocationsModel.getTaskSelectors().size()));
 			for (final GradleTask task : isLocalTasks
 					? GradleProject.getTasks(eclipseProjectModel)
 					: GradleProject.getAggregateTasks(eclipseProjectModel).values()) {
-				final boolean isPublic = isLocalTasks ? tasksVisibility.isTaskPublic(task.getName()) : tasksVisibility.isTaskSelectorPublic(task.getName());
+				final boolean isPublic = tasksVisibility == null || (isLocalTasks ? tasksVisibility.isTaskPublic(task.getName()) : tasksVisibility.isTaskSelectorPublic(task.getName()));
 				if (!isHideInternalTasks || isPublic) {
 					tasksCollection.add(
 						new GradleTask() {

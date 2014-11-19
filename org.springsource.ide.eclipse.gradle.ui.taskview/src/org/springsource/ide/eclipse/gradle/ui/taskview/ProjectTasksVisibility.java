@@ -1,4 +1,4 @@
-package org.springsource.ide.eclipse.gradle.core.util;
+package org.springsource.ide.eclipse.gradle.ui.taskview;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +7,7 @@ import org.gradle.tooling.model.Task;
 import org.gradle.tooling.model.TaskSelector;
 import org.gradle.tooling.model.gradle.BuildInvocations;
 
-public final class ProjectTasksVisibility {
+final class ProjectTasksVisibility {
 	
 	private Map<String, Boolean> tasks = new HashMap<String, Boolean>();
 	
