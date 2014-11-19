@@ -516,7 +516,11 @@ public class GradleProject {
 		return null; 
 	}
 	
-	public <T> T getModelOfType(final Class<T> type) throws CoreException, FastOperationFailedException {
+	public <T> T getModelOfType(Class<T> type) throws CoreException, FastOperationFailedException {
+		return mgr.getModel(this, type);
+	}
+	
+	public <T> T requestModelOfType(final Class<T> type) throws CoreException, FastOperationFailedException {
 		try {
 			return mgr.getModel(this, type);
 		} catch (FastOperationFailedException e) {

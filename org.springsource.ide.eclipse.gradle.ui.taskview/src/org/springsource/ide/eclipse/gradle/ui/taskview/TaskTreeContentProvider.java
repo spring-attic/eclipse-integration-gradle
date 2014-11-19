@@ -115,7 +115,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 				 * request if previous throws FastOperationException
 				 */
 				try {
-					root.getModelOfType(BuildInvocations.class);
+					root.requestModelOfType(BuildInvocations.class);
 				} catch (FastOperationFailedException e) {
 					modelNotAvailable = true;
 				}
@@ -152,14 +152,36 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 								GradleTasksViewPlugin.PLUGIN_ID,
 								"All tasks for project '"
 										+ project.getName()
-										+ "' will be shown as public because it uses old version of Gradle",
+										+ "' will be shown as public because visibility property is unavailable. (Old version of Gradle set for the project)",
 								e));
 			}
 			List<GradleTask> tasksCollection = new ArrayList<GradleTask>(Math.max(buildInvocationsModel.getTasks().size(), buildInvocationsModel.getTaskSelectors().size()));
 			for (final GradleTask task : isLocalTasks
 					? GradleProject.getTasks(eclipseProjectModel)
 					: GradleProject.getAggregateTasks(eclipseProjectModel).values()) {
-				final boolean isPublic = tasksVisibility == null || (isLocalTasks ? tasksVisibility.isTaskPublic(task.getName()) : tasksVisibility.isTaskSelectorPublic(task.getName()));
+				boolean publicTask = true;
+				if (tasksVisibility != null) {
+					try {
+						publicTask = isLocalTasks ? tasksVisibility.isTaskPublic(task.getName()) : tasksVisibility.isTaskSelectorPublic(task.getName());
+					} catch (IllegalArgumentException e) {
+						/*
+						 * Swallow exception - it means task is not in the
+						 * BuildInvocations model for the project and there is
+						 * no visibility property for it
+						 */
+						GradleTasksViewPlugin
+								.getDefault()
+								.getLog()
+								.log(new Status(
+										IStatus.WARNING,
+										GradleTasksViewPlugin.PLUGIN_ID,
+										"Task '"
+												+ task.getPath()
+												+ "' is displayed as public because visibility property is unavailable for it",
+										e));
+					}
+				}
+				final boolean isPublic = publicTask;
 				if (!isHideInternalTasks || isPublic) {
 					tasksCollection.add(
 						new GradleTask() {
