@@ -101,42 +101,6 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 			}
 		}
 	}
-
-//	public Object[] getElements(Object inputElement) {
-//		GradleProject project = (GradleProject) inputElement;
-//		if (project == null) {
-//			return NO_ELEMENTS;
-//		} else {
-//			try {
-//				BuildInvocations model = project.getModelOfType(BuildInvocations.class);
-//				if (model != null) {
-//					DomainObjectSet<? extends Launchable> tasks = isLocalTasks
-//							? model.getTasks()
-//							: model.getTaskSelectors();
-//					if (isHideInternalTasks) {
-//						List<Launchable> result = new ArrayList<Launchable>(
-//								tasks.size());
-//						for (Launchable task : tasks) {
-//							if (task.isPublic()) {
-//								result.add(task);
-//							}
-//						}
-//						return result.toArray(new Launchable[result.size()]);
-//					} else {
-//						return tasks.toArray(new Launchable[tasks.size()]);
-//					}
-//				}
-//			} catch (Exception e) {
-//				GradleTasksViewPlugin
-//						.getDefault()
-//						.getLog()
-//						.log(new Status(IStatus.ERROR,
-//								GradleTasksViewPlugin.PLUGIN_ID,
-//								"Cannot fetch BuildInvocationsModel", e));
-//			}
-//			return new Object[0];
-//		}
-//	}
 	
 	public Object[] getElements(Object inputElement) {
 		GradleProject root = (GradleProject) inputElement;
