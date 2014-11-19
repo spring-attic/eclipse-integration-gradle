@@ -109,6 +109,11 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 		} else {
 			try {
 				boolean modelNotAvailable = false;
+				/*
+				 * Request EclipseProject and BuildInvocations models in
+				 * parallel. Swallow the exception and proceed to the next model
+				 * request if previous throws FastOperationException
+				 */
 				try {
 					root.getModelOfType(BuildInvocations.class);
 				} catch (FastOperationFailedException e) {
