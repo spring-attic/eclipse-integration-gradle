@@ -14,19 +14,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.gradle.tooling.model.DomainObjectSet;
-import org.gradle.tooling.model.Launchable;
+import org.gradle.tooling.model.GradleTask;
+import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.gradle.BuildInvocations;
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
+import org.springsource.ide.eclipse.gradle.core.util.ProjectTasksVisibility;
 
 /**
  * Content provider for displaying tasks tree
@@ -64,7 +66,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 		@Override
 		public <T> void modelChanged(GradleProject p, Class<T> type,
 				T model) {
-			if (currentProject==p && model instanceof BuildInvocations) {
+			if (currentProject==p && (model instanceof BuildInvocations || model instanceof EclipseProject)) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						if (viewer!=null) {
@@ -98,39 +100,121 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 		}
 	}
 
+//	public Object[] getElements(Object inputElement) {
+//		GradleProject project = (GradleProject) inputElement;
+//		if (project == null) {
+//			return NO_ELEMENTS;
+//		} else {
+//			try {
+//				BuildInvocations model = project.getModelOfType(BuildInvocations.class);
+//				if (model != null) {
+//					DomainObjectSet<? extends Launchable> tasks = isLocalTasks
+//							? model.getTasks()
+//							: model.getTaskSelectors();
+//					if (isHideInternalTasks) {
+//						List<Launchable> result = new ArrayList<Launchable>(
+//								tasks.size());
+//						for (Launchable task : tasks) {
+//							if (task.isPublic()) {
+//								result.add(task);
+//							}
+//						}
+//						return result.toArray(new Launchable[result.size()]);
+//					} else {
+//						return tasks.toArray(new Launchable[tasks.size()]);
+//					}
+//				}
+//			} catch (Exception e) {
+//				GradleTasksViewPlugin
+//						.getDefault()
+//						.getLog()
+//						.log(new Status(IStatus.ERROR,
+//								GradleTasksViewPlugin.PLUGIN_ID,
+//								"Cannot fetch BuildInvocationsModel", e));
+//			}
+//			return new Object[0];
+//		}
+//	}
+	
 	public Object[] getElements(Object inputElement) {
-		GradleProject project = (GradleProject) inputElement;
-		if (project == null) {
+		GradleProject root = (GradleProject) inputElement;
+		if (root==null) {
 			return NO_ELEMENTS;
 		} else {
 			try {
-				BuildInvocations model = project.getModelOfType(BuildInvocations.class);
-				if (model != null) {
-					DomainObjectSet<? extends Launchable> tasks = isLocalTasks
-							? model.getTasks()
-							: model.getTaskSelectors();
-					if (isHideInternalTasks) {
-						List<Launchable> result = new ArrayList<Launchable>(
-								tasks.size());
-						for (Launchable task : tasks) {
-							if (task.isPublic()) {
-								result.add(task);
-							}
-						}
-						return result.toArray(new Launchable[result.size()]);
-					} else {
-						return tasks.toArray(new Launchable[tasks.size()]);
-					}
+				boolean modelNotAvailable = false;
+				try {
+					root.getModelOfType(BuildInvocations.class);
+				} catch (FastOperationFailedException e) {
+					modelNotAvailable = true;
 				}
-			} catch (Exception e) {
-				GradleTasksViewPlugin
-						.getDefault()
-						.getLog()
-						.log(new Status(IStatus.ERROR,
-								GradleTasksViewPlugin.PLUGIN_ID,
-								"Cannot fetch BuildInvocationsModel", e));
+				try {
+					root.requestGradleModel();
+				} catch (FastOperationFailedException e) {
+					modelNotAvailable = true;
+				}
+				GradleTask[] gradleTasks = getGradleTasks(root);
+				return modelNotAvailable ? new Object[] {"model not yet available"} : gradleTasks;
+			} catch (CoreException e) {
+				GradleCore.log(e);
+				return new Object[] {"ERROR: "+e.getMessage()+"", "See error log for details"};
 			}
-			return new Object[0];
+		}
+	}
+	
+	private GradleTask[] getGradleTasks(GradleProject project) {
+		try {
+			EclipseProject eclipseProjectModel = project.getGradleModel();
+			BuildInvocations buildInvocationsModel = project.getModelOfType(BuildInvocations.class);
+			ProjectTasksVisibility tasksVisibility = new ProjectTasksVisibility(buildInvocationsModel);
+			List<GradleTask> tasksCollection = new ArrayList<GradleTask>(Math.max(buildInvocationsModel.getTasks().size(), buildInvocationsModel.getTaskSelectors().size()));
+			for (final GradleTask task : isLocalTasks
+					? GradleProject.getTasks(eclipseProjectModel)
+					: GradleProject.getAggregateTasks(eclipseProjectModel).values()) {
+				final boolean isPublic = isLocalTasks ? tasksVisibility.isTaskPublic(task.getName()) : tasksVisibility.isTaskSelectorPublic(task.getName());
+				if (!isHideInternalTasks || isPublic) {
+					tasksCollection.add(
+						new GradleTask() {
+			
+							@Override
+							public String getPath() {
+								return task.getPath();
+							}
+			
+							@Override
+							public String getName() {
+								return task.getName();
+							}
+			
+							@Override
+							public String getDescription() {
+								return task.getDescription();
+							}
+			
+							@Override
+							public String getDisplayName() {
+								return task.getDisplayName();
+							}
+			
+							@Override
+							public boolean isPublic() {
+								return isPublic;
+							}
+			
+							@Override
+							public org.gradle.tooling.model.GradleProject getProject() {
+								return task.getProject();
+							}
+							
+						}
+					);
+				}
+			}
+			return tasksCollection.toArray(new GradleTask[tasksCollection.size()]);
+		} catch (FastOperationFailedException e) {
+			return new GradleTask[0];
+		} catch (CoreException e) {
+			return new GradleTask[0];
 		}
 	}
 	

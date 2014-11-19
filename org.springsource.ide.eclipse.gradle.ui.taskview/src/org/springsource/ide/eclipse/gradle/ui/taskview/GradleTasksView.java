@@ -16,8 +16,6 @@ import java.util.Collections;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -47,12 +45,8 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.part.ViewPart;
-import org.gradle.tooling.model.Launchable;
 import org.gradle.tooling.model.Task;
-import org.gradle.tooling.model.TaskSelector;
-import org.gradle.tooling.model.gradle.BuildInvocations;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
@@ -231,33 +225,18 @@ public class GradleTasksView extends ViewPart {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				Object obj = ((IStructuredSelection)selection).getFirstElement();
-				if (obj instanceof Launchable) {
-					Launchable task = (Launchable) obj;
+				if (obj instanceof Task) {
+					Task task = (Task) obj;
 					GradleProject project = projectSelector.getProject();
 					if (project!=null) {
-						String taskStr = null;
-						if (task instanceof TaskSelector) {
-							taskStr = ((TaskSelector)task).getName();
-						} else if (task instanceof Task) {
-							taskStr = ((Task)task).getPath();
-						} else {
-							GradleTasksViewPlugin
-									.getDefault()
-									.getLog()
-									.log(new Status(IStatus.ERROR,
-											GradleTasksViewPlugin.PLUGIN_ID,
-											"'" + task.getDisplayName()
-													+ "' cannot be launched"));
-						}
-						if (taskStr != null) {
-							final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, taskStr);
-							JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName() + " " + taskStr) {
-								@Override
-								public void doit(IProgressMonitor mon) throws Exception {
-									conf.launch("run", mon, false, true);
-								}
-							});
-						}
+						String taskStr = displayProjectLocalTasks ? task.getPath() : task.getName();
+						final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, taskStr);
+						JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName() + " " + taskStr) {
+							@Override
+							public void doit(IProgressMonitor mon) throws Exception {
+								conf.launch("run", mon, false, true);
+							}
+						});
 					}
 				}
 			}
@@ -319,7 +298,6 @@ public class GradleTasksView extends ViewPart {
 		GradleProject project = projectSelector.getProject();
 		if (project!=null) {
 			project.invalidateGradleModel();
-			project.getModelOfType(BuildInvocations.class);
 			viewer.refresh();
 		}
 	}

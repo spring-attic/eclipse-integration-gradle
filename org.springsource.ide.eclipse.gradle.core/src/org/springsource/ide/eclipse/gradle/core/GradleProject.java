@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -517,7 +516,7 @@ public class GradleProject {
 		return null; 
 	}
 	
-	public <T> T getModelOfType(final Class<T> type) {
+	public <T> T getModelOfType(final Class<T> type) throws CoreException, FastOperationFailedException {
 		try {
 			return mgr.getModel(this, type);
 		} catch (FastOperationFailedException e) {
@@ -536,9 +535,7 @@ public class GradleProject {
 							}
 						}));
 			}
-			return null;
-		} catch (CoreException e) {
-			return null;
+			throw e;
 		}
 	}
 	
