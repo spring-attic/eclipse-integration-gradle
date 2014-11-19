@@ -107,6 +107,7 @@ public abstract class GradleTest extends TestCase {
 		GradleCore.getInstance().getPreferences().setRemapJarsToGradleProjects(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE);
 		GradleCore.getInstance().getPreferences().setRemapJarsToMavenProjects(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN);
 		GradleCore.getInstance().getPreferences().setJarRemappingOnOpenClose(GradlePreferences.DEFAULT_JAR_REMAP_ON_OPEN_CLOSE);
+		GradleCore.getInstance().resetModelManager();
 	}
 
 	public static void deleteAllProjects() throws CoreException {
@@ -384,6 +385,12 @@ public abstract class GradleTest extends TestCase {
 				assertOKStatus(job.getResult());
 	}
 	
+	public void createGeneralProject(String name) throws CoreException {
+		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+		p.create(new NullProgressMonitor());
+		p.open(new NullProgressMonitor());
+	}
+
 	public static void assertOKStatus(IStatus status) {
 		if (!status.isOK()) {
 			fail(status.toString());

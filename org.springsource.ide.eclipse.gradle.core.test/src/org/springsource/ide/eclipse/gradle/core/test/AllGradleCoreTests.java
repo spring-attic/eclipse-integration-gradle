@@ -15,7 +15,6 @@ import java.io.File;
 import junit.framework.TestSuite;
 
 import org.apache.commons.io.FileUtils;
-import org.springsource.ide.eclipse.gradle.core.modelmanager.DefaultModelBuilder;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.test.DefaultModelBuilderTest;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.test.GradleModelManagerTest;
 import org.springsource.ide.eclipse.gradle.core.test.util.GroovySanityTest;
@@ -48,6 +47,7 @@ public class AllGradleCoreTests extends ManagedTestSuite {
 		suite.addTestSuite(ArrayEncoderTest.class);
 		suite.addTestSuite(TopoSortTest.class);
 		suite.addTestSuite(GradleProjectTest.class);
+		suite.addTestSuite(JarRemappingTests.class);
 		suite.addTestSuite(GradleImportTests.class);
 		suite.addTestSuite(GradleTaskRunTest.class);
 		suite.addTestSuite(GradleMenuEnablementTest.class);

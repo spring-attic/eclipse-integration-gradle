@@ -204,54 +204,19 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		}
 		if (shouldHaveListener) {
 			openCloseListener = new ProjectOpenCloseListener() {
-				
-				private Job qrJob = null;
-				
+								
 				@Override
 				public void projectOpened(IProject project) {
 					sdebug("OPENED: "+project.getName());
-					quickRefreshAllContainers();
+					JarRemapRefresher.request();
 				}
 				
 				@Override
 				public void projectClosed(IProject project) {
 					sdebug("CLOSED: "+project.getName());
-					quickRefreshAllContainers();
+					JarRemapRefresher.request();
 				}
 				
-				/**
-				 * Refresh classpath entries in all containers in the workspace quickly (i.e. without invalidating
-				 * the cached gradle models and rebuilding them). This is useful when the entries need to be
-				 * recomputed because a project was opened / closed and so jar -> gradle or 
-				 */
-				private synchronized void quickRefreshAllContainers() {
-					sdebug("quickRefreshAllContainers");
-					Collection<GradleProject> projects = GradleCore.getGradleProjects();
-					if (!projects.isEmpty()) {
-						if (qrJob==null) {
-							qrJob = new GradleRunnable("Refresh Gradle classpath containers") {
-								@Override
-								public void doit(IProgressMonitor mon) throws Exception {
-									//Important: must re-fetch current list of projects each time job runs.
-									Collection<GradleProject> projects = GradleCore.getGradleProjects();
-									sdebug("quickRefreshAllContainers Job started");
-									mon.beginTask("Refresh Gradle Classpath Containers", projects.size());
-									for (GradleProject p : projects) {
-										GradleClassPathContainer classpath = p.getClassPathcontainer();
-										if (classpath!=null) {
-											mon.subTask("Refresh "+p.getName());
-											classpath.clearPersistedEntries();
-											classpath.notifyJDT();
-										}
-										mon.worked(1);
-									}
-								}
-							}.asJob();
-							qrJob.setRule(JobUtil.buildRule());
-						}
-						qrJob.schedule(100); //Slight delay for 'bursty' sets of change events.
-					}
-				}
 			};
 			GradleCore.getInstance().addOpenCloseListener(openCloseListener);
 			
@@ -354,7 +319,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	/**
 	 * Ensures that entries will be recomputed next time around
 	 */
-	private void clearPersistedEntries() {
+	void clearPersistedEntries() {
 		setPersistedEntries(null);
 		project.getDependencyComputer().clearPersistedEntries();
 	}
