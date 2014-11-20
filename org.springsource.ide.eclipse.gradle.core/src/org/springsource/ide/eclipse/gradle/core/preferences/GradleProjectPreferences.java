@@ -32,9 +32,9 @@ import org.springsource.ide.eclipse.gradle.core.util.ResourceListEncoder;
  */
 public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	
-	private static final boolean DEBUG 
-		=  (""+Platform.getLocation()).contains("kdvolder")
-		|| (""+Platform.getLocation()).contains("bamboo");
+	private static final boolean DEBUG = false;
+//		=  (""+Platform.getLocation()).contains("kdvolder")
+//		|| (""+Platform.getLocation()).contains("bamboo");
 
 	private void debug(String string) {
 		if (DEBUG) {
@@ -72,7 +72,7 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	}
 
 	public void setRootProjectLocation(File file) {
-		debug("set " +getGradleProject().getLocation().getName()+ ".root = "+(file==null?"null":file.getName()) );
+		//debug("set " +getGradleProject().getLocation().getName()+ ".root = "+(file==null?"null":file.getName()) );
 		put(ROOT_LOCATION_PREF, file);
 	}
 
