@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 
@@ -88,13 +89,19 @@ public class JarRemapRefresher {
 						mon.beginTask("Remap Gradle Dependencies", 2*projects.size()+1);
 						
 						mon.subTask("Computing project publications");
-						//Force publications models into the model cache.
-						// This is done before aquiring workspace lock.
-						for (GradleProject p : projects) {
-							try {
-								p.getPublications(new SubProgressMonitor(mon, 1));
-							} catch (Throwable e) {
-								GradleCore.log(e);
+						//Force publications models into the model cache, if we are going
+						//to need them.
+						if (GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects()) {
+							for (GradleProject p : projects) {
+								try {
+									p.getPublications(new SubProgressMonitor(mon, 1));
+								} catch (Throwable e) {
+									if (ExceptionUtil.isUnknownModelException(e)) {
+										//ignore
+									} else {
+										GradleCore.log(e);
+									}
+								}
 							}
 						}
 						
