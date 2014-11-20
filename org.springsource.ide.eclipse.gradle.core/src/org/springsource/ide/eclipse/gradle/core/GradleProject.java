@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -107,6 +108,8 @@ public class GradleProject {
 	private GradleClassPathContainer classPathContainer = null;
 
 	private IProject cachedProject;
+
+	private Map<Class<?>, Job> modelFetchingJobsCache = new ConcurrentHashMap<Class<?>, Job>();
 
 	private Job modelUpdateJob;
 
@@ -512,7 +515,34 @@ public class GradleProject {
 		} 
 		return null; 
 	}
+	
+	public <T> T getModelOfType(Class<T> type) throws CoreException, FastOperationFailedException {
+		return mgr.getModel(this, type);
+	}
+	
+	public <T> T requestModelOfType(final Class<T> type) throws CoreException, FastOperationFailedException {
+		try {
+			return mgr.getModel(this, type);
+		} catch (FastOperationFailedException e) {
+			Job job = modelFetchingJobsCache.get(type);
+			if (job == null) {
+				modelFetchingJobsCache.put(type, JobUtil.schedule(
+						JobUtil.NO_RULE,
+						new GradleRunnable("Obtaining Gradle model: "
+								+ type.getName()) {
 
+							@Override
+							public void doit(IProgressMonitor mon)
+									throws Exception {
+								mgr.getModel(GradleProject.this, type, mon);
+								modelFetchingJobsCache.remove(type);
+							}
+						}));
+			}
+			throw e;
+		}
+	}
+	
 	public EclipseProject getGradleModel() throws FastOperationFailedException, CoreException {
 		return mgr.getModel(this, EclipseProject.class);
 	}

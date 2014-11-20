@@ -14,19 +14,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.gradle.api.Project;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.GradleProject;
 import org.gradle.tooling.model.GradleTask;
+import org.gradle.tooling.model.UnsupportedMethodException;
 import org.gradle.tooling.model.eclipse.EclipseProject;
+import org.gradle.tooling.model.gradle.BuildInvocations;
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 
@@ -56,45 +63,98 @@ public class GradleProjectIndex {
 		
 	};
 	
+	private static final ProjectTasksVisibility VISIBILITY_NOT_SUPPORTED = new ProjectTasksVisibility(null);
+	
 	private boolean initialized = false;
+	private org.springsource.ide.eclipse.gradle.core.GradleProject ideProject = null;
+	private LinkedList<org.springsource.ide.eclipse.gradle.core.GradleProject> trackedProjects = new LinkedList<org.springsource.ide.eclipse.gradle.core.GradleProject>();
 	private EclipseProject project = null;
 	private Map<String, GradleTask> aggregateTasks = Collections.emptyMap();
 	private List<GradleTask> sortedAggregateTasks = Collections.emptyList();
 	private List<GradleProject> sortedProjects = Collections.emptyList();
+	private Map<String, ProjectTasksVisibility> tasksVisibilityCache = new ConcurrentHashMap<String, ProjectTasksVisibility>();
 	
 	private ExecutorService executor;
 	
 	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private Future<?> indexRequest = null;
 	
+	private final IGradleModelListener MODEL_LISTENER = new IGradleModelListener() {
+		@Override
+		public <T> void modelChanged(org.springsource.ide.eclipse.gradle.core.GradleProject project, Class<T> type, T model) {
+			try {
+				if (model instanceof EclipseProject) {
+					initializeIndexRequest((EclipseProject) model);
+				}
+			} catch (Exception e) {
+				// ignore
+			}
+		}				
+	};
+	
+	private final IGradleModelListener BUILD_INVOCATIONS_LISTENER = new IGradleModelListener() {
+		
+		@Override
+		public <T> void modelChanged (
+				org.springsource.ide.eclipse.gradle.core.GradleProject project,
+				Class<T> type, T model) {
+			if (model instanceof BuildInvocations) {
+				updateVisibilityCache(project.getName(), (BuildInvocations) model);
+			}
+		}
+	};
+	
 	public GradleProjectIndex() {
 		super();
-		this.executor = Executors.newFixedThreadPool(1);
+		this.executor = Executors.newFixedThreadPool(2);
 	}
 	
 	public void dispose() {
+		if (ideProject != null) {
+			ideProject.removeModelListener(MODEL_LISTENER);
+		}
+		resetIndex();
 		this.executor.shutdownNow();
 	}
 	
 	public void setProject(org.springsource.ide.eclipse.gradle.core.GradleProject project) {
 		try {
+			if (ideProject != null) {
+				ideProject.removeModelListener(MODEL_LISTENER);
+			}
 			resetIndex();
 			if (project != null) {
-				initializeIndexRequest(project.requestGradleModel());
+				ideProject = project;
+				ideProject.addModelListener(MODEL_LISTENER);
+				initializeIndexRequest(ideProject.requestGradleModel());
 			}
 		} catch (FastOperationFailedException e) {
-			project.addModelListener(new IGradleModelListener() {
-				@Override
-				public <T> void modelChanged(org.springsource.ide.eclipse.gradle.core.GradleProject project, Class<T> type, T model) {
-					try {
-						initializeIndexRequest(project.getGradleModel());
-					} catch (Exception e) {
-						// ignore
-					}
-				}				
-			});
+			// ignore
 		} catch (CoreException e) {
 			// ignore
+		}
+	}
+	
+	private void updateVisibilityCache(final String projectName, final BuildInvocations buildInvocations) {
+		ProjectTasksVisibility tasksVisibility;
+		try {
+			tasksVisibility = new ProjectTasksVisibility(buildInvocations);
+		} catch (UnsupportedMethodException e) {
+			tasksVisibility = VISIBILITY_NOT_SUPPORTED;
+			GradleCore
+					.log(new Status(
+							IStatus.WARNING,
+							GradleCore.PLUGIN_ID,
+							"Tasks for project '"
+									+ project.getName()
+									+ "' don't support visibility feature. Most likely because of old version of Gradle is set for the project",
+							e));
+		}
+		lock.writeLock().lock();
+		try {
+			tasksVisibilityCache.put(projectName, tasksVisibility);
+		} finally {
+			lock.writeLock().unlock();
 		}
 	}
 	
@@ -120,6 +180,10 @@ public class GradleProjectIndex {
 			this.aggregateTasks = Collections.emptyMap();
 			this.sortedAggregateTasks = Collections.emptyList();
 			this.sortedProjects = Collections.emptyList();
+			tasksVisibilityCache.clear();
+			while (!trackedProjects.isEmpty()) {
+				trackedProjects.pollFirst().removeModelListener(BUILD_INVOCATIONS_LISTENER);
+			}
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -133,6 +197,10 @@ public class GradleProjectIndex {
 			this.aggregateTasks = Collections.emptyMap();
 			this.sortedAggregateTasks = Collections.emptyList();
 			this.sortedProjects = Collections.emptyList();
+			tasksVisibilityCache.clear();
+			while (!trackedProjects.isEmpty()) {
+				trackedProjects.pollFirst().removeModelListener(BUILD_INVOCATIONS_LISTENER);
+			}
 			if (project != null) {
 				this.aggregateTasks = new HashMap<String, GradleTask>();
 				this.sortedProjects = new ArrayList<GradleProject>();
@@ -148,7 +216,8 @@ public class GradleProjectIndex {
 		}
 	}
 	
-	private static void collectAggregateTasks(EclipseProject model, Map<String, GradleTask> tasksMap, List<GradleProject> sortedProjects) {
+	private void collectAggregateTasks(EclipseProject model, Map<String, GradleTask> tasksMap, List<GradleProject> sortedProjects) {
+		updateVisibilityCache(model);
 		DomainObjectSet<? extends EclipseProject> projects = model.getChildren();
 		for (EclipseProject p : projects) {
 			collectAggregateTasks(p, tasksMap, sortedProjects);
@@ -159,7 +228,21 @@ public class GradleProjectIndex {
 		for (GradleTask t : tasks) {
 			tasksMap.put(t.getName(), t);
 		}	
-	}	
+	}
+	
+	private void updateVisibilityCache(EclipseProject model) {
+		org.springsource.ide.eclipse.gradle.core.GradleProject ideProject = GradleCore.create(model);
+		trackedProjects.add(ideProject);
+		ideProject.addModelListener(BUILD_INVOCATIONS_LISTENER);
+		try {
+			updateVisibilityCache(model.getName(), 
+					ideProject.requestModelOfType(BuildInvocations.class));
+		} catch (CoreException e) {
+			GradleCore.log(e.getStatus());
+		} catch (FastOperationFailedException e) {
+			// ignore
+		}
+	}
 	
 	public boolean isInitialized() {
 		lock.readLock().lock();
@@ -188,7 +271,7 @@ public class GradleProjectIndex {
 			List<GradleTask> tasks = new ArrayList<GradleTask>();
 			for (GradleTask task : sortedAggregateTasks) {
 				if (task.getName().startsWith(prefix)) {
-					tasks.add(task);
+					tasks.add(createTaskProxy(project.getName(), task, true));
 				}
 			}
 			return tasks;
@@ -262,13 +345,83 @@ public class GradleProjectIndex {
 	}
 	
 
-	private static List<GradleTask> findTasks(GradleProject project, String prefix, List<GradleTask> tasks) {
+	private List<GradleTask> findTasks(GradleProject project, String prefix, List<GradleTask> tasks) {
 		for (GradleTask task : project.getTasks()) {
 			if (task.getName().startsWith(prefix)) {
-				tasks.add(task);
+				tasks.add(createTaskProxy(project.getName(), task, false));
 			}
 		}
 		return tasks;
+	}
+	
+	private GradleTask createTaskProxy(final String projectName, final GradleTask task, final boolean aggregate) {
+		return new GradleTask() {
+			@Override
+			public String getPath() {
+				return task.getPath();
+			}
+
+			@Override
+			public String getName() {
+				return task.getName();
+			}
+
+			@Override
+			public String getDescription() {
+				return task.getDescription();
+			}
+
+			@Override
+			public String getDisplayName() {
+				return task.getDisplayName();
+			}
+
+			@Override
+			public boolean isPublic() {
+				lock.readLock().lock();
+				ProjectTasksVisibility tasksVisibility = null;
+				try {
+					tasksVisibility = tasksVisibilityCache.get(projectName);
+				} finally {
+					lock.readLock().unlock();
+				}
+				if (tasksVisibility == null) {
+					/*
+					 * Tasks visibility info ahsn't been loaded yet (BuildInvocations model not fetched yet)
+					 */
+					throw new IllegalArgumentException("BuildInvocations model not loaded yet");
+				} else {
+					/*
+					 * If visibility feature for tasks is not supported for project then just make task public
+					 */
+					if (tasksVisibility != VISIBILITY_NOT_SUPPORTED) {
+						try {
+							return aggregate ? tasksVisibility.isTaskSelectorPublic(task.getName()) : tasksVisibility.isTaskPublic(task.getName());
+						} catch (IllegalArgumentException e) {
+							/*
+							 * Exception means that there is visibility property
+							 * for task, which is some sort of a bug either on
+							 * Gradle or Gradle Eclipse side
+							 */
+							GradleCore
+									.log(new Status(
+											IStatus.WARNING,
+											GradleCore.PLUGIN_ID,
+											"Task '"
+													+ task.getPath()
+													+ "' is displayed as public because visibility property is unavailable for it",
+											e));
+						}
+					}
+					return true;
+				}
+			}
+
+			@Override
+			public GradleProject getProject() {
+				return task.getProject();
+			}
+		};
 	}
 	
 }
