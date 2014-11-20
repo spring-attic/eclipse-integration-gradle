@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Platform;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
@@ -31,8 +32,14 @@ import org.springsource.ide.eclipse.gradle.core.util.ResourceListEncoder;
  */
 public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	
+	private static final boolean DEBUG 
+		=  (""+Platform.getLocation()).contains("kdvolder")
+		|| (""+Platform.getLocation()).contains("bamboo");
+
 	private void debug(String string) {
-		System.out.println(string);
+		if (DEBUG) {
+			System.out.println(string);
+		}
 	}
 
 	private static final String LINKED_RESOURCES_PREF = "org.springsource.ide.eclipse.gradle.linkedresources";
@@ -65,7 +72,7 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	}
 
 	public void setRootProjectLocation(File file) {
-		debug("set " +getGradleProject()+ ".root = "+file );
+		debug("set " +getGradleProject().getLocation().getName()+ ".root = "+file.getName() );
 		put(ROOT_LOCATION_PREF, file);
 	}
 

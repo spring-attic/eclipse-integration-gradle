@@ -678,6 +678,7 @@ public class GradleModelManagerTest extends GradleTest {
 		mgr.invalidate();
 		
 		//From now on birds are people rather than animals
+		System.out.println("birds are now people");
 		changeParent(project("animal/bird"), project("people"));
 		
 		ArrayList<ModelPromise<FooHierarchyModel>> promises = new ArrayList<ModelPromise<FooHierarchyModel>>();
@@ -1282,6 +1283,7 @@ public class GradleModelManagerTest extends GradleTest {
 
 		@Override
 		protected <T> T doBuild(GradleProject project, Class<T> requiredType, IProgressMonitor monitor) throws CoreException {
+			System.out.println(">> building "+project.getLocation().getName()+"::"+requiredType.getSimpleName());
 			incrementBuildCount(project, requiredType);
 			monitor.beginTask("Building of type "+requiredType.getSimpleName()+" for '"+project.getDisplayName()+"'", 1);
 			try {
@@ -1293,6 +1295,7 @@ public class GradleModelManagerTest extends GradleTest {
 				}
 				throw ExceptionUtil.coreException("No such project: "+project.getLocation());
 			} finally {
+				System.out.println("<< building "+project.getLocation().getName()+"::"+requiredType.getSimpleName());
 				monitor.done();
 			}
 		}
