@@ -24,7 +24,7 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 public class DefaultModelBuilder extends AbstractModelBuilder {
 	
 	@Override
-	public <T> T doBuild(GradleProject project, Class<T> type, IProgressMonitor mon) throws CoreException {
+	synchronized public <T> T doBuild(GradleProject project, Class<T> type, IProgressMonitor mon) throws CoreException {
 		mon.beginTask(jobName(project, type), 10);
 		try {
 			return ToolinApiUtils.buildModel(project, type, new SubProgressMonitor(mon, 9));

@@ -73,9 +73,15 @@ public class GradleProjectIndex {
 	private List<GradleTask> sortedAggregateTasks = Collections.emptyList();
 	private List<GradleProject> sortedProjects = Collections.emptyList();
 	private Map<String, ProjectTasksVisibility> tasksVisibilityCache = new ConcurrentHashMap<String, ProjectTasksVisibility>();
+	private Map<GradleProject, EclipseProject> inverseProjectsMap = new HashMap<GradleProject, EclipseProject>();
 	
 	private ExecutorService executor;
 	
+	/**
+	 * The lock is for resetting the cached data. For example
+	 * {@link #tasksVisibilityCache} can be updated during a read operation.
+	 * Tasks visibility data lazily fetched when
+	 */
 	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private Future<?> indexRequest = null;
 	
@@ -127,6 +133,7 @@ public class GradleProjectIndex {
 				ideProject = project;
 				ideProject.addModelListener(MODEL_LISTENER);
 				initializeIndexRequest(ideProject.requestGradleModel());
+				updateVisibilityCache(ideProject);
 			}
 		} catch (FastOperationFailedException e) {
 			// ignore
@@ -146,16 +153,11 @@ public class GradleProjectIndex {
 							IStatus.WARNING,
 							GradleCore.PLUGIN_ID,
 							"Tasks for project '"
-									+ project.getName()
+									+ projectName
 									+ "' don't support visibility feature. Most likely because of old version of Gradle is set for the project",
 							e));
 		}
-		lock.writeLock().lock();
-		try {
-			tasksVisibilityCache.put(projectName, tasksVisibility);
-		} finally {
-			lock.writeLock().unlock();
-		}
+		tasksVisibilityCache.put(projectName, tasksVisibility);
 	}
 	
 	private void initializeIndexRequest(final EclipseProject project) {
@@ -180,6 +182,7 @@ public class GradleProjectIndex {
 			this.aggregateTasks = Collections.emptyMap();
 			this.sortedAggregateTasks = Collections.emptyList();
 			this.sortedProjects = Collections.emptyList();
+			inverseProjectsMap.clear();
 			tasksVisibilityCache.clear();
 			while (!trackedProjects.isEmpty()) {
 				trackedProjects.pollFirst().removeModelListener(BUILD_INVOCATIONS_LISTENER);
@@ -197,6 +200,7 @@ public class GradleProjectIndex {
 			this.aggregateTasks = Collections.emptyMap();
 			this.sortedAggregateTasks = Collections.emptyList();
 			this.sortedProjects = Collections.emptyList();
+			inverseProjectsMap.clear();
 			tasksVisibilityCache.clear();
 			while (!trackedProjects.isEmpty()) {
 				trackedProjects.pollFirst().removeModelListener(BUILD_INVOCATIONS_LISTENER);
@@ -217,7 +221,7 @@ public class GradleProjectIndex {
 	}
 	
 	private void collectAggregateTasks(EclipseProject model, Map<String, GradleTask> tasksMap, List<GradleProject> sortedProjects) {
-		updateVisibilityCache(model);
+		inverseProjectsMap.put(model.getGradleProject(), model);
 		DomainObjectSet<? extends EclipseProject> projects = model.getChildren();
 		for (EclipseProject p : projects) {
 			collectAggregateTasks(p, tasksMap, sortedProjects);
@@ -230,12 +234,11 @@ public class GradleProjectIndex {
 		}	
 	}
 	
-	private void updateVisibilityCache(EclipseProject model) {
-		org.springsource.ide.eclipse.gradle.core.GradleProject ideProject = GradleCore.create(model);
+	private void updateVisibilityCache(org.springsource.ide.eclipse.gradle.core.GradleProject ideProject) {
 		trackedProjects.add(ideProject);
 		ideProject.addModelListener(BUILD_INVOCATIONS_LISTENER);
 		try {
-			updateVisibilityCache(model.getName(), 
+			updateVisibilityCache(ideProject.getName(), 
 					ideProject.requestModelOfType(BuildInvocations.class));
 		} catch (CoreException e) {
 			GradleCore.log(e.getStatus());
@@ -320,6 +323,10 @@ public class GradleProjectIndex {
 						.findByPath(projectPrefix);
 				
 				if (targetProject != null) {
+					EclipseProject eclipseProject = inverseProjectsMap.get(targetProject);
+					if (eclipseProject != null) {
+						updateVisibilityCache(GradleCore.create(eclipseProject));
+					}
 					return findTasks(targetProject, suffix, new ArrayList<GradleTask>());
 				}					
 			}
