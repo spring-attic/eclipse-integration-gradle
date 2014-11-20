@@ -31,6 +31,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
+import org.springsource.ide.eclipse.gradle.core.util.ProjectTasksVisibility;
 
 /**
  * Content provider for displaying tasks tree

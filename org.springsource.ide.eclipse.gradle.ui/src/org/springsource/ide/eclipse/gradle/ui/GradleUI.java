@@ -44,6 +44,7 @@ public class GradleUI extends AbstractUIPlugin {
 	public static final String IMAGE_PUBLIC_TASK = "public-task"; //$NON-NLS-1$
 	public static final String IMAGE_FILTER_INTERNAL_TASKS = "filter-internal-tasks"; //$NON-NLS-1$
 	public static final String IMAGE_RUN_TASK = "run"; //$NON-NLS-1$
+	public static final String IMAGE_LOADING_TASK = "loading-task"; //$NON-NLS-1$
 	
 	private static final Map<String, String> IMAGE_DESCRIPTOR_MAP = new HashMap<String, String>();
 	
@@ -56,6 +57,7 @@ public class GradleUI extends AbstractUIPlugin {
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_MULTIPROJECT_FOLDER, "icons/gradle-multiproj-folder.png");
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_MULTIPROJECT_FOLDER_DISABLED, "icons/gradle-multiproj-folder-disabled.png");
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_LAUNCH, "icons/gradle-launch.png");
+		IMAGE_DESCRIPTOR_MAP.put(IMAGE_LOADING_TASK, "icons/targetloading.png");
 	}
 
 	// The shared instance

@@ -527,7 +527,7 @@ public class GradleProject {
 			Job job = modelFetchingJobsCache.get(type);
 			if (job == null) {
 				modelFetchingJobsCache.put(type, JobUtil.schedule(
-						null,
+						JobUtil.NO_RULE,
 						new GradleRunnable("Obtaining Gradle model: "
 								+ type.getName()) {
 

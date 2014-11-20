@@ -118,8 +118,16 @@ public class TaskContentAssistantProcessor implements IContentAssistProcessor {
 			proposals.add(new TaskCompletionProposal(offset - prefix.length(),
 					offset, task.getName(), displayString, task
 							.getDescription(), GradleUI.getDefault()
-							.getImageRegistry().get(GradleUI.IMAGE_PUBLIC_TASK)));
+							.getImageRegistry().get(getImageId(task))));
         }		
+	}
+	
+	private String getImageId(GradleTask task) {
+		try {
+			return task.isPublic() ? GradleUI.IMAGE_PUBLIC_TASK : GradleUI.IMAGE_INTERNAL_TASK;
+		} catch (IllegalArgumentException e) {
+			return GradleUI.IMAGE_LOADING_TASK;
+		}
 	}
 	
 	private void contributeLocalTasksProposals(List<ICompletionProposal> proposals, String prefix, int offset) {
@@ -133,7 +141,7 @@ public class TaskContentAssistantProcessor implements IContentAssistProcessor {
 			proposals.add(new TaskCompletionProposal(offset - (prefix.length() - 1 - prefix.lastIndexOf(Project.PATH_SEPARATOR)),
 					offset, task.getName(), displayString, task
 							.getDescription(), GradleUI.getDefault()
-							.getImageRegistry().get(GradleUI.IMAGE_PUBLIC_TASK)));
+							.getImageRegistry().get(getImageId(task))));
         }		
 	}
 	

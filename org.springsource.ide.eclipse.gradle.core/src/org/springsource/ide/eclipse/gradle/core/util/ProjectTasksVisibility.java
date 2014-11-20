@@ -8,7 +8,7 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springsource.ide.eclipse.gradle.ui.taskview;
+package org.springsource.ide.eclipse.gradle.core.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,7 @@ import org.gradle.tooling.model.gradle.BuildInvocations;
  * @author Alex Boyko
  *
  */
-final class ProjectTasksVisibility {
+public final class ProjectTasksVisibility {
 	
 	private Map<String, Boolean> tasks = new HashMap<String, Boolean>();
 	
