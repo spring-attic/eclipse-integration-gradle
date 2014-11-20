@@ -140,7 +140,7 @@ public class GradleTasksView extends ViewPart {
 		projectSelector.setProjectSelectionListener(this);
 		
 		PatternFilter filter = new PatternFilter();
-		FilteredTree filteredTree = new FilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
+		FilteredTree filteredTree = new FilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, filter, true);
 		
 		viewer = filteredTree.getViewer();
 		
@@ -223,15 +223,20 @@ public class GradleTasksView extends ViewPart {
 		refreshAction = new RefreshAction(this);
 		doubleClickAction = new Action() {
 			public void run() {
-				ISelection selection = viewer.getSelection();
-				Object obj = ((IStructuredSelection)selection).getFirstElement();
-				if (obj instanceof Task) {
-					Task task = (Task) obj;
-					GradleProject project = projectSelector.getProject();
-					if (project!=null) {
-						String taskStr = displayProjectLocalTasks ? task.getPath() : task.getName();
-						final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, taskStr);
-						JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName() + " " + taskStr) {
+				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+				GradleProject project = projectSelector.getProject();
+				if (project != null && !selection.isEmpty()) {
+					StringBuilder taskStr = new StringBuilder();
+					for (Object obj : selection.toArray()) {
+						if (obj instanceof Task) {
+							Task task = (Task) obj;
+							taskStr.append(displayProjectLocalTasks ? task.getPath() : task.getName());
+							taskStr.append(' ');
+						}
+					}
+					if (taskStr.length() > 0) {
+						final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, taskStr.toString());
+						JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName() + " " + taskStr.toString()) {
 							@Override
 							public void doit(IProgressMonitor mon) throws Exception {
 								conf.launch("run", mon, false, true);
