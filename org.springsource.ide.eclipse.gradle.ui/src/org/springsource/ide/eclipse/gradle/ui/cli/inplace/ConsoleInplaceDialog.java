@@ -1057,8 +1057,8 @@ public class ConsoleInplaceDialog {
 		if (projectList!=null) {
 			String[] projectNames = getGradleProjectNames();
 			projectList.setItems(projectNames);
-			if (getSelectedProject()==null && projectNames.length>0) {
-				setSelectedProject(projectNames[0]);
+			if (getSelectedProject()==null) {
+				projectList.setText("");
 			}
 			if (getSelectedProject()!=null) {
 				projectList.setText(selectedProject.getName());

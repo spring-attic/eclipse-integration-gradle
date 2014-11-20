@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -21,11 +24,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.gradle.tooling.model.GradleTask;
+import org.gradle.tooling.model.UnsupportedMethodException;
 import org.gradle.tooling.model.eclipse.EclipseProject;
+import org.gradle.tooling.model.gradle.BuildInvocations;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
+import org.springsource.ide.eclipse.gradle.core.util.ProjectTasksVisibility;
 
 /**
  * Content provider for displaying tasks tree
@@ -40,6 +46,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 	private TreeViewer viewer;
 	private GradleProject currentProject;
 	private boolean isLocalTasks;
+	private boolean isHideInternalTasks;
 	
 	public TaskTreeContentProvider(TreeViewer viewer) {
 		this.viewer = viewer;
@@ -62,7 +69,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 		@Override
 		public <T> void modelChanged(GradleProject p, Class<T> type,
 				T model) {
-			if (currentProject==p) {
+			if (currentProject==p && (model instanceof BuildInvocations || model instanceof EclipseProject)) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						if (viewer!=null) {
@@ -85,28 +92,41 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 	}
 
 	private void setProject(GradleProject project) {
-		if (currentProject!=project) {
-			GradleProject oldProject = currentProject;
-			currentProject = project;
-			if (oldProject!=null) {
-				oldProject.removeModelListener(modelListener);
+		if (currentProject != project) {
+			if (currentProject != null) {
+				currentProject.removeModelListener(modelListener);
 			}
-			if (project!=null) {
-				project.addModelListener(modelListener);
+			currentProject = project;
+			if (currentProject != null) {
+				currentProject.addModelListener(modelListener);
 			}
 		}
 	}
-
+	
 	public Object[] getElements(Object inputElement) {
 		GradleProject root = (GradleProject) inputElement;
 		if (root==null) {
 			return NO_ELEMENTS;
 		} else {
 			try {
-				GradleTask[] gradleTasks = getGradleTasks(root.requestGradleModel());
-				return gradleTasks;
-			} catch (FastOperationFailedException e) {
-				return new Object[] {"model not yet available"};
+				boolean modelNotAvailable = false;
+				/*
+				 * Request EclipseProject and BuildInvocations models in
+				 * parallel. Swallow the exception and proceed to the next model
+				 * request if previous throws FastOperationException
+				 */
+				try {
+					root.requestModelOfType(BuildInvocations.class);
+				} catch (FastOperationFailedException e) {
+					modelNotAvailable = true;
+				}
+				try {
+					root.requestGradleModel();
+				} catch (FastOperationFailedException e) {
+					modelNotAvailable = true;
+				}
+				GradleTask[] gradleTasks = getGradleTasks(root);
+				return modelNotAvailable ? new Object[] {"model not yet available"} : gradleTasks;
 			} catch (CoreException e) {
 				GradleCore.log(e);
 				return new Object[] {"ERROR: "+e.getMessage()+"", "See error log for details"};
@@ -114,13 +134,101 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 		}
 	}
 	
-	private GradleTask[] getGradleTasks(EclipseProject project) {
-		Collection<? extends GradleTask> tasksCollection = isLocalTasks
-				? GradleProject.getTasks(project)
-				: GradleProject.getAggregateTasks(project).values();
-		return tasksCollection.toArray(new GradleTask[tasksCollection.size()]);
+	private GradleTask[] getGradleTasks(GradleProject project) {
+		try {
+			EclipseProject eclipseProjectModel = project.getGradleModel();
+			BuildInvocations buildInvocationsModel = project.getModelOfType(BuildInvocations.class);
+			ProjectTasksVisibility tasksVisibility = null;
+			try {
+				tasksVisibility = new ProjectTasksVisibility(buildInvocationsModel);
+			} catch (UnsupportedMethodException e) {
+				/*
+				 * Make all tasks public if Gradle runtime does for the project does not support visibility feature
+				 */
+				GradleTasksViewPlugin
+						.getDefault()
+						.getLog()
+						.log(new Status(
+								IStatus.WARNING,
+								GradleTasksViewPlugin.PLUGIN_ID,
+								"All tasks for project '"
+										+ project.getName()
+										+ "' will be shown as public because visibility property is unavailable. (Old version of Gradle set for the project)",
+								e));
+			}
+			List<GradleTask> tasksCollection = new ArrayList<GradleTask>(Math.max(buildInvocationsModel.getTasks().size(), buildInvocationsModel.getTaskSelectors().size()));
+			for (final GradleTask task : isLocalTasks
+					? GradleProject.getTasks(eclipseProjectModel)
+					: GradleProject.getAggregateTasks(eclipseProjectModel).values()) {
+				boolean publicTask = true;
+				if (tasksVisibility != null) {
+					try {
+						publicTask = isLocalTasks ? tasksVisibility.isTaskPublic(task.getName()) : tasksVisibility.isTaskSelectorPublic(task.getName());
+					} catch (IllegalArgumentException e) {
+						/*
+						 * Swallow exception - it means task is not in the
+						 * BuildInvocations model for the project and there is
+						 * no visibility property for it
+						 */
+						GradleTasksViewPlugin
+								.getDefault()
+								.getLog()
+								.log(new Status(
+										IStatus.WARNING,
+										GradleTasksViewPlugin.PLUGIN_ID,
+										"Task '"
+												+ task.getPath()
+												+ "' is displayed as public because visibility property is unavailable for it",
+										e));
+					}
+				}
+				final boolean isPublic = publicTask;
+				if (!isHideInternalTasks || isPublic) {
+					tasksCollection.add(
+						new GradleTask() {
+			
+							@Override
+							public String getPath() {
+								return task.getPath();
+							}
+			
+							@Override
+							public String getName() {
+								return task.getName();
+							}
+			
+							@Override
+							public String getDescription() {
+								return task.getDescription();
+							}
+			
+							@Override
+							public String getDisplayName() {
+								return task.getDisplayName();
+							}
+			
+							@Override
+							public boolean isPublic() {
+								return isPublic;
+							}
+			
+							@Override
+							public org.gradle.tooling.model.GradleProject getProject() {
+								return task.getProject();
+							}
+							
+						}
+					);
+				}
+			}
+			return tasksCollection.toArray(new GradleTask[tasksCollection.size()]);
+		} catch (FastOperationFailedException e) {
+			return new GradleTask[0];
+		} catch (CoreException e) {
+			return new GradleTask[0];
+		}
 	}
-
+	
 	public Object[] getChildren(Object parentElement) {
 		return NO_ELEMENTS;
 	}
@@ -135,6 +243,10 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 
 	public void setLocalTasks(boolean isLocalTasks) {
 		this.isLocalTasks = isLocalTasks;
+	}
+	
+	public void setHideInternalTasks(boolean isHideInternalTasks) {
+		this.isHideInternalTasks = isHideInternalTasks;
 	}
 
 }
