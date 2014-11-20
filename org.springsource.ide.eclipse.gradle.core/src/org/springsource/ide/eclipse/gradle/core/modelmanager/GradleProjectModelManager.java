@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -25,6 +26,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.ObjectUtil;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation.ExistingProjectException;
 
 /**
@@ -116,8 +118,7 @@ public class GradleProjectModelManager {
 	
 	private <T> T getModelInternal(Class<T> type, IProgressMonitor mon) throws CoreException {
 		BuildStrategy buildStrategy = mgr.getBuildStrategy(project, type);
-		Collection<GradleProject> predictedFamily = buildStrategy.predictBuildFamily(project, type);
-		Lock lock = predictedFamily==null?mgr.lockAll(type):mgr.lockFamily(type, predictedFamily);
+		Lock lock = lockFamily(buildStrategy, type); 
 		mon.beginTask("Fetch model of type "+type.getSimpleName()+" for project "+project.getDisplayName(), 10);
 		try {
 			synchronized (this) {
@@ -151,6 +152,23 @@ public class GradleProjectModelManager {
 		}
 	}
 	
+	private Lock lockFamily(BuildStrategy buildStrategy, Class<?> type) {
+		Collection<GradleProject> predictedFamily = buildStrategy.predictBuildFamily(project, type);
+		Lock lock = null;
+		do {
+			lock = predictedFamily==null?mgr.lockAll(type):mgr.lockFamily(type, predictedFamily);
+			//After aquiring the lock we should recompuet predictedFamily and check if its still the same
+			// It might have been changed by builds we were waiting for.
+			Set<GradleProject> repredicted = buildStrategy.predictBuildFamily(project, type);
+			if (!ObjectUtil.equal(predictedFamily, repredicted)) {
+				lock.release();
+				lock = null;
+				predictedFamily = repredicted;
+			}
+		} while (lock==null);
+		return lock;
+	}
+
 	private static <T> T getFirst(List<T> elements) {
 		if (elements!=null && !elements.isEmpty()) {
 			return elements.get(0);

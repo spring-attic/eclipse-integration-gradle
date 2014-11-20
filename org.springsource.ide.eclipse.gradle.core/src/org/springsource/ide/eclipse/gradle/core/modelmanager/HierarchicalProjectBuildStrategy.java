@@ -14,6 +14,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +29,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 /**
  * Build strategy specific for subtypes of HierarchicalEclipseProject. 
@@ -142,12 +142,12 @@ public class HierarchicalProjectBuildStrategy extends BuildStrategy {
 	}
 	
 	@Override
-	public <T> Collection<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type) {
+	public <T> Set<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type) {
 		GradleProject root = getRootProject(focusProject);
 		if (root!=null) {
 			GradleProject[] members = getBuildFamily(root);
 			if (members!=null) {
-				return Arrays.asList(members);
+				return new HashSet<GradleProject>(Arrays.asList(members));
 			}
 		}
 		return null;

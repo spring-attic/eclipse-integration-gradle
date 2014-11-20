@@ -13,6 +13,7 @@ package org.springsource.ide.eclipse.gradle.core.modelmanager;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,7 +41,7 @@ public class SingleProjectBuildStrategy extends BuildStrategy {
 	}
 
 	@Override
-	public <T> Collection<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type) {
+	public <T> Set<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type) {
 		return Collections.singleton(focusProject);
 	}
 

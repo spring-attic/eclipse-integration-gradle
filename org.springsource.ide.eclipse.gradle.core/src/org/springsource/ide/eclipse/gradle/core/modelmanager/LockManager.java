@@ -13,10 +13,24 @@ package org.springsource.ide.eclipse.gradle.core.modelmanager;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.maven.wagon.observers.Debug;
+import org.eclipse.core.runtime.Platform;
+
 /**
  * Manages locks on a set of strings.
  */
 public class LockManager {
+	
+	private static final boolean DEBUG = false;
+//		=  (""+Platform.getLocation()).contains("kdvolder")
+//		|| (""+Platform.getLocation()).contains("bamboo");
+	
+	private static void debug(String msg) {
+		if (DEBUG) {
+			System.out.println(msg);
+		}
+	}
+	
 	
 	private Set<String> locked = new HashSet<String>();
 	private boolean worldIsLocked = false;
@@ -42,11 +56,23 @@ public class LockManager {
 			public void release() {
 				releaseAll(keys);
 			}
+			@Override
+			public String toString() {
+				StringBuilder buf = new StringBuilder("Lock {\n");
+				for (String string : keys) {
+					buf.append(string);
+					buf.append("\n");
+				}
+				buf.append("}");
+				return buf.toString();
+			}
 		};
 	}
 
 	private synchronized void releaseAll(String[] keys) {
+//		debug("releasing locks: ");
 		for (String k : keys) {
+			debug("   "+k);
 			locked.remove(k);
 		}
 		notify();
@@ -81,10 +107,15 @@ public class LockManager {
 			public void release() {
 				unlockTheWorld();
 			}
+			@Override
+			public String toString() {
+				return "*";
+			}
 		};
 	}
 
 	private synchronized void unlockTheWorld() {
+		//debug("Releasing lock: *");
 		worldIsLocked = false;
 		notify();
 	}

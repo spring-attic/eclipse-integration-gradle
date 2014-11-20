@@ -72,7 +72,7 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	}
 
 	public void setRootProjectLocation(File file) {
-		debug("set " +getGradleProject().getLocation().getName()+ ".root = "+file.getName() );
+		debug("set " +getGradleProject().getLocation().getName()+ ".root = "+(file==null?"null":file.getName()) );
 		put(ROOT_LOCATION_PREF, file);
 	}
 

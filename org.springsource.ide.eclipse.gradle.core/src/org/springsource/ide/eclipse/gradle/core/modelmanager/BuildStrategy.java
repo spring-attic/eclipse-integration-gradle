@@ -12,6 +12,7 @@ package org.springsource.ide.eclipse.gradle.core.modelmanager;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -66,6 +67,6 @@ public abstract class BuildStrategy {
 	 * 100% guaranteed to be correct. All that is really expected/required as a high probability that 
 	 * the prediction is accurate. 
 	 */
-	public abstract <T> Collection<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type);
+	public abstract <T> Set<GradleProject> predictBuildFamily(GradleProject focusProject, Class<T> type);
 		
 }
