@@ -39,6 +39,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.GradleSaveParticipant;
 import org.springsource.ide.eclipse.gradle.core.ProjectOpenCloseListener;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
+import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
@@ -187,67 +188,47 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	
 	/**
 	 * Ensures that open close listener is registered to respond to openening and closing of projects
-	 * and update remapped jars in classpath container
-	 * 
+	 * in correspondence to whether or not the corresponding option is enabled in preferences.
 	 */
-	private static synchronized void ensureOpenCloseListener() {
-		if (openCloseListener!=null) {
+	public static synchronized void ensureOpenCloseListener() {
+		boolean haveListener = openCloseListener!=null;
+		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
+		boolean enableForMaven = prefs.getRemapJarsToMavenProjects() && M2EUtils.isInstalled();
+		boolean enableForGradle = prefs.getRemapJarsToGradleProjects();
+		boolean enableListener = prefs.getJarRemappingOnOpenClose();
+		
+		boolean shouldHaveListener = 
+				enableListener && (enableForGradle || enableForMaven);
+		if (haveListener==shouldHaveListener) {
 			return;
 		}
-		openCloseListener = new ProjectOpenCloseListener() {
-			
-			private Job qrJob = null;
-			
-			@Override
-			public void projectOpened(IProject project) {
-				sdebug("OPENED: "+project.getName());
-				quickRefreshAllContainers();
-			}
-			
-			@Override
-			public void projectClosed(IProject project) {
-				sdebug("CLOSED: "+project.getName());
-				quickRefreshAllContainers();
-			}
-			
-			/**
-			 * Refresh classpath entries in all containers in the workspace quickly (i.e. without invalidating
-			 * the cached gradle models and rebuilding them). This is useful when the entries need to be
-			 * recomputed because a project was opened / closed and so jar -> gradle or 
-			 */
-			private synchronized void quickRefreshAllContainers() {
-				sdebug("quickRefreshAllContainers");
-				Collection<GradleProject> projects = GradleCore.getGradleProjects();
-				if (!projects.isEmpty()) {
-					if (qrJob==null) {
-						qrJob = new GradleRunnable("Refresh Gradle classpath containers") {
-							@Override
-							public void doit(IProgressMonitor mon) throws Exception {
-								//Important: must re-fetch current list of projects each time job runs.
-								Collection<GradleProject> projects = GradleCore.getGradleProjects();
-								sdebug("quickRefreshAllContainers Job started");
-								mon.beginTask("Refresh Gradle Classpath Containers", projects.size());
-								for (GradleProject p : projects) {
-									GradleClassPathContainer classpath = p.getClassPathcontainer();
-									if (classpath!=null) {
-										mon.subTask("Refresh "+p.getName());
-										classpath.clearPersistedEntries();
-										classpath.notifyJDT();
-									}
-									mon.worked(1);
-								}
-							}
-						}.asJob();
-						qrJob.setRule(JobUtil.buildRule());
-					}
-					qrJob.schedule(100); //Slight delay for 'bursty' sets of change events.
+		if (shouldHaveListener) {
+			openCloseListener = new ProjectOpenCloseListener() {
+								
+				@Override
+				public void projectOpened(IProject project) {
+					sdebug("OPENED: "+project.getName());
+					JarRemapRefresher.request();
 				}
+				
+				@Override
+				public void projectClosed(IProject project) {
+					sdebug("CLOSED: "+project.getName());
+					JarRemapRefresher.request();
+				}
+				
+			};
+			GradleCore.getInstance().addOpenCloseListener(openCloseListener);
+			
+			if (M2EUtils.isInstalled()) {
+				M2EUtils.addOpenCloseListener(openCloseListener);
 			}
-		};
-		GradleCore.getInstance().addOpenCloseListener(openCloseListener);
-		
-		if (M2EUtils.isInstalled()) {
-			M2EUtils.addMavenProjectListener(openCloseListener);
+		} else { // case: shouldHaveListener == false
+			GradleCore.getInstance().removeOpenCloseListener(openCloseListener);
+			if (M2EUtils.isInstalled()) {
+				M2EUtils.removeOpenCloseListener(openCloseListener);
+			}
+			openCloseListener=null;
 		}
 	}
 	
@@ -338,7 +319,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	/**
 	 * Ensures that entries will be recomputed next time around
 	 */
-	private void clearPersistedEntries() {
+	void clearPersistedEntries() {
 		setPersistedEntries(null);
 		project.getDependencyComputer().clearPersistedEntries();
 	}

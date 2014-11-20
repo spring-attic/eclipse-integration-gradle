@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -56,8 +55,8 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
-import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation.MissingProjectDependencyException;
+import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper;
 import org.springsource.ide.eclipse.gradle.core.wizards.PrecomputedProjectMapper.NameClashException;
 import org.springsource.ide.eclipse.gradle.ui.util.UIJobUtil;
 
@@ -443,6 +442,7 @@ public class GradleImportWizardPageOne extends WizardPage {
         	public void widgetSelected(SelectionEvent e) {
     			File rf = getRootFolder();
     			if (rf!=null && rf.exists()) {
+    				addRootFolderToHistory();
     				populateProjectTree(rf);
     			}
         	}
@@ -451,7 +451,7 @@ public class GradleImportWizardPageOne extends WizardPage {
         String[] rootFolderHistory = getRootFolderHistory();
         if (rootFolderHistory.length>0) {
         	rootFolderText.setItems(rootFolderHistory);
-        	rootFolderText.select(rootFolderHistory.length-1);
+        	rootFolderText.select(0);
         }
         
         rootFolderText.addModifyListener(new ModifyListener() {
@@ -624,7 +624,6 @@ public class GradleImportWizardPageOne extends WizardPage {
 	 * Called by our wizard when its about to finish (i.e. user has pressed finish button).
 	 */
 	public void wizardAboutToFinish() {
-		addRootFolderToHistory();
 		HierarchicalEclipseProject project = getRootProject();
 		if (project!=null) {
 			defaultsSetter.saveDefaults(GradleCore.create(project));
@@ -635,13 +634,14 @@ public class GradleImportWizardPageOne extends WizardPage {
 	 * Ensure that the current contents of the root folder text box is added to the history.
 	 */
 	private void addRootFolderToHistory() {
-		String[] history = getRootFolderHistory();
-		LinkedHashSet<String> historySet = new LinkedHashSet<String>(Arrays.asList(history));
-		if (historySet.size()>=MAX_ROOT_FOLDER_HISTORY) {
-			historySet.remove(history[0]);
-		}
-		historySet.add(rootFolderText.getText());
-		GradleCore.getInstance().getPreferences().putStrings(ROOT_FOLDER_HISTORY_KEY, historySet.toArray(new String[historySet.size()]));
+		String[] historyArray = getRootFolderHistory();
+		ArrayList<String> history = new ArrayList<String>(Arrays.asList(historyArray));
+		String selectedFolder = rootFolderText.getText();
+		history.remove(selectedFolder);
+		history.add(0, selectedFolder);
+		int lastIndex = history.size()>=MAX_ROOT_FOLDER_HISTORY ? MAX_ROOT_FOLDER_HISTORY-1 : history.size();
+		List<String> lengthAdjustedHistory = history.subList(0, lastIndex);
+		GradleCore.getInstance().getPreferences().putStrings(ROOT_FOLDER_HISTORY_KEY, lengthAdjustedHistory.toArray(new String[0]));
 	}
 
 	/**

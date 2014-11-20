@@ -551,6 +551,10 @@ public class GradleProject {
 		return mgr.getModel(this,ProjectPublications.class, mon);
 	}
 	
+	public ProjectPublications getPublications() throws CoreException, FastOperationFailedException {
+		return mgr.getModel(this,ProjectPublications.class);
+	}
+	
 	public <T extends HierarchicalEclipseProject> T getGradleModel(Class<T> type) throws FastOperationFailedException, CoreException {
 		return mgr.getModel(this, type);
 	}

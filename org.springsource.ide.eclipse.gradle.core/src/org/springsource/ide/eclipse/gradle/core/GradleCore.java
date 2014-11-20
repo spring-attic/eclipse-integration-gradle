@@ -36,6 +36,7 @@ import org.gradle.tooling.model.gradle.ProjectPublications;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.DefaultModelBuilder;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.ModelBuilder;
@@ -208,24 +209,28 @@ public class GradleCore extends Plugin {
 	}
 
 	/**
-	 * Find gradle project in the Eclipse workspace corresponding to a gradle 'external dependency'.
-	 * @throws Exception 
+	 * Try to find gradle project in the Eclipse workspace corresponding to a gradle 'external dependency'.
+	 * This method does a 'best effort' based on what information is currently in the model cache.
+	 * Callers should have a mechanism in place to populate the cache beforehand. 
 	 */
-	public static IProject getGradleProject(ExternalDependency gEntry, IProgressMonitor mon) {
+	public static IProject getGradleProject(ExternalDependency gEntry) throws FastOperationFailedException {
 		Collection<GradleProject> projects = getGradleProjects();
 		File file = gEntry.getFile();
-		mon.beginTask("Searching workspace for "+file, 2*projects.size());
+		FastOperationFailedException throwAtEnd = null;
 		try {
 			for (GradleProject gp : projects) {
 				IProject p = gp.getProject();
 				if (p!=null) { //only projects that exist in the workspace are interesting.
-					ProjectPublications publications = gp.getPublications(new SubProgressMonitor(mon, 1));
-					for (GradlePublication pub : publications.getPublications()) {
-						if (matches(pub.getId(), gEntry.getGradleModuleVersion())) {
-							return p;
+					try {
+						ProjectPublications publications = gp.getPublications();
+						for (GradlePublication pub : publications.getPublications()) {
+							if (matches(pub.getId(), gEntry.getGradleModuleVersion())) {
+								return p;
+							}
 						}
+					} catch (FastOperationFailedException e) {
+						throwAtEnd = e;
 					}
-					mon.worked(1);
 				}
 			}
 		} catch (Throwable e) {
@@ -234,16 +239,19 @@ public class GradleCore extends Plugin {
 			} else {
 				GradleCore.log(e);
 			}
-		} finally {
-			mon.done();
+		}
+		if (throwAtEnd!=null) {
+			throw throwAtEnd; //This is to let us distinguish normal 'null' value from 
+			                  //the case where the null value may be because of missing Gradle models
 		}
 		return null;
 	}
 
 	private static boolean matches(GradleModuleVersion publication, GradleModuleVersion dependency) {
+		//TODO: make matching algo configurable to some degree.
 		return equal(publication.getGroup(), dependency.getGroup())
-			&& equal(publication.getName(), dependency.getName())
-			&& equal(publication.getVersion(), dependency.getVersion());
+			&& equal(publication.getName(), dependency.getName());
+		//	&& equal(publication.getVersion(), dependency.getVersion());
 	}
 
 	private static boolean equal(String x, String y) {
@@ -259,6 +267,28 @@ public class GradleCore extends Plugin {
 			ResourcesPlugin.getWorkspace().addResourceChangeListener(openCloseListeners);
 		}
 		openCloseListeners.add(l);
+	}
+
+	public synchronized void removeOpenCloseListener(ProjectOpenCloseListener l) {
+		if (openCloseListeners!=null) {
+			openCloseListeners.remove(l);
+		}
+	}
+
+	/**
+	 * Mainly here for testing purposes. (so we can test that removing listeners actually works).
+	 */
+	public int countOpenCloseListeners() {
+		if (openCloseListeners!=null) { 
+			return openCloseListeners.countListeners();
+		} 
+		return 0;
+	}
+
+	public void resetModelManager() {
+		if (modelManager!=null) {
+			modelManager.invalidate();
+		}
 	}
 
 }

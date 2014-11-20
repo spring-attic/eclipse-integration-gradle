@@ -50,7 +50,7 @@ public class ToolinApiUtils {
 		final int totalWork = 10000;
 		monitor.beginTask(jobName, totalWork+100);
 		ProjectConnection connection = null;
-		final Console console = ConsoleUtil.getConsole("Building Gradle Model '"+projectLoc+"'");
+		final Console console = ConsoleUtil.getConsole("Building "+requiredType.getSimpleName()+" Gradle Model '"+projectLoc+"'");
 		try {
 			connection = getGradleConnector(project, new SubProgressMonitor(monitor, 100));
 

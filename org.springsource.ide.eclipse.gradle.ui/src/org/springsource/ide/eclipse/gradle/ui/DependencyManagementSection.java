@@ -39,6 +39,7 @@ public class DependencyManagementSection extends PrefsPageSection {
 
 	private Button enableJarToMvnProjectMappingButton;
 	private Button enableJarToGradleProjectMappingButton;
+	private Button enableJarRemappingOnOpenClose;
 	
 	private Button exportDependencies;
 	
@@ -56,6 +57,7 @@ public class DependencyManagementSection extends PrefsPageSection {
 			setRemapJarsToMavenProjects(enableJarToMvnProjectMappingButton.getSelection());
 		}
 		setRemapJarsToGradleProjects(enableJarToGradleProjectMappingButton.getSelection());
+		setJarRemappingOnOpenClose(enableJarRemappingOnOpenClose.getSelection());
 		return true;
 	}
 
@@ -67,6 +69,8 @@ public class DependencyManagementSection extends PrefsPageSection {
 		
 		setRemapJarsToMavenProjectsInPage(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN);
 		setRemapJarsToGradleProjectsInPage(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE);
+		
+		setJarRemappingOnOpenCloseInPage(GradlePreferences.DEFAULT_JAR_REMAP_ON_OPEN_CLOSE);
 	}
 
 	@Override
@@ -117,12 +121,18 @@ public class DependencyManagementSection extends PrefsPageSection {
 		grabHorizontal.applyTo(autoRefreshDelayText);
 		
 		setAutoRefreshDelayInPage(getAutoRefreshDelay());
-		enableDisableWidgets();
 		
         enableJarToMvnProjectMappingButton = new Button(composite, SWT.CHECK);
         enableJarToMvnProjectMappingButton.setText("Remap Jars to maven projects (requires Gradle 1.1 and m2e)");
         enableJarToMvnProjectMappingButton.setToolTipText("Try to replace jars in Gradle Dependencies by dependencies to maven projects in the workspace.");
         enableJarToMvnProjectMappingButton.setSelection(GradleCore.getInstance().getPreferences().getRemapJarsToMavenProjects());
+        enableJarToMvnProjectMappingButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+			public void widgetSelected(SelectionEvent e) {
+				enableDisableWidgets();
+			}
+        });
         if (!M2EUtils.isInstalled()) {
         	enableJarToMvnProjectMappingButton.setEnabled(false);
         }
@@ -132,11 +142,32 @@ public class DependencyManagementSection extends PrefsPageSection {
         enableJarToGradleProjectMappingButton.setText("Remap Jars to Gradle Projects (requires Gradle 1.12 or later)");
         enableJarToGradleProjectMappingButton.setToolTipText("Try to replace jars in Gradle Dependencies by dependencies to Gradle projects in the workspace.");
         enableJarToGradleProjectMappingButton.setSelection(GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects());
+        enableJarToGradleProjectMappingButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+			public void widgetSelected(SelectionEvent e) {
+				enableDisableWidgets();
+			}
+        });
+
 		span2.applyTo(enableJarToGradleProjectMappingButton);
+		
+        enableJarRemappingOnOpenClose = new Button(composite, SWT.CHECK);
+        enableJarRemappingOnOpenClose.setText("Jar Remapping on Project Open/Close");
+        enableJarRemappingOnOpenClose.setToolTipText("When jar remapping is enabled, recompute remappings automatically"
+        		+ "when projects in the workspace are openened or closed.");
+        enableJarRemappingOnOpenClose.setSelection(GradleCore.getInstance().getPreferences().getJarRemappingOnOpenClose());
+		span2.applyTo(enableJarRemappingOnOpenClose);
+		
+		enableDisableWidgets();
 	}
 
 	private void enableDisableWidgets() {
 		enableDisableWidgets(enableAutoRefreshButton, autoRefreshDelayText);
+		if (enableJarToGradleProjectMappingButton!=null && enableJarToMvnProjectMappingButton!=null && enableJarRemappingOnOpenClose!=null) {
+			boolean openCloseListerWidgetEnabled = enableJarToGradleProjectMappingButton.getSelection() || enableJarToMvnProjectMappingButton.getSelection();
+			enableJarRemappingOnOpenClose.setEnabled(openCloseListerWidgetEnabled);
+		}
 	}
 
 	public void enableDisableWidgets(Button radio, Control... others) {
@@ -189,6 +220,10 @@ public class DependencyManagementSection extends PrefsPageSection {
 		enableJarToGradleProjectMappingButton.setSelection(enable);
 	}
 
+	private void setJarRemappingOnOpenCloseInPage(boolean v) {
+		enableJarRemappingOnOpenClose.setSelection(v);
+	}
+	
 	///////////// preferences getters and setters /////////////////////////////////
 
 	private boolean getEnableAutoRefresh() {
@@ -223,6 +258,9 @@ public class DependencyManagementSection extends PrefsPageSection {
 		GradleCore.getInstance().getPreferences().setRemapJarsToGradleProjects(v);
 	}
 
-
+	private void setJarRemappingOnOpenClose(boolean v) {
+		GradleCore.getInstance().getPreferences().setJarRemappingOnOpenClose(v);
+		
+	}
 
 }

@@ -14,8 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.junit.Assert;
-
 /**
  * Encapsulates information about an 'external' command that can be run through the OS. 
  * <p>

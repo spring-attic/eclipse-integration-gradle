@@ -28,7 +28,9 @@ import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.JarRemapRefresher;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.MarkerMaker;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
@@ -120,6 +122,7 @@ public class GradleDependencyComputer {
 			debug("gradleModel ready: "+Integer.toHexString(System.identityHashCode(gradleModel))+" "+gradleModel);
 			classpath = new ClassPath(project);
 			boolean export = GradleCore.getInstance().getPreferences().isExportDependencies(); //TODO: maybe should be project preference?
+			boolean missingPublicationsModels = false;
 			
 			for (ExternalDependency gEntry : gradleModel.getClasspath()) {
 				// Get the location of the jar itself
@@ -135,10 +138,14 @@ public class GradleDependencyComputer {
 						}
 					}
 					if (!remapped && GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects()) {
-						IProject projectDep = GradleCore.getGradleProject(gEntry, new NullProgressMonitor());
-						if (projectDep!=null) {
-							addProjectDependency(projectDep, export);
-							remapped = true;
+						try {
+							IProject projectDep = GradleCore.getGradleProject(gEntry);
+							if (projectDep!=null) {
+								addProjectDependency(projectDep, export);
+								remapped = true;
+							}
+						} catch (FastOperationFailedException e) {
+							missingPublicationsModels = true;
 						}
 					}
 					if (!remapped) {
@@ -183,6 +190,11 @@ public class GradleDependencyComputer {
 				} else {
 					markers.reportError("Project dependency not in the workspace: "+projectDependency.getDisplayName());
 				}
+			}
+			if (missingPublicationsModels) {
+				//We have produced a 'best effort' classpath but some model info was missing so schedule a more
+				// complete refresh that will build these models in background (this is slow, so we can not do it here).
+				JarRemapRefresher.request();
 			}
 			
 			return classpath;

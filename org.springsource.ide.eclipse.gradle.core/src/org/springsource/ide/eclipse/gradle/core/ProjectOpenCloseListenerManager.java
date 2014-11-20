@@ -93,6 +93,14 @@ public class ProjectOpenCloseListenerManager implements IResourceChangeListener 
 		listeners.add(l);
 	}
 
+	public void remove(ProjectOpenCloseListener l) {
+		listeners.remove(l);
+	}
+
+	public int countListeners() {
+		return listeners.getListeners().length;
+	}
+
 	//	private void updateRelatedProjects(final IProject project, IProgressMonitor monitor) {
 	//		GradleProject updatingProject = GradleCore.create(project);
 	//		
