@@ -47,6 +47,10 @@
 							<phase>deploy</phase>
 							<configuration>
 								<target>
+								
+									<echo message="dist.properties=${dist.properties}"/>
+									<echo message="dist.accessKey=${dist.accessKey}"/>
+									<echo message="accessKey=${accessKey}"/>
 	
 									<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
 									<taskdef resource="org/springframework/build/aws/ant/antlib.xml" />
