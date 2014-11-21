@@ -35,6 +35,7 @@ public class JavaXXRuntime {
 	static String[] java8locations = {
 		"/home/kdvolder/Applications/jdk1.8.0_20", // On Kris's machine
 		"/opt/java/jdk/Sun/1.8",  // on springsource build server
+		"/opt/java/jdk/Sun/8.0", // in spring.io build server
 		"/Library/Java/JavaVirtualMachines/jdk1.8.0_20.jdk/Contents/Home"
 	};
 	static String[] java7locations = {
@@ -47,9 +48,9 @@ public class JavaXXRuntime {
 		"/usr/lib/jvm/java-6-sun", // On a ubuntu machine that has sun java 6 installed
 		"/usr/lib/jvm/java-6-oracle", // On a ubuntu machine that has oracle java 6 installed
 		"/opt/java/jdk/Sun/1.6",  // on springsource build server
+		"/opt/java/jdk/Sun/6.0", // in spring.io build server
 		"/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home"
 	};
-	
 	
 	/**
 	 * Switch 'everyone' to using Java 8 as a default.
