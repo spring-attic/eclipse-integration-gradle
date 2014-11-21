@@ -942,7 +942,10 @@ public class ConsoleInplaceDialog {
 	
 	private void restoreProject() {
 		if (selectedProject == null) {
-			setSelectedProject(getDialogSettings().get(STORE_PROJECT));
+			String projectName = getDialogSettings().get(STORE_PROJECT);
+			if (projectName!=null) {
+				setSelectedProject(projectName);
+			}
 		}
 	}
 
