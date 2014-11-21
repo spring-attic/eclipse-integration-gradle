@@ -93,6 +93,7 @@ public class JarRemapRefresher {
 						//to need them.
 						if (GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects()) {
 							for (GradleProject p : projects) {
+								JobUtil.checkCanceled(mon);
 								try {
 									p.getPublications(new SubProgressMonitor(mon, 1));
 								} catch (Throwable e) {
