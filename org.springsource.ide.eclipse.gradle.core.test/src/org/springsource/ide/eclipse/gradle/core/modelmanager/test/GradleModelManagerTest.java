@@ -696,7 +696,8 @@ public class GradleModelManagerTest extends GradleTest {
 		// case.
 		
 		builder.dump();
-		assertTrue(builder.totalBuilds()<=3);
+		assertTrue(builder.totalBuilds()<=3); 
+			//TODO: this should really only result in 2 builds. Why is it sometimes 3?
 
 	}
 	
