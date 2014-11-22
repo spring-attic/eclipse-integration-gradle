@@ -33,10 +33,6 @@
             objectClass="org.eclipse.core.resources.IResource"
              adaptable="true"
              id="org.springsource.ide.eclipse.gradle.menu">
-   		<filter
-           name="projectNature"
-           value="org.springsource.ide.eclipse.gradle.core.nature">
-        </filter>
         <menu
              label="Gradle"
              id="org.springsource.ide.eclipse.gradle.menu">
@@ -44,6 +40,9 @@
             <separator name="toggle"/>
             <separator name= "refresh"/>
         </menu> 
+        <visibility>
+            <objectState name="nature" value="org.springsource.ide.eclipse.gradle.core.nature"/>
+        </visibility>
       </objectContribution>
       
       <objectContribution
