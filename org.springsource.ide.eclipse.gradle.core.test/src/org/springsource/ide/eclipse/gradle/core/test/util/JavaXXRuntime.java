@@ -93,7 +93,7 @@ public class JavaXXRuntime {
 			vm.setName("java_"+version);
 		}
 		if (!JavaUtils.isJavaXX(vm, version)) {
-			throw new Error("vm at "+vm.getInstallLocation()+ " doesn't look like a Java "+version);
+			throw new Error("vm at "+vm.getInstallLocation()+ " doesn't look like a Java "+version+". Eclipse thinks it is a Java "+JavaUtils.getVersion(vm));
 		}
 		JavaRuntime.setDefaultVMInstall(vm, new NullProgressMonitor());
 		return vm;
