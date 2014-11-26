@@ -57,19 +57,16 @@ import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
-import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProjectRegistry;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
-import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JUnitLaunchConfigUtil;
+import org.springsource.ide.eclipse.gradle.core.test.util.JavaUtils;
 import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
-import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
 import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
@@ -791,6 +788,7 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testImportSpringIntegration() throws Exception {
+		JavaXXRuntime.java8everyone();
 //		GradleAPIProperties props = GradleCore.getInstance().getAPIProperties();
 		URI distro = null;
 //		if (!props.isSnapshot()) {
@@ -803,8 +801,8 @@ public class GradleImportTests extends GradleTest {
 		GradleImportOperation op = importGitProjectOperation(
 				new GitProject(
 						"spring-integration", 
-						new URI("git://github.com/kdvolder/spring-integration.git"),
-						"d4026bd63b43fdade2ed38a97bcdce89e6fab835"
+						new URI("git://github.com/spring-projects/spring-integration.git"),
+						"3e08ca085b4ef9d0c0c6df4f16b5e8f7b724ae31"
 				).setRecursive(true)
 		);
 		op.setEnableDSLD(true);
@@ -818,6 +816,7 @@ public class GradleImportTests extends GradleTest {
 		String[] projectNames = {
 				"spring-integration",
 				"spring-integration-amqp",
+				"spring-integration-bom",
 				"spring-integration-core",
 				"spring-integration-event",
 				"spring-integration-feed",
@@ -833,14 +832,17 @@ public class GradleImportTests extends GradleTest {
 				"spring-integration-jpa",
 				"spring-integration-mail",
 				"spring-integration-mongodb",
+				"spring-integration-mqtt",
 				"spring-integration-redis",
 				"spring-integration-rmi",
 				"spring-integration-scripting",
 				"spring-integration-security",
 				"spring-integration-sftp",
 				"spring-integration-stream",
+				"spring-integration-syslog",
 				"spring-integration-test",
 				"spring-integration-twitter",
+				"spring-integration-websocket",
 				"spring-integration-ws",
 				"spring-integration-xml",
 				"spring-integration-xmpp"
