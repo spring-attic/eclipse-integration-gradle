@@ -31,8 +31,7 @@ dependencies {
 		"org.gradle:gradle-core:$project.gradleApiVersion",
 		"org.gradle:gradle-tooling-api:$project.gradleApiVersion",
 		"org.gradle:gradle-wrapper:$project.gradleApiVersion",
-		'org.slf4j:slf4j-simple:1.7.5',
-		'commons-collections:commons-collections:3.2.1'
+		'org.slf4j:slf4j-simple:1.7.5'
 	].each { dep ->
         eclipseBundle dep
         eclipseBundleSource "$dep:sources"
