@@ -63,7 +63,6 @@ import org.springsource.ide.eclipse.gradle.core.samples.SampleProjectRegistry;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JUnitLaunchConfigUtil;
-import org.springsource.ide.eclipse.gradle.core.test.util.JavaUtils;
 import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
@@ -517,27 +516,6 @@ public class GradleImportTests extends GradleTest {
 		assertSourceFolder(shared, "src/test/java");
 		assertSourceFolder(shared, "src/test/resources");
 	}		
-	
-	public void testImportSpringDataRedis() throws Exception {
-		GradleCore.getInstance().getPreferences().unsetJavaHome();
-//		JavaUtils.setJava15Compliance();
-		setSnapshotDistro();
-		importGitProject(new GitProject("spring-data-redis", 
-				new URI("git://github.com/SpringSource/spring-data-redis.git"),
-				"4c3419c")
-		);
-		
-		
-//		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-//		for (IProject proj : projects) {
-//			System.out.println(proj);
-//		}
-		
-		assertProjects(
-				"spring-data-redis"
-		);
-		
-	}
 	
 	/** 
 	 * Import preserves existing source folder exclusion filters?
