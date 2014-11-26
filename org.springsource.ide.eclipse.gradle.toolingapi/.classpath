@@ -6,6 +6,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/gradle-core-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gradle-tooling-api-2.1.jar" sourcepath="lib/gradle-tooling-api-2.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gradle-wrapper-2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-simple-1.7.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/model-1.0.jar" sourcepath="lib/model-1.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gradle-resources-2.1.jar"/>
