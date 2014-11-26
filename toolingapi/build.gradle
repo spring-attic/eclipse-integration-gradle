@@ -14,7 +14,6 @@ subprojects {
             // for integration test runs and intermediate publishing
             url "$projectDir/repo"
         }
-        mavenLocal()
 		mavenCentral()
 		maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
 	}

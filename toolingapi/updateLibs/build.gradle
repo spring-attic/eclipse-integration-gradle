@@ -23,7 +23,7 @@ def bundleDir = file('../../org.springsource.ide.eclipse.gradle.toolingapi')
 
 configurations {
     eclipseBundle
-//    eclipseBundleSource
+    eclipseBundleSource
 }
 
 dependencies {
@@ -35,7 +35,7 @@ dependencies {
 		"org.slf4j:slf4j-simple:1.7.5"
 	].each { dep ->
         eclipseBundle dep
-//        eclipseBundleSource "$dep:sources"
+        eclipseBundleSource "$dep:sources"
 	}
 
     eclipseBundle project (':model')
@@ -59,7 +59,7 @@ task copyLibs(type: Copy) {
 	}
 	into libDir
 	from configurations.eclipseBundle
-//	from configurations.eclipseBundleSource
+	from configurations.eclipseBundleSource
 }
 
 task updateEmbeddedLibsProperties << {
