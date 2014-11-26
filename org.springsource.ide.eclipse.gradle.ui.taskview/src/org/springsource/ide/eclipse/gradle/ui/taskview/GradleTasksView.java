@@ -50,6 +50,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
+import org.springsource.ide.eclipse.gradle.ui.GradleUI;
 import org.springsource.ide.eclipse.gradle.ui.util.DialogSettingsUtil;
 import org.springsource.ide.eclipse.gradle.ui.util.SelectionUtils;
 
@@ -81,16 +82,20 @@ public class GradleTasksView extends ViewPart {
 	private static final String IS_LINKING_ENABLED = "isLinkingEnabled";
 	private static final boolean DEFAULT_IS_LINKING_ENABLED = false;
 	private static final String IS_DISPLAY_PROJECT_LOCAL_TASKS = "isDisplayProjectLocalTasks";
+	private static final boolean DEFAULT_IS_HIDE_INTERNAL_TASKS = false;
+	private static final String IS_HIDE_INTERNAL_TASKS = "isHideInternalTasks";
 	private static final boolean DEFAULT_IS_DISPLAY_PROJECT_LOCAL_TASKS = false;
 	private static final String SELECTED_PROJECT = "selectedProject";
 
 	private TreeViewer viewer;
 	private boolean displayProjectLocalTasks;
+	private boolean hideInternalTasks;
 	
 	private Action linkWithSelectionAction;
 	private Action refreshAction;
 	private Action toggleProjectTasks;
 	private Action doubleClickAction;
+	private Action toggleHideInternalTasks;
 	private TasksConsoleAction tasksConsoleAction;
 
 	private SelectionListener selectionListener;
@@ -106,6 +111,9 @@ public class GradleTasksView extends ViewPart {
 		displayProjectLocalTasks = DialogSettingsUtil.getBoolean(
 				dialogSettings, IS_DISPLAY_PROJECT_LOCAL_TASKS,
 				DEFAULT_IS_DISPLAY_PROJECT_LOCAL_TASKS);
+		hideInternalTasks = DialogSettingsUtil.getBoolean(
+				dialogSettings, IS_HIDE_INTERNAL_TASKS,
+				DEFAULT_IS_HIDE_INTERNAL_TASKS);
 	}
 
 	public void projectSelected(GradleProject p) {
@@ -132,7 +140,7 @@ public class GradleTasksView extends ViewPart {
 		projectSelector.setProjectSelectionListener(this);
 		
 		PatternFilter filter = new PatternFilter();
-		FilteredTree filteredTree = new FilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
+		FilteredTree filteredTree = new FilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, filter, true);
 		
 		viewer = filteredTree.getViewer();
 		
@@ -199,6 +207,8 @@ public class GradleTasksView extends ViewPart {
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(doubleClickAction);
+		manager.add(toggleHideInternalTasks);
 		manager.add(toggleProjectTasks);
 		manager.add(tasksConsoleAction);
 		manager.add(linkWithSelectionAction);
@@ -207,20 +217,26 @@ public class GradleTasksView extends ViewPart {
 
 	private void makeActions() {
 		tasksConsoleAction = new TasksConsoleAction();
+		toggleHideInternalTasks = new ToggleHideInternalTasks(this, hideInternalTasks);
 		toggleProjectTasks = new ToggleProjectTasks(this, displayProjectLocalTasks);
 		linkWithSelectionAction = new ToggleLinkingAction(this);
 		refreshAction = new RefreshAction(this);
 		doubleClickAction = new Action() {
 			public void run() {
-				ISelection selection = viewer.getSelection();
-				Object obj = ((IStructuredSelection)selection).getFirstElement();
-				if (obj instanceof Task) {
-					Task task = (Task) obj;
-					GradleProject project = projectSelector.getProject();
-					if (project!=null) {
-						String taskStr = displayProjectLocalTasks ? task.getPath() : task.getName();
-						final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, taskStr);
-						JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName() + " " + taskStr) {
+				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+				GradleProject project = projectSelector.getProject();
+				if (project != null && !selection.isEmpty()) {
+					StringBuilder taskStr = new StringBuilder();
+					for (Object obj : selection.toArray()) {
+						if (obj instanceof Task) {
+							Task task = (Task) obj;
+							taskStr.append(displayProjectLocalTasks ? task.getPath() : task.getName());
+							taskStr.append(' ');
+						}
+					}
+					if (taskStr.length() > 0) {
+						final ILaunchConfiguration conf = GradleLaunchConfigurationDelegate.getOrCreate(project, taskStr.toString());
+						JobUtil.schedule(NO_RULE, new GradleRunnable(project.getDisplayName() + " " + taskStr.toString()) {
 							@Override
 							public void doit(IProgressMonitor mon) throws Exception {
 								conf.launch("run", mon, false, true);
@@ -230,6 +246,10 @@ public class GradleTasksView extends ViewPart {
 				}
 			}
 		};
+		doubleClickAction.setDescription("Run Task");
+		doubleClickAction.setToolTipText("Run a task");
+		doubleClickAction.setImageDescriptor(GradleUI.getDefault().getImageRegistry().getDescriptor(GradleUI.IMAGE_RUN_TASK));
+
 	}
 
 	private void hookDoubleClickAction() {
@@ -282,8 +302,8 @@ public class GradleTasksView extends ViewPart {
 		projectSelector.updateProjects();
 		GradleProject project = projectSelector.getProject();
 		if (project!=null) {
-			project.requestGradleModelRefresh();
-//			viewer.refresh();
+			project.invalidateGradleModel();
+			viewer.refresh();
 		}
 	}
 
@@ -295,4 +315,11 @@ public class GradleTasksView extends ViewPart {
 		}		
 	}
 	
+	void setHideInternalTasks(boolean hideInternalTasks) {
+		if (this.hideInternalTasks != hideInternalTasks) {
+			this.hideInternalTasks = hideInternalTasks;
+			((TaskTreeContentProvider) viewer.getContentProvider()).setHideInternalTasks(hideInternalTasks);
+			viewer.refresh();
+		}		
+	}
 }

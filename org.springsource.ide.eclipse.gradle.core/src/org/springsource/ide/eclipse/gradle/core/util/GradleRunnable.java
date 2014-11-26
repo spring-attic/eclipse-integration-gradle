@@ -68,8 +68,7 @@ public abstract class GradleRunnable implements IRunnableWithProgress {
 				if (cancellationSource != null) {
 					cancellationSource.cancel();
 				}
-			}			
-			
+			}
 		};
 	}
 

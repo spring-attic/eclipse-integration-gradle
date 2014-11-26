@@ -36,20 +36,28 @@ public class GradleUI extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springsource.ide.eclipse.gradle.ui"; //$NON-NLS-1$
 	
-	public static final String IMAGE_TARGET = "target"; //$NON-NLS-1$
 	public static final String IMAGE_PROJECT_FOLDER = "projectFolder"; //$NON-NLS-1$
 	public static final String IMAGE_MULTIPROJECT_FOLDER = "multiProjectFolder"; //$NON-NLS-1$
 	public static final String IMAGE_MULTIPROJECT_FOLDER_DISABLED = "multiProjectFolderDisabled"; //$NON-NLS-1$
 	public static final String IMAGE_LAUNCH = "launch"; //$NON-NLS-1$
+	public static final String IMAGE_INTERNAL_TASK = "internal-task"; //$NON-NLS-1$
+	public static final String IMAGE_PUBLIC_TASK = "public-task"; //$NON-NLS-1$
+	public static final String IMAGE_FILTER_INTERNAL_TASKS = "filter-internal-tasks"; //$NON-NLS-1$
+	public static final String IMAGE_RUN_TASK = "run"; //$NON-NLS-1$
+	public static final String IMAGE_LOADING_TASK = "loading-task"; //$NON-NLS-1$
 	
 	private static final Map<String, String> IMAGE_DESCRIPTOR_MAP = new HashMap<String, String>();
 	
 	static {
-		IMAGE_DESCRIPTOR_MAP.put(IMAGE_TARGET, "icons/target.gif");
+		IMAGE_DESCRIPTOR_MAP.put(IMAGE_PUBLIC_TASK, "icons/targetpublic_obj.png");
+		IMAGE_DESCRIPTOR_MAP.put(IMAGE_INTERNAL_TASK, "icons/targetinternal_obj.png");
+		IMAGE_DESCRIPTOR_MAP.put(IMAGE_FILTER_INTERNAL_TASKS, "icons/filter_internal_targets.png");
+		IMAGE_DESCRIPTOR_MAP.put(IMAGE_RUN_TASK, "icons/run_tool.png");
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_PROJECT_FOLDER, "icons/gradle-proj-folder.png");
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_MULTIPROJECT_FOLDER, "icons/gradle-multiproj-folder.png");
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_MULTIPROJECT_FOLDER_DISABLED, "icons/gradle-multiproj-folder-disabled.png");
 		IMAGE_DESCRIPTOR_MAP.put(IMAGE_LAUNCH, "icons/gradle-launch.png");
+		IMAGE_DESCRIPTOR_MAP.put(IMAGE_LOADING_TASK, "icons/targetloading.png");
 	}
 
 	// The shared instance

@@ -8,20 +8,14 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springsource.ide.eclipse.gradle.core;
+package my.cool.app;
 
+import my.cool.lib.CoolLib;
 
-/**
- * A listener that can be added to a project to get notified whenever the Gradle project's
- * model is set.
- * 
- * @author Kris De Volder
- */
-public interface IGradleModelListener {
+public class Runner {
 	
-	/**
-	 * Gets called when the model for a given project is changed. Note that the oldModel and new model could be instances
-	 * of EclipseProject which is a subtype of HierarchicalEclipseProject.
-	 */
-	public void modelChanged(GradleProject project);
+	public static void main(String[] args) {
+		CoolLib.niceMethod("Gradle");
+	}
+
 }

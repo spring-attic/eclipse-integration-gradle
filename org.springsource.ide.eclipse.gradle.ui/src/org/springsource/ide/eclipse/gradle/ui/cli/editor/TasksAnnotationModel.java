@@ -26,6 +26,7 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
+import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectIndex;
 
 /**
@@ -94,7 +95,7 @@ public class TasksAnnotationModel extends AnnotationModel {
 	}
 
 	private void updateAnnotations() {
-		StsEclipseProject project = index.getProject();
+		EclipseProject project = index.getProject();
 		if (project == null) {
 			if (index.isInitialized()) {
 				scheduleUpdate();

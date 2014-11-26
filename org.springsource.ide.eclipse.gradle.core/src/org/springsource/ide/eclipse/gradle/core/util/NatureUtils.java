@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
 
 /**
  * @author Kris De Volder
@@ -68,5 +69,15 @@ public class NatureUtils {
 		}
 		
 	}
+
+	public static boolean hasNature(IProject p, String natureId) {
+		try {
+			return p!=null && p.isAccessible() && p.hasNature(natureId);
+		} catch (CoreException e) {
+			GradleCore.log(e);
+		}
+		return false;
+	}
+
 
 }

@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -89,7 +90,7 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 	}
 	
 	@Override
-	public String get(String name, String deflt) {
+	public synchronized String get(String name, String deflt) {
 		Properties props = getProperties();
 		if (props.containsKey(name)) {
 			return props.getProperty(name);
@@ -132,11 +133,11 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 	}
 
 	@Override
-	public void put(String key, String value) {
+	public synchronized void put(String key, String value) {
 		Properties props = getProperties();
 		boolean changed = false;
 		if (value==null) {
-			if (props.contains(key)) {
+			if (props.containsKey(key)) {
 				props.remove(key);
 				changed = true;
 			}
@@ -149,7 +150,7 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 		if (changed) {
 			try {
 				flush();
-			} catch (IOException e) {
+			} catch (Throwable e) {
 				GradleCore.log(e);
 			}
 		}
@@ -221,6 +222,42 @@ public abstract class AbstractGradleProjectPreferences extends AbstractGradlePre
 		String encoded = get(key, (String)null);
 		if (encoded!=null) {
 			return decodeFile(encoded);
+		}
+		return deflt;
+	}
+
+	/**
+	 * Stores paths to a number of files in the preferences. THe paths are, if possible stored
+	 * as relative paths starting from the locatio of the project asssociated with thus preferences
+	 * object.
+	 * <p>
+	 * The order of the files is not preserved when later retrieved from the preference as
+	 * the files will we stored in some kind of sorted order. This is because the assumption is that 
+	 * order does not matter to the client and sorting avoids spurious changes to the project preferences
+	 * file.
+	 */
+	public void put(String key, File[] files) {
+		if (files!=null) {
+			String[] encoded = new String[files.length];
+			for (int i = 0; i < encoded.length; i++) {
+				encoded[i] = encodeFile(files[i]);
+			}
+			Arrays.sort(encoded);
+			putStrings(key, encoded);
+		} else {
+			putStrings(key, (String[])null);
+		}
+	}
+	
+	
+	public File[] get(String key, File[] deflt) {
+		String[] encoded = getStrings(key, null);
+		if (encoded!=null) {
+			File[] files = new File[encoded.length];
+			for (int i = 0; i < encoded.length; i++) {
+				files[i] = decodeFile(encoded[i]);
+			}
+			return files;
 		}
 		return deflt;
 	}

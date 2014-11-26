@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core;
 
-import io.pivotal.tooling.model.eclipse.StsEclipseProject;
-
 import org.eclipse.core.resources.IProject;
+import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.api.IProjectConfigurationRequest;
 
 /**
@@ -24,16 +23,16 @@ import org.springsource.ide.eclipse.gradle.core.api.IProjectConfigurationRequest
 public class ProjectConfigurationRequest implements
 		IProjectConfigurationRequest {
 	
-	private StsEclipseProject gradleProject;
+	private EclipseProject gradleProject;
 	private IProject project;
 	
-	public ProjectConfigurationRequest(StsEclipseProject gradleProject, IProject project) {
+	public ProjectConfigurationRequest(EclipseProject gradleProject, IProject project) {
 		super();
 		this.gradleProject = gradleProject;
 		this.project = project;
 	}
 
-	public StsEclipseProject getGradleModel() {
+	public EclipseProject getGradleModel() {
 		return gradleProject;
 	}
 

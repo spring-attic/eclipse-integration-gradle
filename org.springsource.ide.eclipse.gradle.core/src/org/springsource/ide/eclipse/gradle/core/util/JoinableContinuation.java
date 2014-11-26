@@ -23,20 +23,19 @@ package org.springsource.ide.eclipse.gradle.core.util;
  */
 public class JoinableContinuation<T> extends Continuation<T> implements Joinable<T> {
 	
-	private boolean isValue = false;
-	private boolean isThrow = false;
+	private boolean isDone = false;
 	private T value = null;
 	private Throwable thrw = null;
 
 	public synchronized T join() throws Exception {
-		while(!(isValue || isThrow)) {
+		while(!isDone) {
 			try {
 				wait(3000);
 			} catch (InterruptedException e) {
 				//ignore
 			}
 		}
-		if (isValue) {
+		if (isValue()) {
 			return value;
 		} else {
 			//isThrow
@@ -51,6 +50,14 @@ public class JoinableContinuation<T> extends Continuation<T> implements Joinable
 		}
 	}
 
+	public synchronized boolean isValue() {
+		return isDone && thrw==null;
+	}
+
+	public synchronized boolean isError() {
+		return isDone && thrw!=null;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.springsource.ide.eclipse.gradle.core.util.Continuation#apply(java.lang.Object)
 	 */
@@ -64,18 +71,28 @@ public class JoinableContinuation<T> extends Continuation<T> implements Joinable
 	 */
 	@Override
 	public void error(Throwable e) {
-		super.error(e);
+		//super.error(e); logs to error log, suppress this.
 		setError(e);
 	}
-
+	
 	private synchronized void setError(Throwable e) {
-		isThrow = true;
+		if (isDone()) {
+			return;
+		}
+		isDone = true;
 		thrw = e;
 		notifyAll();
 	}
 
+	public synchronized boolean isDone() {
+		return isDone; 
+	}
+
 	private synchronized void setValue(T value) {
-		isValue = true;
+		if (isDone()) {
+			return;
+		}
+		isDone = true;
 		this.value = value;
 		notifyAll();
 	}

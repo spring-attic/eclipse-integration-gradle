@@ -14,7 +14,6 @@ import io.pivotal.tooling.model.eclipse.StsEclipseProject;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collection;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -23,6 +22,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -38,6 +38,8 @@ import org.springsource.ide.eclipse.gradle.core.GradleDependencyComputer;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.GradleSaveParticipant;
 import org.springsource.ide.eclipse.gradle.core.ProjectOpenCloseListener;
+import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
+import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
@@ -63,8 +65,8 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	public static final String ERROR_MARKER_ID = "org.springsource.ide.eclipse.gradle.core.classpathcontainer";
 	private static final String GRADLE_CLASSPATHCONTAINER_KEY = "gradle.classpathcontainer";
 
-	public static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
-	public static final boolean S_DEBUG = false;
+	public static final boolean DEBUG = false;
+	public static final boolean S_DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	
 	private static final void debug(String msg) {
 		if (DEBUG) {
@@ -90,10 +92,11 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 * be known if the entries where created during the current session since models
 	 * themselves do not persist across sessions).
 	 */
-	private StsEclipseProject oldModel = null;
+	private EclipseProject oldModel = null;
 	private IClasspathEntry[] persistedEntries;
 	private IRefreshListener refreshListener;
-	private ProjectOpenCloseListener openCloseListener;
+	
+	private static ProjectOpenCloseListener openCloseListener;
 	
 	public void addRefreshListener(IRefreshListener l) {
 		Assert.isLegal(refreshListener==null);
@@ -136,7 +139,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 					project.getGradleModel(monitor); // Forces initialisation of the model.
 					notifyJDT();
 				} catch (Exception e) {
-					throw ExceptionUtil.coreException("Error while initializing classpath container");
+					throw ExceptionUtil.coreException(e);
 				} finally {
 					monitor.done();
 					job = null;
@@ -152,7 +155,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		GradleDependencyComputer dependencyComputer = project.getDependencyComputer();
 		debug("getClassPathEntries called");
 		try {
-			StsEclipseProject gradleModel = project.getGradleModel();
+			EclipseProject gradleModel = project.getGradleModel();
 			if (gradleModel!=null) {
 				if (oldModel==gradleModel) {
 					IClasspathEntry[] persisted = getPersistedEntries();
@@ -185,25 +188,51 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	
 	/**
 	 * Ensures that open close listener is registered to respond to openening and closing of projects
-	 * and update remapped jars in classpath container
-	 * 
+	 * in correspondence to whether or not the corresponding option is enabled in preferences.
 	 */
-	private void ensureOpenCloseListener() {
-		if (openCloseListener==null) {
+	public static synchronized void ensureOpenCloseListener() {
+		boolean haveListener = openCloseListener!=null;
+		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
+		boolean enableForMaven = prefs.getRemapJarsToMavenProjects() && M2EUtils.isInstalled();
+		boolean enableForGradle = prefs.getRemapJarsToGradleProjects();
+		boolean enableListener = prefs.getJarRemappingOnOpenClose();
+		
+		boolean shouldHaveListener = 
+				enableListener && (enableForGradle || enableForMaven);
+		if (haveListener==shouldHaveListener) {
+			return;
+		}
+		if (shouldHaveListener) {
 			openCloseListener = new ProjectOpenCloseListener() {
+								
 				@Override
 				public void projectOpened(IProject project) {
-					quickRefreshAllContainers();
+					sdebug("OPENED: "+project.getName());
+					JarRemapRefresher.request();
 				}
 				
 				@Override
 				public void projectClosed(IProject project) {
-					quickRefreshAllContainers();
+					sdebug("CLOSED: "+project.getName());
+					JarRemapRefresher.request();
 				}
+				
 			};
 			GradleCore.getInstance().addOpenCloseListener(openCloseListener);
+			
+			if (M2EUtils.isInstalled()) {
+				M2EUtils.addOpenCloseListener(openCloseListener);
+			}
+		} else { // case: shouldHaveListener == false
+			GradleCore.getInstance().removeOpenCloseListener(openCloseListener);
+			if (M2EUtils.isInstalled()) {
+				M2EUtils.removeOpenCloseListener(openCloseListener);
+			}
+			openCloseListener=null;
 		}
 	}
+	
+	
 
 	public String getDescription() {
 		String desc = "Gradle Dependencies";
@@ -273,50 +302,24 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		}
 	}
 
-
-	/**
-	 * Refresh classpath entries in all containers in the workspace quickly (i.e. without invalidating
-	 * the cached gradle models and rebuilding them). This is useful when the entries need to be
-	 * recomputed because a project was opened / closed and so jar -> gradle or 
-	 */
-	private void quickRefreshAllContainers() {
-		//TODO mechanism to avoid repeatedly scheduling many of these jobs in parallel.
-		final Collection<GradleProject> projects = GradleCore.getGradleProjects();
-		if (!projects.isEmpty()) {
-			JobUtil.schedule(new GradleRunnable("Refresh Gradle classpath containers") {
-				@Override
-				public void doit(IProgressMonitor mon) throws Exception {
-					mon.beginTask("Refresh Gradle Classpath Containers", projects.size());
-					for (GradleProject p : projects) {
-						GradleClassPathContainer classpath = p.getClassPathcontainer();
-						if (classpath!=null) {
-							mon.subTask("Refresh "+p.getName());
-							clearPersistedEntries();
-							notifyJDT();
-						}
-						mon.worked(1);
-					}
-				}
-			});
-		}
-	}
 	
 	@Override
 	public String toString() {
-		StringBuffer out = new StringBuffer(getDescription());
+		return "GradleClasspathContainer("+project.getDisplayName()+")";
+//		StringBuffer out = new StringBuffer(getDescription());
 //		+ "{\n");
 //		for (IClasspathEntry e : getClasspathEntries()) {
 //			out.append("   "+e.getPath()+"\n");
 //		}
 //		out.append("}");
-		return out.toString();
+//		return out.toString();
 	}
 	
 
 	/**
 	 * Ensures that entries will be recomputed next time around
 	 */
-	private void clearPersistedEntries() {
+	void clearPersistedEntries() {
 		setPersistedEntries(null);
 		project.getDependencyComputer().clearPersistedEntries();
 	}
@@ -369,7 +372,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 			mon.worked(1);
 			if (!isOnClassPath(project)) {
 				boolean export = GradleCore.getInstance().getPreferences().isExportDependencies();
-				sdebug("Adding... to "+project.getElementName());
+				//debug("Adding... to "+project.getElementName());
 				//Only add it if itsn't there yet
 				ClassPath classpath = new ClassPath(GradleCore.create(project));
 				
@@ -382,9 +385,9 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 				classpath.removeProjectEntries();
 				classpath.setOn(project, new SubProgressMonitor(mon, 9));
 				GradleCore.create(project).getClassPathcontainer().refreshMarkers();
-				sdebug("Done Adding to "+project.getElementName());
+				//debug("Done Adding to "+project.getElementName());
 			} else {
-				sdebug("NOT adding (already there) "+project.getElementName());
+				//debug("NOT adding (already there) "+project.getElementName());
 			}
 		} finally {
 			mon.done();

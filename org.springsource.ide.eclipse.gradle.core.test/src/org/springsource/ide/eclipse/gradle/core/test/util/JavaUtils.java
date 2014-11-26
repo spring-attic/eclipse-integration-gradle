@@ -79,6 +79,14 @@ public class JavaUtils {
 		}
 		return false;
 	}
+	
+	public static String getVersion(IVMInstall vm) {
+		if (vm instanceof IVMInstall2) {
+			IVMInstall2 defaultVM = (IVMInstall2) vm;
+			return defaultVM.getJavaVersion();
+		}
+		return "UNKOWN";
+	}
 
 	public static String createVMId(IVMInstallType type) {
 		//This code based on code copied from 

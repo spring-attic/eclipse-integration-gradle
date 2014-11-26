@@ -34,19 +34,23 @@ public class JavaXXRuntime {
 	
 	static String[] java8locations = {
 		"/home/kdvolder/Applications/jdk1.8.0_20", // On Kris's machine
-		"/opt/java/jdk/Sun/1.8"  // on springsource build server
+		"/opt/java/jdk/Sun/1.8",  // on springsource build server
+		"/opt/java/jdk/Sun/8.0", // in spring.io build server
+		"/Library/Java/JavaVirtualMachines/jdk1.8.0_20.jdk/Contents/Home"
 	};
 	static String[] java7locations = {
 		"/home/kdvolder/Applications/jdk1.7.0_17", // On Kris's machine
-		"/opt/java/jdk/Sun/1.7"  // on springsource build server
+		"/opt/java/jdk/Sun/1.7",  // on springsource build server
+		"/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home"
 	};
 	static String[] java6locations = {
 		"/home/kdvolder/Applications/jdk1.6.0_45", // On Kris's machine
 		"/usr/lib/jvm/java-6-sun", // On a ubuntu machine that has sun java 6 installed
 		"/usr/lib/jvm/java-6-oracle", // On a ubuntu machine that has oracle java 6 installed
-		"/opt/java/jdk/Sun/1.6"  // on springsource build server
+		"/opt/java/jdk/Sun/1.6",  // on springsource build server
+		"/opt/java/jdk/Sun/6.0", // in spring.io build server
+		"/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home"
 	};
-	
 	
 	/**
 	 * Switch 'everyone' to using Java 8 as a default.
@@ -89,7 +93,7 @@ public class JavaXXRuntime {
 			vm.setName("java_"+version);
 		}
 		if (!JavaUtils.isJavaXX(vm, version)) {
-			throw new Error("vm at "+vm.getInstallLocation()+ " doesn't look like a Java "+version);
+			throw new Error("vm at "+vm.getInstallLocation()+ " doesn't look like a Java "+version+". Eclipse thinks it is a Java "+JavaUtils.getVersion(vm));
 		}
 		JavaRuntime.setDefaultVMInstall(vm, new NullProgressMonitor());
 		return vm;

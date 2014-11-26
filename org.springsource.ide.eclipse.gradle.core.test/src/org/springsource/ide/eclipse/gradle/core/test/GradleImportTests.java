@@ -69,6 +69,7 @@ import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
+import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
 import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
@@ -582,7 +583,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(name);
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 	
@@ -597,7 +598,7 @@ public class GradleImportTests extends GradleTest {
 		
 		assertProjects(name);
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 		assertTrue("Dependency management should be enabled", gp.isDependencyManaged());
 		
 		RefreshAllActionCore.callOn(Arrays.asList(gp.getProject())).join();
@@ -605,7 +606,7 @@ public class GradleImportTests extends GradleTest {
 		//Project should basically still be the same:
 		assertProjects(name);
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 		assertTrue("Dependency management should be enabled", gp.isDependencyManaged());
 
 		//Now try disabling dep management...
@@ -617,7 +618,7 @@ public class GradleImportTests extends GradleTest {
 		// still be there.
 		assertProjects(name);
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 		assertFalse("Dependency management should be disabled", gp.isDependencyManaged());
 
 	}
@@ -672,7 +673,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects("quickstart");
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 		
 		assertNoRawLibraryEntries(project);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
@@ -719,7 +720,7 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(name);
 		
 		assertJarEntry(project, "commons-collections-3.2.jar", true);
-		assertJarEntry(project, "junit-4.12-beta-2.jar", true);
+		assertJarEntry(project, "junit-4.12-beta-3.jar", true);
 //		assertJarEntry(project, "bogus-4.8.2.jar", true);
 	}
 	
@@ -786,7 +787,6 @@ public class GradleImportTests extends GradleTest {
 			actualRootLocation = project.getRootProject().getLocation();
 			assertEquals("Root associated with "+project, rootLocation, actualRootLocation);
 			
-			//File actualRootLocation = project.getRootProject().getLocation();
 		}
 	}
 	
@@ -1186,129 +1186,7 @@ public class GradleImportTests extends GradleTest {
 		assertTrue("Gradle Dependencies container is located after the Web App Libraries container on the classpath!", wtpIndex > gradleDepIndex);
 	}
 
-	public void testSTS2405RemapJarToMavenProject() throws Exception {
-		assertTrue("This test requires m2e", M2EUtils.isInstalled());
-		String userHome = System.getProperty("user.home");
-		String restoreJvmArgs = GradleCore.getInstance().getPreferences().getJVMArguments();
-		try {
-			String home = System.getenv("HOME");
-			System.out.println("HOME = "+home);
-			System.out.println("user.home = "+System.getProperty("user.home"));
-			System.out.println("maven.repo.local = "+System.getProperty("maven.repo.local"));
-			final IProject mvnProject = importEclipseProject("sts2405/myLib");
-			String mvnLocalRepo = userHome +"/.m2/repository";
-			assertNoErrors(mvnProject, true);
-			new ExternalCommand(
-				"which", "mvn"	
-			).exec(mvnProject.getLocation().toFile());
-//			new ExternalCommand(
-//				"env"	
-//			).exec(mvnProject.getLocation().toFile());
-			String mavenLocalProp = "-Dmaven.repo.local="+mvnLocalRepo;
-			new MavenCommand(
-					"mvn", mavenLocalProp, "install"
-			).exec(mvnProject.getLocation().toFile());
 	
-			//Note: Gradle does not obey system property 'maven.repo.local'. The build script must 
-			//read it and use it somehow for it to have an effect.
-			GradleCore.getInstance().getPreferences().setJVMArguments(mavenLocalProp);
-			
-			importTestProject("sts2405/main");
-			IProject gradleProject = getProject("main");
-			assertNoErrors(gradleProject, true);
-	
-			final IJavaProject jp = JavaCore.create(gradleProject);
-			assertNoClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", jp);
-			assertClasspathProjectEntry(mvnProject, jp);
-	
-			GradleCore.getInstance().getPreferences().setRemapJarsToMavenProjects(false);
-			refreshDependencies(gradleProject);
-			assertNoClasspathProjectEntry(mvnProject, jp);
-			assertClasspathJarEntry("myLib-0.0.1-SNAPSHOT.jar", GradleCore.create(jp));
-		} finally{
-			GradleCore.getInstance().getPreferences().setJVMArguments(restoreJvmArgs);
-		}
-	}
-
-	public void testSTS2834RemapJarToGradleProject() throws Exception {
-		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
-									 // test projects. Will be cleaned up (deleted)
-									 // by setup of next test.
-		
-		importTestProject("sts2834/my-lib", true);
-		IProject libProject = getProject("my-lib");
-		assertProjects("repos", "my-lib");
-		
-		GradleProcess process = LaunchUtil.launchTasks(GradleCore.create(libProject), ":uploadArchives");
-		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
-		assertContains("BUILD SUCCESSFUL", output);
-
-		importTestProject("sts2834/my-app", true);
-		assertProjects("repos", "my-lib", "my-app");
-		GradleProject app = GradleCore.create(getProject("my-app"));
-		GradleProject lib = GradleCore.create(getProject("my-lib"));
-
-		//Initially, remapping should be enabled:
-		assertTrue(GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects());
-		assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
-		assertClasspathProjectEntry(lib.getProject(), app.getJavaProject());
-		
-		//Disable mapping and check whether changes are made to classpath accordingly:
-		GradleCore.getInstance().getPreferences().setRemapJarsToGradleProjects(false);
-		refreshDependencies(app.getProject());
-		assertNoClasspathProjectEntry(libProject, app.getJavaProject());
-		assertClasspathJarEntry("my-lib-1.0.jar", app);
-		
-	}
-	
-	public void testRemapJarToGradleOpenCloseListener() throws Exception {
-		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
-		 // test projects. Will be cleaned up (deleted)
-		 // by setup of next test.
-		
-		importTestProject("sts2834/my-lib", true);
-		final IProject libProject = getProject("my-lib");
-		assertProjects("repos", "my-lib");
-		
-		GradleProcess process = LaunchUtil.launchTasks(GradleCore.create(libProject), ":uploadArchives");
-		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
-		assertContains("BUILD SUCCESSFUL", output);
-
-		importTestProject("sts2834/my-app", true);
-		assertProjects("repos", "my-lib", "my-app");
-		final GradleProject app = GradleCore.create(getProject("my-app"));
-		GradleProject lib = GradleCore.create(getProject("my-lib"));
-
-		//Initially, remapping should be enabled:
-		assertTrue(GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects());
-		assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
-		assertClasspathProjectEntry(lib.getProject(), app.getJavaProject());
-		
-		libProject.close(new NullProgressMonitor());
-		new ACondition("Project remapped to jar") {
-			public boolean test() throws Exception {
-				assertNoClasspathProjectEntry(libProject, app.getJavaProject());
-				assertClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
-				return true;
-			}
-		}.waitFor(4000);
-		
-		libProject.open(new NullProgressMonitor());
-		new ACondition("Jar remapped to project") {
-			public boolean test() throws Exception {
-				assertClasspathProjectEntry(libProject, app.getJavaProject());
-				assertNoClasspathJarEntry("my-lib-1.0.jar", app.getJavaProject());
-				return true;
-			}
-		}.waitFor(4000);
-	}
-	
-	private void createGeneralProject(String name) throws CoreException {
-		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-		p.create(new NullProgressMonitor());
-		p.open(new NullProgressMonitor());
-	}
-
 	private void dumpRawClasspath(IJavaProject jp) throws JavaModelException {
 		System.out.println(">>> raw classpath for "+jp.getElementName());
 		for (IClasspathEntry e : jp.getRawClasspath()) {

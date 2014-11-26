@@ -10,16 +10,13 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core;
 
-import io.pivotal.tooling.model.eclipse.StsEclipseProject;
-import io.pivotal.tooling.model.eclipse.StsEclipseProjectDependency;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -28,7 +25,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.gradle.tooling.model.ExternalDependency;
+import org.gradle.tooling.model.eclipse.EclipseProject;
+import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.JarRemapRefresher;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.MarkerMaker;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
@@ -42,7 +43,7 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 @SuppressWarnings("restriction")
 public class GradleDependencyComputer {
 
-	public static boolean DEBUG = (""+Platform.getLocation()).equals("/tmp/testws");
+	public static boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	
 	public void debug(String msg) {
 		if (DEBUG) {
@@ -52,7 +53,7 @@ public class GradleDependencyComputer {
 	
 	private GradleProject project;
 	private ClassPath classpath; // computed classpath or null if not yet computed.
-	private StsEclipseProject gradleModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
+	private EclipseProject gradleModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
 	
 	public GradleDependencyComputer(GradleProject project) {
 		this.project = project;
@@ -102,7 +103,7 @@ public class GradleDependencyComputer {
 		}
 	}
 	
-	public ClassPath getClassPath(StsEclipseProject gradleModel) {
+	public ClassPath getClassPath(EclipseProject gradleModel) {
 		if (classpath==null || !gradleModel.equals(this.gradleModel)) {
 			this.gradleModel = gradleModel;
 			classpath = computeEntries();
@@ -120,6 +121,7 @@ public class GradleDependencyComputer {
 			debug("gradleModel ready: "+Integer.toHexString(System.identityHashCode(gradleModel))+" "+gradleModel);
 			classpath = new ClassPath(project);
 			boolean export = GradleCore.getInstance().getPreferences().isExportDependencies(); //TODO: maybe should be project preference?
+			boolean missingPublicationsModels = false;
 			
 			for (ExternalDependency gEntry : gradleModel.getClasspath()) {
 				// Get the location of the jar itself
@@ -129,16 +131,20 @@ public class GradleDependencyComputer {
 					boolean remapped = false;
 					if (GradleCore.getInstance().getPreferences().getRemapJarsToMavenProjects()) {	
 						IProject projectDep = M2EUtils.getMavenProject(gEntry);
-						if (projectDep!=null) {
+						if (projectDep!=null && projectDep.isAccessible()) {
 							addProjectDependency(projectDep, export);
 							remapped = true;
 						}
 					}
 					if (!remapped && GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects()) {
-						IProject projectDep = GradleCore.getGradleProject(gEntry, new NullProgressMonitor());
-						if (projectDep!=null) {
-							addProjectDependency(projectDep, export);
-							remapped = true;
+						try {
+							IProject projectDep = GradleCore.getGradleProject(gEntry);
+							if (projectDep!=null) {
+								addProjectDependency(projectDep, export);
+								remapped = true;
+							}
+						} catch (FastOperationFailedException e) {
+							missingPublicationsModels = true;
 						}
 					}
 					if (!remapped) {
@@ -175,15 +181,29 @@ public class GradleDependencyComputer {
 				}
 			}
 			
-			for (StsEclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
-				IProject project = GradleCore.create(dep.getTargetProject()).getProject();
-				if(project != null && project.isOpen())
-					addProjectDependency(project, export);
-				else {
-					// replace the project dependency with a binary build of the project
-					ExternalDependency external = dep.getExternalEquivalent();
-					addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
+//			for (StsEclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
+//				IProject project = GradleCore.create(dep.getTargetProject()).getProject();
+//				if(project != null && project.isOpen())
+//					addProjectDependency(project, export);
+//				else {
+//					// replace the project dependency with a binary build of the project
+//					ExternalDependency external = dep.getExternalEquivalent();
+//					addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
+//				}
+//			}
+			for (EclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
+				GradleProject projectDependency = GradleCore.create(dep.getTargetProject());
+				IProject projectInWorkspace = projectDependency.getProject();
+				if (projectInWorkspace!=null) {
+					addProjectDependency(projectInWorkspace, export);
+				} else {
+					markers.reportError("Project dependency not in the workspace: "+projectDependency.getDisplayName());
 				}
+			}
+			if (missingPublicationsModels) {
+				//We have produced a 'best effort' classpath but some model info was missing so schedule a more
+				// complete refresh that will build these models in background (this is slow, so we can not do it here).
+				JarRemapRefresher.request();
 			}
 			
 			return classpath;
@@ -193,6 +213,7 @@ public class GradleDependencyComputer {
 	}
 
 	private void addProjectDependency(IProject projectDep, boolean export) {
+		Assert.isNotNull(projectDep);
 		classpath.add(JavaCore.newProjectEntry(projectDep.getFullPath(), export));
 	}
 

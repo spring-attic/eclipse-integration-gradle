@@ -34,6 +34,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.autorefresh.DependencyRefresher;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.util.JavaRuntimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wtp.DeploymentExclusions;
 import org.springsource.ide.eclipse.gradle.core.wtp.RegexpListDeploymentExclusions;
@@ -75,9 +76,11 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 			//See: https://issuetracker.springsource.com/browse/STS-3405
 
 	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN = true;
-	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE = true;
+	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE = false; //still experimental, may turn on by default on next release
+	public static final boolean DEFAULT_JAR_REMAP_ON_OPEN_CLOSE = true;
 	public static final String JAR_REMAP_GRADLE_TO_MAVEN = GradlePreferences.class.getName()+".JAR_REMAP_GRADLE_TO_MAVEN";
 	public static final String JAR_REMAP_GRADLE_TO_GRADLE = GradlePreferences.class.getName()+".JAR_REMAP_GRADLE_TO_GRADLE";
+	public static final String JAR_REMAP_ON_OPEN_CLOSE = GradlePreferences.class.getName()+".JAR_REMAP_ON_OPEN_CLOSE";
 	
 	private static URI builtInDistribution = null;
 
@@ -286,6 +289,10 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 			} catch (CoreException e) {
 				GradleCore.log(e);
 			}
+		} else if (JAR_REMAP_ON_OPEN_CLOSE.equals(event.getKey())
+				|| JAR_REMAP_GRADLE_TO_GRADLE.equals(event.getKey())
+				|| JAR_REMAP_GRADLE_TO_MAVEN.equals(event.getKey())) {
+			GradleClassPathContainer.ensureOpenCloseListener();
 		}
 	}
 
@@ -371,5 +378,11 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 		put(JAR_REMAP_GRADLE_TO_GRADLE, enable);
 	}
 
-	
+	public boolean getJarRemappingOnOpenClose() {
+		return get(JAR_REMAP_ON_OPEN_CLOSE, DEFAULT_JAR_REMAP_ON_OPEN_CLOSE);
+	}
+
+	public void setJarRemappingOnOpenClose(boolean enable) {
+		put(JAR_REMAP_ON_OPEN_CLOSE, enable);
+	}
 }
