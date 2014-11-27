@@ -360,7 +360,7 @@ public class GradleProject {
 	}
 	
 	private File getCustomToolingModelInitScript() {
-		if (GradleCore.getInstance().getPreferences().getJarRemappingInHierarchy()) {
+		if (GradleCore.getInstance().getPreferences().getRemapJarsInHierarchy()) {
 			Bundle bundle = Platform.getBundle(GradleToolingApi.PLUGIN_ID);
 			try {
 				File bundleFile = FileLocator.getBundleFile(bundle);

@@ -35,7 +35,8 @@ public class ArgumentsCustomizerHelper {
 	 * Create an ArgumentsCustomizerHelper with a list of user-provided arguments.
 	 * User provided arguments may be null, meaning that the user did not provide
 	 * an arguments list. The null case is considered distinct from the case
-	 * where user explicitly provided an empty argument list.
+	 * where user explicitly provided an empty argument list. (i.e. hasUserProvidedArguments
+	 * will return true if the user-provided argument list is empty but false if it is null).
 	 * 
 	 * @param userProvidedArguments
 	 */

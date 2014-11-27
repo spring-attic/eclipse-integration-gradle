@@ -380,6 +380,15 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	public void setRemapJarsToGradleProjects(boolean enable) {
 		put(JAR_REMAP_GRADLE_TO_GRADLE, enable);
 	}
+	
+	public boolean getRemapJarsInHierarchy() {
+		return get(JAR_REMAP_IN_HIERARCHY, DEFAULT_JAR_REMAP_IN_HIERARCHY);
+	}
+	
+	public void setRemapJarsInHierarchy(boolean enable) {
+		put(JAR_REMAP_IN_HIERARCHY, enable);
+	}
+	
 
 	public boolean getJarRemappingOnOpenClose() {
 		return get(JAR_REMAP_ON_OPEN_CLOSE, DEFAULT_JAR_REMAP_ON_OPEN_CLOSE);
@@ -389,11 +398,4 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 		put(JAR_REMAP_ON_OPEN_CLOSE, enable);
 	}
 
-	public boolean getJarRemappingInHierarchy() {
-		return get(JAR_REMAP_IN_HIERARCHY, DEFAULT_JAR_REMAP_IN_HIERARCHY);
-	}
-	
-	public void setJarRemappingInHierarchy(boolean enable) {
-		put(JAR_REMAP_IN_HIERARCHY, enable);
-	}
 }

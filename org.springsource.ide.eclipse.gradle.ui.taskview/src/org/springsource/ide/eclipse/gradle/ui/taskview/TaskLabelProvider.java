@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.ui.taskview;
 
-import io.pivotal.tooling.model.eclipse.StsEclipseProject;
-
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -35,7 +33,6 @@ import org.springsource.ide.eclipse.gradle.ui.wizards.GradleProjectTreeLabelProv
  * 
  * @author Kris De Volder
  * @author Alex Boyko
- * 
  */
 public class TaskLabelProvider extends GradleLabelProvider
 		implements
