@@ -15,11 +15,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.gradle.tooling.BuildException;
-import org.gradle.tooling.provider.model.UnknownModelException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.InconsistenProjectHierarchyException;
-
 
 /**
  * Utility methods to convert exceptions into other types of exceptions, status objects etc.
