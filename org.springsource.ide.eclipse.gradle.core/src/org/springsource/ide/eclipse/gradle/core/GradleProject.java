@@ -360,22 +360,23 @@ public class GradleProject {
 	}
 	
 	private File getCustomToolingModelInitScript() {
-		//TODO: enable the code below based on a suitable condition
-		Bundle bundle = Platform.getBundle(GradleToolingApi.PLUGIN_ID);
-		try {
-			File bundleFile = FileLocator.getBundleFile(bundle);
-			if (bundleFile != null && bundleFile.exists() && bundleFile.isDirectory()) {
-				File initScript = new File(bundleFile, "toolingCustomModel/init.gradle");
-				if (initScript.exists()) {
-					return initScript;
+		if (GradleCore.getInstance().getPreferences().getJarRemappingInHierarchy()) {
+			Bundle bundle = Platform.getBundle(GradleToolingApi.PLUGIN_ID);
+			try {
+				File bundleFile = FileLocator.getBundleFile(bundle);
+				if (bundleFile != null && bundleFile.exists() && bundleFile.isDirectory()) {
+					File initScript = new File(bundleFile, "toolingCustomModel/init.gradle");
+					if (initScript.exists()) {
+						return initScript;
+					} else {
+						GradleCore.log("init.gradle not found in plugin "+GradleCore.PLUGIN_ID);
+					}
 				} else {
-					GradleCore.log("init.gradle not found in plugin "+GradleCore.PLUGIN_ID);
+					GradleCore.log("Couldn't access the plugin "+GradleCore.PLUGIN_ID+" as a directory. Maybe it is not installed as an 'exploded' bundle?");
 				}
-			} else {
-				GradleCore.log("Couldn't access the plugin "+GradleCore.PLUGIN_ID+" as a directory. Maybe it is not installed as an 'exploded' bundle?");
+			} catch (IOException e) {
+				GradleCore.log(e);
 			}
-		} catch (IOException e) {
-			GradleCore.log(e);
 		}
 		return null;
 	}

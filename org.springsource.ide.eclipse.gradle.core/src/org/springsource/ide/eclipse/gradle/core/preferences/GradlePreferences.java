@@ -77,10 +77,13 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 
 	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN = true;
 	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE = false; //still experimental, may turn on by default on next release
+	public static final boolean DEFAULT_JAR_REMAP_IN_HIERARCHY = false; //experimental, will break workspaces using older versions of Gradle if enabled.
 	public static final boolean DEFAULT_JAR_REMAP_ON_OPEN_CLOSE = true;
 	public static final String JAR_REMAP_GRADLE_TO_MAVEN = GradlePreferences.class.getName()+".JAR_REMAP_GRADLE_TO_MAVEN";
 	public static final String JAR_REMAP_GRADLE_TO_GRADLE = GradlePreferences.class.getName()+".JAR_REMAP_GRADLE_TO_GRADLE";
 	public static final String JAR_REMAP_ON_OPEN_CLOSE = GradlePreferences.class.getName()+".JAR_REMAP_ON_OPEN_CLOSE";
+	public static final String JAR_REMAP_IN_HIERARCHY = GradlePreferences.class.getName()+"JAR_REMAP_IN_HIERARCHY";
+	
 	
 	private static URI builtInDistribution = null;
 
@@ -384,5 +387,13 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 
 	public void setJarRemappingOnOpenClose(boolean enable) {
 		put(JAR_REMAP_ON_OPEN_CLOSE, enable);
+	}
+
+	public boolean getJarRemappingInHierarchy() {
+		return get(JAR_REMAP_IN_HIERARCHY, DEFAULT_JAR_REMAP_IN_HIERARCHY);
+	}
+	
+	public void setJarRemappingInHierarchy(boolean enable) {
+		put(JAR_REMAP_IN_HIERARCHY, enable);
 	}
 }
