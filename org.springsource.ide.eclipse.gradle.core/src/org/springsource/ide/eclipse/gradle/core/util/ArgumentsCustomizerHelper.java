@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -30,6 +31,14 @@ public class ArgumentsCustomizerHelper {
 	private static final String ARG_SETTINGS_FILE_1 = "-c";
 	private static final String ARG_SETTINGS_FILE_2 = "--settings-file";
 
+	/**
+	 * Create an ArgumentsCustomizerHelper with a list of user-provided arguments.
+	 * User provided arguments may be null, meaning that the user did not provide
+	 * an arguments list. The null case is considered distinct from the case
+	 * where user explicitly provided an empty argument list.
+	 * 
+	 * @param userProvidedArguments
+	 */
 	public ArgumentsCustomizerHelper(String[] userProvidedArguments) {
 		this.args = new ArrayList<String>();
 		if (userProvidedArguments!=null) {
@@ -41,14 +50,27 @@ public class ArgumentsCustomizerHelper {
 	/**
 	 * Add a '--settings-file' argument but only if there's not one there already.
 	 */
-	public void addSettingsFile(String settingsPath) {
+	public void addSettingsFile(File settingsPath) {
 		for (String a : args) {
 			if (a.equals(ARG_SETTINGS_FILE_1)|| a.equals(ARG_SETTINGS_FILE_2)) {
 				return; //already has 'settings' argument so ignore added argument.
 			}
 		}
-		args.add("-c");
-		args.add(settingsPath);
+		add("-c");
+		add(settingsPath.toString());
+	}
+	
+	/**
+	 * Add a '--init-script' argument. This argument is added unconditionally (because
+	 * multiple '--init-script' arguments are allowed).
+	 */
+	public void addInitScript(File initScript) {
+		add("--init-script");
+		add(initScript.toString());
+	}
+
+	public void add(String string) {
+		args.add(string);
 		hasToolingProvidedArguments = true;
 	}
 	
@@ -63,5 +85,6 @@ public class ArgumentsCustomizerHelper {
 	public String[] getArguments() {
 		return args.toArray(new String[args.size()]);
 	}
+
 
 }

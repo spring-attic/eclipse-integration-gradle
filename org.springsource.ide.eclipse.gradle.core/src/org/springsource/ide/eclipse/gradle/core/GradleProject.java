@@ -13,7 +13,6 @@ package org.springsource.ide.eclipse.gradle.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -319,9 +318,10 @@ public class GradleProject {
 			if (javaHome!=null) {
 				gradleOp.setJavaHome(javaHome);
 			}
-			String[] jvmArgs = projectPrefs.getJVMArgs();
-			if (jvmArgs!=null) {
-				gradleOp.setJvmArguments(jvmArgs);
+			ArgumentsCustomizerHelper jvmArgs = new ArgumentsCustomizerHelper(projectPrefs.getJVMArgs());
+			customizeJVMArguments(jvmArgs, this);
+			if (jvmArgs.hasArguments()) {
+				gradleOp.setJvmArguments(jvmArgs.getArguments());
 			}
 			ArgumentsCustomizerHelper pgmArgs = new ArgumentsCustomizerHelper(projectPrefs.getProgramArgs());
 			customizeProgramArguments(pgmArgs, this);
@@ -337,34 +337,9 @@ public class GradleProject {
 			// That really doesn't leave us with a practical way to handle the exceptions.
 			GradleCore.log(e);
 		}
-		
-			
-			//TODO: cleanup the mess below.
-			
-//			List<String> jvmArguments = new ArrayList<String>();
-//			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + getRepo().getAbsolutePath());
-//			
-//			// TODO allow the binary version to be controlled via a workspace level property
-//			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration");
-//			
-//			if(projectPrefs.getJVMArgs() != null)
-//				jvmArguments.addAll(Arrays.asList(projectPrefs.getJVMArgs()));
-//			
-//			gradleOp.setJvmArguments(jvmArguments.toArray(new String[jvmArguments.size()]));
-//			
-//			List<String> arguments = new ArrayList<String>();
-//			arguments.add("--init-script");
-//			arguments.add(getInitScript().getAbsolutePath());
-//	
-//			if(projectPrefs.getProgramArgs() != null)
-//				arguments.addAll(Arrays.asList(projectPrefs.getProgramArgs()));
-//			
-//			gradleOp.withArguments(arguments.toArray(new String[arguments.size()]));
-			
-
 	}
 	
-	private File getRepo() {
+	private File getCustomToolingModelRepo() {
 		Bundle bundle = Platform.getBundle(GradleToolingApi.PLUGIN_ID);
 		try {
 			File bundleFile = FileLocator.getBundleFile(bundle);
@@ -384,7 +359,8 @@ public class GradleProject {
 		return null;
 	}
 	
-	private File getInitScript() {
+	private File getCustomToolingModelInitScript() {
+		//TODO: enable the code below based on a suitable condition
 		Bundle bundle = Platform.getBundle(GradleToolingApi.PLUGIN_ID);
 		try {
 			File bundleFile = FileLocator.getBundleFile(bundle);
@@ -410,7 +386,7 @@ public class GradleProject {
 	 * 
 	 * @return parameters as array of strings
 	 */
-	final public static ArgumentsCustomizerHelper customizeProgramArguments(ArgumentsCustomizerHelper pgmArgs, GradleProject project) {
+	final public static void customizeProgramArguments(ArgumentsCustomizerHelper pgmArgs, GradleProject project) {
 		//Add '--settings-file' argument to help gradle find settings.gradle, but only in cases where it needs the
 		// help (i.e. when rootproject is not the project's ancestor in the file system).
 		if (project != null) {
@@ -421,13 +397,27 @@ public class GradleProject {
 						&& !new Path(project.getLocation().getPath()).isPrefixOf(new Path(rootProject.getLocation().getPath()))) {
 					File settingsFile = new File(rootProject.getLocation(), GRADLE_SETTINGS_FILE);
 					if (settingsFile.exists()) {
-						pgmArgs.addSettingsFile(settingsFile.toString());
+						pgmArgs.addSettingsFile(settingsFile);
 					}
 				}
 			}
+			
+			//add 'init-script' parameter for custom tooling model if any features that require it are enabled.
+			File initScript = project.getCustomToolingModelInitScript();
+			if (initScript!=null && initScript.exists()) {
+				pgmArgs.addInitScript(initScript);
+			}
 		}
-		//TODO: add 'init-script' parameter for custom tooling model features that require it are enabled.
-		return pgmArgs;
+	}
+	
+	public static void customizeJVMArguments(ArgumentsCustomizerHelper jvmArgs, GradleProject project) {
+		if (project.getCustomToolingModelInitScript()!=null) {
+			File repo = project.getCustomToolingModelRepo();
+			if (repo!=null && repo.exists()) {
+				jvmArgs.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + repo.getAbsolutePath());
+				jvmArgs.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration");
+			}
+		}
 	}
 
 	/**

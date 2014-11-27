@@ -420,17 +420,19 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			if (javaHome!=null) {
 				gradleOp.setJavaHome(javaHome);
 			}
-			String[] jvmArgs = getJVMArgumentsArray(conf);
-			if (jvmArgs!=null) {
-				gradleOp.setJvmArguments(jvmArgs);
-			}
-			ArgumentsCustomizerHelper programArgs = new ArgumentsCustomizerHelper(getProgramArgumentsArray(conf));
+			ArgumentsCustomizerHelper jvmArgs = new ArgumentsCustomizerHelper(getJVMArgumentsArray(conf));
 			//Note that the test here 'hasUserProvidedArguments' is more restrictive than the test in 
 			//GradleProject.configureOperation. This is to respect user provided arguments that may
 			//have been configured in GradleProject.configureOperation, unless they are explicitly overridden here.
+			
+			GradleProject.customizeJVMArguments(jvmArgs, getProject(conf));
+			if (jvmArgs.hasUserProvidedArguments()) {
+				gradleOp.setJvmArguments(jvmArgs.getArguments());
+			}
+			ArgumentsCustomizerHelper programArgs = new ArgumentsCustomizerHelper(getProgramArgumentsArray(conf));
+			GradleProject.customizeProgramArguments(programArgs, getProject(conf));
 			if (programArgs.hasUserProvidedArguments()) {
-				GradleProject.customizeProgramArguments(programArgs, getProject(conf));
-				gradleOp.withArguments(GradleProject.customizeProgramArguments(programArgs, getProject(conf)).getArguments());
+				gradleOp.withArguments(programArgs.getArguments());
 			}
 		}
 	}

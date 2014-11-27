@@ -30,11 +30,11 @@ public class DefaultModelBuilderTest extends GradleTest {
 
 	DefaultModelBuilder builder = new DefaultModelBuilder();
 	
-	public void testBuildSimpleProjectModel() throws Exception {
+	public void testBuildSimpleProjectModel() throws Throwable {
 		File projectLoc = extractJavaSample("quickstart");
 		GradleProject project = GradleCore.create(projectLoc);
 		BuildResult<EclipseProject> result = builder.buildModel(project, EclipseProject.class, new NullProgressMonitor());
-		assertTrue(result.isSucceeded());
+		assertSucceeded(result);
 		
 		EclipseProject model = result.getModel();
 		assertEquals("quickstart",  model.getName());
