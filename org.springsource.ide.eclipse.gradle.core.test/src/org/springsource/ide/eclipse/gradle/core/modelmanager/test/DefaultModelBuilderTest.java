@@ -25,7 +25,6 @@ import org.springsource.ide.eclipse.gradle.core.test.GradleTest;
 import org.springsource.ide.eclipse.gradle.core.util.Distributions;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
-import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 
 public class DefaultModelBuilderTest extends GradleTest {
 

@@ -35,6 +35,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.IJavaHomePreferences;
+import org.springsource.ide.eclipse.gradle.core.util.ArgumentsCustomizerHelper;
 import org.springsource.ide.eclipse.gradle.core.util.ArgumentsParser;
 
 /**
@@ -423,9 +424,13 @@ public class GradleLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			if (jvmArgs!=null) {
 				gradleOp.setJvmArguments(jvmArgs);
 			}
-			String[] programArgs = getProgramArgumentsArray(conf);
-			if (programArgs!=null) {
-				gradleOp.withArguments(GradleProject.calculateProgramArgs(programArgs, getProject(conf)));
+			ArgumentsCustomizerHelper programArgs = new ArgumentsCustomizerHelper(getProgramArgumentsArray(conf));
+			//Note that the test here 'hasUserProvidedArguments' is more restrictive than the test in 
+			//GradleProject.configureOperation. This is to respect user provided arguments that may
+			//have been configured in GradleProject.configureOperation, unless they are explicitly overridden here.
+			if (programArgs.hasUserProvidedArguments()) {
+				GradleProject.customizeProgramArguments(programArgs, getProject(conf));
+				gradleOp.withArguments(GradleProject.customizeProgramArguments(programArgs, getProject(conf)).getArguments());
 			}
 		}
 	}

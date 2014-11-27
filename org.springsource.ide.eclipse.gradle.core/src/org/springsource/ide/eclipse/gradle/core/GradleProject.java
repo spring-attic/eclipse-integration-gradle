@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core;
 
-import io.pivotal.tooling.model.eclipse.StsEclipseProject;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,8 +51,8 @@ import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.gradle.tooling.model.eclipse.EclipseSourceDirectory;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
-import org.osgi.framework.Bundle;
 import org.gradle.tooling.model.gradle.ProjectPublications;
+import org.osgi.framework.Bundle;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
@@ -65,6 +63,7 @@ import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
+import org.springsource.ide.eclipse.gradle.core.util.ArgumentsCustomizerHelper;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 import org.springsource.ide.eclipse.gradle.core.util.IllegalClassPathEntryException;
@@ -92,8 +91,6 @@ public class GradleProject {
 	public static boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	
 	private static final String GRADLE_SETTINGS_FILE = "settings.gradle";
-	private static final String ARG_SETTINGS_FILE_1 = "-c";
-	private static final String ARG_SETTINGS_FILE_2 = "--settings-file";
 	
 	private void debug(String msg) {
 		if (DEBUG) {
@@ -322,36 +319,14 @@ public class GradleProject {
 			if (javaHome!=null) {
 				gradleOp.setJavaHome(javaHome);
 			}
-			
-			//TODO: cleanup the mess below.
-			
-			List<String> jvmArguments = new ArrayList<String>();
-			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + getRepo().getAbsolutePath());
-			
-			// TODO allow the binary version to be controlled via a workspace level property
-			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration");
-			
-			if(projectPrefs.getJVMArgs() != null)
-				jvmArguments.addAll(Arrays.asList(projectPrefs.getJVMArgs()));
-			
-			gradleOp.setJvmArguments(jvmArguments.toArray(new String[jvmArguments.size()]));
-			
-			List<String> arguments = new ArrayList<String>();
-			arguments.add("--init-script");
-			arguments.add(getInitScript().getAbsolutePath());
-	
-			if(projectPrefs.getProgramArgs() != null)
-				arguments.addAll(Arrays.asList(projectPrefs.getProgramArgs()));
-			
-			gradleOp.withArguments(arguments.toArray(new String[arguments.size()]));
-			
-//			String[] jvmArgs = projectPrefs.getJVMArgs();
-//			if (jvmArgs!=null) {
-//				gradleOp.setJvmArguments(jvmArgs);
-//			}
-			String[] pgmArgs = calculateProgramArgs(arguments.toArray(new String[arguments.size()]), this);
-			if (pgmArgs!=null) {
-				gradleOp.withArguments(pgmArgs);
+			String[] jvmArgs = projectPrefs.getJVMArgs();
+			if (jvmArgs!=null) {
+				gradleOp.setJvmArguments(jvmArgs);
+			}
+			ArgumentsCustomizerHelper pgmArgs = new ArgumentsCustomizerHelper(projectPrefs.getProgramArgs());
+			customizeProgramArguments(pgmArgs, this);
+			if (pgmArgs.hasArguments()) {
+				gradleOp.withArguments(pgmArgs.getArguments());
 			}
 			GradleLaunchConfigurationDelegate.configureOperation(gradleOp, conf);
 		} catch (Exception e) {
@@ -362,6 +337,31 @@ public class GradleProject {
 			// That really doesn't leave us with a practical way to handle the exceptions.
 			GradleCore.log(e);
 		}
+		
+			
+			//TODO: cleanup the mess below.
+			
+//			List<String> jvmArguments = new ArrayList<String>();
+//			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + getRepo().getAbsolutePath());
+//			
+//			// TODO allow the binary version to be controlled via a workspace level property
+//			jvmArguments.add("-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration");
+//			
+//			if(projectPrefs.getJVMArgs() != null)
+//				jvmArguments.addAll(Arrays.asList(projectPrefs.getJVMArgs()));
+//			
+//			gradleOp.setJvmArguments(jvmArguments.toArray(new String[jvmArguments.size()]));
+//			
+//			List<String> arguments = new ArrayList<String>();
+//			arguments.add("--init-script");
+//			arguments.add(getInitScript().getAbsolutePath());
+//	
+//			if(projectPrefs.getProgramArgs() != null)
+//				arguments.addAll(Arrays.asList(projectPrefs.getProgramArgs()));
+//			
+//			gradleOp.withArguments(arguments.toArray(new String[arguments.size()]));
+			
+
 	}
 	
 	private File getRepo() {
@@ -405,53 +405,28 @@ public class GradleProject {
 	}
 	
 	/**
-	 * Calculates parameters for the Gradle operation. Main purpose incorporate
-	 * settings file parameter if it's not there for the flat layout
-	 * multi-project model building or task execution.
+	 * Customize program arguments for the Gradle operation. Main purpose incorporate
+	 * various 'tooling generated' arguments with the arguments provided by user preferences.
 	 * 
 	 * @return parameters as array of strings
 	 */
-	final public static String[] calculateProgramArgs(String[] pgmArgs, GradleProject project) {
+	final public static ArgumentsCustomizerHelper customizeProgramArguments(ArgumentsCustomizerHelper pgmArgs, GradleProject project) {
+		//Add '--settings-file' argument to help gradle find settings.gradle, but only in cases where it needs the
+		// help (i.e. when rootproject is not the project's ancestor in the file system).
 		if (project != null) {
 			GradleProject rootProject = project.getRootProjectMaybe();
-			/*
-			 * Check if the project is a sub-project in a flat multi-project
-			 * layout. if there is no settings file provided with the current
-			 * arguments add the settings file from the root project if it
-			 * exists to CLI arguments
-			 */
 			if (rootProject != null) {
 				if (rootProject != project
 						&& !new File(project.getLocation(), GRADLE_SETTINGS_FILE).exists()
 						&& !new Path(project.getLocation().getPath()).isPrefixOf(new Path(rootProject.getLocation().getPath()))) {
-					boolean addedSettingsFileArgument = false;
-					if (pgmArgs != null) {
-						for (int i = 0; !addedSettingsFileArgument
-								&& i < pgmArgs.length; i++) {
-							String arg = pgmArgs[i].trim();
-							if (ARG_SETTINGS_FILE_1.equals(arg) || ARG_SETTINGS_FILE_2.equals(arg)) {
-								addedSettingsFileArgument = true;
-							}
-						}
-					}
-					if (!addedSettingsFileArgument) {
-						File settingsFile = new File(rootProject.getLocation(), GRADLE_SETTINGS_FILE);
-						if (settingsFile.exists()) {
-							ArrayList<String> newArgs = new ArrayList<String>(
-									pgmArgs == null ? 2 : pgmArgs.length + 2);
-							if (pgmArgs != null) {
-								for (String arg : pgmArgs) {
-									newArgs.add(arg);
-								}
-							}
-							newArgs.add(ARG_SETTINGS_FILE_1);
-							newArgs.add(settingsFile.toString());
-							pgmArgs = newArgs.toArray(new String[newArgs.size()]);
-						}
+					File settingsFile = new File(rootProject.getLocation(), GRADLE_SETTINGS_FILE);
+					if (settingsFile.exists()) {
+						pgmArgs.addSettingsFile(settingsFile.toString());
 					}
 				}
 			}
 		}
+		//TODO: add 'init-script' parameter for custom tooling model features that require it are enabled.
 		return pgmArgs;
 	}
 
