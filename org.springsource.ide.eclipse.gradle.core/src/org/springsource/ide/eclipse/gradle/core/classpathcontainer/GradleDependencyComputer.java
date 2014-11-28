@@ -8,7 +8,7 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springsource.ide.eclipse.gradle.core;
+package org.springsource.ide.eclipse.gradle.core.classpathcontainer;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,10 +27,9 @@ import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.JarRemapRefresher;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.MarkerMaker;
+import org.springsource.ide.eclipse.gradle.core.ClassPath;
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;

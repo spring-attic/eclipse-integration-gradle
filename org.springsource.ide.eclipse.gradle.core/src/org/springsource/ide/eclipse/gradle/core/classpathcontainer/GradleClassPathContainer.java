@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.core.JavaProject;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.ClassPath;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
-import org.springsource.ide.eclipse.gradle.core.GradleDependencyComputer;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.GradleSaveParticipant;
 import org.springsource.ide.eclipse.gradle.core.ProjectOpenCloseListener;

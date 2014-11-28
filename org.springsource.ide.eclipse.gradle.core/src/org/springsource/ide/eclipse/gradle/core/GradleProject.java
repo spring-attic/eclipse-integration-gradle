@@ -56,11 +56,13 @@ import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClasspathContainerInitializer;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleDependencyComputer;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
+import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ArgumentsCustomizerHelper;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
@@ -360,7 +362,12 @@ public class GradleProject {
 	}
 	
 	private File getCustomToolingModelInitScript() {
-		if (GradleCore.getInstance().getPreferences().getRemapJarsInHierarchy()) {
+		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
+		if (prefs.getRemapJarsInHierarchy()) {
+			//TODO; should this also be enabled when 'export dependencies' is disabled?
+			//  Export dependencies = false really doesn't make much sense unless custom
+			//  tooling model is used to add transitive dependencies to classpath of each 
+			//  project instead of relying on the exported dependencies from dependent projects.
 			Bundle bundle = Platform.getBundle(GradleToolingApi.PLUGIN_ID);
 			try {
 				File bundleFile = FileLocator.getBundleFile(bundle);
