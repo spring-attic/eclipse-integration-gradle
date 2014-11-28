@@ -31,6 +31,7 @@ import org.springsource.ide.eclipse.gradle.core.ClassPath;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
+import org.springsource.ide.eclipse.gradle.core.util.ObjectUtil;
 import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 
@@ -52,7 +53,7 @@ public class GradleDependencyComputer {
 	
 	private GradleProject project;
 	private ClassPath classpath; // computed classpath or null if not yet computed.
-	private EclipseProject gradleModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
+	private ClassPathModel gradleModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
 	
 	public GradleDependencyComputer(GradleProject project) {
 		this.project = project;
@@ -102,7 +103,7 @@ public class GradleDependencyComputer {
 		}
 	}
 	
-	public ClassPath getClassPath(EclipseProject gradleModel) {
+	public ClassPath getClassPath(ClassPathModel gradleModel) {
 		if (classpath==null || !gradleModel.equals(this.gradleModel)) {
 			this.gradleModel = gradleModel;
 			classpath = computeEntries();

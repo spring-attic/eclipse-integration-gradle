@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.classpathcontainer;
 
-import io.pivotal.tooling.model.eclipse.StsEclipseProject;
-
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -31,7 +29,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springsource.ide.eclipse.gradle.core.ClassPath;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
@@ -91,7 +88,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 * be known if the entries where created during the current session since models
 	 * themselves do not persist across sessions).
 	 */
-	private EclipseProject oldModel = null;
+	private ClassPathModel oldModel = null;
 	private IClasspathEntry[] persistedEntries;
 	private IRefreshListener refreshListener;
 	
@@ -154,7 +151,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		GradleDependencyComputer dependencyComputer = project.getDependencyComputer();
 		debug("getClassPathEntries called");
 		try {
-			EclipseProject gradleModel = project.getGradleModel();
+			ClassPathModel gradleModel = ClassPathModel.getClassPathModel(project);
 			if (gradleModel!=null) {
 				if (oldModel==gradleModel) {
 					IClasspathEntry[] persisted = getPersistedEntries();
@@ -255,7 +252,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	
 	public boolean isInitialized() {
 		try {
-			project.getGradleModel(StsEclipseProject.class);
+			ClassPathModel.getClassPathModel(project);
 			return true;
 		} catch (FastOperationFailedException e) {
 		} catch (CoreException e) {

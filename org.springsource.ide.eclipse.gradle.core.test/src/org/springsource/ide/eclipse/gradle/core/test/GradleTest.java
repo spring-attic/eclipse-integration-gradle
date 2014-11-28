@@ -108,6 +108,8 @@ public abstract class GradleTest extends TestCase {
 		GradleCore.getInstance().getPreferences().setRemapJarsToMavenProjects(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN);
 		GradleCore.getInstance().getPreferences().setRemapJarsInHierarchy(GradlePreferences.DEFAULT_JAR_REMAP_IN_HIERARCHY);
 		GradleCore.getInstance().getPreferences().setJarRemappingOnOpenClose(GradlePreferences.DEFAULT_JAR_REMAP_ON_OPEN_CLOSE);
+		GradleCore.getInstance().getPreferences().setExportDependencies(GradlePreferences.DEFAULT_EXPORT_DEPENDENCIES);
+		GradleCore.getInstance().getPreferences().setRemapJarsInHierarchy(GradlePreferences.DEFAULT_JAR_REMAP_IN_HIERARCHY);
 		GradleCore.getInstance().resetModelManager();
 	}
 
