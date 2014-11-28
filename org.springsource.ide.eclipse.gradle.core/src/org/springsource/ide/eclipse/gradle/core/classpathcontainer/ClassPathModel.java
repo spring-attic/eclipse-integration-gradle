@@ -15,6 +15,7 @@ import io.pivotal.tooling.model.eclipse.StsEclipseProjectDependency;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.eclipse.EclipseProject;
@@ -52,11 +53,21 @@ public abstract class ClassPathModel {
 	
 	public static ClassPathModel getClassPathModel(GradleProject project) throws CoreException, FastOperationFailedException {
 		if (project.useCustomToolingModel()) {
-			return from(project.getModelOfType(StsEclipseProject.class));
+			return from(project.getModel(StsEclipseProject.class));
 		} else {
-			return from(project.getModelOfType(EclipseProject.class));
+			return from(project.getModel(EclipseProject.class));
 		}
 	}
+	
+	public static ClassPathModel getClassPathModel(GradleProject project, IProgressMonitor mon) throws CoreException {
+		if (project.useCustomToolingModel()) {
+			return from(project.getModel(StsEclipseProject.class, mon));
+		} else {
+			return from(project.getModel(EclipseProject.class, mon));
+		}
+	}
+	
+
 	
 	////////////////// implementation cruft below ////////////////////////////////
 	
@@ -116,5 +127,5 @@ public abstract class ClassPathModel {
 		}
 		return false;
 	}
-	
+
 }

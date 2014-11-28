@@ -363,11 +363,7 @@ public class GradleProject {
 	
 	public boolean useCustomToolingModel() {
 		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
-		return prefs.getRemapJarsInHierarchy();
-		//TODO; should this also be enabled when 'export dependencies' is disabled?
-		//  Export dependencies = false really doesn't make much sense unless custom
-		//  tooling model is used to add transitive dependencies to classpath of each 
-		//  project instead of relying on the exported dependencies from dependent projects.
+		return prefs.getUseCustomToolingModel();
 	}
 
 	
@@ -564,11 +560,15 @@ public class GradleProject {
 		return null; 
 	}
 
-	public <T> T getModelOfType(Class<T> type) throws CoreException, FastOperationFailedException {
+	public <T> T getModel(Class<T> type) throws CoreException, FastOperationFailedException {
 		return mgr.getModel(this, type);
 	}
 	
-	public <T> T requestModelOfType(final Class<T> type) throws CoreException, FastOperationFailedException {
+	public <T> T getModel(Class<T> type, IProgressMonitor mon) throws CoreException {
+		return mgr.getModel(this, type, mon);
+	}
+	
+	public <T> T requestModel(final Class<T> type) throws CoreException, FastOperationFailedException {
 		try {
 			return mgr.getModel(this, type);
 		} catch (FastOperationFailedException e) {

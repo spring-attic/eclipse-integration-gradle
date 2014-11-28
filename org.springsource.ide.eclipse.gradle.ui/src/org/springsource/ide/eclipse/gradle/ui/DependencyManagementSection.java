@@ -39,7 +39,7 @@ public class DependencyManagementSection extends PrefsPageSection {
 
 	private Button enableJarToMvnProjectMappingButton;
 	private Button enableJarToGradleProjectMappingButton;
-	private Button enableRemapJarsInHierarchyButton;
+	private Button useCustomToolingModelButton;
 	
 	private Button enableJarRemappingOnOpenClose;
 	
@@ -59,8 +59,8 @@ public class DependencyManagementSection extends PrefsPageSection {
 			setRemapJarsToMavenProjects(enableJarToMvnProjectMappingButton.getSelection());
 		}
 		setRemapJarsToGradleProjects(enableJarToGradleProjectMappingButton.getSelection());
-		setRemapJarsInHierarchy(enableRemapJarsInHierarchyButton.getSelection());
 		setJarRemappingOnOpenClose(enableJarRemappingOnOpenClose.getSelection());
+		setUseCustomToolingModel(useCustomToolingModelButton.getSelection());
 		return true;
 	}
 
@@ -72,7 +72,7 @@ public class DependencyManagementSection extends PrefsPageSection {
 		
 		setRemapJarsToMavenProjectsInPage(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN);
 		setRemapJarsToGradleProjectsInPage(GradlePreferences.DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE);
-		setRemapJarsInHierarchyInPage(GradlePreferences.DEFAULT_JAR_REMAP_IN_HIERARCHY);
+		setUseCustomToolingModelInPage(GradlePreferences.DEFAULT_USE_CUSTOM_TOOLING_MODEL);
 		
 		setJarRemappingOnOpenCloseInPage(GradlePreferences.DEFAULT_JAR_REMAP_ON_OPEN_CLOSE);
 	}
@@ -156,20 +156,19 @@ public class DependencyManagementSection extends PrefsPageSection {
 
 		span2.applyTo(enableJarToGradleProjectMappingButton);
 		
-		enableRemapJarsInHierarchyButton = new Button(composite, SWT.CHECK);
-		enableRemapJarsInHierarchyButton.setText("Jar remapping within a hierachy (requires Gradle 1.12)");
-		enableRemapJarsInHierarchyButton.setToolTipText("When enabled tools will try to remap dependencyies to"
-				+ " Gradle project in the same project hierarchy to an equivalent jar, if"
-				+ " the corresponding project is closed or otherwise not available in the "
-				+ " workspace");
-		span2.applyTo(enableRemapJarsInHierarchyButton);
-		
         enableJarRemappingOnOpenClose = new Button(composite, SWT.CHECK);
         enableJarRemappingOnOpenClose.setText("Jar Remapping on Project Open/Close");
         enableJarRemappingOnOpenClose.setToolTipText("When jar remapping is enabled, recompute remappings automatically"
         		+ "when projects in the workspace are openened or closed.");
         enableJarRemappingOnOpenClose.setSelection(GradleCore.getInstance().getPreferences().getJarRemappingOnOpenClose());
 		span2.applyTo(enableJarRemappingOnOpenClose);
+		
+		useCustomToolingModelButton = new Button(composite, SWT.CHECK);
+		useCustomToolingModelButton.setText("Use Custom Tooling Model (requires Gradle 1.12)");
+		useCustomToolingModelButton.setToolTipText("The tooling will work better on newer versions of Gradle but "
+				+ "may not work at all on older versions of Gradle.");
+		useCustomToolingModelButton.setSelection(GradleCore.getInstance().getPreferences().getUseCustomToolingModel());
+		span2.applyTo(useCustomToolingModelButton);
 		
 		enableDisableWidgets();
 	}
@@ -178,11 +177,9 @@ public class DependencyManagementSection extends PrefsPageSection {
 		enableDisableWidgets(enableAutoRefreshButton, autoRefreshDelayText);
 		if (enableJarToGradleProjectMappingButton!=null 
 				&& enableJarToMvnProjectMappingButton!=null 
-				&& enableJarRemappingOnOpenClose!=null
-				&& enableRemapJarsInHierarchyButton!=null) {
+				&& enableJarRemappingOnOpenClose!=null) {
 			boolean openCloseListerWidgetEnabled = enableJarToGradleProjectMappingButton.getSelection() 
-					|| enableJarToMvnProjectMappingButton.getSelection()
-					|| enableRemapJarsInHierarchyButton.getSelection();
+					|| enableJarToMvnProjectMappingButton.getSelection();
 			enableJarRemappingOnOpenClose.setEnabled(openCloseListerWidgetEnabled);
 		}
 	}
@@ -236,8 +233,8 @@ public class DependencyManagementSection extends PrefsPageSection {
 	private void setRemapJarsToGradleProjectsInPage(boolean enable) {
 		enableJarToGradleProjectMappingButton.setSelection(enable);
 	}
-	private void setRemapJarsInHierarchyInPage(boolean enable) {
-		enableRemapJarsInHierarchyButton.setSelection(enable);
+	private void setUseCustomToolingModelInPage(boolean enable) {
+		useCustomToolingModelButton.setSelection(enable);
 	}
 
 	private void setJarRemappingOnOpenCloseInPage(boolean v) {
@@ -278,8 +275,8 @@ public class DependencyManagementSection extends PrefsPageSection {
 		GradleCore.getInstance().getPreferences().setRemapJarsToGradleProjects(v);
 	}
 	
-	private void setRemapJarsInHierarchy(boolean v) {
-		GradleCore.getInstance().getPreferences().setRemapJarsInHierarchy(v);
+	private void setUseCustomToolingModel(boolean v) {
+		GradleCore.getInstance().getPreferences().setUseCustomToolingModel(v);
 	}
 
 	private void setJarRemappingOnOpenClose(boolean v) {

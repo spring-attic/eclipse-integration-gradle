@@ -77,13 +77,13 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 
 	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_MAVEN = true;
 	public static final boolean DEFAULT_JAR_REMAP_GRADLE_TO_GRADLE = false; //still experimental, may turn on by default on next release
-	public static final boolean DEFAULT_JAR_REMAP_IN_HIERARCHY = false; //experimental, will break workspaces using older versions of Gradle if enabled.
 	public static final boolean DEFAULT_JAR_REMAP_ON_OPEN_CLOSE = true;
 	public static final String JAR_REMAP_GRADLE_TO_MAVEN = GradlePreferences.class.getName()+".JAR_REMAP_GRADLE_TO_MAVEN";
 	public static final String JAR_REMAP_GRADLE_TO_GRADLE = GradlePreferences.class.getName()+".JAR_REMAP_GRADLE_TO_GRADLE";
 	public static final String JAR_REMAP_ON_OPEN_CLOSE = GradlePreferences.class.getName()+".JAR_REMAP_ON_OPEN_CLOSE";
-	public static final String JAR_REMAP_IN_HIERARCHY = GradlePreferences.class.getName()+"JAR_REMAP_IN_HIERARCHY";
 	
+	public static final String USE_CUSTOM_TOOLING_MODEL = GradlePreferences.class.getName()+"USE_CUSTOM_TOOLING_MODEL";
+	public static final boolean DEFAULT_USE_CUSTOM_TOOLING_MODEL = false;
 	
 	private static URI builtInDistribution = null;
 
@@ -381,12 +381,12 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 		put(JAR_REMAP_GRADLE_TO_GRADLE, enable);
 	}
 	
-	public boolean getRemapJarsInHierarchy() {
-		return get(JAR_REMAP_IN_HIERARCHY, DEFAULT_JAR_REMAP_IN_HIERARCHY);
+	public boolean getUseCustomToolingModel() {
+		return get(USE_CUSTOM_TOOLING_MODEL, DEFAULT_USE_CUSTOM_TOOLING_MODEL);
 	}
 	
-	public void setRemapJarsInHierarchy(boolean enable) {
-		put(JAR_REMAP_IN_HIERARCHY, enable);
+	public void setUseCustomToolingModel(boolean enable) {
+		put(USE_CUSTOM_TOOLING_MODEL, enable);
 	}
 	
 

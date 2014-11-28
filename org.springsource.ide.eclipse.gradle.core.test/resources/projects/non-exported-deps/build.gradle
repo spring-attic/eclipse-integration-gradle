@@ -1,0 +1,21 @@
+subprojects {
+	apply plugin: 'java'
+	
+	repositories {
+		mavenCentral()
+	}
+	
+}
+
+
+project(":main") {
+	dependencies {
+		compile project(":lib")
+	}
+}
+
+project(":lib") {
+	dependencies {
+		compile "commons-collections:commons-collections:3.2.1"
+	}
+}

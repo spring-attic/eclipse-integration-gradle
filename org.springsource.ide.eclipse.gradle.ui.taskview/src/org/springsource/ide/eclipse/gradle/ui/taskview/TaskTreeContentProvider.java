@@ -116,7 +116,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 				 * request if previous throws FastOperationException
 				 */
 				try {
-					root.requestModelOfType(BuildInvocations.class);
+					root.requestModel(BuildInvocations.class);
 				} catch (FastOperationFailedException e) {
 					modelNotAvailable = true;
 				}
@@ -137,7 +137,7 @@ public class TaskTreeContentProvider implements ITreeContentProvider {
 	private GradleTask[] getGradleTasks(GradleProject project) {
 		try {
 			EclipseProject eclipseProjectModel = project.getGradleModel();
-			BuildInvocations buildInvocationsModel = project.getModelOfType(BuildInvocations.class);
+			BuildInvocations buildInvocationsModel = project.getModel(BuildInvocations.class);
 			ProjectTasksVisibility tasksVisibility = null;
 			try {
 				tasksVisibility = new ProjectTasksVisibility(buildInvocationsModel);

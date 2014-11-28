@@ -132,7 +132,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 				monitor.beginTask("Initializing Gradle Classpath Container", IProgressMonitor.UNKNOWN);
 				
 				try {
-					project.getGradleModel(monitor); // Forces initialisation of the model.
+					ClassPathModel.getClassPathModel(project, monitor); // Forces initialisation of the model.
 					notifyJDT();
 				} catch (Exception e) {
 					throw ExceptionUtil.coreException(e);

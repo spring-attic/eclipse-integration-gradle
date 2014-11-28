@@ -57,6 +57,7 @@ import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
+import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPreferences;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProject;
 import org.springsource.ide.eclipse.gradle.core.samples.SampleProjectRegistry;
@@ -865,6 +866,39 @@ public class GradleImportTests extends GradleTest {
 		
 	}
 	
+	public void testNonExportedDependencies() throws Exception {
+		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
+		prefs.setExportDependencies(false);
+		prefs.setUseCustomToolingModel(true);
+		importTestProject("non-exported-deps");
+		
+		assertContainerExported(false, getGradleProject("lib"));
+		
+		// Custom model will not be built as early as the legacy model because it
+		// is only used for classpath infos. Thus the first time the model is needed
+		// will be when projects get built (and classpath container is being initialized).
+		// So before verifying that projects build without errors we must wait for
+		// classpath containers to become populated with expected elements
+		new ACondition("check resolved classpaths") {
+			
+			@Override
+			public boolean test() throws Exception {
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("main"));
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("lib"));
+				assertClasspathProjectEntry(getProject("lib"), getJavaProject("main"));
+				return true;
+			}
+		}.waitFor(15000);
+		
+		assertProjects("non-exported-deps", "main", "lib");
+	}
+	
+	private void assertContainerExported(boolean expected, GradleProject p) throws JavaModelException {
+		IClasspathEntry containerEntry = p.getClassPath().getContainer(GradleClassPathContainer.ID);
+		assertNotNull("Gradle classpath container missing", containerEntry);
+		assertEquals(expected, containerEntry.isExported());
+	}
+
 	public void testSTS2094() throws Exception {
 		//This bug happens if one imports a set of projects then deletes them and then imports them all again.
 		testImportSpringIntegration();

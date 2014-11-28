@@ -53,12 +53,12 @@ public class GradleDependencyComputer {
 	
 	private GradleProject project;
 	private ClassPath classpath; // computed classpath or null if not yet computed.
-	private ClassPathModel gradleModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
+	private ClassPathModel classpathModel; // The model that was used to compute the current classpath. We use this to check if we need to recompute the classpath.
 	
 	public GradleDependencyComputer(GradleProject project) {
 		this.project = project;
 		this.classpath = null;
-		this.gradleModel = null;
+		this.classpathModel = null;
 	}
 	
 	private void addJarEntry(IPath jarPath, ExternalDependency gEntry, boolean export) {
@@ -104,8 +104,8 @@ public class GradleDependencyComputer {
 	}
 	
 	public ClassPath getClassPath(ClassPathModel gradleModel) {
-		if (classpath==null || !gradleModel.equals(this.gradleModel)) {
-			this.gradleModel = gradleModel;
+		if (classpath==null || !gradleModel.equals(this.classpathModel)) {
+			this.classpathModel = gradleModel;
 			classpath = computeEntries();
 		}
 		return classpath;
@@ -118,12 +118,12 @@ public class GradleDependencyComputer {
 	private ClassPath computeEntries() {
 		MarkerMaker markers = new MarkerMaker(project, GradleClassPathContainer.ERROR_MARKER_ID);
 		try {
-			debug("gradleModel ready: "+Integer.toHexString(System.identityHashCode(gradleModel))+" "+gradleModel);
+			debug("gradleModel ready: "+Integer.toHexString(System.identityHashCode(classpathModel))+" "+classpathModel);
 			classpath = new ClassPath(project);
 			boolean export = GradleCore.getInstance().getPreferences().isExportDependencies(); //TODO: maybe should be project preference?
 			boolean missingPublicationsModels = false;
 			
-			for (ExternalDependency gEntry : gradleModel.getClasspath()) {
+			for (ExternalDependency gEntry : classpathModel.getClasspath()) {
 				// Get the location of the jar itself
 				File file = gEntry.getFile();
 				IPath jarPath = new Path(file.getAbsolutePath()); 
@@ -191,7 +191,7 @@ public class GradleDependencyComputer {
 //					addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
 //				}
 //			}
-			for (EclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
+			for (EclipseProjectDependency dep : classpathModel.getProjectDependencies()) {
 				GradleProject projectDependency = GradleCore.create(dep.getTargetProject());
 				IProject projectInWorkspace = projectDependency.getProject();
 				if (projectInWorkspace!=null) {

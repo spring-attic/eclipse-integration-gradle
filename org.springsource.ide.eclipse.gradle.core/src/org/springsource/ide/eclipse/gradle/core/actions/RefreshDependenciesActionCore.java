@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.ClassPathModel;
 import org.springsource.ide.eclipse.gradle.core.util.Continuation;
 import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
@@ -52,7 +53,7 @@ public class RefreshDependenciesActionCore {
 						monitor.worked(workUnit);
 					}
 					for (GradleProject gp : gps) {
-						gp.getGradleModel(new SubProgressMonitor(monitor, workUnit));
+						ClassPathModel.getClassPathModel(gp, new SubProgressMonitor(monitor, workUnit));
 					}
 					JobUtil.schedule(new Continuable("Refresh project dependencies", projects.size(), cont) {
 						@Override

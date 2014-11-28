@@ -239,7 +239,7 @@ public class GradleProjectIndex {
 		ideProject.addModelListener(BUILD_INVOCATIONS_LISTENER);
 		try {
 			updateVisibilityCache(ideProject.getName(), 
-					ideProject.requestModelOfType(BuildInvocations.class));
+					ideProject.requestModel(BuildInvocations.class));
 		} catch (CoreException e) {
 			GradleCore.log(e.getStatus());
 		} catch (FastOperationFailedException e) {
