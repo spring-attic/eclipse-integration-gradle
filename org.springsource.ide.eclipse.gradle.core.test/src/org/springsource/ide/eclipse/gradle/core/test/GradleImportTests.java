@@ -893,6 +893,35 @@ public class GradleImportTests extends GradleTest {
 		assertProjects("non-exported-deps", "main", "lib");
 	}
 	
+	public void testRemappingMultiProject() throws Exception {
+		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
+		prefs.setExportDependencies(false);
+		prefs.setUseCustomToolingModel(true);
+		prefs.setRemapJarsToGradleProjects(true);
+		prefs.setJarRemappingOnOpenClose(true);
+		
+		final String[] projectNames = { "remapping-multiproject", "main", "lib", "sublib" };
+		importTestProject(projectNames[0]);
+		
+		for (String p : projectNames) {
+			assertContainerExported(false, getGradleProject(p));
+		}
+		
+		new ACondition() {
+			public boolean test() throws Exception {
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("main"));
+				assertNoClasspathJarEntry("commons-collections-3.2.jar", getGradleProject("main")); //thanks to custom model this problem can be solved!
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("lib"));
+				assertClasspathJarEntry("commons-collections-3.2.jar", getGradleProject("sublib"));
+				assertProjects(projectNames);
+				return true;
+			}
+		}.waitFor(20000);
+		
+		
+		//TODO: close some projects and check remappings happen as expected.
+	}
+	
 	private void assertContainerExported(boolean expected, GradleProject p) throws JavaModelException {
 		IClasspathEntry containerEntry = p.getClassPath().getContainer(GradleClassPathContainer.ID);
 		assertNotNull("Gradle classpath container missing", containerEntry);

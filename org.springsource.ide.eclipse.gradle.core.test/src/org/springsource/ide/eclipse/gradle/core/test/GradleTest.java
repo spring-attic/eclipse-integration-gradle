@@ -680,6 +680,11 @@ public abstract class GradleTest extends TestCase {
 		}
 		//ok!
 	}
+	
+	public static void assertNoClasspathJarEntry(String jarFile, GradleProject gp) throws JavaModelException {
+		assertNoClasspathJarEntry(jarFile, gp.getJavaProject());
+	}
+	
 
 	/**
 	 * Check that there are no explicit project entries in the given project. I.e. any project entries 
