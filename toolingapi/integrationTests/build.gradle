@@ -1,8 +1,7 @@
-apply plugin: 'groovy'
+apply plugin: 'java'
 
 dependencies {
     compile gradleApi()
     compile project(':model')
-	compile 'org.codehaus.groovy:groovy-all:2.3.6'
-	testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+	testCompile 'junit:junit:4.11'
 }
