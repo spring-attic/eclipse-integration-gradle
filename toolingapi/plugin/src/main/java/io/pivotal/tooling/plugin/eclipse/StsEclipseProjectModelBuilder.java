@@ -253,7 +253,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     
 	private DefaultStsEclipseProjectDependency newProjectDep(
 			DefaultEclipseProjectDependency projectDependency) {
-        String targetName = projectDependency.getTargetProject().getName();
+        String targetName = projectDependency.getTargetProject().getPath();
 		DefaultStsEclipseProjectDependency dep = projectDependendencyInstances.get(targetName);
 		if (dep==null) {
 			projectDependendencyInstances.put(targetName, dep = new DefaultStsEclipseProjectDependency(
