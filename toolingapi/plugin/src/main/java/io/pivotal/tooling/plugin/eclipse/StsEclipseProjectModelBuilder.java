@@ -200,8 +200,11 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         DefaultEclipseProject defaultEclipseProject = eclipseModelBuilder.buildAll(HierarchicalEclipseProject.class.getName(), project);
 
         List<DefaultGradleModuleVersion> publications = new ArrayList<DefaultGradleModuleVersion>();
-        for (ProjectPublication publication : publicationRegistry.getPublications(project.getPath()))
-            publications.add(new DefaultGradleModuleVersion(publication.getId()));
+        
+        if(publicationRegistry != null) {
+	        for (ProjectPublication publication : publicationRegistry.getPublications(project.getPath()))
+	            publications.add(new DefaultGradleModuleVersion(publication.getId()));
+        }
 
         eclipseProject
                 .setHierarchicalEclipseProject(defaultEclipseProject)
