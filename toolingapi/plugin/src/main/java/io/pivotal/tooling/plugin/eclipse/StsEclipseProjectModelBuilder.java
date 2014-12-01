@@ -232,9 +232,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 	    	if (pDeps==null) {
 	        eclipseProject.setProjectDependencies(pDeps = new LinkedHashSet<DefaultStsEclipseProjectDependency>());
 	        for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
-	        	pDeps.add(
-	                newProjectDep(projectDependency)
-	            );
+	        		pDeps.add(newProjectDep(projectDependency));
 	        }
 	        //Add transitives as well
 	        for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
@@ -251,8 +249,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
     private Map<String, DefaultStsEclipseProjectDependency> projectDependendencyInstances = new HashMap<String, DefaultStsEclipseProjectDependency>();
     
-	private DefaultStsEclipseProjectDependency newProjectDep(
-			DefaultEclipseProjectDependency projectDependency) {
+	private DefaultStsEclipseProjectDependency newProjectDep(DefaultEclipseProjectDependency projectDependency) {
         String targetName = projectDependency.getTargetProject().getPath();
 		DefaultStsEclipseProjectDependency dep = projectDependendencyInstances.get(targetName);
 		if (dep==null) {

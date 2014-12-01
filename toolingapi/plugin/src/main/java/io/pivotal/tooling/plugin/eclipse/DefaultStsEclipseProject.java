@@ -2,7 +2,6 @@ package io.pivotal.tooling.plugin.eclipse;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
