@@ -900,7 +900,7 @@ public class GradleImportTests extends GradleTest {
 		prefs.setRemapJarsToGradleProjects(true);
 		prefs.setJarRemappingOnOpenClose(true);
 		
-		final String[] projectNames = { "remapping-multiproject", "main", "lib", "sublib" };
+		final String[] projectNames = { "remapping-multiproject", "main", "lib", "sublib"};
 		importTestProject(projectNames[0]);
 		
 		for (String p : projectNames) {
@@ -916,7 +916,7 @@ public class GradleImportTests extends GradleTest {
 				assertProjects(projectNames);
 				return true;
 			}
-		}.waitFor(20000);
+		}.waitFor(40000);
 		
 		
 		//TODO: close some projects and check remappings happen as expected.

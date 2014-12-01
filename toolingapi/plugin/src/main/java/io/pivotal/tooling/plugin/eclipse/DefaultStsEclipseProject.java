@@ -1,14 +1,16 @@
 package io.pivotal.tooling.plugin.eclipse;
 
+import java.io.File;
+import java.io.Serializable;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseLinkedResource;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProject;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseSourceDirectory;
 import org.gradle.tooling.internal.gradle.DefaultGradleModuleVersion;
 import org.gradle.tooling.internal.gradle.DefaultGradleProject;
-
-import java.io.File;
-import java.io.Serializable;
-import java.util.List;
 
 public class DefaultStsEclipseProject implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -19,7 +21,7 @@ public class DefaultStsEclipseProject implements Serializable {
     private DefaultStsEclipseProject parent;
     private List<DefaultStsEclipseProject> children;
     private List<String> plugins;
-    private List<DefaultStsEclipseProjectDependency> projectDependencies;
+    private Set<DefaultStsEclipseProjectDependency> projectDependencies;
     private DefaultStsEclipseProject root;
     private List<DefaultGradleModuleVersion> publications;
 
@@ -37,9 +39,9 @@ public class DefaultStsEclipseProject implements Serializable {
         return children;
     }
 
-    public List<DefaultStsEclipseProjectDependency> getProjectDependencies() { return projectDependencies; }
-
-    public Iterable<? extends DefaultEclipseSourceDirectory> getSourceDirectories() {
+    public Set<DefaultStsEclipseProjectDependency> getProjectDependencies() { return projectDependencies; }
+    
+	public Iterable<? extends DefaultEclipseSourceDirectory> getSourceDirectories() {
         return hierarchicalEclipseProject.getSourceDirectories();
     }
 
@@ -88,7 +90,7 @@ public class DefaultStsEclipseProject implements Serializable {
         return this;
     }
 
-    public DefaultStsEclipseProject setProjectDependencies(List<DefaultStsEclipseProjectDependency> projectDependencies) {
+    public DefaultStsEclipseProject setProjectDependencies(Set<DefaultStsEclipseProjectDependency> projectDependencies) {
         this.projectDependencies = projectDependencies;
         return this;
     }

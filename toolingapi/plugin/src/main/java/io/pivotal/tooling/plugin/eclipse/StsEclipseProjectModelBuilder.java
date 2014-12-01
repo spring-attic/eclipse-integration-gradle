@@ -3,8 +3,10 @@ package io.pivotal.tooling.plugin.eclipse;
 import io.pivotal.tooling.model.eclipse.StsEclipseProject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +57,8 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
     private Map<String, GradleModuleVersion> moduleVersionByProjectName = new HashMap<String, GradleModuleVersion>();
     private Map<String, DefaultStsEclipseExternalDependency> externalEquivalentByProjectName = new HashMap<String, DefaultStsEclipseExternalDependency>();
+
+	private Map<String, DefaultStsEclipseProject> projectByPath = new HashMap<String, DefaultStsEclipseProject>();
 
     public StsEclipseProjectModelBuilder(ProjectPublicationRegistry publicationRegistry) {
         this.publicationRegistry = publicationRegistry;
@@ -184,7 +188,7 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     }
 
     private DefaultStsEclipseProject buildHierarchy(Project project) {
-        DefaultStsEclipseProject eclipseProject = new DefaultStsEclipseProject();
+        DefaultStsEclipseProject eclipseProject = getProject(project.getPath());
 
         if (project == project.getRootProject())
             root = eclipseProject;
@@ -224,24 +228,51 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
         return eclipseProject;
     }
 
-    private void buildProjectDependencies(DefaultStsEclipseProject eclipseProject) {
-        List<DefaultStsEclipseProjectDependency> projectDependencies = new ArrayList<DefaultStsEclipseProjectDependency>();
-        for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
-            String targetName = projectDependency.getTargetProject().getName();
-            projectDependencies.add(
-                new DefaultStsEclipseProjectDependency(
-                    projectDependency,
-                    moduleVersionByProjectName.get(targetName),
-                    externalEquivalentByProjectName.get(targetName)
-                )
-            );
-        }
+    private DefaultStsEclipseProject getProject(String path) {
+    	DefaultStsEclipseProject existing = projectByPath.get(path);
+    	if (existing==null) {
+    		projectByPath.put(path, existing=new DefaultStsEclipseProject());
+    	}
+    	return existing;
+	}
 
-        eclipseProject.setProjectDependencies(projectDependencies);
+	private Set<DefaultStsEclipseProjectDependency> buildProjectDependencies(DefaultStsEclipseProject eclipseProject) {
+    	Set<DefaultStsEclipseProjectDependency> pDeps = eclipseProject.getProjectDependencies();
+    	if (pDeps==null) {
+	        eclipseProject.setProjectDependencies(pDeps = new LinkedHashSet<DefaultStsEclipseProjectDependency>());
+	        for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
+	        	pDeps.add(
+	                newProjectDep(projectDependency)
+	            );
+	        }
+	        //Add transitives as well
+	        for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
+	        	pDeps.addAll(buildProjectDependencies(getProject(projectDependency.getTargetProject().getPath())));
+	        }
+    	}
 
+    	//Ensure that all project in hierarchy get built:
         for (DefaultStsEclipseProject child : eclipseProject.getChildren())
             buildProjectDependencies(child);
+        
+        return pDeps;
     }
+
+    private Map<String, DefaultStsEclipseProjectDependency> projectDependendencyInstances = new HashMap<String, DefaultStsEclipseProjectDependency>();
+    
+	private DefaultStsEclipseProjectDependency newProjectDep(
+			DefaultEclipseProjectDependency projectDependency) {
+        String targetName = projectDependency.getTargetProject().getName();
+		DefaultStsEclipseProjectDependency dep = projectDependendencyInstances.get(targetName);
+		if (dep==null) {
+			projectDependendencyInstances.put(targetName, dep = new DefaultStsEclipseProjectDependency(
+				    projectDependency,
+				    moduleVersionByProjectName.get(targetName),
+				    externalEquivalentByProjectName.get(targetName)
+			));
+		}
+		return dep;
+	}
 
     private static List<String> plugins(Project project) {
         List<String> plugins = new ArrayList<String>();
