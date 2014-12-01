@@ -3,8 +3,6 @@ package io.pivotal.tooling.plugin.eclipse;
 import io.pivotal.tooling.model.eclipse.StsEclipseProject;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -85,13 +83,6 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
      */
     @SuppressWarnings("unchecked")
 	private List<DefaultStsEclipseExternalDependency> buildExternalDependencies(Project project) {
-        boolean hasCompile = false;
-        for(Configuration conf : project.getConfigurations())
-            if(conf.getName().equals("compile"))
-                hasCompile = true;
-        if(!hasCompile)
-            return Collections.EMPTY_LIST;
-
         Map<String, DefaultStsEclipseExternalDependency> externalDependenciesById = new HashMap<String, DefaultStsEclipseExternalDependency>();
 
         EclipseModel eclipseModel = project.getExtensions().getByType(EclipseModel.class);
@@ -229,16 +220,16 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     }
 
     private DefaultStsEclipseProject getProject(String path) {
-    	DefaultStsEclipseProject existing = projectByPath.get(path);
-    	if (existing==null) {
-    		projectByPath.put(path, existing=new DefaultStsEclipseProject());
-    	}
-    	return existing;
+	    	DefaultStsEclipseProject existing = projectByPath.get(path);
+	    	if (existing==null) {
+	    		projectByPath.put(path, existing=new DefaultStsEclipseProject());
+	    	}
+	    	return existing;
 	}
 
 	private Set<DefaultStsEclipseProjectDependency> buildProjectDependencies(DefaultStsEclipseProject eclipseProject) {
-    	Set<DefaultStsEclipseProjectDependency> pDeps = eclipseProject.getProjectDependencies();
-    	if (pDeps==null) {
+	    	Set<DefaultStsEclipseProjectDependency> pDeps = eclipseProject.getProjectDependencies();
+	    	if (pDeps==null) {
 	        eclipseProject.setProjectDependencies(pDeps = new LinkedHashSet<DefaultStsEclipseProjectDependency>());
 	        for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
 	        	pDeps.add(
@@ -247,11 +238,11 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 	        }
 	        //Add transitives as well
 	        for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
-	        	pDeps.addAll(buildProjectDependencies(getProject(projectDependency.getTargetProject().getPath())));
+	        		pDeps.addAll(buildProjectDependencies(getProject(projectDependency.getTargetProject().getPath())));
 	        }
-    	}
+	    	}
 
-    	//Ensure that all project in hierarchy get built:
+	    	//Ensure that all project in hierarchy get built:
         for (DefaultStsEclipseProject child : eclipseProject.getChildren())
             buildProjectDependencies(child);
         
