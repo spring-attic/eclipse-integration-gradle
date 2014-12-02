@@ -44,4 +44,6 @@ public interface StsEclipseProject extends HierarchicalEclipseProject {
     boolean hasPlugin(Class<?> type);
 
     StsEclipseProject getRoot();
+    
+    String getPath();
 }

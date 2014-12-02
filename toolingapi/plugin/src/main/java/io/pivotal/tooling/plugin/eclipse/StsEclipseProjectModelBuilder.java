@@ -2,13 +2,15 @@ package io.pivotal.tooling.plugin.eclipse;
 
 import io.pivotal.tooling.model.eclipse.StsEclipseProject;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -41,10 +43,6 @@ import org.gradle.tooling.internal.gradle.DefaultGradleProject;
 import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.gradle.tooling.provider.model.ToolingModelBuilder;
-
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 
 class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
     private static final String PROJECT_EXTERNAL_CONF = "projectExternal";
@@ -231,35 +229,51 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 	    	}
 	    	return existing;
 	}
-
+    
     private Set<DefaultStsEclipseProjectDependency> buildProjectDependencies(DefaultStsEclipseProject eclipseProject) {
-	    	Set<DefaultStsEclipseProjectDependency> pDeps = eclipseProject.getProjectDependencies();
+    		Set<DefaultStsEclipseProjectDependency> pDeps = eclipseProject.getProjectDependencies();
 
 	    	if (pDeps == null) {
 	    		eclipseProject.setProjectDependencies(pDeps = new HashSet<DefaultStsEclipseProjectDependency>());
 	    		for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
-	    			pDeps.add(projectDependencyCache.getUnchecked(projectDependency.getPath()));
+	    			// in case of a cycle, we never want to add ourselves as a project dependency
+	    			if(!eclipseProject.getHierarchicalEclipseProject().getPath().equals(":" + projectDependency.getPath())) {
+	    				pDeps.add(newProjectDep(projectDependency));	
+	    			}
 	    		}
 	    		//Add transitives as well
 	    		for (DefaultEclipseProjectDependency projectDependency : eclipseProject.getHierarchicalEclipseProject().getProjectDependencies()) {
-	    			pDeps.addAll(buildProjectDependencies(getProject(projectDependency.getTargetProject().getPath())));
+	    			if(!eclipseProject.getName().equals(projectDependency.getTargetProject().getName())) {
+	    				for (DefaultStsEclipseProjectDependency transitive : buildProjectDependencies(getProject(projectDependency.getTargetProject().getPath()))) {
+	    					if(!eclipseProject.getHierarchicalEclipseProject().getPath().equals(":" + transitive.getPath())) {
+			    				pDeps.add(transitive);	
+			    			}
+					}
+	    			}
 	    		}
 	    	}
 	
 	    	//Ensure that all projects in the hierarchy get built:
 	    	for (DefaultStsEclipseProject child : eclipseProject.getChildren())
 	    		buildProjectDependencies(child);
-	
+	    	
 	    	return pDeps;
     }
     
-    LoadingCache<String, DefaultStsEclipseProjectDependency> projectDependencyCache = CacheBuilder.newBuilder()
-       .expireAfterWrite(10, TimeUnit.MINUTES)
-       .build(new CacheLoader<String, DefaultStsEclipseProjectDependency>() {
-			public DefaultStsEclipseProjectDependency load(String key) {
-				return null;
-			}
-       });
+    private Map<String, DefaultStsEclipseProjectDependency> projectDependendencyCache = new HashMap<String, DefaultStsEclipseProjectDependency>();
+    
+	private DefaultStsEclipseProjectDependency newProjectDep(DefaultEclipseProjectDependency projectDependency) {
+        String targetPath = projectDependency.getTargetProject().getPath();
+		DefaultStsEclipseProjectDependency dep = projectDependendencyCache.get(targetPath);
+		if (dep==null) {
+			projectDependendencyCache.put(targetPath, dep = new DefaultStsEclipseProjectDependency(
+			    projectDependency,
+			    moduleVersionByProjectPath.get(targetPath),
+			    externalEquivalentByProjectPath.get(targetPath)
+			));
+		}
+		return dep;
+	}
 
     private static List<String> plugins(Project project) {
         List<String> plugins = new ArrayList<String>();

@@ -25,7 +25,7 @@ public class DefaultStsEclipseProject implements Serializable {
     private List<DefaultGradleModuleVersion> publications;
 
     public String getName() { return gradleProject.getName(); }
-
+    
     public List<DefaultStsEclipseExternalDependency> getClasspath() { return classpath; }
 
     public DefaultGradleProject<?> getGradleProject() { return gradleProject; }
@@ -34,6 +34,10 @@ public class DefaultStsEclipseProject implements Serializable {
         return parent;
     }
 
+    public String getPath() {
+    		return hierarchicalEclipseProject.getPath();
+    }
+    
     public List<DefaultStsEclipseProject> getChildren() {
         return children;
     }

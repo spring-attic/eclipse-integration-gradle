@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import io.pivotal.tooling.model.eclipse.StsEclipseProject;
+import io.pivotal.tooling.model.eclipse.StsEclipseProjectDependency;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -154,6 +155,13 @@ public class StsEclipseProjectTest {
         customModelBuilder.withArguments("--init-script", file("projects/init.gradle").getAbsolutePath());
 
         StsEclipseProject project = customModelBuilder.get().getChildren().iterator().next();
+        System.out.println("name: " + project.getName());
+        System.out.println("path: " + project.getPath());
+        
+        for (StsEclipseProjectDependency dependency : project.getProjectDependencies()) {
+			System.out.println(dependency.getTargetProject().getName());
+		}
+        
         assertEquals(1, project.getProjectDependencies().size());
     }
 
