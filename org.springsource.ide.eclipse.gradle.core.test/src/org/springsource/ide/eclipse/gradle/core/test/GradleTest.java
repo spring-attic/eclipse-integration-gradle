@@ -89,6 +89,7 @@ public abstract class GradleTest extends TestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
+		setAutoBuilding(true); //Default value
 		JavaXXRuntime.java6everyone(); //Swicht compiler VM install, Grade Java home all to JAva 6 by default.
 										// Individual tests may swich to another Java version if they like
 										// But ensure java 6 as stable baseline for tests that don't set it themselves.

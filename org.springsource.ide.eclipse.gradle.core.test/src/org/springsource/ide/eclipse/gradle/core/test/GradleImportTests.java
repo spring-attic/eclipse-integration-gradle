@@ -767,6 +767,7 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testImportSpringIntegration() throws Exception {
+		setAutoBuilding(false);
 		JavaXXRuntime.java8everyone();
 //		GradleAPIProperties props = GradleCore.getInstance().getAPIProperties();
 		URI distro = null;
