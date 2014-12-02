@@ -181,7 +181,8 @@ public class GradleDependencyComputer {
 			
 			if (GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects()) {
 				for (EclipseProjectDependency dep : classpathModel.getProjectDependencies()) {
-					IProject project = GradleCore.create(dep.getTargetProject()).getProject();
+					GradleProject gproject = GradleCore.create(dep.getTargetProject());
+					IProject project = gproject.getProject();
 					if(project != null && project.isOpen())
 						addProjectDependency(project, export);
 					else {
@@ -190,18 +191,9 @@ public class GradleDependencyComputer {
 							// replace the project dependency with a binary build of the project
 							addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
 						} else {
-							addProjectDependency(project, export);
+							markers.reportError("Project dependency not in the workspace: "+gproject.getDisplayName());
 						}
 					}
-				}
-			}
-			for (EclipseProjectDependency dep : classpathModel.getProjectDependencies()) {
-				GradleProject projectDependency = GradleCore.create(dep.getTargetProject());
-				IProject projectInWorkspace = projectDependency.getProject();
-				if (projectInWorkspace!=null) {
-					addProjectDependency(projectInWorkspace, export);
-				} else {
-					markers.reportError("Project dependency not in the workspace: "+projectDependency.getDisplayName());
 				}
 			}
 			if (missingPublicationsModels) {
