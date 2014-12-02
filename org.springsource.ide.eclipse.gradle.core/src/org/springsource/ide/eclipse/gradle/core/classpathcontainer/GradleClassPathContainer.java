@@ -130,10 +130,13 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 			@Override
 			public void doit(IProgressMonitor monitor) throws Exception {
 				monitor.beginTask("Initializing Gradle Classpath Container", IProgressMonitor.UNKNOWN);
-				
 				try {
 					ClassPathModel.getClassPathModel(project, monitor); // Forces initialisation of the model.
-					notifyJDT();
+					JobUtil.withRule(JobUtil.buildRule(), monitor, 1, new GradleRunnable("Set classpath "+project.getDisplayName()) {
+						public void doit(IProgressMonitor mon) throws Exception {
+							notifyJDT();
+						}
+					});
 				} catch (Exception e) {
 					throw ExceptionUtil.coreException(e);
 				} finally {
@@ -142,7 +145,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 				}
 			}
 		};
-		job = popupProgress ? JobUtil.userJob(runnable) : JobUtil.schedule(runnable);
+		job = popupProgress ? JobUtil.userJob(runnable) : JobUtil.schedule(JobUtil.NO_RULE, runnable);
 		return job;
 	}
 
@@ -423,15 +426,15 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	}
 
 	private IClasspathEntry[] decode(Serializable serializable) {
-		JavaProject jp = (JavaProject) project.getJavaProject();
-		if (serializable!=null) {
-			String[] encoded = (String[]) serializable;
-			IClasspathEntry[] decoded = new IClasspathEntry[encoded.length];
-			for (int i = 0; i < decoded.length; i++) {
-				decoded[i] = jp.decodeClasspathEntry(encoded[i]);
-			}
-			return decoded;
-		}
+//		JavaProject jp = (JavaProject) project.getJavaProject();
+//		if (serializable!=null) {
+//			String[] encoded = (String[]) serializable;
+//			IClasspathEntry[] decoded = new IClasspathEntry[encoded.length];
+//			for (int i = 0; i < decoded.length; i++) {
+//				decoded[i] = jp.decodeClasspathEntry(encoded[i]);
+//			}
+//			return decoded;
+//		}
 		return null;
 	}
 	
