@@ -290,4 +290,13 @@ public class GradleCore extends Plugin {
 		}
 	}
 
+	/**
+	 * For testing purposes mainly. Clears all know / cached classpath container data. 
+	 * Otherwise it may cause test failures when projects with similar names / locations leak cached
+	 * information from one test to another.
+	 */
+	public void clearPersistedClasspathContainerData() {
+		projectManager.clearPersistedClasspathContainerData();
+	}
+
 }

@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
 
 /**
@@ -89,6 +90,18 @@ public class GradleProjectManager {
 
 	public GradleProject getOrCreate(IProject project) {
 		return getOrCreate(project.getLocation().toFile().getAbsoluteFile());
+	}
+
+	public void clearPersistedClasspathContainerData() {
+		if (gradleProjects!=null) {
+			for (GradleProject p : gradleProjects.values()) {
+				GradleClassPathContainer container = p.getClassPathcontainer();
+				if (container!=null) {
+					container.setPersistedEntries(null);
+				}
+				GradleSaveParticipant.getInstance().clearAll();
+			}
+		}
 	}
 
 }

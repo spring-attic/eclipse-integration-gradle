@@ -62,6 +62,7 @@ import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActio
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.test.GradleImportTests.WaitForRefresh;
+import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.KillGradleDaemons;
@@ -110,6 +111,7 @@ public abstract class GradleTest extends TestCase {
 		GradleCore.getInstance().getPreferences().setExportDependencies(GradlePreferences.DEFAULT_EXPORT_DEPENDENCIES);
 		GradleCore.getInstance().getPreferences().setUseCustomToolingModel(GradlePreferences.DEFAULT_USE_CUSTOM_TOOLING_MODEL);
 		GradleCore.getInstance().resetModelManager();
+		GradleCore.getInstance().clearPersistedClasspathContainerData();
 	}
 
 	public static void deleteAllProjects() throws CoreException {
@@ -137,19 +139,19 @@ public abstract class GradleTest extends TestCase {
 		prefs.setJVMArguments(null); //Reset to default.
 		prefs.setProgramArguments(null); //Reset to default.
 		KillGradleDaemons.killem(); //Keep the number of daemons under control.
-//		try {
-//			new ACondition("Job Manager Idle") {
-//				@Override
-//				public boolean test() throws Exception {
-//					ACondition.assertJobManagerIdle();
-//					return true;
-//				}
-//			}.waitFor(120000);
-//		} catch (Throwable e) {
-//			//Print this as interesting information about the jobs that keep on chugging away...
-//			//but do not let this cause test failures.
-//			GradleCore.log(e);
-//		}
+		try {
+			new ACondition("Job Manager Idle") {
+				@Override
+				public boolean test() throws Exception {
+					ACondition.assertJobManagerIdle();
+					return true;
+				}
+			}.waitFor(120000);
+		} catch (Throwable e) {
+			//Print this as interesting information about the jobs that keep on chugging away...
+			//but do not let this cause test failures.
+			GradleCore.log(e);
+		}
 	}
 	
 	public static File getTestFile(String path) throws IOException {

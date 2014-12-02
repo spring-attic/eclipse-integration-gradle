@@ -236,4 +236,12 @@ public class GradleSaveParticipant implements ISaveParticipant {
 		return null;
 	}
 
+	public synchronized void clearAll() {
+		store = null;
+		File saveFile = getSaveFile();
+		if (saveFile.exists()) {
+			saveFile.delete();
+		}
+	}
+
 }
