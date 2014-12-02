@@ -43,12 +43,6 @@
         <visibility>
             <objectState name="nature" value="org.springsource.ide.eclipse.gradle.core.nature"/>
         </visibility>
-      </objectContribution>
-      
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IResource"
-             adaptable="true"
-             id="org.springsource.ide.eclipse.gradle.actions">
         <action
                class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshAllAction"
                enablesFor="+"
