@@ -25,13 +25,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.gradle.tooling.model.ExternalDependency;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.gradle.tooling.model.eclipse.EclipseProjectDependency;
 import org.springsource.ide.eclipse.gradle.core.ClassPath;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
-import org.springsource.ide.eclipse.gradle.core.util.ObjectUtil;
 import org.springsource.ide.eclipse.gradle.core.util.WorkspaceUtil;
 import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
 
@@ -181,16 +179,22 @@ public class GradleDependencyComputer {
 				}
 			}
 			
-//			for (StsEclipseProjectDependency dep : gradleModel.getProjectDependencies()) {
-//				IProject project = GradleCore.create(dep.getTargetProject()).getProject();
-//				if(project != null && project.isOpen())
-//					addProjectDependency(project, export);
-//				else {
-//					// replace the project dependency with a binary build of the project
-//					ExternalDependency external = dep.getExternalEquivalent();
-//					addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
-//				}
-//			}
+			if (GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects()) {
+				for (EclipseProjectDependency dep : classpathModel.getProjectDependencies()) {
+					IProject project = GradleCore.create(dep.getTargetProject()).getProject();
+					if(project != null && project.isOpen())
+						addProjectDependency(project, export);
+					else {
+						ExternalDependency external = ClassPathModel.getExternalEquivalent(dep);
+						if (external!=null) {
+							// replace the project dependency with a binary build of the project
+							addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
+						} else {
+							addProjectDependency(project, export);
+						}
+					}
+				}
+			}
 			for (EclipseProjectDependency dep : classpathModel.getProjectDependencies()) {
 				GradleProject projectDependency = GradleCore.create(dep.getTargetProject());
 				IProject projectInWorkspace = projectDependency.getProject();

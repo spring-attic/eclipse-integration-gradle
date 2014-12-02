@@ -128,4 +128,11 @@ public abstract class ClassPathModel {
 		return false;
 	}
 
+	public static ExternalDependency getExternalEquivalent(EclipseProjectDependency dep) {
+		if (dep instanceof StsEclipseProjectDependency) {
+			return ((StsEclipseProjectDependency) dep).getExternalEquivalent();
+		}
+		return null;
+	}
+
 }
