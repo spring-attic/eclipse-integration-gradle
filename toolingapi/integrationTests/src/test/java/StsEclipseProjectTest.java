@@ -27,15 +27,15 @@ public class StsEclipseProjectTest {
     public static void beforeClass() throws URISyntaxException {
         GradleConnector connector = GradleConnector.newConnector();
 
-        connector.forProjectDirectory(new File(StsEclipseProjectTest.class.getResource("").toURI()));
+        connector.forProjectDirectory(file("projects/multiproject"));
         connection = connector.connect();
 
         ModelBuilder<StsEclipseProject> customModelBuilder = connection.model(StsEclipseProject.class);
         customModelBuilder.setJvmArguments(
-                "-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + new File("../../org.springsource.ide.eclipse.gradle.toolingapi/lib").getAbsolutePath(),
+                "-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + file("../../org.springsource.ide.eclipse.gradle.toolingapi/lib").getAbsolutePath(),
                 "-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration"
         );
-        customModelBuilder.withArguments("--init-script", new File(StsEclipseProjectTest.class.getResource("init.gradle").toURI()).getAbsolutePath());
+        customModelBuilder.withArguments("--init-script", file("projects/init.gradle").getAbsolutePath());
 
         root = customModelBuilder.get();
     }
@@ -54,11 +54,11 @@ public class StsEclipseProjectTest {
 
     @Test
     public void rootProjectContainsResolvedHierarchyOfAllChildProjects() {
-        List<String> projectNames = new ArrayList<>();
+        List<String> projectNames = new ArrayList<String>();
         for (StsEclipseProject project : root.getChildren())
 			projectNames.add(project.getGradleProject().getName());
         
-        assertThat(projectNames, hasItems("a","b","minus","plus"));
+        assertThat(projectNames, hasItems("a", "b", "minus", "plus"));
     }
 
     @Test
@@ -69,7 +69,7 @@ public class StsEclipseProjectTest {
     		assertEquals(0, a.getChildren().size());
     		assertEquals(7, a.getClasspath().size());
 
-    		List<String> moduleNames = new ArrayList<>();
+    		List<String> moduleNames = new ArrayList<String>();
     		for (ExternalDependency dependency : a.getClasspath())
     			moduleNames.add(dependency.getGradleModuleVersion().getName());
 
@@ -116,14 +116,14 @@ public class StsEclipseProjectTest {
 
     @Test
     public void minusConfigurationsResultsInResolutionOfAllConfigurationsExceptForThoseSpecified() {
-    		StsEclipseProject minus = project("minus");
-    		assertEquals(2, minus.getClasspath().size());
-    		
-    		List<String> moduleNames = new ArrayList<>();
-    		for (ExternalDependency dep : minus.getClasspath())
-    			moduleNames.add(dep.getGradleModuleVersion().getName());
-    		
-    		assertThat(moduleNames, hasItems("hamcrest-core", "junit"));
+        StsEclipseProject minus = project("minus");
+        assertEquals(2, minus.getClasspath().size());
+
+        List<String> moduleNames = new ArrayList<String>();
+        for (ExternalDependency dep : minus.getClasspath())
+            moduleNames.add(dep.getGradleModuleVersion().getName());
+
+        assertThat(moduleNames, hasItems("hamcrest-core", "junit"));
     }
 
     @Test
@@ -141,10 +141,30 @@ public class StsEclipseProjectTest {
         assertEquals("a", project("a").getName());
     }
 
-    StsEclipseProject project(String name) { 
-    		for (StsEclipseProject project : root.getChildren())
-    			if(project.getGradleProject().getName().equals(name))
-    				return project;
-    		return null;
+    @Test
+    public void projectDependencyCyclesAreResolvable() throws URISyntaxException {
+        GradleConnector connector = GradleConnector.newConnector();
+        connector.forProjectDirectory(file("projects/multiproject-cycle"));
+
+        ModelBuilder<StsEclipseProject> customModelBuilder = connector.connect().model(StsEclipseProject.class);
+        customModelBuilder.setJvmArguments(
+                "-Dorg.springsource.ide.eclipse.gradle.toolingApiRepo=" + file("../../org.springsource.ide.eclipse.gradle.toolingapi/lib").getAbsolutePath(),
+                "-Dorg.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion=latest.integration"
+        );
+        customModelBuilder.withArguments("--init-script", file("projects/init.gradle").getAbsolutePath());
+
+        StsEclipseProject project = customModelBuilder.get().getChildren().iterator().next();
+        assertEquals(1, project.getProjectDependencies().size());
+    }
+
+    StsEclipseProject project(String name) {
+        for (StsEclipseProject project : root.getChildren())
+            if(project.getGradleProject().getName().equals(name))
+                return project;
+        return null;
+    }
+
+    static File file(String path) {
+        return new File(System.getProperty("user.dir"), path);
     }
 }
