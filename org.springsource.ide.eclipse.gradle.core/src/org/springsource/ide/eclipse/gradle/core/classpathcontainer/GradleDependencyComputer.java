@@ -189,8 +189,10 @@ public class GradleDependencyComputer {
 					ExternalDependency external = ClassPathModel.getExternalEquivalent(dep);
 					if (external!=null) {
 						// replace the project dependency with a binary build of the project
+						debug("Remapping project '"+gproject.getDisplayName()+" => "+external.getFile());
 						addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
 					} else {
+						debug("Remapping project '"+gproject.getDisplayName()+" FAILED");
 						markers.reportError("Remapping project '"+gproject.getDisplayName()+" to jar dependency failed, make sure to publish a jar to a location where it can be resolved.");
 					}
 				} else {

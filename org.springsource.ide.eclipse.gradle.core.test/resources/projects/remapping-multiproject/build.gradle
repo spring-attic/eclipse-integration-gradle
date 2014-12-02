@@ -3,6 +3,9 @@ subprojects {
 	apply plugin: 'maven-publish'
 	
 	repositories {
+		maven {
+			url file("${rootDir}/../repos/maven").toURI()
+		}
 		mavenCentral()
 	}
 	
@@ -11,7 +14,11 @@ subprojects {
     }
 	
 	publishing {
-		repositories { mavenLocal() }
+		repositories {
+			maven {
+				url file("${rootDir}/../repos/maven").toURI()
+			}
+		}
 
 		publications {
 			maven(MavenPublication) {

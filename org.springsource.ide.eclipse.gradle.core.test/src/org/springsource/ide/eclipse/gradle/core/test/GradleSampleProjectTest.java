@@ -66,7 +66,7 @@ public class GradleSampleProjectTest extends GradleTest {
 		}
 	}
 
-	private void doTestNewSample(SampleProject sampleProject) throws CoreException, FastOperationFailedException {
+	private void doTestNewSample(SampleProject sampleProject) throws Exception {
 		MockNewProjectWizardUI gui = new MockNewProjectWizardUI();
 		gui.name.setValue(nameGen("bork"));
 		gui.location.setValue(SampleProject.getDefaultProjectLocation(gui.name.getValue()));

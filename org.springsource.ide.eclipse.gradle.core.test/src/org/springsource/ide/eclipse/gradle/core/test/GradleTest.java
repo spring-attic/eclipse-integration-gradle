@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -61,7 +62,6 @@ import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActio
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.test.GradleImportTests.WaitForRefresh;
-import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.KillGradleDaemons;
@@ -137,19 +137,19 @@ public abstract class GradleTest extends TestCase {
 		prefs.setJVMArguments(null); //Reset to default.
 		prefs.setProgramArguments(null); //Reset to default.
 		KillGradleDaemons.killem(); //Keep the number of daemons under control.
-		try {
-			new ACondition("Job Manager Idle") {
-				@Override
-				public boolean test() throws Exception {
-					ACondition.assertJobManagerIdle();
-					return true;
-				}
-			}.waitFor(120000);
-		} catch (Throwable e) {
-			//Print this as interesting information about the jobs that keep on chugging away...
-			//but do not let this cause test failures.
-			GradleCore.log(e);
-		}
+//		try {
+//			new ACondition("Job Manager Idle") {
+//				@Override
+//				public boolean test() throws Exception {
+//					ACondition.assertJobManagerIdle();
+//					return true;
+//				}
+//			}.waitFor(120000);
+//		} catch (Throwable e) {
+//			//Print this as interesting information about the jobs that keep on chugging away...
+//			//but do not let this cause test failures.
+//			GradleCore.log(e);
+//		}
 	}
 	
 	public static File getTestFile(String path) throws IOException {
@@ -189,7 +189,7 @@ public abstract class GradleTest extends TestCase {
 	 * <p>
 	 * If the workspace has extra or missing projects this results in an AssertionFailedError.
 	 */
-	public void assertProjects(String... names) throws CoreException {
+	public void assertProjects(String... names) throws Exception {
 		IProject[] projects = buildProjects();
 		Set<String> expected = new HashSet<String>(Arrays.asList(names));
 		System.out.println("CHECKING FOR ERRORS IN PROJECTS");
@@ -248,20 +248,24 @@ public abstract class GradleTest extends TestCase {
 		}
 	}
 
-	protected IProject[] buildProjects() throws CoreException {
+	protected IProject[] buildProjects() throws Exception {
 		//Wait long enough for the gradle model to become available.
-		IProject[] projects = getProjects();
-		for (IProject p : projects) {
-			GradleProject gp = GradleCore.create(p);
-			gp.getGradleModel(new NullProgressMonitor()); 
-		}
-		
-		//Now do an eclipse build
-		IWorkspace ws = ResourcesPlugin.getWorkspace();
-		System.out.println("CLEANING WORKSPACE...");
-		ws.build(IncrementalProjectBuilder.CLEAN_BUILD, new LoggingProgressMonitor());
-		System.out.println("BUILDING WORKSPACE...");
-		ws.build(IncrementalProjectBuilder.FULL_BUILD, new LoggingProgressMonitor());
+		final IProject[] projects = getProjects();
+		JobUtil.withRule(JobUtil.buildRule(), new NullProgressMonitor(), 1, new GradleRunnable("Clean and Build workspace") {
+			public void doit(IProgressMonitor mon) throws Exception {
+				for (IProject p : projects) {
+					GradleProject gp = GradleCore.create(p);
+					gp.getGradleModel(new NullProgressMonitor()); 
+				}
+				
+				//Now do an eclipse build
+				IWorkspace ws = ResourcesPlugin.getWorkspace();
+				System.out.println("CLEANING WORKSPACE...");
+				ws.build(IncrementalProjectBuilder.CLEAN_BUILD, new LoggingProgressMonitor());
+				System.out.println("BUILDING WORKSPACE...");
+				ws.build(IncrementalProjectBuilder.FULL_BUILD, new LoggingProgressMonitor());
+			}
+		});
 		return projects;
 	}
 
@@ -780,6 +784,15 @@ public abstract class GradleTest extends TestCase {
 		assertNoClasspathJarEntry(string, jp.getResolvedClasspath(true));
 	}
 	
+	public static void setAutoBuilding(boolean enabled) throws CoreException {
+		IWorkspaceDescription wsd = ResourcesPlugin.getWorkspace().getDescription();
+		if (!wsd.isAutoBuilding() == enabled) {
+			wsd.setAutoBuilding(enabled);
+			ResourcesPlugin.getWorkspace().setDescription(wsd);
+		}
+	}
+
+	
 	public static void assertSameElements(String[] _expecteds, String[] actuals) {
 		StringBuilder msg = new StringBuilder();
 		Set<String> expecteds = new HashSet<String>(Arrays.asList(_expecteds));
@@ -831,5 +844,13 @@ public abstract class GradleTest extends TestCase {
 			container.removeRefreshListener(waitForRefresh);
 		}
 	}
+	
+	/**
+	 * Helper to refresh dependencies for a project. 
+	 */
+	public static void refreshDependencies(IProject... projects) throws Exception {
+		RefreshDependenciesActionCore.callOn(Arrays.asList(projects)).join();
+	}
+	
 	
 }

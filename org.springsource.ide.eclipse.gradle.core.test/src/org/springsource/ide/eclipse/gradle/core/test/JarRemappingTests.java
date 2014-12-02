@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.test;
 
+import java.util.Arrays;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
+import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
@@ -24,6 +29,8 @@ import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
+import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
+import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 
 /**
  * @author Kris De Volder
@@ -213,7 +220,7 @@ public class JarRemappingTests extends GradleTest {
 	public void testRemapJarToGradleOpenCloseListener() throws Exception {
 		GradleCore.getInstance().getPreferences().setRemapJarsToGradleProjects(true);
 		System.out.println("==== starting: testRemapJarToGradleOpenCloseListener ===");
-		createGeneralProject("repos"); //useds as 'flatFile' repo by the two
+		createGeneralProject("repos"); //useds as repos by the two
 		 // test projects. Will be cleaned up (deleted)
 		 // by setup of next test.
 		System.out.println("project 'repos' created");
@@ -300,6 +307,14 @@ public class JarRemappingTests extends GradleTest {
 		
 	}
 	
+	public static void assertClasspathProjectEntry(GradleProject expectProject, GradleProject project) throws JavaModelException {
+		assertClasspathProjectEntry(expectProject.getProject(), project.getJavaProject());
+	}
+	
+	public static void assertNoClasspathProjectEntry(GradleProject expectProject, GradleProject project) throws JavaModelException {
+		assertNoClasspathProjectEntry(expectProject.getProject(), project.getJavaProject());
+	}
+	
 	public void testRemappingMultiProject() throws Exception {
 		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
 		prefs.setExportDependencies(false);
@@ -307,32 +322,88 @@ public class JarRemappingTests extends GradleTest {
 		prefs.setRemapJarsToGradleProjects(true);
 		prefs.setJarRemappingOnOpenClose(true);
 		
-		final String[] projectNames = { "remapping-multiproject", "main", "lib", "sublib"};
-		importTestProject(projectNames[0]);
+		createGeneralProject("repos"); //used as repos to publish to by the test project
 		
-		for (String p : projectNames) {
+		final String[] projectNames = { "remapping-multiproject", "main", "lib", "sublib", "repos"};
+		final String[] javaProjectNames = { "remapping-multiproject", "main", "lib", "sublib"};
+		importTestProject(projectNames[0], true); //must copy to workspace to have correct relative location to 'repos'
+		
+		final GradleProject root = getGradleProject("remapping-multiproject");
+		final GradleProject main = getGradleProject("main");
+		final GradleProject lib = getGradleProject("lib");
+		final GradleProject sublib = getGradleProject("sublib");
+		
+		for (String p : javaProjectNames) {
 			assertContainerExported(false, getGradleProject(p));
 		}
 		
 		new ACondition() {
 			public boolean test() throws Exception {
-				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("main"));
-				assertNoClasspathJarEntry("commons-collections-3.2.jar", getGradleProject("main")); //thanks to custom model this problem can be solved!
-				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("lib"));
-				assertClasspathJarEntry("commons-collections-3.2.jar", getGradleProject("sublib"));
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", main);
+				assertNoClasspathJarEntry("commons-collections-3.2.jar", main); //thanks to custom model this problem can be solved!
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", lib);
+				assertClasspathJarEntry("commons-collections-3.2.jar", sublib);
 				
-				assertClasspathProjectEntry(getProject("lib"), getJavaProject("main"));
-				assertClasspathProjectEntry(getProject("sublib"), getJavaProject("main")); // transitive project dep also included
+				assertClasspathProjectEntry(lib, main);
+				assertClasspathProjectEntry(sublib, main); // transitive project dep also included
+				assertClasspathProjectEntry(sublib, lib);
 				
-				assertClasspathProjectEntry(getProject("sublib"), getJavaProject("lib"));
+				return true;
+			}
+
+		}.waitFor(40000);
+		
+		// Remapping doesn't work unless artifacts are published
+		GradleProcess process = LaunchUtil.launchTasks(root, "publish");
+		String output = process.getStreamsProxy().getOutputStreamMonitor().getContents();
+		assertContains("BUILD SUCCESSFUL", output);
+		
+		refreshDependencies(root.getProject(), main.getProject(), lib.getProject(), sublib.getProject());
+		
+		close(lib);
+		
+		new ACondition() {
+			public boolean test() throws Exception {
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", main);
+				assertNoClasspathJarEntry("commons-collections-3.2.jar", main); //thanks to custom model this problem can be solved!
+//				assertClasspathJarEntry("commons-collections-3.2.1.jar", lib); // CLOSED! not applicable
+				assertClasspathJarEntry("commons-collections-3.2.jar", sublib);
 				
-				assertProjects(projectNames);
+				assertNoClasspathProjectEntry(lib, main);
+				assertClasspathJarEntry("lib.jar", main);
+				
+				assertClasspathProjectEntry(sublib, main); // transitive project dep also included
+//				assertClasspathProjectEntry(sublib, lib); // CLOSED! not applicable
+				return true;
+			}
+		}.waitFor(40000);
+			
+		close(sublib);
+		
+		new ACondition() {
+			public boolean test() throws Exception {
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", main);
+				assertNoClasspathJarEntry("commons-collections-3.2.jar", main); //thanks to custom model this problem can be solved!
+//				assertClasspathJarEntry("commons-collections-3.2.1.jar", lib);  // CLOSED! not applicable
+//				assertClasspathJarEntry("commons-collections-3.2.jar", sublib); // CLOSED! not applicable
+				
+				assertNoClasspathProjectEntry(lib, main);
+				assertClasspathJarEntry("lib.jar", main);
+				
+				assertNoClasspathProjectEntry(sublib, main); // transitive project dep also included
+				assertClasspathJarEntry("sublib.jar", main);
 				return true;
 			}
 		}.waitFor(40000);
 		
-		
-		//TODO: close some projects and check remappings happen as expected.
+	}
+
+	public static void close(final GradleProject project) throws Exception {
+		JobUtil.withRule(JobUtil.buildRule(), new NullProgressMonitor(), 1, new GradleRunnable("Close "+project.getDisplayName()) {
+			public void doit(IProgressMonitor mon) throws Exception {
+				project.getProject().close(new NullProgressMonitor());
+			}
+		});
 	}
 
 	
