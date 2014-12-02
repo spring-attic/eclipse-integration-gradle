@@ -320,6 +320,12 @@ public class JarRemappingTests extends GradleTest {
 				assertNoClasspathJarEntry("commons-collections-3.2.jar", getGradleProject("main")); //thanks to custom model this problem can be solved!
 				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("lib"));
 				assertClasspathJarEntry("commons-collections-3.2.jar", getGradleProject("sublib"));
+				
+				assertClasspathProjectEntry(getProject("lib"), getJavaProject("main"));
+				assertClasspathProjectEntry(getProject("sublib"), getJavaProject("main")); // transitive project dep also included
+				
+				assertClasspathProjectEntry(getProject("sublib"), getJavaProject("lib"));
+				
 				assertProjects(projectNames);
 				return true;
 			}
