@@ -19,6 +19,7 @@ import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
+import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
@@ -298,5 +299,35 @@ public class JarRemappingTests extends GradleTest {
 		}
 		
 	}
+	
+	public void testRemappingMultiProject() throws Exception {
+		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
+		prefs.setExportDependencies(false);
+		prefs.setUseCustomToolingModel(true);
+		prefs.setRemapJarsToGradleProjects(true);
+		prefs.setJarRemappingOnOpenClose(true);
+		
+		final String[] projectNames = { "remapping-multiproject", "main", "lib", "sublib"};
+		importTestProject(projectNames[0]);
+		
+		for (String p : projectNames) {
+			assertContainerExported(false, getGradleProject(p));
+		}
+		
+		new ACondition() {
+			public boolean test() throws Exception {
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("main"));
+				assertNoClasspathJarEntry("commons-collections-3.2.jar", getGradleProject("main")); //thanks to custom model this problem can be solved!
+				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("lib"));
+				assertClasspathJarEntry("commons-collections-3.2.jar", getGradleProject("sublib"));
+				assertProjects(projectNames);
+				return true;
+			}
+		}.waitFor(40000);
+		
+		
+		//TODO: close some projects and check remappings happen as expected.
+	}
+
 	
 }

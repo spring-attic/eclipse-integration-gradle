@@ -523,6 +523,13 @@ public abstract class GradleTest extends TestCase {
 		}
 		fail("Source folder not found: "+pathInProject+"\nfound: "+seen.toString());
 	}
+	
+	public static void assertContainerExported(boolean expected, GradleProject p) throws JavaModelException {
+		IClasspathEntry containerEntry = p.getClassPath().getContainer(GradleClassPathContainer.ID);
+		assertNotNull("Gradle classpath container missing", containerEntry);
+		assertEquals(expected, containerEntry.isExported());
+	}
+	
 
 	/**
 	 * Find a directory in the "test resources" of this test bundle and copy its contents into a new
