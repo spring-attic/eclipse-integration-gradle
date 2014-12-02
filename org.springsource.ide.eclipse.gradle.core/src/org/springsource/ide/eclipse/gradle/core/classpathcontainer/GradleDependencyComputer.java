@@ -179,23 +179,26 @@ public class GradleDependencyComputer {
 				}
 			}
 			
-			if (GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects()) {
-				for (EclipseProjectDependency dep : classpathModel.getProjectDependencies()) {
-					GradleProject gproject = GradleCore.create(dep.getTargetProject());
-					IProject project = gproject.getProject();
-					if(project != null && project.isOpen())
-						addProjectDependency(project, export);
-					else {
-						ExternalDependency external = ClassPathModel.getExternalEquivalent(dep);
-						if (external!=null) {
-							// replace the project dependency with a binary build of the project
-							addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
-						} else {
-							markers.reportError("Project dependency not in the workspace: "+gproject.getDisplayName());
-						}
+			boolean enableRemapping = GradleCore.getInstance().getPreferences().getRemapJarsToGradleProjects();
+			for (EclipseProjectDependency dep : classpathModel.getProjectDependencies()) {
+				GradleProject gproject = GradleCore.create(dep.getTargetProject());
+				IProject project = gproject.getProject();
+				if (project != null && project.isOpen()) {
+					addProjectDependency(project, export);
+				} else if (enableRemapping) {
+					ExternalDependency external = ClassPathModel.getExternalEquivalent(dep);
+					if (external!=null) {
+						// replace the project dependency with a binary build of the project
+						addJarEntry(new Path(external.getFile().getAbsolutePath()), external, export);
+					} else {
+						markers.reportError("Remapping project '"+gproject.getDisplayName()+" to jar dependency failed, make sure to publish a jar to a location where it can be resolved.");
 					}
+				} else {
+					//remapping not enabled and project not found
+					markers.reportError("Project dependency not in the workspace: "+gproject.getDisplayName());
 				}
 			}
+			
 			if (missingPublicationsModels) {
 				//We have produced a 'best effort' classpath but some model info was missing so schedule a more
 				// complete refresh that will build these models in background (this is slow, so we can not do it here).
