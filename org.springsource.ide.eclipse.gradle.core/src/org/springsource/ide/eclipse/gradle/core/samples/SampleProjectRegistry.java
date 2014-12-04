@@ -61,7 +61,7 @@ public class SampleProjectRegistry {
 			File userHomeFile = new File(userHome);
 			File downloadLocation = new File(userHomeFile, ".sts/gradle/download-cache");
 			if (downloadLocation.exists() || downloadLocation.mkdirs()) {
-				downloadManager = new DownloadManager(new File(stateLocation, "samples").toString());
+				downloadManager = new DownloadManager(new File(downloadLocation, "samples").toString());
 				return;
 			}
 		}
