@@ -164,10 +164,18 @@ public class GradleProject {
 	 * (Note that this doesn't force the gradleModel itself to be updated!)
 	 */
 	private void refreshClasspathContainer(IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask("Refresh Classpath Container", 1);
+		monitor.beginTask("Refresh Classpath Container", 2);
 		try {
 			IProject project = getProject();
 			if (project != null) {
+				boolean shouldExport = GradleCore.getInstance().getPreferences().isExportDependencies();
+				boolean isExported = GradleClassPathContainer.isExported(getJavaProject());
+				if (shouldExport!=isExported) {
+					GradleClassPathContainer container = getClassPathcontainer();
+					if (container!=null) {
+						container.setExported(shouldExport, new SubProgressMonitor(monitor, 1));
+					}
+				}
 				//TODO: the requestUpdateFor is asynchronous... make it synchronous!
 				GradleClasspathContainerInitializer.requestUpdateFor(project, false);
 			}

@@ -140,19 +140,19 @@ public abstract class GradleTest extends TestCase {
 		prefs.setJVMArguments(null); //Reset to default.
 		prefs.setProgramArguments(null); //Reset to default.
 		KillGradleDaemons.killem(); //Keep the number of daemons under control.
-		try {
-			new ACondition("Job Manager Idle") {
-				@Override
-				public boolean test() throws Exception {
-					ACondition.assertJobManagerIdle();
-					return true;
-				}
-			}.waitFor(120000);
-		} catch (Throwable e) {
-			//Print this as interesting information about the jobs that keep on chugging away...
-			//but do not let this cause test failures.
-			GradleCore.log(e);
-		}
+//		try {
+//			new ACondition("Job Manager Idle") {
+//				@Override
+//				public boolean test() throws Exception {
+//					ACondition.assertJobManagerIdle();
+//					return true;
+//				}
+//			}.waitFor(120000);
+//		} catch (Throwable e) {
+//			//Print this as interesting information about the jobs that keep on chugging away...
+//			//but do not let this cause test failures.
+//			GradleCore.log(e);
+//		}
 	}
 	
 	public static File getTestFile(String path) throws IOException {

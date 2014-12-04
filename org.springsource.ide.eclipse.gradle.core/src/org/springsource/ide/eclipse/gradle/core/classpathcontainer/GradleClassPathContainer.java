@@ -369,15 +369,16 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		mon.beginTask("Add classpath container", 10);
 		try {
 			mon.worked(1);
-			if (!isOnClassPath(project)) {
-				boolean export = GradleCore.getInstance().getPreferences().isExportDependencies();
+			boolean shouldExport = GradleCore.getInstance().getPreferences().isExportDependencies();
+			if (!isOnClassPath(project) || isExported(project)!=shouldExport) {
 				//debug("Adding... to "+project.getElementName());
 				//Only add it if itsn't there yet
 				ClassPath classpath = new ClassPath(GradleCore.create(project));
+				classpath.removeContainer(ID);
 				
 				//			classpath.add(JavaCore.newContainerEntry(new Path(ID)));
 				classpath.DEBUG = S_DEBUG;
-				classpath.add(WTPUtil.addToDeploymentAssembly(project, JavaCore.newContainerEntry(new Path(ID), export)));
+				addTo(classpath, project, shouldExport);
 				classpath.addAll(Arrays.asList(project.getRawClasspath()));
 //						GlobalSettings.exportClasspathContainer)));
 				classpath.removeLibraryEntries();
@@ -391,6 +392,22 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		} finally {
 			mon.done();
 		}
+	}
+
+	/**
+	 * @return whether given javaProject has a exported classpath container (if no container is present
+	 * it returns false).
+	 */
+	public static boolean isExported(IJavaProject project) {
+		try {
+			IClasspathEntry containerEntry = GradleCore.create(project).getClassPath().getContainer(ID);
+			if (containerEntry!=null) {
+				return containerEntry.isExported();
+			}
+		} catch (Exception e) {
+			GradleCore.log(e);
+		}
+		return false;
 	}
 
 	private void refreshMarkers() {
@@ -458,6 +475,27 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 */
 	public static void waitForMarkerUpdates() {
 		MarkerMaker.busy.waitNotBusy();
+	}
+
+	public void setExported(boolean exported, IProgressMonitor mon) throws JavaModelException {
+		mon.beginTask("Set container exported "+project.getDisplayName()+" "+exported, 1);
+		try {
+			ClassPath cp = project.getClassPath();
+			IClasspathEntry existing = cp.getContainer(ID);
+			Assert.isNotNull(existing);
+			if (existing.isExported()==exported) {
+				return;
+			}
+			cp.removeContainer(ID);
+			addTo(cp, project.getJavaProject(), exported);
+			cp.setOn(project.getJavaProject(), new SubProgressMonitor(mon,1));
+		} finally {
+			mon.done();
+		}
+	}
+
+	private static void addTo(ClassPath cp, IJavaProject javaProject, boolean exported) {
+		cp.add(WTPUtil.addToDeploymentAssembly(javaProject, JavaCore.newContainerEntry(new Path(ID), exported)));
 	}
 	
 }

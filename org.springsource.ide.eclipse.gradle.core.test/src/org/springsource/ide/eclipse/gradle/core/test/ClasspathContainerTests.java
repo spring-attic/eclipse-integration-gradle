@@ -13,15 +13,17 @@ package org.springsource.ide.eclipse.gradle.core.test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
+import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
+import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 
 
 /**
  * @author Kris De Volder
  */
-public class ClasspathContainerErrorMarkersTests extends GradleTest {
+public class ClasspathContainerTests extends GradleTest {
 	
 	public void testSomeMissingDependencies() throws Throwable {
 //		new InterruptEater() {
@@ -135,6 +137,69 @@ public class ClasspathContainerErrorMarkersTests extends GradleTest {
 //			}
 //		};
 	}
+	
+	public void testSTS3981nonStickyExportedStatus() throws Exception {
+		String name = "quickstart";
+		importSampleProject(name);
+		final GradleProject project = getGradleProject(name);
+		assertTrue(GradleCore.getInstance().getPreferences().isExportDependencies());
+		assertContainerExported(true, project);
+		
+		//Requirement 1: changing preference should update containers in workspace projects
+		GradleCore.getInstance().getPreferences().setExportDependencies(false);
+		new ACondition("container no longer exported") {
+			public boolean test() throws Exception {
+				assertContainerExported(false, project);
+				return true;
+			}
+		}.waitFor(4000);
+		
+		//Requirement 2: refresh dependencies should synch 'export' status of container with preference
+		project.getClassPathcontainer().setExported(true, new NullProgressMonitor()); //deliberately bring it outof synch again
+		assertContainerExported(true, project);
+		refreshDependencies(project.getProject());
+		new ACondition("container no longer exported") {
+			public boolean test() throws Exception {
+				assertContainerExported(false, project);
+				return true;
+			}
+		}.waitFor(4000);
+	}
+	
+	
+	/**
+	 * Very similar test to testSTS3981nonStickyExportedStatus but with a test project that doesn't
+	 * have the 'apply plugin: 'eclipse' line in its build script. This case works differently because
+	 * it doesn't run 'cleanEclipse' task.
+	 */
+	public void testSTS3981nonStickyExportedStatusNoEclipsePlugin() throws Exception {
+		String name = "quickstart-noeclipse";
+		importTestProject(name);
+		final GradleProject project = getGradleProject(name);
+		assertTrue(GradleCore.getInstance().getPreferences().isExportDependencies());
+		assertContainerExported(true, project);
+		
+		//Requirement 1: changing preference should update containers in workspace projects
+		GradleCore.getInstance().getPreferences().setExportDependencies(false);
+		new ACondition("container no longer exported") {
+			public boolean test() throws Exception {
+				assertContainerExported(false, project);
+				return true;
+			}
+		}.waitFor(4000);
+		
+		//Requirement 2: refresh dependencies should synch 'export' status of container with preference
+		project.getClassPathcontainer().setExported(true, new NullProgressMonitor()); //deliberately bring it outof synch again
+		assertContainerExported(true, project);
+		refreshDependencies(project.getProject());
+		new ACondition("container no longer exported") {
+			public boolean test() throws Exception {
+				assertContainerExported(false, project);
+				return true;
+			}
+		}.waitFor(4000);
+	}
+
 	
 
 }

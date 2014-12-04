@@ -53,7 +53,7 @@ public class AllGradleCoreTests extends ManagedTestSuite {
 		suite.addTestSuite(GradleMenuEnablementTest.class);
 		suite.addTestSuite(GradleDSLDTests.class);
 		suite.addTestSuite(RefreshAllActionCoreTests.class);
-		suite.addTestSuite(ClasspathContainerErrorMarkersTests.class);
+		suite.addTestSuite(ClasspathContainerTests.class);
 		suite.addTestSuite(DistributionValidatorTest.class);
 		suite.addTestSuite(ArgumentsParserTests.class);
 		suite.addTestSuite(GradleSampleProjectTest.class);
