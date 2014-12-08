@@ -38,17 +38,18 @@
              id="org.springsource.ide.eclipse.gradle.menu">
             <separator name="actions"/>
             <separator name="toggle"/>
-            <separator name= "refresh"/>
+            <separator name="refresh"/>
         </menu> 
         <visibility>
             <objectState name="nature" value="org.springsource.ide.eclipse.gradle.core.nature"/>
         </visibility>
         <action
-               class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshAllAction"
-               enablesFor="+"
-               id="org.springsource.ide.eclipse.gradle.actions.refresh.all"
-               label="Refresh All"
-               menubarPath="org.springsource.ide.eclipse.gradle.menu/refresh">
+              class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshAllAction"
+              definitionId="org.springsource.ide.eclipse.gradle.ui.refresh.all"
+              enablesFor="+"
+              id="org.springsource.ide.eclipse.gradle.actions.refresh.all"
+              label="Refresh All"
+              menubarPath="org.springsource.ide.eclipse.gradle.menu/refresh">
          </action>
         <action
                class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshSourceFoldersAction"
@@ -330,6 +331,12 @@
             id="org.springsource.ide.eclipse.gradle.ui.OpenTasksQuickLauncher"
             name="Open Gradle Tasks Quick Launcher">
       </command>
+      <command
+            categoryId="org.springsource.ide.eclipse.gradle.ui.commands"
+            description="Refresh All both dependecies and source folders for selected gradle project"
+            id="org.springsource.ide.eclipse.gradle.ui.refresh.all"
+            name="Refresh All">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
@@ -338,6 +345,12 @@
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M2+M3+R">
+      </key>
+      <key
+            commandId="org.springsource.ide.eclipse.gradle.ui.refresh.all"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+F5">
       </key>
    </extension>
    <extension
@@ -354,6 +367,13 @@
                label="Open Gradle Tasks Quick Launcher">
          </action>
       </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.springsource.ide.eclipse.gradle.ui.actions.RefreshAllHandler"
+            commandId="org.springsource.ide.eclipse.gradle.ui.refresh.all">
+      </handler>
    </extension>
 
 </plugin>

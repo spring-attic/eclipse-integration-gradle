@@ -65,6 +65,19 @@ public abstract class GradleProjectActionDelegate implements IObjectActionDelega
 						projects.add((IProject) element);
 					} else if (element instanceof IResource) {
 						projects.add(((IResource) element).getProject());
+					} else if (element instanceof IAdaptable) {
+					    IAdaptable adaptable = (IAdaptable) element;
+					    IProject project = (IProject) adaptable.getAdapter( IProject.class );
+					    if(project == null) {
+					        IResource resource = (IResource) adaptable.getAdapter( IResource.class );
+					        if (resource != null ) {
+					            project = resource.getProject();
+					        }
+					    }
+
+					    if (project != null ) {
+					        projects.add(project);
+					    }
 					} else if (element instanceof IWorkingSet) {
 						IWorkingSet workingSet = (IWorkingSet) element;
 						for (IAdaptable adaptable : workingSet.getElements()) {
