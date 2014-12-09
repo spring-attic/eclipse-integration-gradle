@@ -2,6 +2,7 @@ package io.pivotal.tooling.plugin.eclipse;
 
 import io.pivotal.tooling.model.eclipse.StsEclipseProject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,9 +12,7 @@ import java.util.Set;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ModuleVersionIdentifier;
-import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.artifacts.*;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.result.ArtifactResult;
 import org.gradle.api.artifacts.result.ComponentArtifactsResult;
@@ -30,6 +29,7 @@ import org.gradle.api.specs.Specs;
 import org.gradle.language.base.artifact.SourcesArtifact;
 import org.gradle.language.java.artifact.JavadocArtifact;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
+import org.gradle.plugins.ide.internal.resolver.model.IdeLocalFileDependency;
 import org.gradle.plugins.ide.internal.tooling.EclipseModelBuilder;
 import org.gradle.plugins.ide.internal.tooling.GradleProjectBuilder;
 import org.gradle.plugins.ide.internal.tooling.eclipse.DefaultEclipseProject;
@@ -106,11 +106,10 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
 
             for (ResolvedArtifact artifact : conf.getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL)) {
                 ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
-
                 if (binaryDependenciesAsStrings.contains(id.toString())) {
                     externalDependenciesById.put(id.toString(), new DefaultStsEclipseExternalDependency()
                             .setFile(artifact.getFile())
-                            .setModuleVersion(new DefaultModuleVersionIdentifier(id.getGroup(), id.getName(), id.getVersion())));
+                            .setModuleVersion(id));
                 }
             }
 
@@ -123,6 +122,21 @@ class StsEclipseProjectModelBuilder implements ToolingModelBuilder {
                 for (ArtifactResult javadocResult : artifactResult.getArtifacts(JavadocArtifact.class)) {
                     if (javadocResult instanceof DefaultResolvedArtifactResult)
                         externalDependency.setJavadoc(((DefaultResolvedArtifactResult) javadocResult).getFile());
+                }
+            }
+        }
+
+        // this grabs "local file dependencies" (e.g. gradleApi(), localGroovy())
+        for(Configuration conf : eclipseModel.getClasspath().getPlusConfigurations()) {
+            for (Dependency dependency : conf.getAllDependencies()) {
+                if (dependency instanceof SelfResolvingDependency && !(dependency instanceof ProjectDependency)) {
+                    Set<File> resolvedFiles = ((SelfResolvingDependency) dependency).resolve();
+
+                    for (File resolvedFile : resolvedFiles) {
+                        // these type of dependencies do not have a module version identifier, the file path is unique enough
+                        externalDependenciesById.put(resolvedFile.getAbsolutePath(), new DefaultStsEclipseExternalDependency()
+                                .setFile(resolvedFile));
+                    }
                 }
             }
         }
