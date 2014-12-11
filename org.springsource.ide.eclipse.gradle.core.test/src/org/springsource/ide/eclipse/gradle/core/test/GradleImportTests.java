@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -51,6 +52,7 @@ import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.ReimportOperation;
+import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer.IRefreshListener;
 import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
@@ -67,6 +69,8 @@ import org.springsource.ide.eclipse.gradle.core.test.util.JUnitLaunchConfigUtil;
 import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.TestUtils;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
+import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
+import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
 import org.springsource.ide.eclipse.gradle.core.util.TimeUtils;
 import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
@@ -1160,6 +1164,7 @@ public class GradleImportTests extends GradleTest {
 	}
 	
 	public void testSTS3742ClassPathContainerEntryOrder() throws Exception {
+		setAutoBuilding(false);
 		importTestProject("sts3742");
 		assertProjects(new String[] { "sts3742" });
 
@@ -1169,12 +1174,20 @@ public class GradleImportTests extends GradleTest {
 		assertWtpAfterGradleDependencies(jp);
 		
 		gp.getProjectPreferences().setEnableClasspatEntrySorting(false);
-		new ReimportOperation(Collections.singletonList(gp)).perform(null, new NullProgressMonitor());
+		reimport(gp);
 		assertWtpAfterGradleDependencies(jp);
 		
 		gp.getProjectPreferences().setEnableClasspatEntrySorting(true);
-		new ReimportOperation(Collections.singletonList(gp)).perform(null, new NullProgressMonitor());
+		reimport(gp);
 		assertWtpAfterGradleDependencies(jp);		
+	}
+
+	public static void reimport(final GradleProject gp) throws Exception {
+		JobUtil.withRule(JobUtil.buildRule(), new NullProgressMonitor(), 1, new GradleRunnable("Reimport "+gp.getDisplayName()) {
+			public void doit(IProgressMonitor mon) throws Exception {
+				new ReimportOperation(Collections.singletonList(gp)).perform(null, new NullProgressMonitor());
+			}
+		});
 	}
 	
 	private static void assertWtpAfterGradleDependencies(IJavaProject jp) throws JavaModelException {
