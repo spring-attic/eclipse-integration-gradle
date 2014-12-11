@@ -16,7 +16,10 @@ import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ModelBuilder;
 import org.gradle.tooling.ProjectConnection;
+import org.gradle.tooling.internal.consumer.DefaultGradleConnector;
+import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.ExternalDependency;
+import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -163,6 +166,24 @@ public class StsEclipseProjectTest {
 		}
         
         assertEquals(1, project.getProjectDependencies().size());
+    }
+    
+    @Test
+    public void gradleApiDependencyAddsMoreThanOneJarToClasspath() {
+        DefaultGradleConnector connector = (DefaultGradleConnector) GradleConnector.newConnector();
+		connector.embedded(true);
+		connector.forProjectDirectory(file("projects/pluginproject"));
+
+		EclipseProject eclipseProject = connector.connect().model(EclipseProject.class).get();
+		assertTrue(eclipseProject.getClasspath().size() > 1);
+
+        System.setProperty("org.springsource.ide.eclipse.gradle.toolingApiRepo", file("../../org.springsource.ide.eclipse.gradle.toolingapi/lib").getAbsolutePath());
+        System.setProperty("org.springsource.ide.eclipse.gradle.toolingApiEquivalentBinaryVersion", "latest.integration");
+
+		ModelBuilder<StsEclipseProject> customModelBuilder = connector.connect().model(StsEclipseProject.class);
+		customModelBuilder.withArguments("--init-script", file("projects/init.gradle").getAbsolutePath());
+
+        assertEquals(eclipseProject.getClasspath().size(), customModelBuilder.get().getClasspath().size());
     }
 
     StsEclipseProject project(String name) {
