@@ -67,10 +67,10 @@ public class ClassPath {
 	 */
 	public static final int[] kindOrdering = {
 		IClasspathEntry.CPE_SOURCE,
-		IClasspathEntry.CPE_PROJECT,
 		IClasspathEntry.CPE_LIBRARY,
 		IClasspathEntry.CPE_CONTAINER,
-		IClasspathEntry.CPE_VARIABLE
+		IClasspathEntry.CPE_VARIABLE,
+		IClasspathEntry.CPE_PROJECT
 	};
 	
 	/**
