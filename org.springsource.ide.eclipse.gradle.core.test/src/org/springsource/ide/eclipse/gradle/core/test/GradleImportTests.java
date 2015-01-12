@@ -1242,9 +1242,9 @@ public class GradleImportTests extends GradleTest {
 
 	public void assertSts2175ExpectedCP(String firstProj, String secondProj, IClasspathEntry[] entries) {
 		assertEquals(3, entries.length);
-		assertEquals(JavaCore.newProjectEntry(new Path("/"+firstProj), true), entries[0]);
-		assertEquals(JavaCore.newProjectEntry(new Path("/"+secondProj), true), entries[1]);
-		assertJarEntry("junit-4.8.2.jar", entries[2]);
+		assertJarEntry("junit-4.8.2.jar", entries[0]);
+		assertEquals(JavaCore.newProjectEntry(new Path("/"+firstProj), true), entries[1]);
+		assertEquals(JavaCore.newProjectEntry(new Path("/"+secondProj), true), entries[2]);
 	}
 
 
