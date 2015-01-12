@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2015 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -183,7 +183,9 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 	
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		setProject(getContext());
-		setTasksDocument("");
+		if (tasksViewer != null) {
+			setTasksDocument("");
+		}
 	}
 
 	private void setProject(GradleProject project) {
@@ -313,7 +315,9 @@ public class GradleLaunchTasksTab extends AbstractLaunchConfigurationTab {
 
 	@Override
 	public void dispose() {
-		tasksViewer.dispose();
+		if (tasksViewer != null) {
+			tasksViewer.dispose();
+		}
 		super.dispose();
 	}
 

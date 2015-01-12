@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal Software, Inc.
+ * Copyright (c) 2014, 2015 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1048,7 +1048,7 @@ public class ConsoleInplaceDialog {
 	}
 
 	public void setSelectedProject(IProject project) {
-		index.setProject(project == null ? null : GradleCore.create(project));
+		index.setProject(project == null || !project.exists() ? null : GradleCore.create(project));
 		selectedProject = project;
 		refreshProjects();
 	}
