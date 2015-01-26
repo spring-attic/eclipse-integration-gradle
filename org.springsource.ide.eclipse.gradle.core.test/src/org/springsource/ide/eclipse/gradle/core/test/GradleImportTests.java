@@ -769,108 +769,7 @@ public class GradleImportTests extends GradleTest {
 			
 		}
 	}
-	
-	public void testImportSpringIntegration() throws Exception {
-		setAutoBuilding(false);
-		JavaXXRuntime.java8everyone();
-//		GradleAPIProperties props = GradleCore.getInstance().getAPIProperties();
-		URI distro = null;
-//		if (!props.isSnapshot()) {
-			//We are running the 'regular' build!
-			//This test requires M8 (project's wrapper properties says so, but it is non-standar location so 
-			// tooling API doesn't know.
-			// distro = new URI("http://repo.gradle.org/gradle/distributions/gradle-1.0-milestone-8-bin.zip");
-//		}
-		GradleCore.getInstance().getPreferences().setDistribution(distro);
-		GradleImportOperation op = importGitProjectOperation(
-				new GitProject(
-						"spring-integration", 
-						new URI("git://github.com/spring-projects/spring-integration.git"),
-						"3e08ca085b4ef9d0c0c6df4f16b5e8f7b724ae31"
-				).setRecursive(true)
-		);
-		op.setEnableDSLD(true);
-		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
-
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (IProject proj : projects) {
-			System.out.println("\""+proj.getName()+"\",");
-		}
-
-		String[] projectNames = {
-				"spring-integration",
-				"spring-integration-amqp",
-				"spring-integration-bom",
-				"spring-integration-core",
-				"spring-integration-event",
-				"spring-integration-feed",
-				"spring-integration-file",
-				"spring-integration-ftp",
-				"spring-integration-gemfire",
-				"spring-integration-groovy",
-				"spring-integration-http",
-				"spring-integration-ip",
-				"spring-integration-jdbc",
-				"spring-integration-jms",
-				"spring-integration-jmx",
-				"spring-integration-jpa",
-				"spring-integration-mail",
-				"spring-integration-mongodb",
-				"spring-integration-mqtt",
-				"spring-integration-redis",
-				"spring-integration-rmi",
-				"spring-integration-scripting",
-				"spring-integration-security",
-				"spring-integration-sftp",
-				"spring-integration-stream",
-				"spring-integration-syslog",
-				"spring-integration-test",
-				"spring-integration-twitter",
-				"spring-integration-websocket",
-				"spring-integration-ws",
-				"spring-integration-xml",
-				"spring-integration-xmpp"
-		};
 		
-		TestUtils.disableCompilerLevelCheck(getProject("spring-integration-groovy"));
-		TestUtils.disableCompilerLevelCheck(getProject("spring-integration-scripting"));
-		
-		assertProjects(
-				projectNames
-		);
-		
-		DSLDSupport dslSupport = DSLDSupport.getInstance();
-		for (IProject p : projects) {
-			GradleProject gp = GradleCore.create(p);
-			//Iniatially dsl support is ...
-			assertTrue("dslSupport enabled?", dslSupport.isEnabled(gp));
-			assertTrue("Groovy Nature", p.hasNature(DSLDSupport.GROOVY_NATURE));
-			//Disable dsl support
-			dslSupport.enableFor(gp, false, new NullProgressMonitor());
-		}
-		
-		// Now do a basic refresh all test.
-		RefreshAllActionCore.callOn(Arrays.asList(projects)).join();
-		for (IProject p : projects) {
-			GradleProject gp = GradleCore.create(p);
-			assertFalse(dslSupport.isEnabled(gp));
-			if (p.getName().equals("spring-integration")) {
-				//The 'root' project keeps groovy nature because it doesn't apply the 'eclipse'
-				//  plugin. Therefore it has no 'cleanEclipse' task and so the nature isn't erased.
-				// This is the expected behavior. (Or should we ourselves attempt to 'cleanEclipse'?).
-				assertTrue(p.hasNature(DSLDSupport.GROOVY_NATURE));
-			} else {
-				assertFalse("Project "+p.getName()+" still has Groovy nature", 
-						p.hasNature(DSLDSupport.GROOVY_NATURE));
-			}
-		}
-		
-		assertProjects(
-				projectNames
-		);
-		
-	}
-	
 	public void testNonExportedDependencies() throws Exception {
 		GradlePreferences prefs = GradleCore.getInstance().getPreferences();
 		prefs.setExportDependencies(false);
@@ -896,22 +795,6 @@ public class GradleImportTests extends GradleTest {
 		}.waitFor(40000);
 		
 		assertProjects("non-exported-deps", "main", "lib");
-	}
-	
-	public void testSTS2094() throws Exception {
-		//This bug happens if one imports a set of projects then deletes them and then imports them all again.
-		testImportSpringIntegration();
-		
-		GradleProject rootProject = getGradleProject("spring-integration");
-		File rootLocation = rootProject.getLocation();
-		
-		for (IProject p : getProjects()) {
-			p.delete(false, true, new NullProgressMonitor());
-		}
-		
-		GradleImportOperation importOp = GradleImportOperation.importAll(rootLocation);
-		importOp.verify();
-		importOp.perform(new ErrorHandler.Test(IStatus.ERROR), new NullProgressMonitor());
 	}
 	
 	public void disabledTestTimedImport() throws Exception {
