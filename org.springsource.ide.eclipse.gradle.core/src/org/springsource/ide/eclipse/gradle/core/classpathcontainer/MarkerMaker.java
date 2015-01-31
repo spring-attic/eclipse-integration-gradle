@@ -90,7 +90,7 @@ public class MarkerMaker extends GradleRunnable implements Joinable<Void> {
 		try {
 			mon.beginTask(jobName, 1+work.size());
 			IProject project = gp.getProject();
-			if (project!=null) { //Safeguard against project has been deleted
+			if (project!=null && project.isAccessible()) { //Safeguard against deleted or closed
 				project.deleteMarkers(markerType, false, IResource.DEPTH_ZERO);
 				mon.worked(1);
 				for (GradleRunnable w : work) {
