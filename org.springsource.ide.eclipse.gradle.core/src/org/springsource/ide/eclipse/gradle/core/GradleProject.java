@@ -593,8 +593,11 @@ public class GradleProject {
 							@Override
 							public void doit(IProgressMonitor mon)
 									throws Exception {
-								mgr.getModel(GradleProject.this, type, mon);
-								modelFetchingJobsCache.remove(type);
+								try {
+									mgr.getModel(GradleProject.this, type, mon);
+								} finally {
+									modelFetchingJobsCache.remove(type);
+								}
 							}
 						}));
 			}
