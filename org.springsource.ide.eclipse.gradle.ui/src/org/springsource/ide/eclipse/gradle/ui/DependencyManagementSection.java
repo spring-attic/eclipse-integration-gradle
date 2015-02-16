@@ -164,7 +164,7 @@ public class DependencyManagementSection extends PrefsPageSection {
 		span2.applyTo(enableJarRemappingOnOpenClose);
 		
 		useCustomToolingModelButton = new Button(composite, SWT.CHECK);
-		useCustomToolingModelButton.setText("Use Custom Tooling Model (requires Gradle 1.12)");
+		useCustomToolingModelButton.setText("Use Custom Tooling Model (requires Gradle 2.2)");
 		useCustomToolingModelButton.setToolTipText("The tooling will work better on newer versions of Gradle but "
 				+ "may not work at all on older versions of Gradle.");
 		useCustomToolingModelButton.setSelection(GradleCore.getInstance().getPreferences().getUseCustomToolingModel());
