@@ -8,8 +8,8 @@ initscript {
     dependencies {
         classpath 'io.pivotal.gradle.eclipse.toolingapi:plugin:1.0'
         classpath ':model:1.0'
-        classpath 'org.gradle:gradle-tooling-api:2.1'
-        classpath 'org.slf4j:slf4j-api:1.7.5'
+        classpath 'org.gradle:gradle-tooling-api:2.2.1'
+        classpath 'org.slf4j:slf4j-api:1.7.7'
     }
 }
 
