@@ -794,7 +794,7 @@ public class GradleImportTests extends GradleTest {
 				assertClasspathProjectEntry(getProject("lib"), getJavaProject("main"));
 				return true;
 			}
-		}.waitFor(40000);
+		}.waitFor(80000);
 		
 		assertProjects("non-exported-deps", "main", "lib");
 	}
