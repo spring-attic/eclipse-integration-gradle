@@ -223,8 +223,4 @@ public abstract class ErrorHandler {
 		//return new LogToEclipseErrorLog();
 	}
 
-	public static ErrorHandler forEnableDisableDSLD() {
-		return new LogToEclipseErrorLog();
-	}
-
 }

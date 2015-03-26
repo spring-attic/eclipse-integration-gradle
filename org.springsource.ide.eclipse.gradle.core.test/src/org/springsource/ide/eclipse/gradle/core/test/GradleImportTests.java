@@ -28,7 +28,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
@@ -52,10 +51,8 @@ import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.actions.ReimportOperation;
-import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer.IRefreshListener;
-import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
@@ -84,29 +81,10 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
  */
 public class GradleImportTests extends GradleTest {
 	
-	public void testImportNoClasspathContainer() throws Exception {
+	public void testImportBasic() throws Exception {
 		String projectName = "quickstart";
 		File projectLoc = extractJavaSample(projectName);
 		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
-		importOp.setEnableDependencyManagement(false); //use default values for everything else.
-		boolean expectDsld = importOp.getEnableDSLD();
-		
-		performImport(importOp);
-		GradleProject project = getGradleProject(projectName);
-		
-		assertProjects(projectName); //no compile errors?
-		
-		assertFalse("Shouldn't have classpath container", 
-				GradleClassPathContainer.isOnClassPath(project.getJavaProject()));
-		assertEquals("DSLD support enablement state", expectDsld, DSLDSupport.getInstance().isEnabled(project));
-		assertTrue("Gradle nature added?", GradleNature.hasNature(getProject(projectName)));
-	}
-	
-	public void testImportNoDSLDSupport() throws Exception {
-		String projectName = "quickstart";
-		File projectLoc = extractJavaSample(projectName);
-		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
-		importOp.setEnableDSLD(false); //use default values for everything else.
 		
 		performImport(importOp);
 		GradleProject project = getGradleProject(projectName);
@@ -114,16 +92,14 @@ public class GradleImportTests extends GradleTest {
 		assertProjects(projectName); //no compile errors?
 		
 		assertTrue("Should have classpath container", GradleClassPathContainer.isOnClassPath(project.getJavaProject()));
-		assertFalse("DSLD support added?", DSLDSupport.getInstance().isEnabled(project));
 		assertTrue("Gradle nature added?", GradleNature.hasNature(getProject(projectName)));
 	}
 	
-	public void testImportNoClasspathContainerNoDSLDSupport() throws Exception {
+	public void testImportNoClasspathContainer() throws Exception {
 		String projectName = "quickstart";
 		File projectLoc = extractJavaSample(projectName);
 		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
-		importOp.setEnableDependencyManagement(false); 
-		importOp.setEnableDSLD(false);
+		importOp.setEnableDependencyManagement(false); //use default values for everything else.
 		
 		performImport(importOp);
 		GradleProject project = getGradleProject(projectName);
@@ -132,7 +108,6 @@ public class GradleImportTests extends GradleTest {
 		
 		assertFalse("Shouldn't have classpath container", 
 				GradleClassPathContainer.isOnClassPath(project.getJavaProject()));
-		assertFalse("DSLD support should not have been added", DSLDSupport.getInstance().isEnabled(project));
 		assertTrue("Gradle nature added?", GradleNature.hasNature(getProject(projectName)));
 	}
 	
@@ -197,7 +172,6 @@ public class GradleImportTests extends GradleTest {
 				":spring-oxm:compileTestJava",
 		};
 		
-		importOp.setEnableDSLD(false); // cause some compilation errors in this project so turn off
 		importOp.setEnableDependencyManagement(false);
 		importOp.setDoBeforeTasks(true);
 		importOp.setBeforeTasks(beforeTasks);

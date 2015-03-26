@@ -62,7 +62,6 @@ import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActio
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.test.GradleImportTests.WaitForRefresh;
-import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.test.util.GitProject;
 import org.springsource.ide.eclipse.gradle.core.test.util.JavaXXRuntime;
 import org.springsource.ide.eclipse.gradle.core.test.util.KillGradleDaemons;
@@ -94,7 +93,6 @@ public abstract class GradleTest extends TestCase {
 										// Individual tests may swich to another Java version if they like
 										// But ensure java 6 as stable baseline for tests that don't set it themselves.
 		
-		//Disable greclipse background DSL support adding. Hopefully will stop random test failures because of 'missing external folder links'.
 		IEclipsePreferences preferences = ConfigurationScope.INSTANCE.getNode("org.codehaus.groovy.eclipse.dsl");
 		preferences.putBoolean("org.codehaus.groovy.eclipse.dsl.auto.add.support", false);
 		preferences.flush();

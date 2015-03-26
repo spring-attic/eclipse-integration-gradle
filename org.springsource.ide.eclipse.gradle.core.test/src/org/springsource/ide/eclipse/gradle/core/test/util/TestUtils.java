@@ -17,8 +17,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import junit.framework.Assert;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -30,9 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
-
-import org.codehaus.groovy.eclipse.core.compiler.CompilerUtils;
-import org.codehaus.groovy.frameworkadapter.util.SpecifiedVersion;
+import org.junit.Assert;
 
 /**
  * @author Kris De Volder
@@ -73,10 +69,6 @@ public class TestUtils {
 				Assert.fail("Expecting no problems but found: " + markerMessage(problem));
 			}
 		}
-	}
-	
-	public static void disableCompilerLevelCheck(IProject p) {
-		CompilerUtils.setCompilerLevel(p, SpecifiedVersion.DONT_CARE);
 	}
 	
 	public static String markerMessage(IMarker m) throws CoreException {

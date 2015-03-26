@@ -57,7 +57,6 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperation
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClasspathContainerInitializer;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleDependencyComputer;
-import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.GradleModelManager;
 import org.springsource.ide.eclipse.gradle.core.modelmanager.IGradleModelListener;
@@ -698,7 +697,7 @@ public class GradleProject {
 	 */
 	public void convertToGradleProject(IProjectMapper projectMapping, ErrorHandler eh, IProgressMonitor monitor) {
 		debug("convertToGradleProject called");
-		monitor.beginTask("Convert to Gradle project", 7);
+		monitor.beginTask("Convert to Gradle project", 5);
 		try {
 			//1: natures
 			NatureUtils.ensure(getProject(), new SubProgressMonitor(monitor, 1), 
@@ -732,16 +731,12 @@ public class GradleProject {
 //			} finally {
 //				monitor.worked(1);
 //			}
-			
-			//4: Enable DSL support
-			DSLDSupport.maybeAdd(this, eh, new SubProgressMonitor(monitor, 1));
-			debug("DSLDSupport maybe added");
-			
-			//5: Add classpath container
+						
+			//4: Add classpath container
 			GradleClassPathContainer.addTo(getJavaProject(), new SubProgressMonitor(monitor, 1));
 			debug("Classpath container added");
 
-			//6: Add WTP fixups
+			//5: Add WTP fixups
 			WTPUtil.addWebLibraries(this);
 			monitor.worked(1);
 		} catch (CoreException e) {

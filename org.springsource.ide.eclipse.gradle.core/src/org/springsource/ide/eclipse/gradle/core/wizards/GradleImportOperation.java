@@ -60,7 +60,6 @@ import org.springsource.ide.eclipse.gradle.core.TaskUtil;
 import org.springsource.ide.eclipse.gradle.core.TaskUtil.ITaskProvider;
 import org.springsource.ide.eclipse.gradle.core.actions.GradleRefreshPreferences;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
-import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectSorter;
@@ -92,7 +91,6 @@ public class GradleImportOperation {
 	
 	public static final boolean DEFAULT_DO_AFTER_TASKS = true; //Is not affected by GRADLE-1792 so can be on by default
 	public static final boolean DEFAULT_ENABLE_DEPENDENCY_MANAGEMENT = true; //Default setting preserves 'old' behavior.
-	public static final boolean DEFAULT_ENABLE_DSLD = false; //Less chance of classpath issues created by adding DSL stuff to classpath.
 	
 	/**
 	 * Tasks to run before doing actual import (if option is enabled)
@@ -120,7 +118,6 @@ public class GradleImportOperation {
 	private String quickWorkingSetName;
 	private boolean enableDependencyManagement = DEFAULT_ENABLE_DEPENDENCY_MANAGEMENT;
 	private boolean isReimport = false;
-	private boolean enableDSLD = DEFAULT_ENABLE_DSLD;
 	
 	public GradleImportOperation(/*File rootFolder,*/ List<HierarchicalEclipseProject> projectsToImport, boolean addResourceFilters, PrecomputedProjectMapper projectMapping) {
 //		this.rootFolder = rootFolder;
@@ -422,7 +419,6 @@ public class GradleImportOperation {
 								GradleNature.NATURE_ID, //Must be first to make gradle project icon have gradle nature showing 
 								JavaCore.NATURE_ID
 					);
-					DSLDSupport.maybeAdd(gProj, eh, new SubProgressMonitor(monitor, 1));
 				} catch (CoreException e) {
 					eh.handleError(e);
 				}
@@ -703,13 +699,6 @@ public class GradleImportOperation {
 
 	public void setAddResourceFilters(boolean enable) {
 		this.addResourceFilters = enable;
-	}
-
-	public boolean getEnableDSLD() {
-		return this.enableDSLD;
-	}
-	public void setEnableDSLD(boolean enable) {
-		this.enableDSLD = enable;
 	}
 
 	public static List<HierarchicalEclipseProject> allProjects(File rootFolder) throws OperationCanceledException, CoreException {

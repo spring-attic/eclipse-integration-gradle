@@ -32,7 +32,6 @@ public class GradleRefreshPreferences extends AbstractGradleProjectPreferences {
 	private static final String DO_BEFORE_TASKS = "enableBeforeTasks";
 	private static final String BEFORE_TASKS = "beforeTasks";
 	private static final String AFTER_TASKS = "afterTasks";
-	private static final String ENABLE_DSLD = "enableDSLD";
 
 	public GradleRefreshPreferences(GradleProject project) {
 		super(project, "org.springsource.ide.eclipse.gradle.refresh");
@@ -87,13 +86,6 @@ public class GradleRefreshPreferences extends AbstractGradleProjectPreferences {
 		return getStrings(AFTER_TASKS, GradleImportOperation.DEFAULT_AFTER_TASKS);
 	}
 	
-	public boolean getEnableDSLD() {
-		return get(ENABLE_DSLD, GradleImportOperation.DEFAULT_ENABLE_DSLD);
-	}
-	public void setEnableDSLD(boolean enable) {
-		put(ENABLE_DSLD, enable);
-	}
-
 	/**
 	 * Set all the refresh preferences based on a the properties of a given importOperation.
 	 */
@@ -104,7 +96,6 @@ public class GradleRefreshPreferences extends AbstractGradleProjectPreferences {
 		setDoAfterTasks(importOperation.getDoAfterTasks());
 		setDoBeforeTasks(importOperation.getDoBeforeTasks());
 		setUseHierarchicalNames(importOperation.getUseHierarchicalNames());
-		setEnableDSLD(importOperation.getEnableDSLD());
 	}
 
 }

@@ -79,13 +79,6 @@
                label="Enable Dependency Management"
                menubarPath="org.springsource.ide.eclipse.gradle.menu/toggle">
          </action>
-        <action
-               class="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
-               enablesFor="+"
-               id="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
-               label="Toggle DSL Support"
-               menubarPath="org.springsource.ide.eclipse.gradle.menu/toggle">
-         </action>
       <action
             class="org.springsource.ide.eclipse.gradle.ui.actions.ConsoleInplaceDialogActionDelegate"
             definitionId="org.springsource.ide.eclipse.gradle.ui.OpenTasksQuickLauncher"
@@ -135,13 +128,6 @@
                enablesFor="+"
                id="org.springsource.ide.eclipse.gradle.ui.EnableDisableDependencyManagementActionDelegate"
                label="Enable Dependency Management"
-               menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh">
-         </action>
-         <action
-               class="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
-               enablesFor="+"
-               id="org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate"
-               label="Toggle DSL Support"
                menubarPath="org.springsource.ide.eclipse.gradle.workingSetMenu/refresh">
          </action>
       <action

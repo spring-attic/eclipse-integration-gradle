@@ -50,9 +50,6 @@ public class GradleRefreshPreferencesTest extends GradleTest {
 		
 		importOp.setUseHierachicalNames(!importOp.getUseHierarchicalNames());
 		copyAndTest(importOp, refreshPrefs);
-		
-		importOp.setEnableDSLD(!importOp.getEnableDSLD());
-		copyAndTest(importOp, refreshPrefs);
 	}
 	
 	private void copyAndTest(GradleImportOperation importOp,
@@ -71,7 +68,6 @@ public class GradleRefreshPreferencesTest extends GradleTest {
 		assertArrayEquals(importOp.getBeforeTasks(), refreshPrefs.getBeforeTasks());
 		assertEquals(importOp.getAddResourceFilters(), refreshPrefs.getAddResourceFilters());
 		assertEquals(importOp.getUseHierarchicalNames(), refreshPrefs.getUseHierarchicalNames());
-		assertEquals(importOp.getEnableDSLD(), refreshPrefs.getEnableDSLD());
 	}
 
 }

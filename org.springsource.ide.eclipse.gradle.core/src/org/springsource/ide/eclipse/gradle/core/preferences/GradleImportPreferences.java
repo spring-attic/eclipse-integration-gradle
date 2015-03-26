@@ -39,7 +39,6 @@ public class GradleImportPreferences extends AbstractGradleProjectPreferences {
 	private static final String AFTER_TASKS = "afterTasks";
 	private static final String SELECTED_PROJECTS = "projects";
 	private static final String ENABLE_DEPENDENCY_MANAGEMENT = "enableDependendencyManagement";
-	private static final String ENABLE_DSLD = "enableDSLD";
 	private static final String ADD_RESOURCE_FILTERS = "addResourceFilters";
 
 	public GradleImportPreferences(GradleProject project) {
@@ -148,14 +147,6 @@ public class GradleImportPreferences extends AbstractGradleProjectPreferences {
 	}
 	public boolean getEnableDependencyManagement() {
 		return get(ENABLE_DEPENDENCY_MANAGEMENT, GradleImportOperation.DEFAULT_ENABLE_DEPENDENCY_MANAGEMENT);
-	}
-
-	public boolean getEnableDSLD() {
-		return get(ENABLE_DSLD, GradleImportOperation.DEFAULT_ENABLE_DSLD);
-	}
-	
-	public void setEnableDSLD(boolean enableDSLD) {
-		put(ENABLE_DSLD, enableDSLD);
 	}
 
 }

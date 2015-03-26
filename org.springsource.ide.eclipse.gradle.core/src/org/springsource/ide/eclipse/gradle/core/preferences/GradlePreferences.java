@@ -55,9 +55,6 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 	
 	private static final String DEPLOYMENT_EXCLUSIONS = GradlePreferences.class.getName()+".WTP_EXCLUDE";
 	
-	private static final String DISABLE_UNDERLINING = GradlePreferences.class.getName()+".DISABLE_UNDERLINING";
-	public static final boolean DEFAULT_DISABLE_UNDERLINING = true;
-	
 	private static final String JVM_ARGS = GradlePreferences.class.getName()+".JVM_ARGS";
 	private static final String DEFAULT_JVM_ARGS = null;
 	
@@ -297,14 +294,6 @@ public class GradlePreferences extends AbstractGradlePreferences implements IPre
 				|| JAR_REMAP_GRADLE_TO_MAVEN.equals(event.getKey())) {
 			GradleClassPathContainer.ensureOpenCloseListener();
 		}
-	}
-
-	public boolean getGroovyEditorDisableUnderlining() {
-		return get(DISABLE_UNDERLINING, DEFAULT_DISABLE_UNDERLINING);
-	}
-	
-	public void setGroovyEditorDisableUnderlining(boolean disable) {
-		put(DISABLE_UNDERLINING, disable);
 	}
 
 	/**

@@ -15,23 +15,16 @@ import junit.framework.AssertionFailedError;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
-import org.springsource.ide.eclipse.gradle.core.ClassPath;
-import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleNature;
-import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
-import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.util.NatureUtils;
-import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
 import org.springsource.ide.eclipse.gradle.ui.actions.ConvertToGradleProjectActionDelegate;
-import org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDSLSupportDelegate;
 import org.springsource.ide.eclipse.gradle.ui.actions.EnableDisableDependencyManagementActionDelegate;
 import org.springsource.ide.eclipse.gradle.ui.actions.RefreshDependenciesAction;
 
@@ -134,34 +127,6 @@ public class GradleMenuEnablementTest extends GradleTest {
 		
 		select(actionDelegate, project.getFile("build.gradle"));
 		assertEnablement(false);
-	}
-	
-	public void test_STS2450_IgnoreGroovyLibrariesInDSLDSupportEnablementTest() throws Exception {
-		String projectName = "quickstart";
-		GradleImportOperation op = importSampleProjectOperation(projectName);
-		op.setEnableDSLD(true);
-		op.perform(defaultTestErrorHandler(), new NullProgressMonitor());
-		IProject project = getProject(projectName);
-		IJavaProject jp = JavaCore.create(project);
-		
-		//DSLD should be enabled now, and we expect that the groovy libs are on the classpath
-		assertTrue(ClassPath.isContainerOnClasspath(jp, DSLDSupport.GROOVY_LIBS_CONTAINER)); 
-		IObjectActionDelegate actionDelegate = new EnableDisableDSLSupportDelegate();
-		select(actionDelegate, project);
-		assertEnablement(true);
-		assertMenuTextContains("Disable");
-		
-		//Remove the Grooyv libs container... 
-		GradleProject gp = GradleCore.create(project);
-		ClassPath cp = gp.getClassPath();
-		cp.removeContainer(DSLDSupport.GROOVY_LIBS_CONTAINER);
-		cp.setOn(gp.getJavaProject(), new NullProgressMonitor());
-		assertFalse(ClassPath.isContainerOnClasspath(jp, DSLDSupport.GROOVY_LIBS_CONTAINER)); 
-		
-		//the DSLD support should still be considered as enabled.
-		select(actionDelegate, project);
-		assertEnablement(true);
-		assertMenuTextContains("Disable");
 	}
 	
 	public void testConvertToGradleProjectMenuEnablement() throws Exception {

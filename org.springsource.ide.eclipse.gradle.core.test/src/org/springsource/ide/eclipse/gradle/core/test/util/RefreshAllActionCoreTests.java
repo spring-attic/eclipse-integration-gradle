@@ -23,7 +23,6 @@ import org.springsource.ide.eclipse.gradle.core.ClassPath;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.actions.RefreshAllActionCore;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPathContainer;
-import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.test.GradleTest;
 import org.springsource.ide.eclipse.gradle.core.util.ErrorHandler;
 import org.springsource.ide.eclipse.gradle.core.util.Joinable;
@@ -79,11 +78,9 @@ public class RefreshAllActionCoreTests extends GradleTest {
 		GradleImportOperation importOp = simpleProjectImport(projectName, 
 				build.toString()
 		);
-		importOp.setEnableDSLD(false);
 		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
 		
 		GradleProject project = getGradleProject(projectName);
-		DSLDSupport.getInstance().enableFor(project, false, new NullProgressMonitor());
 		assertProjects(projectName); //no compile errors?
 
 		assertTrue(GradleClassPathContainer.isOnClassPath(project.getJavaProject()));
@@ -112,12 +109,10 @@ public class RefreshAllActionCoreTests extends GradleTest {
 		GradleImportOperation importOp = simpleProjectImport(projectName, 
 				build.toString()
 		);
-		importOp.setEnableDSLD(false);
 		importOp.setEnableDependencyManagement(false);
 		importOp.perform(new ErrorHandler.Test(), new NullProgressMonitor());
 		
 		GradleProject project = getGradleProject(projectName);
-		DSLDSupport.getInstance().enableFor(project, false, new NullProgressMonitor());
 		assertProjects(projectName); //no compile errors?
 
 		assertFalse(GradleClassPathContainer.isOnClassPath(project.getJavaProject()));
@@ -143,7 +138,6 @@ public class RefreshAllActionCoreTests extends GradleTest {
 		File projectLoc = extractJavaSample(projectName);
 		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
 		importOp.setEnableDependencyManagement(false); 
-		importOp.setEnableDSLD(false);
 		
 		performImport(importOp);
 		GradleProject gradleProject = getGradleProject(projectName);		
@@ -226,7 +220,6 @@ public class RefreshAllActionCoreTests extends GradleTest {
 		File projectLoc = extractJavaSample(projectName);
 		GradleImportOperation importOp = importTestProjectOperation(projectLoc);
 		importOp.setEnableDependencyManagement(false); 
-		importOp.setEnableDSLD(false);
 		
 		performImport(importOp);
 		GradleProject gradleProject = getGradleProject(projectName);

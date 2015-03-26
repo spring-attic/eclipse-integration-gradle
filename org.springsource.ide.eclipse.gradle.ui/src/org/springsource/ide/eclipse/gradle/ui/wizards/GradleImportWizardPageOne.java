@@ -49,7 +49,6 @@ import org.gradle.tooling.model.eclipse.HierarchicalEclipseProject;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
-import org.springsource.ide.eclipse.gradle.core.dsld.DSLDSupport;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradleImportPreferences;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleProjectUtil;
@@ -101,8 +100,6 @@ public class GradleImportWizardPageOne extends WizardPage {
 	private boolean isTreePopulated = false;
 	
 	private DefaultsSetter defaultsSetter = new DefaultsSetter();
-
-	private Button enableDSLDCheckbox;
 
 	public GradleImportWizardPageOne() {
 		super("gradleImportWizardPage1", "Import Gradle Project", WIZBAN_IMAGE);
@@ -247,16 +244,6 @@ public class GradleImportWizardPageOne extends WizardPage {
 				"with the 'Refresh All' command, but this will be done by re-running the eclipse plugin tasks.");
 		enableDependencyManagementCheckbox.setSelection(GradleImportOperation.DEFAULT_ENABLE_DEPENDENCY_MANAGEMENT);
 		
-		enableDSLDCheckbox =  new Button(optionsGroup, SWT.CHECK);
-		enableDSLDCheckbox.setText("Enable DSL Support");
-		enableDSLDCheckbox.setToolTipText("Enable Gradle DSL editor support (requires Greclipse)");
-		if (DSLDSupport.getInstance().haveGreclipse()) {
-			enableDSLDCheckbox.setSelection(GradleImportOperation.DEFAULT_ENABLE_DSLD);
-		} else {
-			enableDSLDCheckbox.setSelection(false);
-			enableDSLDCheckbox.setEnabled(false);
-		}
-		
 		createRecourceFiltersCheckbox = new Button(optionsGroup, SWT.CHECK);
 		createRecourceFiltersCheckbox.setText("Create resource filters");
 		createRecourceFiltersCheckbox.setToolTipText("Check this option to add resource filters that remove subprojects " +
@@ -290,10 +277,6 @@ public class GradleImportWizardPageOne extends WizardPage {
 		});
 	}
 	
-	private boolean getEnableDSLD() {
-		return enableDSLDCheckbox.getSelection();
-	}
-
 	private void updateProjectMapping() throws NameClashException, CoreException {
 		projectMapping = null;
 		projectMapping = GradleImportOperation.createProjectMapping(getUseHierarchicalNames(), getAllProjects());
@@ -656,7 +639,6 @@ public class GradleImportWizardPageOne extends WizardPage {
 		operation.setDoAfterTasks(runAfterLine.isEnabled());
 		operation.setAfterTasks(runAfterLine.getTasks());
 		operation.setEnableDependencyManagement(enableDependencyManagementCheckbox.getSelection());
-		operation.setEnableDSLD(getEnableDSLD());
 		return operation;
 	}
 
@@ -704,7 +686,6 @@ public class GradleImportWizardPageOne extends WizardPage {
 			store.setDoAfterTasks(runAfterLine.isEnabled());
 			store.setAfterTasks(runAfterLine.getTasks());
 			store.setEnableDependencyManagement(enableDependencyManagementCheckbox.getSelection());
-			store.setEnableDSLD(getEnableDSLD());
 			store.setAddResourceFilters(getCreateResourceFilters());
 		}
 
@@ -722,9 +703,6 @@ public class GradleImportWizardPageOne extends WizardPage {
 			runAfterLine.setEnabled(store.getDoAfterTasks());
 			runAfterLine.setTasks(store.getAfterTasks());
 			enableDependencyManagementCheckbox.setSelection(store.getEnableDependencyManagement());
-			if (enableDSLDCheckbox.isEnabled()) {
-				enableDSLDCheckbox.setSelection(store.getEnableDSLD());
-			}
 			setCreateResourceFilters(store.getAddResourceFilters());
 		}
 

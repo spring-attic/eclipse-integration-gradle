@@ -26,7 +26,6 @@ public class GradlePreferencesPage extends PreferencePageWithSections {
 	@Override
 	protected List<PrefsPageSection> createSections() {
 		List<PrefsPageSection> sections = new ArrayList<PrefsPageSection>();
-		sections.add(new EnableUnderliningSection(this));
 		sections.add(new DistributionSection(this));
 		sections.add(new GradleUserHomeSection(this));
 		sections.add(new DependencyManagementSection(this));
