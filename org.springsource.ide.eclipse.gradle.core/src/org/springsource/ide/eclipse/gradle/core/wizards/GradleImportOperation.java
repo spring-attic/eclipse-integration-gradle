@@ -701,6 +701,27 @@ public class GradleImportOperation {
 		this.addResourceFilters = enable;
 	}
 
+	/**
+	 * This method is deprecated. It only exist to avoid breakage at 'class linking' time when someone installs a newer
+	 * version of Gradle tooling into an older version of STS. Calling this method always returns false as 
+	 * newer version of Gradle tooling don't provide DSLD support.
+	 */
+	@Deprecated
+	public boolean getEnableDSLD() {
+		//always false, feature no longer supported
+		return false;
+	}
+	
+	/**
+	 * This method is deprecated. It only exist to avoid breakage at 'class linking' time when someone installs a newer
+	 * version of Gradle tooling into an older version of STS. Calling this method does nothing in newer
+	 * version of Gradle tooling don't provide DSLD support.
+	 */
+	@Deprecated
+	public void setEnableDSLD(boolean enable) {
+		//do nothing. Feature no longer supported
+	}
+
 	public static List<HierarchicalEclipseProject> allProjects(File rootFolder) throws OperationCanceledException, CoreException {
 		GradleProject proj = GradleCore.create(rootFolder);
 		HierarchicalEclipseProject root = proj.getSkeletalGradleModel(new NullProgressMonitor());
