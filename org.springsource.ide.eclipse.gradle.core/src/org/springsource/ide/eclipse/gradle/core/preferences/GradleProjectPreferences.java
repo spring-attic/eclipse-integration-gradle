@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.Platform;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
 import org.springsource.ide.eclipse.gradle.core.classpathcontainer.FastOperationFailedException;
@@ -27,14 +26,12 @@ import org.springsource.ide.eclipse.gradle.core.util.ResourceListEncoder;
  * <p>
  * Also used to store other persisted properties associated with a project, that should be stored in
  * the files associated with the project (inside the .settings folder).
- * 
+ *
  * @author Kris De Volder
  */
 public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
-	
+
 	private static final boolean DEBUG = false;
-//		=  (""+Platform.getLocation()).contains("kdvolder")
-//		|| (""+Platform.getLocation()).contains("bamboo");
 
 	private void debug(String string) {
 		if (DEBUG) {
@@ -45,12 +42,14 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	private static final String LINKED_RESOURCES_PREF = "org.springsource.ide.eclipse.gradle.linkedresources";
 	private static final String ROOT_LOCATION_PREF = "org.springsource.ide.eclipse.gradle.rootprojectloc";
 	private static final String ENABLE_CLASSPATH_SORTING = "org.springsource.ide.eclipse.gradle.classpath.enableSorting";
-	
-	public static final boolean DEFAULT_ENABLE_CLASSPATH_SORTING = true; 
-	
+	private static final String ENABLE_CLASSNAME_SORTING = "org.springsource.ide.eclipse.gradle.classname.enableSorting";
+
+	public static final boolean DEFAULT_ENABLE_CLASSPATH_SORTING = false;
+	public static final boolean DEFAULT_ENABLE_CLASSNAME_SORTING = true;
+
 	/**
 	 * Get preferences associated with this project.
-	 *  
+	 *
 	 * @param project
 	 */
 	public GradleProjectPreferences(GradleProject project) {
@@ -79,7 +78,7 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	public File getRootProjectLocation() {
 		return get(ROOT_LOCATION_PREF, (File)null);
 	}
-		
+
 	/**
 	 * @return Whether classpath entry sorting is enabled. This preference is shared by all projects in a project hierarchy.
 	 */
@@ -88,20 +87,50 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
 			return rootPrefs.get(ENABLE_CLASSPATH_SORTING, DEFAULT_ENABLE_CLASSPATH_SORTING);
 		} catch (FastOperationFailedException e) {
-			GradleCore.log(e); 
+			GradleCore.log(e);
 			return DEFAULT_ENABLE_CLASSPATH_SORTING;
 		}
 	}
-	
-	public void setEnableClasspatEntrySorting(boolean enable) {
+
+	public void setEnableClasspathEntrySorting(boolean enable) {
 		try {
 			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
 			rootPrefs.put(ENABLE_CLASSPATH_SORTING, enable);
 		} catch (FastOperationFailedException e) {
-			GradleCore.log(e); 
+			GradleCore.log(e);
 		}
 	}
-	
+
+	/**
+	 * @return Whether classname entry sorting is enabled. This preference is shared by all projects in a project hierarchy.
+	 */
+	public boolean getEnableClassnameEntrySorting()
+	{
+		try
+		{
+			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
+			return rootPrefs.get(ENABLE_CLASSNAME_SORTING, DEFAULT_ENABLE_CLASSNAME_SORTING);
+		}
+		catch (FastOperationFailedException e)
+		{
+			GradleCore.log(e);
+			return DEFAULT_ENABLE_CLASSNAME_SORTING;
+		}
+	}
+
+	public void setEnableClassnameEntrySorting(boolean enable)
+	{
+		try
+		{
+			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
+			rootPrefs.put(ENABLE_CLASSNAME_SORTING, enable);
+		}
+		catch (FastOperationFailedException e)
+		{
+			GradleCore.log(e);
+		}
+	}
+
 	public File getJavaHome() {
 		//Presently this preference can not be specified on projects so we just use the
 		//global preference to determine it.
