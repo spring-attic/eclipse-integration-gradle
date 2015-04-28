@@ -80,13 +80,12 @@ public class ClassPath {
 	private Map<Integer, Collection<IClasspathEntry>> entryMap = new HashMap<Integer, Collection<IClasspathEntry>>(kindOrdering.length);
 
 	public class ClasspathEntryComparator implements Comparator<IClasspathEntry> {
+		@Override
 		public int compare(IClasspathEntry e1, IClasspathEntry e2) {
-			int k1 = e1.getEntryKind();
-			int k2 = e2.getEntryKind();
-			Assert.isLegal(k1==k2, "Only entries with the same kind should be compared");
-			String p1 = getCompareString(e1);
-			String p2 = getCompareString(e2);
-			return p1.compareTo(p2);
+			Assert.isLegal(e1.getEntryKind()==e2.getEntryKind(), "Only entries with the same kind should be compared");
+			String path1 = getCompareString(e1);
+			String path2 = getCompareString(e2);
+			return path1.compareTo(path2);
 		}
 
 		private String getCompareString(IClasspathEntry e) {
@@ -110,8 +109,19 @@ public class ClassPath {
 			return str;
 		}
 	}
+	
+	public class ClassnameEntryComparator implements Comparator<IClasspathEntry> {
+		@Override
+		public int compare(IClasspathEntry e1, IClasspathEntry e2) {
+			Assert.isLegal(e1.getEntryKind()==e2.getEntryKind(), "Only entries with the same kind should be compared");
+			String name1 = e1.getPath().lastSegment().toLowerCase();
+			String name2 = e2.getPath().lastSegment().toLowerCase();
+			return name1.compareTo(name2);
+		}
+	}
 
-	private boolean enableSorting; //If true, entries of the same kind will be sorted otherwise they will retained in the order they are being added.
+	private boolean enablePathSorting; //If true, entries of the same kind will be sorted by classpath.
+	private boolean enableNameSorting; //If true, entries of the same kind will be sorted by name.
 
 	/** 
 	 * Create a classpath prepopoluated with a set of raw classpath entries.
@@ -125,12 +135,15 @@ public class ClassPath {
 	}
 	
 	public ClassPath(GradleProject project) {
-		this.enableSorting = project.getProjectPreferences().getEnableClasspathEntrySorting();
+		this.enablePathSorting = project.getProjectPreferences().getEnableClasspathEntrySorting();
+		this.enableNameSorting = project.getProjectPreferences().getEnableClassnameEntrySorting();
 	}
 
 	public Collection<IClasspathEntry> createEntrySet(int size) {
-		if (enableSorting) {
+		if (enablePathSorting) {
 			return new TreeSet<IClasspathEntry>(new ClasspathEntryComparator());
+		} if (enableNameSorting) {
+			return new TreeSet<IClasspathEntry>(new ClassnameEntryComparator());
 		} else {
 			return new LinkedHashSet<IClasspathEntry>();
 		}

@@ -1002,7 +1002,7 @@ public class GradleImportTests extends GradleTest {
 				gp.getClassPathcontainer().getClasspathEntries());
 		
 		//Now disable sorting... the ordering should change
-		gp.getProjectPreferences().setEnableClasspatEntrySorting(false);
+		gp.getProjectPreferences().setEnableClasspathEntrySorting(false);
 		for (String name : projectNames) {
 			//Setting this should affect all projects in the hierarchy
 			GradleProject p = getGradleProject(name);
@@ -1032,11 +1032,11 @@ public class GradleImportTests extends GradleTest {
 		
 		assertWtpAfterGradleDependencies(jp);
 		
-		gp.getProjectPreferences().setEnableClasspatEntrySorting(false);
+		gp.getProjectPreferences().setEnableClasspathEntrySorting(false);
 		reimport(gp);
 		assertWtpAfterGradleDependencies(jp);
 		
-		gp.getProjectPreferences().setEnableClasspatEntrySorting(true);
+		gp.getProjectPreferences().setEnableClasspathEntrySorting(true);
 		reimport(gp);
 		assertWtpAfterGradleDependencies(jp);		
 	}

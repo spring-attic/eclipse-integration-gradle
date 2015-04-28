@@ -39,7 +39,8 @@ import org.springsource.ide.eclipse.gradle.core.preferences.GradleProjectPrefere
  */
 public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
 	
-	private Button enableSortingButton;
+	private Button enablePathSortingButton;
+	private Button enableNameSortingButton;
 
 	public GradleProjectPropertyPage() {
 		super();
@@ -65,13 +66,17 @@ public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenc
             Group group1 = new Group(page, SWT.BORDER);
             grabHorizontal.applyTo(group1);
             group1.setText("Classpath sorting strategy");
-            group1.setLayout(new GridLayout(2, true));
-            enableSortingButton = new Button(group1, SWT.RADIO);
-            enableSortingButton.setText("Alphabetically by path");
+            group1.setLayout(new GridLayout(3, true));
+            enablePathSortingButton = new Button(group1, SWT.RADIO);
+            enablePathSortingButton.setText("Alphabetically by path");
+            enableNameSortingButton = new Button(group1, SWT.RADIO);
+            enableNameSortingButton.setText("Alphabetically by name");
             Button disableSortingButton = new Button(group1, SWT.RADIO);
             disableSortingButton.setText("As returned by build script");
             if (project.getProjectPreferences().getEnableClasspathEntrySorting()) {
-            	enableSortingButton.setSelection(true);
+            	enablePathSortingButton.setSelection(true);
+            } else if (project.getProjectPreferences().getEnableClassnameEntrySorting()) {
+            	enableNameSortingButton.setSelection(true);
             } else {
             	disableSortingButton.setSelection(true);
             }
@@ -83,7 +88,8 @@ public class GradleProjectPropertyPage extends PropertyPage implements IWorkbenc
 	public boolean performOk() {
 		GradleProject gradleProject = getGradleProject();
 		GradleProjectPreferences prefs = gradleProject.getProjectPreferences();
-		prefs.setEnableClasspatEntrySorting(enableSortingButton.getSelection());
+		prefs.setEnableClasspathEntrySorting(enablePathSortingButton.getSelection());
+		prefs.setEnableClassnameEntrySorting(enableNameSortingButton.getSelection());
 		return true;
 	}
 
