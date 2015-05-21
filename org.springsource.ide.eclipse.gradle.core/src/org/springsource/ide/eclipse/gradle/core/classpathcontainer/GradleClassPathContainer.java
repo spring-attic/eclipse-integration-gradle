@@ -47,9 +47,9 @@ import org.springsource.ide.eclipse.gradle.core.wtp.WTPUtil;
  */
 @SuppressWarnings("restriction")
 public class GradleClassPathContainer implements IClasspathContainer /*, Cloneable*/ {
-	
+
 	/**
-	 * Listener that gets called when classpath container is refreshed. 
+	 * Listener that gets called when classpath container is refreshed.
 	 * The main purpose of this listener is to allow test code to wait for refreshes
 	 * before proceeding with checking assertions about a classpath container they caused to
 	 * be refreshed.
@@ -61,9 +61,9 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	public static final String ERROR_MARKER_ID = "org.springsource.ide.eclipse.gradle.core.classpathcontainer";
 	private static final String GRADLE_CLASSPATHCONTAINER_KEY = "gradle.classpathcontainer";
 
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	public static final boolean S_DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-	
+
 	private static final void debug(String msg) {
 		if (DEBUG) {
 			System.out.println("GradleClassPathContainer: "+msg);
@@ -75,9 +75,9 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 			System.out.println("GradleClassPathContainer: "+msg);
 		}
 	}
-	
+
 	public static final String ID = "org.springsource.ide.eclipse.gradle.classpathcontainer";
-	
+
 	private GradleProject project;
 	private IPath path;
 
@@ -91,9 +91,9 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	private ClassPathModel oldModel = null;
 	private IClasspathEntry[] persistedEntries;
 	private IRefreshListener refreshListener;
-	
+
 	private static ProjectOpenCloseListener openCloseListener;
-	
+
 	public void addRefreshListener(IRefreshListener l) {
 		Assert.isLegal(refreshListener==null);
 		refreshListener = l;
@@ -104,7 +104,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 			refreshListener=null;
 		}
 	}
-	
+
 	/**
 	 * Creates an uninitialised {@link GradleClassPathContainer}. If displayed in the UI it
 	 * will have no entries.
@@ -126,7 +126,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		}
 
 		GradleRunnable runnable = new GradleRunnable("Update Gradle Classpath for "+project.getName()) {
-			
+
 			@Override
 			public void doit(IProgressMonitor monitor) throws Exception {
 				monitor.beginTask("Initializing Gradle Classpath Container", IProgressMonitor.UNKNOWN);
@@ -184,7 +184,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		return new IClasspathEntry[] {
 		};
 	}
-	
+
 	/**
 	 * Ensures that open close listener is registered to respond to openening and closing of projects
 	 * in correspondence to whether or not the corresponding option is enabled in preferences.
@@ -195,30 +195,30 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		boolean enableForMaven = prefs.getRemapJarsToMavenProjects() && M2EUtils.isInstalled();
 		boolean enableForGradle = prefs.getRemapJarsToGradleProjects();
 		boolean enableListener = prefs.getJarRemappingOnOpenClose();
-		
-		boolean shouldHaveListener = 
+
+		boolean shouldHaveListener =
 				enableListener && (enableForGradle || enableForMaven);
 		if (haveListener==shouldHaveListener) {
 			return;
 		}
 		if (shouldHaveListener) {
 			openCloseListener = new ProjectOpenCloseListener() {
-								
+
 				@Override
 				public void projectOpened(IProject project) {
 					sdebug("OPENED: "+project.getName());
 					JarRemapRefresher.request();
 				}
-				
+
 				@Override
 				public void projectClosed(IProject project) {
 					sdebug("CLOSED: "+project.getName());
 					JarRemapRefresher.request();
 				}
-				
+
 			};
 			GradleCore.getInstance().addOpenCloseListener(openCloseListener);
-			
+
 			if (M2EUtils.isInstalled()) {
 				M2EUtils.addOpenCloseListener(openCloseListener);
 			}
@@ -230,8 +230,8 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 			openCloseListener=null;
 		}
 	}
-	
-	
+
+
 
 	public String getDescription() {
 		String desc = "Gradle Dependencies";
@@ -252,7 +252,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	public IPath getPath() {
 		return path;
 	}
-	
+
 	public boolean isInitialized() {
 		try {
 			ClassPathModel.getClassPathModel(project);
@@ -269,7 +269,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 */
 	void notifyJDT() {
 		debug("notifyJDT");
-//		setJDTClassPathContainer(project, path, 
+//		setJDTClassPathContainer(project, path,
 //					isInitialized()? this : null);
 //		System.err.println("JDT notified: "+this);
 //		JavaModelManager.getJavaModelManager().getClasspathContainer(getPath(), project);
@@ -284,12 +284,12 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	}
 
 	public static void setJDTClassPathContainer(IJavaProject project, IPath path, GradleClassPathContainer container) {
-		if (project!=null) { 
+		if (project!=null) {
 			GradleClasspathContainerInitializer.debug("setting container on "+project.getElementName()+" to "+container);
-			//project may be null, if project got deleted since the refresh got started... 
+			//project may be null, if project got deleted since the refresh got started...
 			try {
 				JavaCore.setClasspathContainer(path,
-						new IJavaProject[] {project},  
+						new IJavaProject[] {project},
 						//					new IClasspathContainer[] {getClone(container)}, //Clone it to make sure JDT pays attention (needs to see a 'changed' object).
 						new IClasspathContainer[] {container},
 						new NullProgressMonitor());
@@ -301,7 +301,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		}
 	}
 
-	
+
 	@Override
 	public String toString() {
 		return "GradleClasspathContainer("+project.getDisplayName()+")";
@@ -313,7 +313,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 //		out.append("}");
 //		return out.toString();
 	}
-	
+
 
 	/**
 	 * Ensures that entries will be recomputed next time around
@@ -362,8 +362,8 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 
 	/**
 	 * Adds a {@link GradleClassPathContainer} entry to the project's classpath.
-	 * @param mon 
-	 * @throws JavaModelException 
+	 * @param mon
+	 * @throws JavaModelException
 	 */
 	public static void addTo(IJavaProject project, IProgressMonitor mon) throws JavaModelException {
 		mon.beginTask("Add classpath container", 10);
@@ -375,7 +375,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 				//Only add it if itsn't there yet
 				ClassPath classpath = new ClassPath(GradleCore.create(project));
 				classpath.removeContainer(ID);
-				
+
 				//			classpath.add(JavaCore.newContainerEntry(new Path(ID)));
 				classpath.DEBUG = S_DEBUG;
 				addTo(classpath, project, shouldExport);
@@ -416,7 +416,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	}
 
 	/**
-	 * This method may be used during initialisation, if the container is initialised using 
+	 * This method may be used during initialisation, if the container is initialised using
 	 * a persisted set of entries from the previous run. Persisted entries will only be
 	 * returned if there's no GradleModel to return a properly computed set of entries.
 	 */
@@ -429,7 +429,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 		}
 	}
 
-	
+
 	private IClasspathEntry[] getPersistedEntries() {
 		if (persistedEntries!=null) {
 			debug("In memory persisted");
@@ -443,18 +443,18 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	}
 
 	private IClasspathEntry[] decode(Serializable serializable) {
-//		JavaProject jp = (JavaProject) project.getJavaProject();
-//		if (serializable!=null) {
-//			String[] encoded = (String[]) serializable;
-//			IClasspathEntry[] decoded = new IClasspathEntry[encoded.length];
-//			for (int i = 0; i < decoded.length; i++) {
-//				decoded[i] = jp.decodeClasspathEntry(encoded[i]);
-//			}
-//			return decoded;
-//		}
+		JavaProject jp = (JavaProject) project.getJavaProject();
+		if (serializable!=null) {
+			String[] encoded = (String[]) serializable;
+			IClasspathEntry[] decoded = new IClasspathEntry[encoded.length];
+			for (int i = 0; i < decoded.length; i++) {
+				decoded[i] = jp.decodeClasspathEntry(encoded[i]);
+			}
+			return decoded;
+		}
 		return null;
 	}
-	
+
 	private Serializable encode(IClasspathEntry[] entries) {
 		JavaProject jp = (JavaProject) project.getJavaProject();
 		if (entries!=null) {
@@ -471,7 +471,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	 * This method is here to facilitate testing. Classpath container refreshes, removals and
 	 * additions also trigger marker updates but these updates are not necessarily synchronous.
 	 * Thus, if we want to test that markers are correctly updated we need to be able to
-	 * wait for the right time. 
+	 * wait for the right time.
 	 */
 	public static void waitForMarkerUpdates() {
 		MarkerMaker.busy.waitNotBusy();
@@ -497,5 +497,5 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	private static void addTo(ClassPath cp, IJavaProject javaProject, boolean exported) {
 		cp.add(WTPUtil.addToDeploymentAssembly(javaProject, JavaCore.newContainerEntry(new Path(ID), exported)));
 	}
-	
+
 }
