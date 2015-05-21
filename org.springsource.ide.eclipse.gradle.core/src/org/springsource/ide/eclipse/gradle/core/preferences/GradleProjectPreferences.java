@@ -45,8 +45,10 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 	private static final String LINKED_RESOURCES_PREF = "org.springsource.ide.eclipse.gradle.linkedresources";
 	private static final String ROOT_LOCATION_PREF = "org.springsource.ide.eclipse.gradle.rootprojectloc";
 	private static final String ENABLE_CLASSPATH_SORTING = "org.springsource.ide.eclipse.gradle.classpath.enableSorting";
+	private static final String ENABLE_CLASSNAME_SORTING = "org.springsource.ide.eclipse.gradle.classname.enableSorting";
 	
 	public static final boolean DEFAULT_ENABLE_CLASSPATH_SORTING = true; 
+	public static final boolean DEFAULT_ENABLE_CLASSNAME_SORTING = false; 
 	
 	/**
 	 * Get preferences associated with this project.
@@ -93,10 +95,32 @@ public class GradleProjectPreferences extends AbstractGradleProjectPreferences {
 		}
 	}
 	
-	public void setEnableClasspatEntrySorting(boolean enable) {
+	public void setEnableClasspathEntrySorting(boolean enable) {
 		try {
 			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
 			rootPrefs.put(ENABLE_CLASSPATH_SORTING, enable);
+		} catch (FastOperationFailedException e) {
+			GradleCore.log(e); 
+		}
+	}
+	
+	/**
+	 * @return Whether classname entry sorting is enabled. This preference is shared by all projects in a project hierarchy.
+	 */
+	public boolean getEnableClassnameEntrySorting() {
+		try {
+			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
+			return rootPrefs.get(ENABLE_CLASSNAME_SORTING, DEFAULT_ENABLE_CLASSNAME_SORTING);
+		} catch (FastOperationFailedException e) {
+			GradleCore.log(e); 
+			return DEFAULT_ENABLE_CLASSNAME_SORTING;
+		}
+	}
+	
+	public void setEnableClassnameEntrySorting(boolean enable) {
+		try {
+			AbstractGradleProjectPreferences rootPrefs = getRootProjectPreferences();
+			rootPrefs.put(ENABLE_CLASSNAME_SORTING, enable);
 		} catch (FastOperationFailedException e) {
 			GradleCore.log(e); 
 		}
