@@ -17,14 +17,14 @@
    
    <!-- Dashboard: removed should only be consumed from commons update site 
    <feature 
-       url="features/org.springsource.ide.eclipse.dashboard_3.7.0.qualifier.jar" 
-   	   id="org.springsource.ide.eclipse.dashboard" version="3.7.0.qualifier">
+       url="features/org.springsource.ide.eclipse.dashboard_3.7.1.qualifier.jar" 
+   	   id="org.springsource.ide.eclipse.dashboard" version="3.7.1.qualifier">
        <category name="Extensions / Gradle Integration"/>
    </feature> -->
    
    <feature 
-       url="features/org.springsource.ide.eclipse.commons_3.7.0.qualifier.jar" 
-   	   id="org.springsource.ide.eclipse.commons" version="3.7.0.qualifier">
+       url="features/org.springsource.ide.eclipse.commons_3.7.1.qualifier.jar" 
+   	   id="org.springsource.ide.eclipse.commons" version="3.7.1.qualifier">
    </feature>
    
    <!-- gradle -->
