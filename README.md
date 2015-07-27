@@ -65,6 +65,10 @@ If you follow this installation procedure in a plain Eclipse, this will install 
 This gives you an easy way to subsequently install Groovy Eclipse as well. See instructions on 
 [Installing from the STS Dashboard](#installing-from-the-sts-dashboard) above. 
 
+### Offline Installation
+
+Use Update Site Archive for STS from <https://spring.io/tools/sts/all>
+
 ## Questions and bug reports:
 
 If you have a question that Google can't answer, the best way is to go to the [STS forum](http://forum.springsource.org/forumdisplay.php?32-SpringSource-Tool-Suite).
