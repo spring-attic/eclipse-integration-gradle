@@ -32,32 +32,32 @@ import org.springsource.ide.eclipse.gradle.core.util.TopoSort;
  * Gathers contributed project configurators and keeps them in topological
  * order. This manager object is able to configure projects via
  * {@link #configure(IProjectConfigurationRequest, IProgressMonitor)} method
- * 
+ *
  * @author Alex Boyko
- * 
+ *
  */
 public final class ProjectConfigurationManager {
-	
+
 	private static final String EXTPT_ID = "projectConfigurators"; //$NON-NLS-1$
 	private static final String ATTR__ID = "id"; //$NON-NLS-1$
 	private static final String ATTR__CLASS = "class"; //$NON-NLS-1$
 //	private static final String ATTR__NAME = "name"; //$NON-NLS-1$
 	private static final String ATTR__AFTER = "after"; //$NON-NLS-1$
 	private static final String ATTR__BEFORE = "before"; //$NON-NLS-1$
-	
+
 	private static final String IDS_SEPARATOR = ","; //$NON-NLS-1$
-	
+
 	private static ProjectConfigurationManager INSTANCE = null;
-	
+
 	private IProjectConfigurator[] configurators = new IProjectConfigurator[0];
-	
+
 	public static ProjectConfigurationManager getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new ProjectConfigurationManager();
 		}
 		return INSTANCE;
 	}
-	
+
 	private static List<String> extractIds(String idStr) {
 		if (idStr == null) {
 			return Collections.emptyList();
@@ -72,12 +72,12 @@ public final class ProjectConfigurationManager {
 		}
 		return list;
 	}
-	
+
 	private ProjectConfigurationManager() {
 		super();
 		initializeFromExtensions();
 	}
-	
+
 	private void initializeFromExtensions() {
 		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(GradleCore.PLUGIN_ID, EXTPT_ID);
 		final Map<String, ProjectConfiguratorDescriptor> descriptorsMap = new HashMap<String, ProjectConfiguratorDescriptor>();
@@ -93,7 +93,7 @@ public final class ProjectConfigurationManager {
 				GradleCore.log(e);
 			}
 		}
-		
+
 		// Topologically sort project configurator descriptors.
 		DescriptorsTopoSort topoSort = new DescriptorsTopoSort(createPredecessorsMap(descriptorsMap));
 		List<ProjectConfiguratorDescriptor> descriptors = topoSort.getSorted();
@@ -101,17 +101,17 @@ public final class ProjectConfigurationManager {
 			GradleCore
 					.log("Cycle detected in the graph constructed from contributed Gradle Project Configurators. Gradle projects may not be configured appropriately.");
 		}
-		
+
 		this.configurators = new IProjectConfigurator[descriptors.size()];
 		for (int i = 0; i < descriptors.size(); i++) {
 			this.configurators[i] = descriptors.get(i).configurator;
 		}
 	}
-	
+
 	private static Map<ProjectConfiguratorDescriptor, Set<ProjectConfiguratorDescriptor>> createPredecessorsMap(Map<String, ProjectConfiguratorDescriptor> descriptors) {
 		Map<ProjectConfiguratorDescriptor, Set<ProjectConfiguratorDescriptor>> predecessorsMap = new HashMap<ProjectConfiguratorDescriptor, Set<ProjectConfiguratorDescriptor>>();
 		for (ProjectConfiguratorDescriptor descriptor : descriptors.values()) {
-			
+
 			// Handle "after" ids
 			Set<ProjectConfiguratorDescriptor> predecessors = predecessorsMap.get(descriptor);
 			if (predecessors == null) {
@@ -124,7 +124,7 @@ public final class ProjectConfigurationManager {
 					predecessors.add(after);
 				}
 			}
-			
+
 			// Handle "before" ids
 			for (String beforeId : descriptor.before) {
 				ProjectConfiguratorDescriptor before = descriptors.get(beforeId);
@@ -140,7 +140,7 @@ public final class ProjectConfigurationManager {
 		}
 		return predecessorsMap;
 	}
-	
+
 	public void configure(IProjectConfigurationRequest request, IProgressMonitor monitor) {
 		for (IProjectConfigurator configurator : this.configurators) {
 			try {
@@ -150,20 +150,20 @@ public final class ProjectConfigurationManager {
 			}
 		}
 	}
-	
+
 	private class ProjectConfiguratorDescriptor {
-		
+
 		String id;
 //		String name;
 		List<String> before;
 		List<String> after;
 		IProjectConfigurator configurator;
-		
+
 		ProjectConfiguratorDescriptor(IConfigurationElement element) throws CoreException {
 			super();
 			this.id = element.getAttribute(ATTR__ID);
 //			this.name = element.getAttribute(ATTR__NAME);
-			this.configurator = (IProjectConfigurator) element.createExecutableExtension(ATTR__CLASS);			
+			this.configurator = (IProjectConfigurator) element.createExecutableExtension(ATTR__CLASS);
 			this.before = extractIds(element.getAttribute(ATTR__BEFORE));
 			this.after = extractIds(element.getAttribute(ATTR__AFTER));
 		}
@@ -181,12 +181,17 @@ public final class ProjectConfigurationManager {
 			}
 			return false;
 		}
-		
-		
+
+		@Override
+		public String toString() {
+			return "ProjectConfiguratorDescriptor [id=" + id + ", configurator=" + configurator + "]";
+		}
+
+
 	}
-	
+
 	private class DescriptorsTopoSort extends TopoSort<ProjectConfiguratorDescriptor> {
-		
+
 		public DescriptorsTopoSort(
 				final Map<ProjectConfiguratorDescriptor, Set<ProjectConfiguratorDescriptor>> predecessorsMap) {
 			super(predecessorsMap.keySet(), new PartialOrder<ProjectConfiguratorDescriptor>() {
