@@ -62,11 +62,11 @@ public class GradleCore extends Plugin {
 	private static ModelBuilder modelBuilder = new DefaultModelBuilder();
 	private static GradleModelManager modelManager = new GradleModelManager(modelBuilder);
 	private static GradleProjectManager projectManager = new GradleProjectManager(modelManager);
-	
+
 	private GradlePreferences gradlePreferences = null;
 	private GradleAPIProperties properties;
 	private ProjectOpenCloseListenerManager openCloseListeners = null;
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -99,7 +99,7 @@ public class GradleCore extends Plugin {
 		IStatus s = ExceptionUtil.status(IStatus.ERROR, e);
 		log(s);
 	}
-	
+
 	public static void logInfo(Throwable e) {
 		IStatus s = ExceptionUtil.status(IStatus.INFO, e);
 		log(s);
@@ -108,11 +108,11 @@ public class GradleCore extends Plugin {
 	public static void log(IStatus s) {
 		instance.getLog().log(s);
 	}
-	
+
 	public static void log(String msg) {
 		log(ExceptionUtil.coreException(msg));
 	}
-	
+
 	public static GradleCore getInstance() {
 		return instance;
 	}
@@ -123,7 +123,7 @@ public class GradleCore extends Plugin {
 		}
 		return properties;
 	}
-	
+
 	public GradlePreferences getPreferences() {
 		if (gradlePreferences==null) {
 			migrateLegacyPreferences(OLD_PLUGIN_ID, PLUGIN_ID);
@@ -172,8 +172,8 @@ public class GradleCore extends Plugin {
 	}
 
 	/**
-	 * Gets GradleProject associated with given IProject, if it exists. 
-	 * May return null if the project itself doesn't exist (has no location) or the GradleProject 
+	 * Gets GradleProject associated with given IProject, if it exists.
+	 * May return null if the project itself doesn't exist (has no location) or the GradleProject
 	 * instance associated with thay project wasn't created yet.
 	 */
 	public static GradleProject getGradleProject(IProject project) {
@@ -209,7 +209,7 @@ public class GradleCore extends Plugin {
 	/**
 	 * Try to find gradle project in the Eclipse workspace corresponding to a gradle 'external dependency'.
 	 * This method does a 'best effort' based on what information is currently in the model cache.
-	 * Callers should have a mechanism in place to populate the cache beforehand. 
+	 * Callers should have a mechanism in place to populate the cache beforehand.
 	 */
 	public static IProject getGradleProject(ExternalDependency gEntry) throws FastOperationFailedException {
 		Collection<GradleProject> projects = getGradleProjects();
@@ -239,7 +239,7 @@ public class GradleCore extends Plugin {
 			}
 		}
 		if (throwAtEnd!=null) {
-			throw throwAtEnd; //This is to let us distinguish normal 'null' value from 
+			throw throwAtEnd; //This is to let us distinguish normal 'null' value from
 			                  //the case where the null value may be because of missing Gradle models
 		}
 		return null;
@@ -247,7 +247,7 @@ public class GradleCore extends Plugin {
 
 	private static boolean matches(GradleModuleVersion publication, GradleModuleVersion dependency) {
 		//TODO: make matching algo configurable to some degree.
-		return equal(publication.getGroup(), dependency.getGroup())
+		return publication!=null && dependency!=null && equal(publication.getGroup(), dependency.getGroup())
 			&& equal(publication.getName(), dependency.getName());
 		//	&& equal(publication.getVersion(), dependency.getVersion());
 	}
@@ -258,7 +258,7 @@ public class GradleCore extends Plugin {
 		}
 		return x.equals(y);
 	}
-	
+
 	public synchronized void addOpenCloseListener(ProjectOpenCloseListener l) {
 		if (openCloseListeners==null) {
 			openCloseListeners = new ProjectOpenCloseListenerManager();
@@ -277,9 +277,9 @@ public class GradleCore extends Plugin {
 	 * Mainly here for testing purposes. (so we can test that removing listeners actually works).
 	 */
 	public int countOpenCloseListeners() {
-		if (openCloseListeners!=null) { 
+		if (openCloseListeners!=null) {
 			return openCloseListeners.countListeners();
-		} 
+		}
 		return 0;
 	}
 
@@ -290,7 +290,7 @@ public class GradleCore extends Plugin {
 	}
 
 	/**
-	 * For testing purposes mainly. Clears all know / cached classpath container data. 
+	 * For testing purposes mainly. Clears all know / cached classpath container data.
 	 * Otherwise it may cause test failures when projects with similar names / locations leak cached
 	 * information from one test to another.
 	 */
