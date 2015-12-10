@@ -21,7 +21,7 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.gradle.toolingapi,
  org.eclipse.ui.editors,
  org.eclipse.jface.text
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: org.springsource.ide.eclipse.gradle.ui,

@@ -7,7 +7,7 @@ Bundle-Activator: org.springsource.ide.eclipse.gradle.toolingapi.GradleToolingAp
 Bundle-Vendor: Pivotal Software, Inc.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/gradle-core-2.2.1.jar,
