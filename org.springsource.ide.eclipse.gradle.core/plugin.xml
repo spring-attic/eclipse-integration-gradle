@@ -12,7 +12,7 @@
    
    <extension
          id="org.springsource.ide.eclipse.gradle.core.nature"
-         name="Gradle Nature"
+         name="Gradle (STS) Nature"
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run class="org.springsource.ide.eclipse.gradle.core.GradleNature">
@@ -25,7 +25,7 @@
 
   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
     <launchConfigurationType
-        name="Gradle Build"
+        name="Gradle (STS) Build"
         delegate="org.springsource.ide.eclipse.gradle.core.launch.GradleLaunchConfigurationDelegate"
         category="org.eclipse.ui.externaltools"
         modes="run"               

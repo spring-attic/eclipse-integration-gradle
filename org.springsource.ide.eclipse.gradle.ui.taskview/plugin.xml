@@ -5,7 +5,7 @@
    <extension
          point="org.eclipse.ui.views">
       <category
-            name="Gradle"
+            name="Gradle (STS)"
             id="org.springsource.ide.eclipse.gradle.ui.taskview">
       </category>
       <view

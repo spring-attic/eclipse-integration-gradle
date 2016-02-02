@@ -24,7 +24,7 @@
                class="org.springsource.ide.eclipse.gradle.ui.actions.ConvertToGradleProjectActionDelegate"
                enablesFor="+"
                id="org.springsource.ide.eclipse.gradle.ui.actions.ConvertToGradleProject"
-               label="Convert to Gradle Project"
+               label="Convert to Gradle (STS) Project"
                menubarPath="org.eclipse.ui.projectConfigure/additions">
          </action>
       </objectContribution>
@@ -34,7 +34,7 @@
              adaptable="true"
              id="org.springsource.ide.eclipse.gradle.menu">
         <menu
-             label="Gradle"
+             label="Gradle (STS)"
              id="org.springsource.ide.eclipse.gradle.menu">
             <separator name="actions"/>
             <separator name="toggle"/>
@@ -95,7 +95,7 @@
             objectClass="org.eclipse.ui.IWorkingSet">
          <menu
                id="org.springsource.ide.eclipse.gradle.workingSetMenu"
-               label="Gradle"
+               label="Gradle (STS)"
                path="additions">
             <groupMarker
                   name="refresh">
@@ -144,7 +144,7 @@
       point = "org.eclipse.ui.preferencePages">
        <page id="org.springsource.ide.eclipse.gradle.PreferencesPage"
 	    class="org.springsource.ide.eclipse.gradle.ui.GradlePreferencesPage"
-            name="Gradle">
+            name="Gradle (STS)">
        </page>
        <page
              category="org.springsource.ide.eclipse.gradle.PreferencesPage"
@@ -183,7 +183,7 @@
             class="org.springsource.ide.eclipse.gradle.ui.wizards.GradleImportWizard"
             icon="icons/gradle-import.png"
             id="org.springsource.ide.eclipse.gradle.wizards.import"
-            name="Gradle Project"> 
+            name="Gradle (STS) Project"> 
          <description> 
             An import wizards that imports existing Gradle projects into Eclipse.
          </description> 
@@ -191,7 +191,7 @@
       </wizard>
       <category
             id="org.springsource.ide.eclipse.gradle.wizards.import.category"
-            name="Gradle">
+            name="Gradle (STS)">
       </category> 
 </extension>
  <extension point="org.eclipse.ui.ide.projectNatureImages">
@@ -206,14 +206,14 @@
       point = "org.eclipse.ui.newWizards">
 	<category
 	   id = "org.springsource.ide.eclipse.gradle.wizards.new.category"
-	   name="Gradle">
+	   name="Gradle (STS)">
 	</category>
  	<wizard
         category="org.springsource.ide.eclipse.gradle.wizards.new.category"
         class="org.springsource.ide.eclipse.gradle.ui.wizards.NewGradleProjectWizard"
         icon="icons/gradle-multiproj-folder.png"
         id="org.springsource.ide.eclipse.gradle.wizards.new"
-        name="Gradle Project"
+        name="Gradle (STS) Project"
         project="true">
     	   <description>Create a New Gradle Project</description>
 	   <selection class="org.eclipse.core.resources.IResource"/>
@@ -244,7 +244,7 @@
             description="Selected and execute a set of Gradle tasks"
             icon="icons/gradle-launch.png"
             id="org.springsource.ide.eclipse.gradle.launch.shortcut.showDialog"
-            label="Gradle Build..."
+            label="Gradle (STS) Build..."
             modes="run">
         <contextualLaunch>
            <enablement>
@@ -262,10 +262,10 @@
            </enablement>
            <contextLabel
          	  mode="run"
-         	  label="Gradle Build..."/>
+         	  label="Gradle (STS) Build..."/>
           <contextLabel
          	  mode="debug"
-         	  label="Gradle Build..."/>
+         	  label="Gradle (STS) Build..."/>
   		 </contextualLaunch>
         <configurationType
               id="org.springsource.ide.eclipse.gradle.launch">
@@ -277,7 +277,7 @@
             description="Selected and execute a set of Gradle tasks"
             icon="icons/gradle-launch.png"
             id="org.springsource.ide.eclipse.gradle.launch.shortcut.skipDialog"
-            label="Gradle Build"
+            label="Gradle (STS) Build"
             modes="run">
         <contextualLaunch>
            <enablement>
@@ -295,10 +295,10 @@
            </enablement>
            <contextLabel
          	  mode="run"
-         	  label="Gradle Build"/>
+         	  label="Gradle (STS) Build"/>
           <contextLabel
          	  mode="debug"
-         	  label="Gradle Build"/>
+         	  label="Gradle (STS) Build"/>
   		 </contextualLaunch>
         <configurationType
               id="org.springsource.ide.eclipse.gradle.launch">
@@ -309,13 +309,13 @@
          point="org.eclipse.ui.commands">
       <category
             id="org.springsource.ide.eclipse.gradle.ui.commands"
-            name="SpringSource Gradle Tools">
+            name="Gradle (STS) Tools">
       </category>
       <command
             categoryId="org.springsource.ide.eclipse.gradle.ui.commands"
             description="Open Gradle tasks quick launcher dialog"
             id="org.springsource.ide.eclipse.gradle.ui.OpenTasksQuickLauncher"
-            name="Open Gradle Tasks Quick Launcher">
+            name="Open Gradle (STS) Tasks Quick Launcher">
       </command>
       <command
             categoryId="org.springsource.ide.eclipse.gradle.ui.commands"
@@ -343,14 +343,14 @@
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="org.springsource.ide.eclipse.gradle.ui.global"
-            label="Gradle Global Actions"
+            label="Gradle (STS) Global Actions"
             visible="true">
          <action
                class="org.springsource.ide.eclipse.gradle.ui.actions.ConsoleInplaceDialogActionDelegate"
                definitionId="org.springsource.ide.eclipse.gradle.ui.OpenTasksQuickLauncher"
                icon="icons/gradle-launch.png"
                id="org.springsource.ide.eclipse.gradle.ui.GlobalKeyBindingOpenTasksQuickLauncher"
-               label="Open Gradle Tasks Quick Launcher">
+               label="Open Gradle (STS) Tasks Quick Launcher">
          </action>
       </actionSet>
    </extension>
