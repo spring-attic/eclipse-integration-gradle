@@ -36,7 +36,7 @@ import org.springsource.ide.eclipse.gradle.core.classpathcontainer.GradleClassPa
  * @author Kris De Volder
  */
 public class ClassPath {
-	
+
 	public static boolean isContainerOnClasspath(IJavaProject jp, String containerID) {
 		try {
 			IClasspathEntry[] entries = jp.getRawClasspath();
@@ -53,15 +53,15 @@ public class ClassPath {
 		}
 		return false;
 	}
-	
+
 	public boolean DEBUG = false;
-	
+
 	private void debug(String msg) {
 		if (DEBUG) {
 			System.out.println("ClassPath: "+msg);
 		}
 	}
-	
+
 	/**
 	 * This array defines the ordering classpath entries based on their kinds.
 	 */
@@ -72,7 +72,7 @@ public class ClassPath {
 		IClasspathEntry.CPE_VARIABLE,
 		IClasspathEntry.CPE_PROJECT
 	};
-	
+
 	/**
 	 * Entries, divided-up by category so that categories always maintain their order no matter
 	 * what order entries are added in.
@@ -103,37 +103,45 @@ public class ClassPath {
 					str = "AA";
 				} else if (str.startsWith("GROOVY_")) {
 					//STS-3382: DSL support Groovy container should be last entry on classpath
-					str = "zzz"+str; 
+					str = "zzz"+str;
 				}
 			}
 			return str;
 		}
 	}
-	
+
 	public class ClassnameEntryComparator implements Comparator<IClasspathEntry> {
+
+		private ClasspathEntryComparator tieBreaker = new ClasspathEntryComparator();
+
 		@Override
 		public int compare(IClasspathEntry e1, IClasspathEntry e2) {
 			Assert.isLegal(e1.getEntryKind()==e2.getEntryKind(), "Only entries with the same kind should be compared");
 			String name1 = e1.getPath().lastSegment().toLowerCase();
 			String name2 = e2.getPath().lastSegment().toLowerCase();
-			return name1.compareTo(name2);
+			int result = name1.compareTo(name2);
+			if (result!=0) {
+				return result;
+			} else {
+				return tieBreaker.compare(e1, e2);
+			}
 		}
 	}
 
 	private boolean enablePathSorting; //If true, entries of the same kind will be sorted by classpath.
 	private boolean enableNameSorting; //If true, entries of the same kind will be sorted by name.
 
-	/** 
+	/**
 	 * Create a classpath prepopoluated with a set of raw classpath entries.
-	 * 
-	 * @param project 
+	 *
+	 * @param project
 	 * @param i
 	 */
 	public ClassPath(GradleProject project, IClasspathEntry[] rawEntries) {
 		this(project);
 		addAll(Arrays.asList(rawEntries));
 	}
-	
+
 	public ClassPath(GradleProject project) {
 		this.enablePathSorting = project.getProjectPreferences().getEnableClasspathEntrySorting();
 		this.enableNameSorting = project.getProjectPreferences().getEnableClassnameEntrySorting();
@@ -168,7 +176,7 @@ public class ClassPath {
 			}
 		}
 	}
-	
+
 	/**
 	 * Retrieves the classpath entries of a particular kind only.
 	 */
@@ -187,7 +195,7 @@ public class ClassPath {
 	public void removeLibraryEntries() {
 		entryMap.remove(IClasspathEntry.CPE_LIBRARY);
 	}
-	
+
 	/**
 	 * Removes all project entries from this classpath.
 	 */
@@ -222,10 +230,10 @@ public class ClassPath {
 	}
 
 	/**
-	 * Find class path container entry with given container ID. If more than one entry 
+	 * Find class path container entry with given container ID. If more than one entry
 	 * exists the first one found will be returned. If no entry is found null will be
 	 * returned.
-	 * 
+	 *
 	 * @param containerID
 	 * @return First matching classpath entry or null if no match.
 	 */
@@ -238,7 +246,7 @@ public class ClassPath {
 		}
 		return null;
 	}
-	
+
 	public void removeContainer(String containerID) {
 		Collection<IClasspathEntry> containers = getEntries(IClasspathEntry.CPE_CONTAINER);
 		Iterator<IClasspathEntry> iter = containers.iterator();
@@ -249,7 +257,7 @@ public class ClassPath {
 			}
 		}
 	}
-	
+
 	private boolean isJREContainer(IClasspathEntry e) {
 		return isContainer(e, JavaRuntime.JRE_CONTAINER);
 	}
@@ -291,7 +299,7 @@ public class ClassPath {
 	}
 
 	private boolean isChanged(IClasspathEntry[] oldClasspath, IClasspathEntry[] newClasspath) {
-		if (oldClasspath.length!=newClasspath.length) 
+		if (oldClasspath.length!=newClasspath.length)
 			return true;
 		for (int i = 0; i < newClasspath.length; i++) {
 			if (!oldClasspath[i].equals(newClasspath[i])) {
