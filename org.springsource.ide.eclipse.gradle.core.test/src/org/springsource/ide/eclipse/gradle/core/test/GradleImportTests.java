@@ -763,8 +763,8 @@ public class GradleImportTests extends GradleTest {
 			
 			@Override
 			public boolean test() throws Exception {
-				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("main"));
-				assertClasspathJarEntry("commons-collections-3.2.1.jar", getGradleProject("lib"));
+				assertClasspathJarEntry("commons-collections-3.2.2.jar", getGradleProject("main"));
+				assertClasspathJarEntry("commons-collections-3.2.2.jar", getGradleProject("lib"));
 				assertClasspathProjectEntry(getProject("lib"), getJavaProject("main"));
 				return true;
 			}

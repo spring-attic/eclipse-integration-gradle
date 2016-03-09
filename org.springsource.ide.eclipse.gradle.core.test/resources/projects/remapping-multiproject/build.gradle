@@ -42,7 +42,7 @@ project(":main") {
 project(":lib") {
 	dependencies {
 		compile project(":sublib")
-		compile "commons-collections:commons-collections:3.2.1"
+		compile "commons-collections:commons-collections:3.2.2"
 	}
 }
 
