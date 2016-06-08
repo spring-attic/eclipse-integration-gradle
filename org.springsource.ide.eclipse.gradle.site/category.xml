@@ -33,5 +33,6 @@
       <category name="Extensions / Gradle Integration"/>
    </feature>
 
+   <bundle id="org.eclipse.buildship.stsmigration" version="0.0.0"/>
 
 </site>

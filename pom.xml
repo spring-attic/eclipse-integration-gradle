@@ -319,6 +319,11 @@
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.eclipse-integration-commons-version}</url>
 				</repository>
+				<repository>
+					<id>buildship</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/buildship/updates/e45/releases/1.0</url>
+				</repository>
 			</repositories>
 		</profile>
 		
@@ -544,11 +549,11 @@
 						<pomDependencies>consider</pomDependencies>
 						<ignoreTychoRepositories>true</ignoreTychoRepositories>
 						<environments>
-							<environment>
+<!--							<environment>
 								<os>macosx</os>
 								<ws>cocoa</ws>
 								<arch>x86</arch>
-							</environment>
+							</environment> -->
 							<environment>
 								<os>macosx</os>
 								<ws>cocoa</ws>
