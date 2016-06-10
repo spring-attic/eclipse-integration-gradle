@@ -1,35 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.springsource.ide.eclipse.gradle</groupId>
-    <artifactId>org.springsource.ide.eclipse.gradle.parent</artifactId>
-    <version>3.8.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>org.springsource.ide.eclipse.gradle.core.test</artifactId>
-  
-  <packaging>eclipse-test-plugin</packaging>
-  <properties>
-    <test.class>org.springsource.ide.eclipse.gradle.core.test.AllGradleCoreTests</test.class>
-    <test.useUIThread>true</test.useUIThread>
-  </properties>
-  <profiles>
-    <profile>
-      <id>GrailsCore</id>
-      <properties>
-          <test.class>org.springsource.ide.eclipse.gradle.core.test.GrailsCoreBuildTest</test.class>
-          <groovy.compiler.feature>org.codehaus.groovy23.feature.feature.group</groovy.compiler.feature>
-      </properties>
-    </profile>
-    <profile>
-      <id>heartbeat</id>
-      <properties>
-        <test.skip>true</test.skip>
-      </properties>
-    </profile>
-  </profiles>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springsource.ide.eclipse.gradle</groupId>
+		<artifactId>org.springsource.ide.eclipse.gradle.parent</artifactId>
+		<version>3.8.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>org.springsource.ide.eclipse.gradle.core.test</artifactId>
+
+	<packaging>eclipse-test-plugin</packaging>
+	<properties>
+		<test.class>org.springsource.ide.eclipse.gradle.core.test.AllGradleCoreTests</test.class>
+		<test.useUIThread>true</test.useUIThread>
+	</properties>
+	<profiles>
+		<profile>
+			<id>GrailsCore</id>
+			<properties>
+				<test.class>org.springsource.ide.eclipse.gradle.core.test.GrailsCoreBuildTest</test.class>
+				<groovy.compiler.feature>org.codehaus.groovy23.feature.feature.group</groovy.compiler.feature>
+			</properties>
+		</profile>
+		<profile>
+			<id>heartbeat</id>
+			<properties>
+				<test.skip>true</test.skip>
+			</properties>
+		</profile>
+	</profiles>
 	<build>
 		<plugins>
 			<plugin>
@@ -45,6 +44,21 @@
 						<phase>verify</phase>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- remove org.eclipse.buildship.stsmigration bundle from test target because it hangs the build with its annoying popup dialog -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<filters>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>org.eclipse.buildship.stsmigration</id>
+							<removeAll />
+						</filter>
+					</filters>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
