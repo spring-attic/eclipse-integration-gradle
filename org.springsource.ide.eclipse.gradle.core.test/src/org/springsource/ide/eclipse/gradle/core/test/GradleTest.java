@@ -91,7 +91,7 @@ public abstract class GradleTest extends TestCase {
 		setAutoBuilding(true); //Default value
 		JavaXXRuntime.java7everyone(); //Swicht compiler VM install, Grade Java home all to JAva 7 by default.
 										// Individual tests may swich to another Java version if they like
-										// But ensure java 6 as stable baseline for tests that don't set it themselves.
+										// But ensure java 7 as stable baseline for tests that don't set it themselves.
 		
 		IEclipsePreferences preferences = ConfigurationScope.INSTANCE.getNode("org.codehaus.groovy.eclipse.dsl");
 		preferences.putBoolean("org.codehaus.groovy.eclipse.dsl.auto.add.support", false);

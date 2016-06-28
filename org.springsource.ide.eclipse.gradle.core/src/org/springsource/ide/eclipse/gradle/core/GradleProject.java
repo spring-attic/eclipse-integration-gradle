@@ -712,30 +712,14 @@ public class GradleProject {
 			classPath.setOn(jProject, new SubProgressMonitor(monitor, 1));
 			debug("convertToGradleProject JRE container added");
 			
-			//3: Refresh source folders
-			refreshSourceFolders(eh, new SubProgressMonitor(monitor, 1));
-			debug("refreshed source folders");
-			
-			//4: Force root project cache to be set
-//Removed calling getRootProject doesn't force anything into the cache. 
-// model builds do that now. It should not be possible to get this far in here without 
-// a model, and if there's a model then rootProject should be set.
-//			try {
-//				getRootProject();
-//				debug("root project cached");
-//			} catch (FastOperationFailedException e) {
-//				debug("FAILED to cache root project: " + e.getMessage());
-//				
-//				 //Shouldn't happen... because by now, there should already be gradle model available
-//				throw ExceptionUtil.coreException(e);
-//			} finally {
-//				monitor.worked(1);
-//			}
-						
 			//4: Add classpath container
 			GradleClassPathContainer.addTo(getJavaProject(), new SubProgressMonitor(monitor, 1));
 			debug("Classpath container added");
-
+			
+			//4: Refresh source folders
+			refreshSourceFolders(eh, new SubProgressMonitor(monitor, 1));
+			debug("refreshed source folders");
+			
 			//5: Add WTP fixups
 			WTPUtil.addWebLibraries(this);
 			monitor.worked(1);

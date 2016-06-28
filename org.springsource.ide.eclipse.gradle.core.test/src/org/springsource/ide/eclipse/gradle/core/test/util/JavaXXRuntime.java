@@ -39,7 +39,7 @@ public class JavaXXRuntime {
 		"/Library/Java/JavaVirtualMachines/jdk1.8.0_20.jdk/Contents/Home"
 	};
 	static String[] java7locations = {
-		"/home/kdvolder/Applications/jdk1.7.0_17", // On Kris's machine
+		"/home/kdvolder/Applications/jdk1.7.0_79", // On Kris's machine
 		"/opt/java/jdk/Sun/1.7",  // on springsource build server
 		"/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home"
 	};
