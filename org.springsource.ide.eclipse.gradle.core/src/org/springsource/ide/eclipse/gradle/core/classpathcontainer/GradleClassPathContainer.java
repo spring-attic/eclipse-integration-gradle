@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.springsource.ide.eclipse.gradle.core.ClassPath;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
@@ -494,7 +495,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	}
 
 	private static void addTo(ClassPath cp, IJavaProject javaProject, boolean exported) {
-		cp.add(WTPUtil.addToDeploymentAssembly(javaProject, JavaCore.newContainerEntry(new Path(ID), exported)));
+		cp.addContainerAfter(JavaRuntime.JRE_CONTAINER, WTPUtil.addToDeploymentAssembly(javaProject, JavaCore.newContainerEntry(new Path(ID), exported)));
 	}
 
 }

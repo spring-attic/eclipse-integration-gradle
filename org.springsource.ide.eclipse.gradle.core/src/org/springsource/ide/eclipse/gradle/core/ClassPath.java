@@ -319,4 +319,30 @@ public class ClassPath {
 		return entries.toArray(new IClasspathEntry[entries.size()]);
 	}
 
+	public void addContainerAfter(String after, IClasspathEntry toAdd) {
+		if (enableSorting()) {
+			add(toAdd);
+		} else {
+			Collection<IClasspathEntry> containers = getEntries(IClasspathEntry.CPE_CONTAINER);
+			Collection<IClasspathEntry> newContainers = createEntrySet(containers.size()+1);
+			boolean added = false;
+			for (IClasspathEntry e : containers) {
+				newContainers.add(e);
+				String id = e.getPath().segment(0);
+				if (!added && after.equals(id)) {
+					added = true;
+					newContainers.add(toAdd);
+				}
+			}
+			if (!added) {
+				newContainers.add(toAdd);
+			}
+			entryMap.put(IClasspathEntry.CPE_CONTAINER, newContainers);
+		}
+	}
+
+	private boolean enableSorting() {
+		return enableNameSorting || enablePathSorting;
+	}
+
 }
