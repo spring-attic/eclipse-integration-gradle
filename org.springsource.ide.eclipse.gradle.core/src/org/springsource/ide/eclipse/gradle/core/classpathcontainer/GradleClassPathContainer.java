@@ -495,6 +495,7 @@ public class GradleClassPathContainer implements IClasspathContainer /*, Cloneab
 	}
 
 	private static void addTo(ClassPath cp, IJavaProject javaProject, boolean exported) {
+		cp.removeContainer(ID);
 		cp.addContainerAfter(JavaRuntime.JRE_CONTAINER, WTPUtil.addToDeploymentAssembly(javaProject, JavaCore.newContainerEntry(new Path(ID), exported)));
 	}
 
