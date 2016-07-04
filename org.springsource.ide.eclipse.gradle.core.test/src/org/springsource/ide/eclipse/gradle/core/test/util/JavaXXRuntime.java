@@ -40,7 +40,8 @@ public class JavaXXRuntime {
 	};
 	static String[] java7locations = {
 		"/home/kdvolder/Applications/jdk1.7.0_79", // On Kris's machine
-		"/opt/java/jdk/Sun/1.7",  // on springsource build server
+		"/opt/jdk-7",  // on springsource build server
+		"/opt/java/jdk/Sun/1.7", 
 		"/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home"
 	};
 	static String[] java6locations = {
