@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.test;
 
-import java.util.Arrays;
+import java.io.File;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
-import org.springsource.ide.eclipse.gradle.core.actions.RefreshDependenciesActionCore;
 import org.springsource.ide.eclipse.gradle.core.launch.GradleProcess;
 import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
@@ -36,6 +35,21 @@ import org.springsource.ide.eclipse.gradle.core.util.JobUtil;
  * @author Kris De Volder
  */
 public class JarRemappingTests extends GradleTest {
+
+	private static String[] MAVEN_EXE_LOCATIONS = {
+			"/opt/maven-3.0/bin/mvn"
+	};
+	
+	private String mvn() {
+		for (String loc : MAVEN_EXE_LOCATIONS) {
+			File f = new File(loc);
+			if (f.isFile()) {
+				return loc;
+			}
+		}
+		return "mvn"; //Let's hope on the PATH
+	}
+
 
 	public void testSTS2405RemapJarToMavenProject() throws Exception {
 		//Disable open/close listener so that we can reliably verify thatremapping works on
@@ -54,15 +68,15 @@ public class JarRemappingTests extends GradleTest {
 			final IProject mvnProject = importEclipseProject("sts2405/myLib");
 			String mvnLocalRepo = userHome +"/.m2/repository";
 			assertNoErrors(mvnProject, true);
-			new ExternalCommand(
-				"which", "mvn"	
-			).exec(mvnProject.getLocation().toFile());
+//			new ExternalCommand(
+//				"which", "mvn"	
+//			).exec(mvnProject.getLocation().toFile());
 //			new ExternalCommand(
 //				"env"	
 //			).exec(mvnProject.getLocation().toFile());
 			String mavenLocalProp = "-Dmaven.repo.local="+mvnLocalRepo;
 			new MavenCommand(
-					"mvn", mavenLocalProp, "install"
+					mvn(), mavenLocalProp, "install"
 			).exec(mvnProject.getLocation().toFile());
 	
 			//Note: Gradle does not obey system property 'maven.repo.local'. The build script must 
@@ -100,15 +114,15 @@ public class JarRemappingTests extends GradleTest {
 			final IProject mvnProject = importEclipseProject("sts2405/myLib");
 			String mvnLocalRepo = userHome +"/.m2/repository";
 			assertNoErrors(mvnProject, true);
-			new ExternalCommand(
-				"which", "mvn"	
-			).exec(mvnProject.getLocation().toFile());
+//			new ExternalCommand(
+//				"which", "mvn"	
+//			).exec(mvnProject.getLocation().toFile());
 //			new ExternalCommand(
 //				"env"	
 //			).exec(mvnProject.getLocation().toFile());
 			String mavenLocalProp = "-Dmaven.repo.local="+mvnLocalRepo;
 			new MavenCommand(
-					"mvn", mavenLocalProp, "install"
+					mvn(), mavenLocalProp, "install"
 			).exec(mvnProject.getLocation().toFile());
 	
 			//Note: Gradle does not obey system property 'maven.repo.local'. The build script must 
