@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.gradle.core.test;
 
-import io.pivotal.tooling.model.eclipse.StsEclipseProject;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.gradle.tooling.model.eclipse.EclipseProject;

@@ -25,7 +25,6 @@ import org.springsource.ide.eclipse.gradle.core.launch.LaunchUtil;
 import org.springsource.ide.eclipse.gradle.core.m2e.M2EUtils;
 import org.springsource.ide.eclipse.gradle.core.preferences.GradlePreferences;
 import org.springsource.ide.eclipse.gradle.core.test.util.ACondition;
-import org.springsource.ide.eclipse.gradle.core.test.util.ExternalCommand;
 import org.springsource.ide.eclipse.gradle.core.test.util.MavenCommand;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
