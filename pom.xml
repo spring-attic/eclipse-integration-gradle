@@ -98,8 +98,6 @@
 
 <!-- 		<maven.test.error.ignore>true</maven.test.error.ignore>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore> -->
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
 		<encoding>UTF-8</encoding>
 		
 		<sts.test.cache>${user.home}/.sts-test-cache</sts.test.cache>
