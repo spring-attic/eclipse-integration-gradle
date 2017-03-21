@@ -59,10 +59,8 @@
 
 		<!-- Signing -->
 		<signing.skip>true</signing.skip>
-		<signing.alias>vmware</signing.alias>
-		<signing.keystore>~/.keytool/springsource.jks</signing.keystore>
-		<signing.store.password>${STORE_PASSWORD}</signing.store.password>
-		<signing.key.password>${KEY_PASSWORD}</signing.key.password>
+		<signing.alias>pivotal</signing.alias>
+		<signing.keystore>~/.keytool/pivotal.jks</signing.keystore>
 
 		<dist.name>Gradle Integration for Eclipse</dist.name>
 		<dist.project>gradle</dist.project>
