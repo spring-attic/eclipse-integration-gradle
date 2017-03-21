@@ -10,6 +10,11 @@
 	<artifactId>org.springsource.ide.eclipse.gradle.site</artifactId>
 	<packaging>eclipse-repository</packaging>
 
+	<properties>
+		<dist.accessKey>${accessKey}</dist.accessKey>
+		<dist.secretKey>${secretKey}</dist.secretKey>
+	</properties>  
+
 		<build>
 			<plugins>
 			  <plugin>
@@ -43,10 +48,6 @@
 							<configuration>
 								<target>
 								
-									<echo message="dist.properties=${dist.properties}"/>
-									<echo message="dist.accessKey=${dist.accessKey}"/>
-									<echo message="accessKey=${accessKey}"/>
-	
 									<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
 									<taskdef resource="org/springframework/build/aws/ant/antlib.xml" />
 	
@@ -73,7 +74,7 @@
 									<checksum file="${dist.full.path}" algorithm="SHA1" fileext=".sha1" />
 									<checksum file="${dist.full.path}" algorithm="MD5" fileext=".md5" />
 	
-									<s3 accessKey="${accessKey}" secretKey="${secretKey}">
+									<s3 accessKey="${dist.accessKey}" secretKey="${dist.secretKey}">
 	
 										<delete bucketName="${dist.bucket}">
 											<fileset dir="${dist.path}">
@@ -113,12 +114,12 @@
 						<dependency>
 							<groupId>org.springframework.build</groupId>
 							<artifactId>org.springframework.build.aws.ant</artifactId>
-							<version>3.0.5.RELEASE</version>
+							<version>3.0.6.RELEASE</version>
 						</dependency>
 						<dependency>
 							<groupId>net.java.dev.jets3t</groupId>
 							<artifactId>jets3t</artifactId>
-							<version>0.7.2</version>
+							<version>0.8.1</version>
 						</dependency>
 						<dependency>
 							<groupId>ant-contrib</groupId>
