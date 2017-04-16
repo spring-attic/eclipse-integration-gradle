@@ -33,7 +33,7 @@ The easiest way to install is from the STS Dashboard "Extensions" page.
   4. Review the list of software that will be installed and click "Next".
   5. Review and accept licence agreements and click "Finish".
 
-###Installing Gradle Tooling from update site:
+### Installing Gradle Tooling from update site:
 
 Alternatively you can install from update sites. The following update
 sites are available:
@@ -63,7 +63,7 @@ sufficient.
      * Milestone: http://dist.springsource.com/milestone/TOOLS/update/e4.2/
      * Nightly: http://dist.springsource.com/snapshot/TOOLS/nightly/e4.2/
      
-####Detailed instructions: 
+#### Detailed instructions: 
 
 Steps 2..4 can be skipped if you are installing into STS.
 
@@ -77,7 +77,7 @@ Steps 2..4 can be skipped if you are installing into STS.
  8. Review the list of software that will be installed. Click "Next" again.
  9. Review and accept licence agreement and Click "Finish".
   
-###Installing Groovy Eclipse from Update Site
+### Installing Groovy Eclipse from Update Site
 
 To install Groovy Eclipse from update site see [here][greclipse].
 
