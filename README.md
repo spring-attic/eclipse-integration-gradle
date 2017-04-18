@@ -40,7 +40,7 @@ The easiest way to install is from the STS Dashboard "Extensions" page.
   4. Review the list of software that will be installed and click "Next".
   5. Review and accept licence agreements and click "Finish".
 
-###Installing Gradle Tooling from update site
+### Installing Gradle Tooling from update site
 
 Alternatively you can install from update sites. The following update
 sites are available:
