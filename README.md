@@ -1,6 +1,9 @@
 Eclipse Integration Gradle
 ==========================
 
+<span style="color:red">**This project is no longer under active development. 
+Please use [BuildShip](https://projects.eclipse.org/projects/tools.buildship) instead.**</span>
+
 The Eclipse-Integration-Gradle project brings you developer tooling for Gradle into Eclipse.
 
 It comes with Spring UAA (User Agent Analysis), an optional component that help us to collect some usage data. This is completely anonymous and helps us to understand better how the tooling is used and how to improve it in the future.
