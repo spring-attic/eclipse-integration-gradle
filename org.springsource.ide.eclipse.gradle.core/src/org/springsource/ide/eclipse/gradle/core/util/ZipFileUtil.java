@@ -118,10 +118,9 @@ public class ZipFileUtil {
 
 				File entryFile = new File(targetFile, name);
 				/*
-				 * If we see the relative traversal string of ".." we need to make sure that the
-				 * outputdir + name doesn't leave the outputdir.
+				 * Ensure the outputdir + name doesn't leave the outputdir.
 				 */
-				if (name.contains("..") && !entryFile.getCanonicalPath().startsWith(targetFile.getCanonicalPath())) {
+				if (!entryFile.toPath().normalize().startsWith(targetFile.toPath().normalize())) {
 					throw new ZipException(
 							"The file " + name + " is trying to leave the target output directory of " + targetFile);
 				}
