@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -115,11 +116,19 @@ public class ZipFileUtil {
 					}
 				}
 
-				if (entry.isDirectory()) {
-					new File(targetFile, name).mkdirs();
+				File entryFile = new File(targetFile, name);
+				/*
+				 * If we see the relative traversal string of ".." we need to make sure that the
+				 * outputdir + name doesn't leave the outputdir.
+				 */
+				if (name.contains("..") && !entryFile.getCanonicalPath().startsWith(targetFile.getCanonicalPath())) {
+					throw new ZipException(
+							"The file " + name + " is trying to leave the target output directory of " + targetFile);
 				}
-				else {
-					File entryFile = new File(targetFile, name);
+				if (entry.isDirectory()) {
+					entryFile.mkdirs();
+				}
+				else {												
 					entryFile.getParentFile().mkdirs();
 					FileOutputStream out = new FileOutputStream(entryFile);
 					try {
