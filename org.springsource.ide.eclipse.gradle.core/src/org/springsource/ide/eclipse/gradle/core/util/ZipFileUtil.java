@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
@@ -102,6 +103,7 @@ public class ZipFileUtil {
 		ZipInputStream zipIn = new ZipInputStream(source.openStream());
 		try {
 			ZipEntry entry;
+			Path normalizedTargetFilePath = targetFile.toPath().normalize();
 			while ((entry = zipIn.getNextEntry()) != null) {
 				String name = entry.getName();
 				if (prefix != null) {
@@ -120,7 +122,7 @@ public class ZipFileUtil {
 				/*
 				 * Ensure the outputdir + name doesn't leave the outputdir.
 				 */
-				if (!entryFile.toPath().normalize().startsWith(targetFile.toPath().normalize())) {
+				if (!entryFile.toPath().normalize().startsWith(normalizedTargetFilePath)) {
 					throw new ZipException(
 							"The file " + name + " is trying to leave the target output directory of " + targetFile);
 				}
