@@ -10,10 +10,9 @@
 	<packaging>pom</packaging>
 
 	<scm>
-		<connection>scm:git:ssh://github.com/SpringSource/eclipse-integration-gradle.git</connection>
-		<developerConnection>scm:git:ssh:git@github.com:SpringSource/eclipse-integration-tcserver.git</developerConnection>
+		<connection>https://github.com/spring-projects/eclipse-integration-gradle.git</connection>
 		<tag>HEAD</tag>
-		<url>https://git.springsource.com/sts/sts</url>
+		<url>https://github.com/spring-projects/eclipse-integration-gradle/</url>
 	</scm>
 
 	<modules>
@@ -40,12 +39,12 @@
 	</prerequisites>
 
 	<issueManagement>
-		<url>https://issuetracker.springsource.com/browse/STS</url>
-		<system>JIRA</system>
+		<url>https://github.com/spring-projects/eclipse-integration-gradle/issues</url>
+		<system>GitHub</system>
 	</issueManagement>
 
 	<ciManagement>
-		<url>https://build.springsource.com/browse/STS</url>
+		<url>https://build.spring.io/browse/IDE</url>
 		<system>BAMBOO</system>
 	</ciManagement>
 
