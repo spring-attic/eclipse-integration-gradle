@@ -15,7 +15,7 @@ subprojects {
             url "$projectDir/repo"
         }
 		mavenCentral()
-		maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
+		maven { url 'https://repo.gradle.org/gradle/libs-releases-local' }
 	}
 	
 	task sourceJar(type: Jar) {
