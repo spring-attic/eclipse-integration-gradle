@@ -165,7 +165,7 @@ Apache Commons Collections
 Copyright 2001-2008 The Apache Software Foundation
 
 This product includes software developed by
-The Apache Software Foundation (http://www.apache.org/).
+The Apache Software Foundation (https://www.apache.org/).
 
 * Copyright 1999,2004 The Apache Software Foundation.
 *
@@ -173,7 +173,7 @@ The Apache Software Foundation (http://www.apache.org/).
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
 *
-* http://www.apache.org/licenses/LICENSE-2.0
+* https://www.apache.org/licenses/LICENSE-2.0
 *
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
@@ -190,7 +190,7 @@ Licensed under the Apache License, Version 2.0 (the License);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an AS IS BASIS,
@@ -207,7 +207,7 @@ Licensed under the Apache License, Version 2.0 (the License);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an AS IS BASIS,
@@ -224,7 +224,7 @@ Licensed under the Apache License, Version 2.0 (the License);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an AS IS BASIS,
@@ -241,7 +241,7 @@ Licensed under the Apache License, Version 2.0 (the License);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an AS IS BASIS,
@@ -258,7 +258,7 @@ Licensed under the Apache License, Version 2.0 (the License);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an AS IS BASIS,
@@ -275,7 +275,7 @@ Licensed under the Apache License, Version 2.0 (the License);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an AS IS BASIS,
@@ -297,7 +297,7 @@ License: Apache 2.0
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -314,7 +314,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -358,7 +358,7 @@ objenesis-1.2-sources.jar\org\objenesis\instantiator\jrockit\JRockit131Instantia
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -380,17 +380,17 @@ About This Content
 June 8, 2007
 License
 The Eclipse Foundation makes available all content in this plug-in ("Content"). Unless otherwise indicated below, the Content is provided to you under the terms and conditions of the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available at 
-http://www.eclipse.org/legal/epl-v10.html
+https://www.eclipse.org/legal/epl-v10.html
 . For purposes of the EPL, "Program" will mean the Content.
 If you did not receive this Content directly from the Eclipse Foundation, the Content is being redistributed by another party ("Redistributor") and different terms and conditions may apply to your use of any object code in the Content. Check the Redistributor's license that was provided with the Content. If no such license exists, contact the Redistributor. Unless otherwise indicated below, the terms and conditions of the EPL still apply to any source code in the Content and such source code may be obtained at 
-http://www.eclipse.org
+https://www.eclipse.org
 .
 Third Party Content
 The Content includes items that have been sourced from third parties as set out below. If you did not receive this Content directly from the Eclipse Foundation, the following is provided for informational purposes only, and you should look to the Redistributors license for terms and conditions of use.
 Apache Commons IO 2.2.0
 The plug-in includes Commons IO 2.2.0 ("Commons IO") developed by the Apache Software Foundation. Therefore:
 This product includes software developed by the Apache Software Foundation (
-http://www.apache.org/
+https://www.apache.org/
 ).
 The Commons IO binary code is included with no modifications except postprocessing (pack200 conditioning and signing). The corresponding Commons IO source code is located in src.zip.
 Commons IO is:
@@ -398,13 +398,13 @@ Copyright (c) 1997-2005 The Apache Software Foundation. All rights reserved.
 Your use of the Commons IO code is subject to the terms and conditions of the Apache Software License 2.0. A copy of the license is contained in the file 
 LICENSE.txt
  and is also available at 
-http://www.apache.org/licenses/LICENSE-2.0.html
+https://www.apache.org/licenses/LICENSE-2.0.html
 .
 The Apache attribution 
 NOTICE.txt
  file is included with the Content in accordance with 4d of the Apache License, Version 2.0.
 Examples and documentation as well as updated source code for Commons IO is available at 
-http://commons.apache.org/io/
+https://commons.apache.org/io/
 .
 
 
@@ -415,10 +415,10 @@ About This Content
 June 5, 2006
 License
 The Eclipse Foundation makes available all content in this plug-in ("Content"). Unless otherwise indicated below, the Content is provided to you under the terms and conditions of the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available at 
-http://www.eclipse.org/legal/epl-v10.html
+https://www.eclipse.org/legal/epl-v10.html
 . For purposes of the EPL, "Program" will mean the Content.
 If you did not receive this Content directly from the Eclipse Foundation, the Content is being redistributed by another party ("Redistributor") and different terms and conditions may apply to your use of any object code in the Content. Check the Redistributor's license that was provided with the Content. If no such license exists, contact the Redistributor. Unless otherwise indicated below, the terms and conditions of the EPL still apply to any source code in the Content and such source code may be obtained at 
-http://www.eclipse.org
+https://www.eclipse.org
 .
 
 
@@ -535,7 +535,7 @@ The Content includes items that have been sourced from third parties, as set out
 Apache License 
 
 Version 2.0, January 2004 
-http://www.apache.org/licenses/ 
+https://www.apache.org/licenses/ 
 
 TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION 
 
@@ -945,7 +945,7 @@ available (as would be noted above), you may obtain a copy of
 the source code corresponding to the binaries for such open
 source components and modifications thereto, if any, (the
 "Source Files"), by downloading the Source Files from Pivotal's website at
-http://network.pivotal.io/open-source, or by sending a request, 
+https://network.pivotal.io/open-source, or by sending a request, 
 with your name and address to: Pivotal Software, Inc., 875 Howard Street, 5th
 floor, San Francisco, CA 94103, Attention: General Counsel. All such requests
 should clearly specify: OPEN SOURCE FILES REQUEST, Attention General Counsel. 

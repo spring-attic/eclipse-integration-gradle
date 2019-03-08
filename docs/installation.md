@@ -38,9 +38,9 @@ The easiest way to install is from the STS Dashboard "Extensions" page.
 Alternatively you can install from update sites. The following update
 sites are available:
 
-  * http://dist.springsource.com/snapshot/TOOLS/nightly/gradle (latest development snapshot)
-  * http://dist.springsource.com/milestone/TOOLS/gradle (latest milestone build.)
-  * http://dist.springsource.com/release/TOOLS/gradle (latest release)
+  * https://dist.springsource.com/snapshot/TOOLS/nightly/gradle (latest development snapshot)
+  * https://dist.springsource.com/milestone/TOOLS/gradle (latest milestone build.)
+  * https://dist.springsource.com/release/TOOLS/gradle (latest release)
 
 **Note:** pasting the above URLs into a web browser will not work. You need
 to follow the instructions given below to use an Eclipse update site.
@@ -55,13 +55,13 @@ sufficient.
 **If you are installing in a plain Eclipse**, you will also need to add an STS update site to satisfy some dependencies.
 
   * For eclipse 3.7:
-     * STS Release: http://dist.springsource.com/release/TOOLS/update/e3.7/ (this site will only contain a compatible version after 3.0.0 release!)
-     * Milestone: http://dist.springsource.com/milestone/TOOLS/update/e3.7/
-     * Nightly: http://dist.springsource.com/snapshot/TOOLS/nightly/e3.7/
+     * STS Release: https://dist.springsource.com/release/TOOLS/update/e3.7/ (this site will only contain a compatible version after 3.0.0 release!)
+     * Milestone: https://dist.springsource.com/milestone/TOOLS/update/e3.7/
+     * Nightly: https://dist.springsource.com/snapshot/TOOLS/nightly/e3.7/
   * For eclipse 4.2:
-     * STS Release: http://dist.springsource.com/release/TOOLS/update/e4.2/ (this site will only contain a compatible version after 3.0.0 release!)
-     * Milestone: http://dist.springsource.com/milestone/TOOLS/update/e4.2/
-     * Nightly: http://dist.springsource.com/snapshot/TOOLS/nightly/e4.2/
+     * STS Release: https://dist.springsource.com/release/TOOLS/update/e4.2/ (this site will only contain a compatible version after 3.0.0 release!)
+     * Milestone: https://dist.springsource.com/milestone/TOOLS/update/e4.2/
+     * Nightly: https://dist.springsource.com/snapshot/TOOLS/nightly/e4.2/
      
 #### Detailed instructions: 
 
@@ -81,5 +81,5 @@ Steps 2..4 can be skipped if you are installing into STS.
 
 To install Groovy Eclipse from update site see [here][greclipse].
 
-   [latest]: http://static.springsource.org/sts/docs/latest/reference/html/gradle/  "Latest Gradle Docs"
-   [greclipse]: http://groovy.codehaus.org/Eclipse+Plugin "Groovy Eclipse"
+   [latest]: https://static.springsource.org/sts/docs/latest/reference/html/gradle/  "Latest Gradle Docs"
+   [greclipse]: https://groovy.codehaus.org/Eclipse+Plugin "Groovy Eclipse"

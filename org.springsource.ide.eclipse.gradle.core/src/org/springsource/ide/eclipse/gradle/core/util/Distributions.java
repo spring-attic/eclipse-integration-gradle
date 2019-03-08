@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
@@ -61,15 +61,11 @@ public class Distributions {
 
 	public static URI milestoneURI(int num) throws URISyntaxException {
 		Assert.isLegal(num>=3 && num<=9);
-		if (num<9) {
-			return new URI("http://repo.gradle.org/gradle/distributions/gradle-1.0-milestone-"+num+"-bin.zip");
-		} else {
-			return new URI("http://services.gradle.org/distributions/gradle-1.0-milestone-"+num+"-bin.zip");
-		}
+		return new URI("https://services.gradle.org/distributions/gradle-1.0-milestone-"+num+"-bin.zip");
 	}
 
 	public static URI releaseURI(int majorVersion, int minorVersion) throws URISyntaxException {
-		return new URI("http://services.gradle.org/distributions/gradle-"+majorVersion+"."+minorVersion+"-bin.zip");
+		return new URI("https://services.gradle.org/distributions/gradle-"+majorVersion+"."+minorVersion+"-bin.zip");
 	}
 	
 }

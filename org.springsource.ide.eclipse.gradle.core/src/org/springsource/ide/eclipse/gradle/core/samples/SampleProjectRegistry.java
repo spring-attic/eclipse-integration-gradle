@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
@@ -75,7 +75,7 @@ public class SampleProjectRegistry {
 	private URI distribution;
 	{
 		try {
-			distribution = new URI("http://services.gradle.org/distributions/gradle-2.1-all.zip");
+			distribution = new URI("https://services.gradle.org/distributions/gradle-2.1-all.zip");
 		} catch (URISyntaxException e) {
 			throw new Error(e);
 		}
@@ -90,7 +90,7 @@ public class SampleProjectRegistry {
 //The sample project below doesn't represent a layout that works well in the STS Eclipse environment							
 //					new GradleDistributionSample(downloadManager, distribution, 
 //							"Java Multiproject", "samples/java/multiproject")
-// The sample project below doesn't work properly. See http://issues.gradle.org/browse/GRADLE-2251
+// The sample project below doesn't work properly. See https://issues.gradle.org/browse/GRADLE-2251
 //					new GradleDistributionSample(downloadManager, distribution, 
 //							"Base- and Sub-project", "samples/java/base")
 			registerLocalSamples();

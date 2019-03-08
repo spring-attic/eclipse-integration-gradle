@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- STS PARENT POM -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springsource.ide.eclipse.gradle</groupId>
@@ -528,7 +528,7 @@
 					<storepass>${signing.store.password}</storepass>
 					<keypass>${signing.key.password}</keypass>
 					<tsa>https://ca.signfiles.com/tsa/get.aspx</tsa>
-	<!--					<tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</tsa> -->
+	<!--					<tsa>https://sha256timestamp.ws.symantec.com/sha256/timestamp</tsa> -->
 				</configuration>
 			</plugin>
 

@@ -36,7 +36,7 @@ Installation instructions:
 
 The easiest way to install is from the STS Dashboard "Extensions" page.
 
-  1. First download and install a [recent release of STS](http://www.springsource.org/springsource-tool-suite-download) 
+  1. First download and install a [recent release of STS](https://www.springsource.org/springsource-tool-suite-download) 
      or Groovy and Grails Toolsuite (GGTS) version 3.0.0 or later.
   2. Open the Dashboard and select the 'Extensions' Tab.
   3. Search for "Gradle" or "Groovy" depending on what you are installing, select it and click "Install".
@@ -48,9 +48,9 @@ The easiest way to install is from the STS Dashboard "Extensions" page.
 Alternatively you can install from update sites. The following update
 sites are available:
 
-  * http://dist.springsource.com/snapshot/TOOLS/gradle/nightly (latest development snapshot)
-  * http://dist.springsource.com/milestone/TOOLS/gradle (latest milestone build)
-  * http://dist.springsource.com/release/TOOLS/gradle (latest release)
+  * https://dist.springsource.com/snapshot/TOOLS/gradle/nightly (latest development snapshot)
+  * https://dist.springsource.com/milestone/TOOLS/gradle (latest milestone build)
+  * https://dist.springsource.com/release/TOOLS/gradle (latest release)
   
 Pasting the above URLs into a web browser will not work. You need
 to follow the instructions given below to use an Eclipse update site.
@@ -74,15 +74,15 @@ Use Update Site Archive for STS from <https://spring.io/tools/sts/all>
 
 ## Questions and bug reports:
 
-If you have a question that Google can't answer, the best way is to go to the [STS forum](http://forum.springsource.org/forumdisplay.php?32-SpringSource-Tool-Suite).
+If you have a question that Google can't answer, the best way is to go to the [StackOverflow](https://stackoverflow.com/).
 
-There you can also ask questions and search for other people with related or similar problems (and solutions). New versions of the Gradle Eclipse Integration (and other tooling that is brought to you by SpringSource) are announced there as well.
+There you can also ask questions and search for other people with related or similar problems (and solutions). 
 
-With regards to bug reports, please go to the [STS issue tracker](https://issuetracker.springsource.com/browse/STS) and choose the [GRADLE component](https://issuetracker.springsource.com/browse/STS-3405?jql=project%20%3D%20STS%20AND%20resolution%20%3D%20Unresolved%20AND%20component%20%3D%20GRADLE%20ORDER%20BY%20priority%20DESC) when filing new issues.
+With regards to bug reports, please go to the [Github issue tracker](https://github.com/spring-projects/eclipse-integration-gradle/issues).
 
 ## Developing Eclipse Integration Gradle
 
-The remainder of this documents expects a familiarity with Eclipse architecture and how plugin development works.  If you are not already familiar with Eclipse development, then you may want to read some tutorials about the Eclipse plugin architecture and how to develop with it.  A good start is here: <http://www.ibm.com/developerworks/library/os-eclipse-plugindev1/>.
+The remainder of this documents expects a familiarity with Eclipse architecture and how plugin development works.  If you are not already familiar with Eclipse development, then you may want to read some tutorials about the Eclipse plugin architecture and how to develop with it.  A good start is here: <https://www.ibm.com/developerworks/library/os-eclipse-plugindev1/>.
 
 ### Setting up the Development Environment and Target Platform  
 
@@ -95,12 +95,12 @@ First we will start by setting up a suitable instance of Eclipse. This instance 
 
 Steps:
 
- 1. download and install Eclipse for Java EE Developers from [eclipse.org](http://www.eclipse.org/downloads/).
+ 1. download and install Eclipse for Java EE Developers from [eclipse.org](https://www.eclipse.org/downloads/).
  2. install egit support (e.g. from the Eclipse Market Place). This step is optional, you can also use git commandline tools.
- 4. install Groovy Eclipse from this update site: `http://dist.codehaus.org/groovy/distributions/greclipse/snapshot/e4.2/`
+ 4. install Groovy Eclipse from this update site: `https://dist.codehaus.org/groovy/distributions/greclipse/snapshot/e4.2/`
     - install everything on the update site except 'm2e Configurator ...'
     - make sure you *do* install 'Groovy Eclipse Test Feature' if you want to be able to compile and run the Gradle IDE regressions tests.
- 5. install Eclipse Integration Gradle tooling from this update site: `http://dist.springsource.com/snapshot/TOOLS/gradle/nightly`
+ 5. install Eclipse Integration Gradle tooling from this update site: `https://dist.springsource.com/snapshot/TOOLS/gradle/nightly`
  
 ### Getting the source code
 
@@ -167,7 +167,7 @@ Notes:
 
 ## Building Gradle IDE
 
-The Gradle IDE project uses [Maven](http://maven.apache.org/) [Tycho](http://eclipse.org/tycho) to do continuous integration builds and to produce p2 repos and update sites. To build the project yourself, you can execute:
+The Gradle IDE project uses [Maven](https://maven.apache.org/) [Tycho](https://eclipse.org/tycho) to do continuous integration builds and to produce p2 repos and update sites. To build the project yourself, you can execute:
 
     mvn -Pe42 -Dmaven.test.skip=true clean install 
     
@@ -187,10 +187,10 @@ unacceptable behavior to spring-code-of-conduct@pivotal.io.
 ### Get Involved
 Here are some ways for you to get involved in the community:
 
-  * Get involved with the Spring community on the Spring Community Forums.  Please help out on the [forum](http://forum.springsource.org/forumdisplay.php?32-SpringSource-Tool-Suite) by responding to questions and joining the debate.
+  * Get involved with the Spring community on the Spring Community Forums.  Please help out on the [forum](https://forum.springsource.org/forumdisplay.php?32-SpringSource-Tool-Suite) by responding to questions and joining the debate.
   * Create [JIRA](https://issuetracker.springsource.com/browse/STS) tickets for bugs and new features and comment and vote on the ones that you are interested in.  
-  * Github is for social coding: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). If you want to contribute code this way, please reference a JIRA ticket as well covering the specific issue you are addressing.
-  * Watch for upcoming articles on Spring by [subscribing](http://www.springsource.org/node/feed) to springframework.org
+  * Github is for social coding: if you want to write code, we encourage contributions through pull requests from [forks of this repository](https://help.github.com/forking/). If you want to contribute code this way, please reference a JIRA ticket as well covering the specific issue you are addressing.
+  * Watch for upcoming articles on Spring by [subscribing](https://www.springsource.org/node/feed) to springframework.org
 
 ### Contributor License Agreement
 Before we accept a patch or pull request we will need you to sign the [contributor's agreement](https://support.springsource.com/spring_eclipsecla_committer_signup). Signing the contributor's agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do. Active contributors might be asked to join the core team, and given the ability to merge pull requests.

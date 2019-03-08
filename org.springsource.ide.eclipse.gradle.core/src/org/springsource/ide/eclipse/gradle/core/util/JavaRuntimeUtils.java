@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
@@ -96,7 +96,7 @@ public class JavaRuntimeUtils {
 		String os = System.getProperty("os.name");
 		if (os!=null) {
 			if (os.startsWith("Windows") || os.equals("Linux")) {
-				//Note: See http://lopica.sourceforge.net/os.html (list of OS names)
+				//Note: See https://lopica.sourceforge.net/os.html (list of OS names)
 				//Only consider OS's where we are relatively confident that the check is valid
 				if (jvm!=null) {
 					File javaHome = jvm.getInstallLocation();

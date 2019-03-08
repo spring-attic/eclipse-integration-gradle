@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
@@ -150,7 +150,7 @@ public class GradleDependencyComputer {
 					}
 				} else {
 					//'non jar' entries may happen when project has a dependency on a sourceSet's output folder.
-					//See http://issues.gradle.org/browse/GRADLE-1766
+					//See https://issues.gradle.org/browse/GRADLE-1766
 					boolean isCovered = false;
 					IProject containingProject = WorkspaceUtil.getContainingProject(file);
 					if (containingProject!=null) {
