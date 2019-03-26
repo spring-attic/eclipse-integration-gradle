@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
@@ -154,7 +154,7 @@ public class GradleImportTests extends GradleTest {
 		//			}
 		//		
 // Use wrapper version
-//		URI distro = new URI("http://services.gradle.org/distributions/gradle-1.3-bin.zip");
+//		URI distro = new URI("https://services.gradle.org/distributions/gradle-1.3-bin.zip");
 //		GradleCore.getInstance().getPreferences().setDistribution(distro);
 
 		final GradleImportOperation importOp = importGitProjectOperation(new GitProject("spring-framework", 

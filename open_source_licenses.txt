@@ -165,7 +165,7 @@ Apache Commons Collections
 Copyright 2001-2008 The Apache Software Foundation
 
 This product includes software developed by
-The Apache Software Foundation (http://www.apache.org/).
+The Apache Software Foundation (https://www.apache.org/).
 
 * Copyright 1999,2004 The Apache Software Foundation.
 *
@@ -380,17 +380,17 @@ About This Content
 June 8, 2007
 License
 The Eclipse Foundation makes available all content in this plug-in ("Content"). Unless otherwise indicated below, the Content is provided to you under the terms and conditions of the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available at 
-http://www.eclipse.org/legal/epl-v10.html
+https://www.eclipse.org/legal/epl-v10.html
 . For purposes of the EPL, "Program" will mean the Content.
 If you did not receive this Content directly from the Eclipse Foundation, the Content is being redistributed by another party ("Redistributor") and different terms and conditions may apply to your use of any object code in the Content. Check the Redistributor's license that was provided with the Content. If no such license exists, contact the Redistributor. Unless otherwise indicated below, the terms and conditions of the EPL still apply to any source code in the Content and such source code may be obtained at 
-http://www.eclipse.org
+https://www.eclipse.org
 .
 Third Party Content
 The Content includes items that have been sourced from third parties as set out below. If you did not receive this Content directly from the Eclipse Foundation, the following is provided for informational purposes only, and you should look to the Redistributors license for terms and conditions of use.
 Apache Commons IO 2.2.0
 The plug-in includes Commons IO 2.2.0 ("Commons IO") developed by the Apache Software Foundation. Therefore:
 This product includes software developed by the Apache Software Foundation (
-http://www.apache.org/
+https://www.apache.org/
 ).
 The Commons IO binary code is included with no modifications except postprocessing (pack200 conditioning and signing). The corresponding Commons IO source code is located in src.zip.
 Commons IO is:
@@ -404,7 +404,7 @@ The Apache attribution
 NOTICE.txt
  file is included with the Content in accordance with 4d of the Apache License, Version 2.0.
 Examples and documentation as well as updated source code for Commons IO is available at 
-http://commons.apache.org/io/
+https://commons.apache.org/io/
 .
 
 
@@ -415,10 +415,10 @@ About This Content
 June 5, 2006
 License
 The Eclipse Foundation makes available all content in this plug-in ("Content"). Unless otherwise indicated below, the Content is provided to you under the terms and conditions of the Eclipse Public License Version 1.0 ("EPL"). A copy of the EPL is available at 
-http://www.eclipse.org/legal/epl-v10.html
+https://www.eclipse.org/legal/epl-v10.html
 . For purposes of the EPL, "Program" will mean the Content.
 If you did not receive this Content directly from the Eclipse Foundation, the Content is being redistributed by another party ("Redistributor") and different terms and conditions may apply to your use of any object code in the Content. Check the Redistributor's license that was provided with the Content. If no such license exists, contact the Redistributor. Unless otherwise indicated below, the terms and conditions of the EPL still apply to any source code in the Content and such source code may be obtained at 
-http://www.eclipse.org
+https://www.eclipse.org
 .
 
 
@@ -945,7 +945,7 @@ available (as would be noted above), you may obtain a copy of
 the source code corresponding to the binaries for such open
 source components and modifications thereto, if any, (the
 "Source Files"), by downloading the Source Files from Pivotal's website at
-http://network.pivotal.io/open-source, or by sending a request, 
+https://network.pivotal.io/open-source, or by sending a request, 
 with your name and address to: Pivotal Software, Inc., 875 Howard Street, 5th
 floor, San Francisco, CA 94103, Attention: General Counsel. All such requests
 should clearly specify: OPEN SOURCE FILES REQUEST, Attention General Counsel. 

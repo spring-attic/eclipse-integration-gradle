@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
@@ -62,7 +62,7 @@ public class TaskUtil {
 			Job.getJobManager().beginRule(JobUtil.LIGHT_RULE, new SubProgressMonitor(mon, 5));
 			//cumulative work: 5%
 			try {
-//				project = project.getRootProject(); //Workaround for bug http://issues.gradle.org/browse/GRADLE-1765
+//				project = project.getRootProject(); //Workaround for bug https://issues.gradle.org/browse/GRADLE-1765
 				// is ok to go via root, since task path strings are 'absolute' anyway.
 				ProjectConnection conn = ToolinApiUtils.getGradleConnector(project, new SubProgressMonitor(mon, 5));
 				//cumulative work: 10%

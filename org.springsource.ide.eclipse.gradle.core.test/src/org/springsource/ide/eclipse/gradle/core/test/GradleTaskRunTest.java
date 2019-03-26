@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
@@ -236,7 +236,7 @@ public class GradleTaskRunTest extends GradleTest {
 	 */
 	public void testDependencyByAPI() throws Exception {
 		//TODO: this test is failing, but report submitted:
-		// http://issues.gradle.org/browse/GRADLE-1555
+		// https://issues.gradle.org/browse/GRADLE-1555
 		String name = "dependencyByAPI";
 		IJavaProject jproject = simpleProject(name, 
 				"4.times { counter ->\n" + 
@@ -458,7 +458,7 @@ public class GradleTaskRunTest extends GradleTest {
 	}
 
 	//TODO: Default tasks... (Example 5.15)
-	// Waiting for http://issues.gradle.org/browse/GRADLE-1560
+	// Waiting for https://issues.gradle.org/browse/GRADLE-1560
 
 	/**
 	 * Example 5.16: using task DAG

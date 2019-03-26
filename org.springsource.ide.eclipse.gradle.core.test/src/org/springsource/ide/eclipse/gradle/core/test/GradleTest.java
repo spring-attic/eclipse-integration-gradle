@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
@@ -335,7 +335,7 @@ public abstract class GradleTest extends TestCase {
 	public static File extractJavaSample(final String projectName)
 			throws IOException, Exception, URISyntaxException {
 		final File targetLocation = new File(TestUtils.createTempDirectory(), projectName);
-		DownloadManager.getDefault().doWithDownload(new URI("http://services.gradle.org/distributions/gradle-2.1-all.zip"), new DownloadRequestor() {
+		DownloadManager.getDefault().doWithDownload(new URI("https://services.gradle.org/distributions/gradle-2.1-all.zip"), new DownloadRequestor() {
 			public void exec(File downloadedFile) throws Exception {
 				ZipFileUtil.unzip(downloadedFile.toURI().toURL(), targetLocation, "gradle-2.1/samples/java/"+projectName);
 			}
@@ -566,7 +566,7 @@ public abstract class GradleTest extends TestCase {
 			//while the last test is still running.
 			//Mostly this doesn't cause problems, unless the test is doing something that is susceptible to
 			//'interrupts', like the file copying methods in apache FileUtils.
-			//See also here: http://stackoverflow.com/questions/1161297/why-are-we-getting-closedbyinterruptexception-from-filechannel-map-in-java-1-6
+			//See also here: https://stackoverflow.com/questions/1161297/why-are-we-getting-closedbyinterruptexception-from-filechannel-map-in-java-1-6
 			try {
 				copyFolder = new File(parentFolder, orgFolder.getName());
 				FileUtils.copyDirectory(orgFolder, copyFolder);
