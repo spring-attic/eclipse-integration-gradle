@@ -1,3 +1,5 @@
+# eclipse-integration-gradle is no longer actively maintained by VMware, Inc.
+
 Eclipse Integration Gradle
 ==========================
 
