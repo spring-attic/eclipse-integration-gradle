@@ -352,9 +352,9 @@ public class JarRemappingTests extends GradleTest {
 		
 		new ACondition() {
 			public boolean test() throws Exception {
-				assertClasspathJarEntry("commons-collections-3.2.1.jar", main);
+				assertClasspathJarEntry("commons-collections-3.2.2.jar", main);
 				assertNoClasspathJarEntry("commons-collections-3.2.jar", main); //thanks to custom model this problem can be solved!
-				assertClasspathJarEntry("commons-collections-3.2.1.jar", lib);
+				assertClasspathJarEntry("commons-collections-3.2.2.jar", lib);
 				assertClasspathJarEntry("commons-collections-3.2.jar", sublib);
 				
 				assertClasspathProjectEntry(lib, main);
@@ -377,7 +377,7 @@ public class JarRemappingTests extends GradleTest {
 		
 		new ACondition() {
 			public boolean test() throws Exception {
-				assertClasspathJarEntry("commons-collections-3.2.1.jar", main);
+				assertClasspathJarEntry("commons-collections-3.2.2.jar", main);
 				assertNoClasspathJarEntry("commons-collections-3.2.jar", main); //thanks to custom model this problem can be solved!
 //				assertClasspathJarEntry("commons-collections-3.2.1.jar", lib); // CLOSED! not applicable
 				assertClasspathJarEntry("commons-collections-3.2.jar", sublib);
@@ -395,7 +395,7 @@ public class JarRemappingTests extends GradleTest {
 		
 		new ACondition() {
 			public boolean test() throws Exception {
-				assertClasspathJarEntry("commons-collections-3.2.1.jar", main);
+				assertClasspathJarEntry("commons-collections-3.2.2.jar", main);
 				assertNoClasspathJarEntry("commons-collections-3.2.jar", main); //thanks to custom model this problem can be solved!
 //				assertClasspathJarEntry("commons-collections-3.2.1.jar", lib);  // CLOSED! not applicable
 //				assertClasspathJarEntry("commons-collections-3.2.jar", sublib); // CLOSED! not applicable

@@ -32,7 +32,7 @@ SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
 
 SECTION 2: Apache License, V2.0
 
-   >>> commons-collections-3.2.1
+   >>> commons-collections-3.2.2
    >>> gradle-base-services-2.2.1
    >>> gradle-base-services-groovy-2.2.1
    >>> gradle-core-2.2.1
@@ -159,7 +159,7 @@ all copies or substantial portions of the Software.
 Apache License, V2.0 is applicable to the following component(s).
 
 
->>> commons-collections-3.2.1
+>>> commons-collections-3.2.2
 
 Apache Commons Collections
 Copyright 2001-2008 The Apache Software Foundation
